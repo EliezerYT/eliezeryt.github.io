@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Project } from '../types/portfolio';
 import { ArrowUpRight, Gamepad2, Laptop, Users, Sparkles } from 'lucide-react';
 
 interface ProjectCardProps {
   project: Project;
   onOpenDetails: (project: Project) => void;
+  index?: number;
 }
 
-export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenDetails }) => {
+export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenDetails, index = 0 }) => {
   const [imageFailed, setImageFailed] = useState(false);
 
   const getCategoryIcon = () => {
@@ -46,7 +48,17 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenDetails
   const originLabel = getOriginLabel();
 
   return (
-    <article
+    <motion.article
+      layout
+      initial={{ opacity: 0, y: 26 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.96, y: 14 }}
+      transition={{
+        duration: 0.38,
+        ease: [0.22, 1, 0.36, 1],
+        delay: Math.min(index * 0.05, 0.3),
+      }}
+      whileHover={{ y: -5, transition: { duration: 0.2, ease: 'easeOut' } }}
       onClick={() => onOpenDetails(project)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -57,7 +69,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenDetails
       tabIndex={0}
       role="button"
       aria-label={`Ver detalles del proyecto ${project.title}`}
-      className="group relative flex flex-col overflow-hidden rounded-xl border border-[#232733] bg-[#12151d] text-left transition-all duration-200 hover:-translate-y-1 hover:border-amber-400/50 hover:shadow-xl hover:shadow-amber-500/5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+      className="group relative flex flex-col overflow-hidden rounded-xl border border-[#232733] bg-[#12151d] text-left transition-colors duration-200 hover:border-amber-400/50 hover:shadow-xl hover:shadow-amber-500/5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
     >
       {/* Visual Media Container with 16:10 aspect ratio */}
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#181c26]">
@@ -171,6 +183,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenDetails
           </span>
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 };

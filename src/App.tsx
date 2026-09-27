@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { Navbar } from './components/Navbar';
 import { ProjectFilters } from './components/ProjectFilters';
 import { ProjectCard } from './components/ProjectCard';
@@ -30,8 +31,37 @@ import {
 
 const STORAGE_KEY = 'portfolio_projects_elydev_v6';
 const AUTH_STORAGE_KEY = 'portfolio_auth_user_v2';
+const THEME_STORAGE_KEY = 'portfolio_theme_elydev';
 
 export default function App() {
+  // Theme state: defaults to 'dark', switchable to professional 'light'
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    try {
+      const saved = localStorage.getItem(THEME_STORAGE_KEY);
+      if (saved === 'light' || saved === 'dark') {
+        return saved;
+      }
+    } catch {}
+    return 'dark';
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch {}
+    if (theme === 'light') {
+      document.documentElement.classList.add('light');
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    }
+  }, [theme]);
+
+  const handleToggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
   // Authentication state (Visitor by default, Moderator when logged in)
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
     try {
@@ -235,7 +265,7 @@ export default function App() {
   const classesCount = projects.filter((p) => p.origin === 'clases').length;
 
   return (
-    <div className="min-h-screen bg-[#0b0d11] text-[#ededef]">
+    <div className={`${theme} min-h-screen bg-[#0b0d11] text-[#ededef]`}>
       {/* 1. Header with Top Bar Contract & Auth status */}
       <Navbar
         activeSection={activeSection}
@@ -248,6 +278,8 @@ export default function App() {
         onPrintResume={() => setIsPrintResumeOpen(true)}
         currentUser={currentUser}
         onOpenAuth={() => setIsAuthOpen(true)}
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
       />
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-10">
@@ -425,13 +457,16 @@ export default function App() {
           {/* Grid de Cuadros de Proyectos */}
           {filteredProjects.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-1">
-              {filteredProjects.map((project) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  onOpenDetails={handleOpenDetails}
-                />
-              ))}
+              <AnimatePresence mode="popLayout">
+                {filteredProjects.map((project, index) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    index={index}
+                    onOpenDetails={handleOpenDetails}
+                  />
+                ))}
+              </AnimatePresence>
             </div>
           ) : (
             /* Empty state if search or filters yield 0 results */

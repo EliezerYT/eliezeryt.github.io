@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Project } from '../types/portfolio';
 import {
   X,
@@ -40,7 +41,7 @@ interface ProjectDetailDrawerProps {
 }
 
 export const ProjectDetailDrawer: React.FC<ProjectDetailDrawerProps> = ({
-  project,
+  project: propProject,
   isOpen,
   onClose,
   onPrevProject,
@@ -54,6 +55,13 @@ export const ProjectDetailDrawer: React.FC<ProjectDetailDrawerProps> = ({
 }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [imgError, setImgError] = useState(false);
+
+  // Preserve the last project reference so exit animation completes smoothly without blanking
+  const lastProjectRef = React.useRef<Project | null>(propProject);
+  if (propProject) {
+    lastProjectRef.current = propProject;
+  }
+  const project = propProject || lastProjectRef.current;
 
   // Close on Escape key and navigate with arrow keys
   useEffect(() => {
@@ -85,17 +93,15 @@ export const ProjectDetailDrawer: React.FC<ProjectDetailDrawerProps> = ({
     setImgError(false);
   }, [project?.id]);
 
-  if (!isOpen || !project) return null;
-
   // Build the list of images (cover + gallery)
-  const allImages = [
-    project.coverImage,
-    ...(project.gallery || []),
-  ].filter((img, idx, arr) => img && arr.indexOf(img) === idx);
+  const allImages = project
+    ? [project.coverImage, ...(project.gallery || [])].filter((img, idx, arr) => img && arr.indexOf(img) === idx)
+    : [];
 
-  const activeImage = allImages[activeImageIndex] || project.coverImage;
+  const activeImage = project ? (allImages[activeImageIndex] || project.coverImage) : '';
 
   const getCategoryIcon = () => {
+    if (!project) return null;
     switch (project.category) {
       case 'juegos':
         return <Gamepad2 className="w-4 h-4 text-amber-400" />;
@@ -107,6 +113,7 @@ export const ProjectDetailDrawer: React.FC<ProjectDetailDrawerProps> = ({
   };
 
   const getCategoryName = () => {
+    if (!project) return '';
     switch (project.category) {
       case 'juegos':
         return 'Videojuego';
@@ -118,6 +125,7 @@ export const ProjectDetailDrawer: React.FC<ProjectDetailDrawerProps> = ({
   };
 
   const getOriginName = () => {
+    if (!project) return '';
     switch (project.origin) {
       case 'propio':
         return 'Iniciativa Propia (Indie)';
@@ -132,19 +140,36 @@ export const ProjectDetailDrawer: React.FC<ProjectDetailDrawerProps> = ({
     }
   };
 
-  const shouldShowDate = project.showDate !== false && Boolean(project.year);
+  const shouldShowDate = project ? (project.showDate !== false && Boolean(project.year)) : false;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden" role="dialog" aria-modal="true">
-      {/* Backdrop with blur */}
-      <div
-        onClick={onClose}
-        className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
-        aria-hidden="true"
-      />
+    <AnimatePresence>
+      {isOpen && project && (
+        <div className="fixed inset-0 z-50 overflow-hidden" role="dialog" aria-modal="true">
+          {/* Backdrop with smooth darkening, blur and fade */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+            aria-hidden="true"
+          />
 
-      <div className="fixed inset-y-0 right-0 flex max-w-full pl-0 sm:pl-10">
-        <aside className="w-screen max-w-2xl bg-[#0e1117] border-l border-[#232733] shadow-2xl flex flex-col text-slate-200 animate-in slide-in-from-right duration-200">
+          <div className="fixed inset-y-0 right-0 flex max-w-full pl-0 sm:pl-10 pointer-events-none">
+            <motion.aside
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{
+                type: 'spring',
+                damping: 32,
+                stiffness: 320,
+                mass: 0.85,
+              }}
+              className="w-screen max-w-2xl bg-[#0e1117] border-l border-[#232733] shadow-2xl flex flex-col text-slate-200 pointer-events-auto"
+            >
           {/* Drawer Top Navigation Header */}
           <div className="flex h-16 items-center justify-between border-b border-[#232733] px-6 bg-[#0b0d11]">
             {/* Quick switcher between projects */}
@@ -526,8 +551,10 @@ export const ProjectDetailDrawer: React.FC<ProjectDetailDrawerProps> = ({
               </div>
             </div>
           </div>
-        </aside>
+        </motion.aside>
       </div>
     </div>
+  )}
+</AnimatePresence>
   );
 };

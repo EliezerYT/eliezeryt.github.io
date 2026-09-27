@@ -1,6 +1,7 @@
 import React from 'react';
 import { Download, PlusCircle, Mail, User, ShieldCheck, LogIn } from 'lucide-react';
 import { AuthUser } from '../types/portfolio';
+import { ThemeToggle } from './ThemeToggle';
 
 interface NavbarProps {
   activeSection: string;
@@ -10,6 +11,8 @@ interface NavbarProps {
   onPrintResume: () => void;
   currentUser: AuthUser | null;
   onOpenAuth: () => void;
+  theme: 'dark' | 'light';
+  onToggleTheme: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -20,6 +23,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onPrintResume,
   currentUser,
   onOpenAuth,
+  theme,
+  onToggleTheme,
 }) => {
   const isModerator = currentUser?.role === 'moderator';
 
@@ -124,6 +129,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Mail className="w-3.5 h-3.5" />
             <span>Contacto</span>
           </button>
+
+          {/* Theme Switcher */}
+          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
 
           {/* Auth button (Iniciar Sesión / Perfil) */}
           <button
