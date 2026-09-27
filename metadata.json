@@ -1,0 +1,6 @@
+{
+  "name": "Portafolio Creativo y Desarrollador",
+  "description": "Portafolio interactivo profesional con listado de proyectos trabajados y propios en juegos, aplicaciones y colaboraciones con panel de detalles.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
