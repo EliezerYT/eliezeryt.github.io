@@ -8,6 +8,9 @@
   'use strict';
 
   const STORAGE_KEY = 'portfolio_projects_elydev_v8';
+  const EXPERIENCES_STORAGE_KEY = 'portfolio_experiences_v2';
+  const TESTIMONIALS_STORAGE_KEY = 'portfolio_satisfied_clients_v3';
+  const FEEDBACK_CODES_STORAGE_KEY = 'portfolio_feedback_codes_v2';
   const AUTH_STORAGE_KEY = 'portfolio_auth_user_v2';
   const THEME_STORAGE_KEY = 'portfolio_theme_elydev';
 
@@ -739,8 +742,89 @@
     }
   ];
 
-  // Listado Oficial de Clientes Satisfechos
-  const satisfiedClients = [
+  // 1.1 Listado Oficial de Experiencia Laboral & Contratos
+  const initialExperiences = [
+    {
+      id: 'exp-moneyfight-cesar',
+      title: 'Freelance Game Developer',
+      company: 'MoneyFight & Cesar',
+      location: 'Remoto',
+      period: 'Feb 2025 — Presente',
+      startDate: '2025-02-01',
+      color: 'text-amber-400',
+      description: 'Desarrollo en producción activa de un nuevo título confidencial de alto impacto para plataformas interactivas.',
+      technologies: ['Unity', 'C#', 'Game Architecture']
+    },
+    {
+      id: 'exp-capricornio-games',
+      title: 'Freelance Game & Web Developer',
+      company: 'Capricornio Games (CapricornioTV)',
+      location: 'República Dominicana / Remoto',
+      period: 'Ago 2024 — Ene 2025',
+      startDate: '2024-08-01',
+      color: 'text-cyan-400',
+      description: 'Desarrollé íntegramente el juego "MotoLoco: En una goma" y creé su plataforma web promocional completa, gestionando frontend y backend con PHP y base de datos a medida.',
+      technologies: ['Unity', 'PHP', 'MySQL', 'Web Full-Stack']
+    },
+    {
+      id: 'exp-caribeatomic',
+      title: 'Freelance Game Developer',
+      company: 'CaribeAtomic',
+      location: 'Remoto',
+      period: 'Ene 2022 — Ene 2024',
+      startDate: '2022-01-01',
+      color: 'text-amber-400',
+      description: 'Contribución en diversas áreas críticas de desarrollo de videojuegos, incluyendo beta testing, mejoras de demos y diseño de niveles.',
+      technologies: ['Unity', 'Level Design', 'Beta Testing']
+    },
+    {
+      id: 'exp-moneyfight-game',
+      title: 'Freelance Lead Game Developer',
+      company: 'MoneyFight',
+      location: 'Remoto',
+      period: 'Nov 2022 — Jul 2023',
+      startDate: '2022-11-01',
+      color: 'text-amber-400',
+      description: 'Desarrollo integral de "MoneyFight Game", abarcando configuración de servidor, multijugador online, base de datos PHP y arte 2D.',
+      technologies: ['Unity', 'Multiplayer Network', 'PHP/MySQL']
+    },
+    {
+      id: 'exp-shl-dominoes',
+      title: 'Game Developer (Bug Fixer & Optimization)',
+      company: 'SHL · Dominoes Republic',
+      location: 'Remoto',
+      period: 'Nov 2022',
+      startDate: '2022-11-15',
+      color: 'text-cyan-400',
+      description: 'Resolución de problemas críticos de rendimiento e interferencias de geolocalización en el juego de dominó competitivo.',
+      technologies: ['Unity', 'Geolocation Services', 'Profiling']
+    },
+    {
+      id: 'exp-dogame-dominican',
+      title: 'Freelance Game Developer (UI & Multijugador)',
+      company: 'DoGame · Dominican Power',
+      location: 'Remoto',
+      period: 'Nov 2021 — Feb 2022',
+      startDate: '2021-11-01',
+      color: 'text-cyan-400',
+      description: 'Renovación técnica integral: corrección de errores, cambio de orientación de juego, rediseño completo de UI e integración de Photon Multiplayer.',
+      technologies: ['Unity', 'Photon PUN 2', 'UI Remake']
+    },
+    {
+      id: 'exp-jobs-laru',
+      title: 'Freelance Game Developer',
+      company: 'Jobs Laru',
+      location: 'Remoto',
+      period: 'Oct 2019 — Dic 2021',
+      startDate: '2019-10-01',
+      color: 'text-amber-400',
+      description: 'Desarrollo y mantenimiento de múltiples proyectos comerciales: Simón, LEVA 3D (Google Play), Fireball (Ads), Dark Castle y GUGO.',
+      technologies: ['Unity 2D/3D', 'AdMob', 'Google Play']
+    }
+  ];
+
+  // 1.2 Listado Oficial de Clientes Satisfechos
+  const initialSatisfiedClients = [
     {
       id: 'client-capricornio',
       name: 'CapricornioTV & Capricornio Games',
@@ -831,6 +915,15 @@
     }
   ];
 
+  // 1.3 Códigos Especiales Iniciales para Realizar Feedback (Uso Único)
+  const initialFeedbackCodes = [
+    { code: 'ELY-VIP-2026', label: 'Invitación VIP Cliente', used: false, disabled: false, createdAt: '2026-03-01' },
+    { code: 'CLIENT-GAME-77', label: 'Cliente Videojuego Unity', used: false, disabled: false, createdAt: '2026-03-05' },
+    { code: 'STUDENT-UNITY-01', label: 'Alumno de Clase Privada', used: false, disabled: false, createdAt: '2026-03-10' },
+    { code: 'FEEDBACK-SPECIAL-99', label: 'Invitado Especial', used: false, disabled: false, createdAt: '2026-03-15' },
+    { code: 'DEMO-USED-CODE', label: 'Código de Ejemplo Usado', used: true, usedBy: 'Carlos Martínez', usedAt: '12 mar 2026', disabled: false, createdAt: '2026-02-20' }
+  ];
+
   // 2. Estado de la aplicación
   let projects = [];
   try {
@@ -846,6 +939,52 @@
     projects = JSON.parse(JSON.stringify(initialProjects));
   }
 
+  // Experiencias Laborales
+  let experiences = [];
+  try {
+    const expSaved = localStorage.getItem(EXPERIENCES_STORAGE_KEY);
+    if (expSaved) {
+      const parsedExp = JSON.parse(expSaved);
+      if (Array.isArray(parsedExp) && parsedExp.length > 0) {
+        experiences = parsedExp;
+      }
+    }
+  } catch (e) {}
+  if (!experiences || experiences.length === 0) {
+    experiences = JSON.parse(JSON.stringify(initialExperiences));
+  }
+
+  // Clientes Satisfechos / Testimonios
+  let satisfiedClients = [];
+  try {
+    const clientsSaved = localStorage.getItem(TESTIMONIALS_STORAGE_KEY);
+    if (clientsSaved) {
+      const parsedClients = JSON.parse(clientsSaved);
+      if (Array.isArray(parsedClients) && parsedClients.length > 0) {
+        satisfiedClients = parsedClients;
+      }
+    }
+  } catch (e) {}
+  if (!satisfiedClients || satisfiedClients.length === 0) {
+    satisfiedClients = JSON.parse(JSON.stringify(initialSatisfiedClients));
+  }
+
+  // Códigos de Feedback
+  let feedbackCodes = [];
+  try {
+    const codesSaved = localStorage.getItem(FEEDBACK_CODES_STORAGE_KEY);
+    if (codesSaved) {
+      const parsedCodes = JSON.parse(codesSaved);
+      if (Array.isArray(parsedCodes) && parsedCodes.length > 0) {
+        feedbackCodes = parsedCodes;
+      }
+    }
+  } catch (e) {}
+  if (!feedbackCodes || feedbackCodes.length === 0) {
+    feedbackCodes = JSON.parse(JSON.stringify(initialFeedbackCodes));
+  }
+
+  let experienceSortOrder = 'desc'; // 'desc' = más recientes primero, 'asc' = más antiguos primero
   let selectedOrigin = 'todos';
   let selectedCategory = 'todos';
   let searchQuery = '';
@@ -894,6 +1033,158 @@
 
   function toggleTheme() {
     applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+  }
+
+  // 3.1 Sistema de Notificaciones Flotantes de Estado (Status Notifications)
+  // Animación slide-in sutil desde la esquina superior derecha con auto-cierre tras 3 segundos.
+  function showStatusNotification(optionsOrTitle, maybeMessage, maybeType) {
+    let opts = {};
+    if (typeof optionsOrTitle === 'string') {
+      opts = {
+        title: optionsOrTitle,
+        message: maybeMessage || '',
+        type: maybeType || 'success'
+      };
+    } else if (optionsOrTitle && typeof optionsOrTitle === 'object') {
+      opts = optionsOrTitle;
+    }
+
+    const title = opts.title || 'Acción completada';
+    const message = opts.message || '';
+    const type = opts.type || 'success';
+    const duration = typeof opts.duration === 'number' ? opts.duration : 3000;
+
+    let icon = opts.icon;
+    let accentBorder = 'border-amber-400/40';
+    let iconBg = 'bg-amber-400/20 text-amber-400';
+    let badgeText = 'Éxito';
+    let badgeClass = 'text-amber-400 bg-amber-400/10 border-amber-400/20';
+    let progressBarClass = 'from-amber-400 to-amber-300';
+
+    if (type === 'success') {
+      if (!icon) icon = '✓';
+      accentBorder = 'border-emerald-500/40';
+      iconBg = 'bg-emerald-500/20 text-emerald-400';
+      badgeText = 'Confirmado';
+      badgeClass = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+      progressBarClass = 'from-emerald-500 via-teal-400 to-amber-400';
+    } else if (type === 'info') {
+      if (!icon) icon = 'ℹ️';
+      accentBorder = 'border-cyan-500/40';
+      iconBg = 'bg-cyan-500/20 text-cyan-400';
+      badgeText = 'Información';
+      badgeClass = 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20';
+      progressBarClass = 'from-cyan-500 to-blue-400';
+    } else if (type === 'warning') {
+      if (!icon) icon = '⚠️';
+      accentBorder = 'border-amber-500/50';
+      iconBg = 'bg-amber-500/20 text-amber-300';
+      badgeText = 'Aviso';
+      badgeClass = 'text-amber-300 bg-amber-500/10 border-amber-500/20';
+      progressBarClass = 'from-amber-500 to-yellow-400';
+    } else if (type === 'error') {
+      if (!icon) icon = '✕';
+      accentBorder = 'border-red-500/50';
+      iconBg = 'bg-red-500/20 text-red-400';
+      badgeText = 'Error';
+      badgeClass = 'text-red-400 bg-red-500/10 border-red-500/20';
+      progressBarClass = 'from-red-500 to-rose-400';
+    }
+
+    let container = document.getElementById('status-notification-container');
+    if (!container) {
+      container = document.createElement('aside');
+      container.id = 'status-notification-container';
+      container.setAttribute('aria-live', 'polite');
+      container.setAttribute('aria-atomic', 'true');
+      container.className = 'fixed top-5 right-5 z-[99999] pointer-events-none flex flex-col gap-2.5 max-w-sm sm:max-w-md w-full px-4 sm:px-0';
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `status-notification-toast status-toast-enter pointer-events-auto relative overflow-hidden rounded-2xl bg-[#121622]/95 border ${accentBorder} text-slate-100 shadow-2xl shadow-black/80 backdrop-blur-md p-4 transition-all duration-300`;
+    toast.setAttribute('role', 'status');
+
+    toast.innerHTML = `
+      <div class="flex items-start gap-3">
+        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${iconBg} font-bold text-sm shadow-inner">
+          ${icon}
+        </div>
+        <div class="flex-1 min-w-0 pr-1">
+          <div class="flex items-center gap-2">
+            <h5 class="toast-title text-xs font-bold text-white font-display tracking-tight">${title}</h5>
+            <span class="text-[9px] font-mono font-semibold uppercase px-1.5 py-0.5 rounded border ${badgeClass}">
+              ${badgeText}
+            </span>
+          </div>
+          ${message ? `<p class="toast-desc text-[11px] text-slate-300 leading-snug mt-1">${message}</p>` : ''}
+        </div>
+        <button
+          type="button"
+          class="toast-close-btn -mr-1 -mt-1 p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors text-xs cursor-pointer"
+          aria-label="Cerrar notificación"
+        >
+          ✕
+        </button>
+      </div>
+      <div class="status-toast-progress absolute bottom-0 left-0 h-1 bg-gradient-to-r ${progressBarClass}"></div>
+    `;
+
+    container.appendChild(toast);
+
+    let dismissed = false;
+    let timerId = null;
+    let remainingTime = duration;
+    let startTime = Date.now();
+
+    function dismissToast() {
+      if (dismissed) return;
+      dismissed = true;
+      if (timerId) clearTimeout(timerId);
+
+      toast.classList.remove('status-toast-enter');
+      toast.classList.add('status-toast-exit');
+
+      setTimeout(function () {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 340);
+    }
+
+    function startTimer(time) {
+      startTime = Date.now();
+      timerId = setTimeout(dismissToast, time);
+    }
+
+    startTimer(remainingTime);
+
+    // Pausar auto-dismiss al pasar el mouse por encima
+    const progressBar = toast.querySelector('.status-toast-progress');
+    toast.addEventListener('mouseenter', function () {
+      if (dismissed) return;
+      if (timerId) clearTimeout(timerId);
+      remainingTime -= (Date.now() - startTime);
+      if (remainingTime < 500) remainingTime = 500;
+      if (progressBar) progressBar.classList.add('paused');
+    });
+
+    toast.addEventListener('mouseleave', function () {
+      if (dismissed) return;
+      if (progressBar) progressBar.classList.remove('paused');
+      startTimer(remainingTime);
+    });
+
+    // Botón de cierre manual
+    const closeBtn = toast.querySelector('.toast-close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        dismissToast();
+      });
+    }
+
+    return toast;
   }
 
   // Helper para extraer ID de video de YouTube
@@ -1134,6 +1425,14 @@
             </button>
           </div>
           <div class="flex items-center gap-1.5">
+            <button
+              type="button"
+              onclick="event.stopPropagation(); window.ElyPortfolio.duplicateProject('${project.id}')"
+              class="px-2 py-1 rounded bg-[#1e2534] text-amber-300 hover:bg-amber-400 hover:text-black text-[11px] font-bold transition-colors shadow-sm"
+              title="Duplicar este proyecto"
+            >
+              📋 Duplicar
+            </button>
             <button
               type="button"
               onclick="event.stopPropagation(); window.ElyPortfolio.openEditProjectModal('${project.id}')"
@@ -1536,50 +1835,202 @@
     }
   }
 
-  // 8. Modal de Clientes Satisfechos (Subventana interactiva solicitada)
-  function openSatisfiedClientsModal() {
-    const modal = document.getElementById('satisfied-clients-modal');
-    const container = document.getElementById('satisfied-clients-list');
-    if (!modal) return;
+  // 8. Testimonios & Clientes Satisfechos
+  function renderTestimonialsPreview() {
+    const container = document.getElementById('testimonials-preview-grid');
+    const badge = document.getElementById('testimonials-count-badge');
+    if (badge) {
+      badge.textContent = satisfiedClients.length + '+';
+    }
+    if (!container) return;
 
-    if (container) {
-      container.innerHTML = satisfiedClients.map(function (c) {
-        const starIcons = '★★★★★';
-        const tagBadges = (c.tags || []).map(function (t) {
-          return '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300 border border-white/10">' + t + '</span>';
-        }).join('');
+    // Mostrar los primeros testimonios en la página principal
+    const previewList = satisfiedClients.slice(0, 4);
 
-        return `
-          <div class="rounded-2xl bg-[#0e1118] border border-[#232733] p-5 space-y-3 hover:border-amber-400/40 transition-colors">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div class="flex items-center gap-3">
-                <div class="h-12 w-12 rounded-xl overflow-hidden bg-black/40 border border-[#232733] shrink-0">
-                  <img src="${c.avatar}" alt="${c.name}" class="h-full w-full object-cover" onerror="this.src='./assets/images/ely/my-avatar.png'" />
-                </div>
-                <div>
-                  <h4 class="text-sm font-bold text-white font-display">${c.name}</h4>
-                  <div class="text-xs text-amber-400">${c.project}</div>
-                  <div class="text-[11px] text-slate-400">${c.role}</div>
-                </div>
+    container.innerHTML = previewList.map(function (c) {
+      const starIcons = '★'.repeat(c.rating || 5);
+      const tagBadges = (c.tags || []).map(function (t) {
+        return `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400 border border-white/10">${t}</span>`;
+      }).join('');
+
+      const moderatorBar = isModerator ? `
+        <div class="flex items-center justify-between p-2 mb-2 bg-[#171c26] rounded-xl border border-amber-400/30 text-xs">
+          <div class="flex items-center gap-1">
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.moveTestimonialOrder('${c.id}', -1)"
+              class="px-2 py-0.5 rounded bg-[#10131a] text-amber-400 hover:bg-amber-400 hover:text-black font-bold cursor-pointer"
+              title="Mover arriba"
+            >
+              ▲ Subir
+            </button>
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.moveTestimonialOrder('${c.id}', 1)"
+              class="px-2 py-0.5 rounded bg-[#10131a] text-amber-400 hover:bg-amber-400 hover:text-black font-bold cursor-pointer"
+              title="Mover abajo"
+            >
+              ▼ Bajar
+            </button>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.duplicateTestimonial('${c.id}')"
+              class="px-2 py-0.5 rounded bg-[#202738] text-amber-300 hover:bg-amber-400 hover:text-black font-bold cursor-pointer"
+              title="Duplicar testimonio"
+            >
+              📋 Duplicar
+            </button>
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.openEditTestimonialModal('${c.id}')"
+              class="px-2.5 py-0.5 rounded bg-amber-400 text-black font-bold hover:bg-amber-300 cursor-pointer"
+              title="Editar testimonio"
+            >
+              ✏️ Editar
+            </button>
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.deleteTestimonial('${c.id}')"
+              class="px-2.5 py-0.5 rounded bg-red-600 text-white font-bold hover:bg-red-500 cursor-pointer"
+              title="Eliminar testimonio"
+            >
+              🗑️ Eliminar
+            </button>
+          </div>
+        </div>
+      ` : '';
+
+      return `
+        <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-6 space-y-3 hover:border-amber-400/40 transition-colors">
+          ${moderatorBar}
+          <div class="flex items-center justify-between">
+            <div class="text-amber-400 text-sm font-bold tracking-wider">${starIcons} <span class="text-xs text-slate-400 font-mono">${(c.rating || 5).toFixed(1)}</span></div>
+            <span class="text-[11px] font-mono text-slate-400 bg-black/40 px-2 py-0.5 rounded">${c.year || '2025'}</span>
+          </div>
+          <p class="text-xs text-slate-300 italic leading-relaxed whitespace-pre-line">
+            “${c.feedback}”
+          </p>
+          <div class="pt-3 border-t border-[#1e2330] flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+              <div class="h-9 w-9 rounded-lg overflow-hidden bg-black/40 border border-[#232733] shrink-0">
+                <img src="${c.avatar || './assets/images/ely/my-avatar.png'}" alt="${c.name}" class="h-full w-full object-cover" onerror="this.src='./assets/images/ely/my-avatar.png'" />
               </div>
-              <div class="flex flex-col sm:items-end gap-1 shrink-0">
-                <div class="star-rating text-sm font-bold text-amber-400">${starIcons} <span class="text-xs text-slate-300">5.0</span></div>
-                <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2 py-0.5 rounded">${c.year}</div>
+              <div>
+                <div class="text-xs font-bold text-white">${c.name}</div>
+                <div class="text-[11px] text-amber-400/90 truncate">${c.project}</div>
+                <div class="text-[10px] text-slate-500">${c.role}</div>
               </div>
-            </div>
-
-            <div class="rounded-xl bg-[#141822] p-3 border border-[#1f2534] text-xs text-slate-300 italic leading-relaxed">
-              “${c.feedback}”
-            </div>
-
-            <div class="flex flex-wrap items-center gap-1.5 pt-1">
-              ${tagBadges}
             </div>
           </div>
-        `;
-      }).join('');
-    }
+          <div class="flex flex-wrap gap-1 pt-1">
+            ${tagBadges}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
 
+  function renderSatisfiedClientsModalList() {
+    const container = document.getElementById('satisfied-clients-list');
+    const badge = document.getElementById('modal-clients-count-badge');
+    if (badge) {
+      badge.textContent = satisfiedClients.length + ' Clientes';
+    }
+    if (!container) return;
+
+    container.innerHTML = satisfiedClients.map(function (c) {
+      const starIcons = '★'.repeat(c.rating || 5);
+      const tagBadges = (c.tags || []).map(function (t) {
+        return `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300 border border-white/10">${t}</span>`;
+      }).join('');
+
+      const moderatorBar = isModerator ? `
+        <div class="flex items-center justify-between p-2 mb-2 bg-[#171c26] rounded-xl border border-amber-400/30 text-xs">
+          <div class="flex items-center gap-1">
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.moveTestimonialOrder('${c.id}', -1)"
+              class="px-2 py-0.5 rounded bg-[#10131a] text-amber-400 hover:bg-amber-400 hover:text-black font-bold cursor-pointer"
+              title="Mover arriba"
+            >
+              ▲ Subir
+            </button>
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.moveTestimonialOrder('${c.id}', 1)"
+              class="px-2 py-0.5 rounded bg-[#10131a] text-amber-400 hover:bg-amber-400 hover:text-black font-bold cursor-pointer"
+              title="Mover abajo"
+            >
+              ▼ Bajar
+            </button>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.duplicateTestimonial('${c.id}')"
+              class="px-2 py-0.5 rounded bg-[#202738] text-amber-300 hover:bg-amber-400 hover:text-black font-bold cursor-pointer"
+              title="Duplicar testimonio"
+            >
+              📋 Duplicar
+            </button>
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.openEditTestimonialModal('${c.id}')"
+              class="px-2.5 py-0.5 rounded bg-amber-400 text-black font-bold hover:bg-amber-300 cursor-pointer"
+              title="Editar testimonio"
+            >
+              ✏️ Editar
+            </button>
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.deleteTestimonial('${c.id}')"
+              class="px-2.5 py-0.5 rounded bg-red-600 text-white font-bold hover:bg-red-500 cursor-pointer"
+              title="Eliminar testimonio"
+            >
+              🗑️ Eliminar
+            </button>
+          </div>
+        </div>
+      ` : '';
+
+      return `
+        <div class="rounded-2xl bg-[#0e1118] border border-[#232733] p-5 space-y-3 hover:border-amber-400/40 transition-colors">
+          ${moderatorBar}
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="h-12 w-12 rounded-xl overflow-hidden bg-black/40 border border-[#232733] shrink-0">
+                <img src="${c.avatar || './assets/images/ely/my-avatar.png'}" alt="${c.name}" class="h-full w-full object-cover" onerror="this.src='./assets/images/ely/my-avatar.png'" />
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-white font-display">${c.name}</h4>
+                <div class="text-xs text-amber-400 font-medium">${c.project}</div>
+                <div class="text-[11px] text-slate-400">${c.role}</div>
+              </div>
+            </div>
+            <div class="flex flex-col sm:items-end gap-1 shrink-0">
+              <div class="star-rating text-sm font-bold text-amber-400">${starIcons} <span class="text-xs text-slate-300">${(c.rating || 5).toFixed(1)}</span></div>
+              <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2 py-0.5 rounded">${c.year || '2025'}</div>
+            </div>
+          </div>
+
+          <div class="rounded-xl bg-[#141822] p-3 border border-[#1f2534] text-xs text-slate-300 italic leading-relaxed whitespace-pre-line">
+            “${c.feedback}”
+          </div>
+
+          <div class="flex flex-wrap items-center gap-1.5 pt-1">
+            ${tagBadges}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function openSatisfiedClientsModal() {
+    const modal = document.getElementById('satisfied-clients-modal');
+    if (!modal) return;
+    renderSatisfiedClientsModalList();
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
   }
@@ -1588,6 +2039,533 @@
     const modal = document.getElementById('satisfied-clients-modal');
     if (modal) modal.classList.add('hidden');
     document.body.style.overflow = '';
+  }
+
+  function moveTestimonialOrder(testimonialId, delta) {
+    const index = satisfiedClients.findIndex(c => c.id === testimonialId);
+    if (index < 0) return;
+    const newIndex = index + delta;
+    if (newIndex < 0 || newIndex >= satisfiedClients.length) return;
+
+    const temp = satisfiedClients[index];
+    satisfiedClients[index] = satisfiedClients[newIndex];
+    satisfiedClients[newIndex] = temp;
+
+    try {
+      localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients));
+    } catch (e) {}
+
+    renderTestimonialsPreview();
+    renderSatisfiedClientsModalList();
+    showStatusNotification({
+      title: 'Posición Actualizada',
+      message: `Se reordenó la posición del testimonio de "${satisfiedClients[newIndex].name}".`,
+      type: 'info',
+      icon: '⇅'
+    });
+  }
+
+  function duplicateTestimonial(testimonialId) {
+    const target = satisfiedClients.find(c => c.id === testimonialId);
+    if (!target) return;
+
+    const copy = JSON.parse(JSON.stringify(target));
+    copy.id = 'client-' + Date.now();
+    copy.name = '[Copia] ' + copy.name;
+
+    const index = satisfiedClients.findIndex(c => c.id === testimonialId);
+    if (index >= 0) {
+      satisfiedClients.splice(index + 1, 0, copy);
+    } else {
+      satisfiedClients.unshift(copy);
+    }
+
+    try {
+      localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients));
+    } catch (e) {}
+
+    renderTestimonialsPreview();
+    renderSatisfiedClientsModalList();
+    showStatusNotification({
+      title: 'Testimonio Duplicado',
+      message: `Se ha creado una copia del testimonio de "${target.name}".`,
+      type: 'success',
+      icon: '📋'
+    });
+  }
+
+  function deleteTestimonial(testimonialId) {
+    const target = satisfiedClients.find(c => c.id === testimonialId);
+    if (!target) return;
+    if (confirm('¿Eliminar el testimonio de "' + target.name + '"?')) {
+      satisfiedClients = satisfiedClients.filter(c => c.id !== testimonialId);
+      try {
+        localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients));
+      } catch (e) {}
+      renderTestimonialsPreview();
+      renderSatisfiedClientsModalList();
+    }
+  }
+
+  let editingTestimonialId = null;
+
+  function openAddTestimonialModal() {
+    if (!isModerator) {
+      openAuthModal();
+      return;
+    }
+    editingTestimonialId = null;
+    const modal = document.getElementById('testimonial-modal');
+    const titleEl = document.getElementById('testimonial-modal-title');
+    if (titleEl) titleEl.textContent = '+ Agregar Testimonio de Cliente';
+
+    document.getElementById('test-form-id').value = '';
+    document.getElementById('test-form-name').value = '';
+    document.getElementById('test-form-role').value = '';
+    document.getElementById('test-form-project').value = '';
+    document.getElementById('test-form-year').value = '2025';
+    document.getElementById('test-form-rating').value = '5';
+    document.getElementById('test-form-avatar').value = './assets/images/ely/my-avatar.png';
+    document.getElementById('test-form-feedback').value = '';
+    document.getElementById('test-form-tags').value = 'Videojuego Unity, Colaboración';
+
+    if (modal) {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function openEditTestimonialModal(testimonialId) {
+    if (!isModerator) {
+      openAuthModal();
+      return;
+    }
+    const target = satisfiedClients.find(c => c.id === testimonialId);
+    if (!target) return;
+    editingTestimonialId = testimonialId;
+
+    const modal = document.getElementById('testimonial-modal');
+    const titleEl = document.getElementById('testimonial-modal-title');
+    if (titleEl) titleEl.textContent = '✏️ Editar Testimonio de Cliente';
+
+    document.getElementById('test-form-id').value = target.id;
+    document.getElementById('test-form-name').value = target.name || '';
+    document.getElementById('test-form-role').value = target.role || '';
+    document.getElementById('test-form-project').value = target.project || '';
+    document.getElementById('test-form-year').value = target.year || '';
+    document.getElementById('test-form-rating').value = String(target.rating || 5);
+    document.getElementById('test-form-avatar').value = target.avatar || './assets/images/ely/my-avatar.png';
+    document.getElementById('test-form-feedback').value = target.feedback || '';
+    document.getElementById('test-form-tags').value = (target.tags || []).join(', ');
+
+    if (modal) {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeTestimonialModal() {
+    const modal = document.getElementById('testimonial-modal');
+    if (modal) modal.classList.add('hidden');
+    document.body.style.overflow = '';
+    editingTestimonialId = null;
+  }
+
+  function handleTestimonialSubmit(e) {
+    e.preventDefault();
+    const name = document.getElementById('test-form-name').value.trim();
+    const role = document.getElementById('test-form-role').value.trim();
+    const project = document.getElementById('test-form-project').value.trim();
+    const year = document.getElementById('test-form-year').value.trim();
+    const rating = parseInt(document.getElementById('test-form-rating').value, 10) || 5;
+    const avatar = document.getElementById('test-form-avatar').value.trim() || './assets/images/ely/my-avatar.png';
+    const feedback = document.getElementById('test-form-feedback').value.trim();
+    const tagsRaw = document.getElementById('test-form-tags').value;
+    const tags = tagsRaw.split(',').map(s => s.trim()).filter(Boolean);
+
+    if (editingTestimonialId) {
+      const target = satisfiedClients.find(c => c.id === editingTestimonialId);
+      if (target) {
+        target.name = name;
+        target.role = role;
+        target.project = project;
+        target.year = year;
+        target.rating = rating;
+        target.avatar = avatar;
+        target.feedback = feedback;
+        target.tags = tags;
+      }
+    } else {
+      const newTestimonial = {
+        id: 'client-' + Date.now(),
+        name: name,
+        role: role,
+        project: project,
+        year: year || '2025',
+        rating: rating,
+        avatar: avatar,
+        feedback: feedback,
+        tags: tags
+      };
+      satisfiedClients.unshift(newTestimonial);
+    }
+
+    try {
+      localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients));
+    } catch (err) {}
+
+    closeTestimonialModal();
+    renderTestimonialsPreview();
+    renderSatisfiedClientsModalList();
+    showStatusNotification({
+      title: editingTestimonialId ? 'Testimonio Actualizado' : 'Testimonio Guardado',
+      message: `El testimonio de "${name}" se guardó exitosamente.`,
+      type: 'success',
+      icon: '⭐'
+    });
+  }
+
+  // 8.1 Sistema de Feedback con Códigos Especiales (Dejar Feedback)
+  function openFeedbackModal(initialCode) {
+    const modal = document.getElementById('feedback-modal');
+    const codeInput = document.getElementById('feedback-input-code');
+    const statusMsg = document.getElementById('feedback-status-msg');
+    if (!modal) return;
+
+    if (statusMsg) statusMsg.classList.add('hidden');
+    document.getElementById('feedback-submission-form').reset();
+
+    if (codeInput && initialCode) {
+      codeInput.value = initialCode.toUpperCase().trim();
+    }
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeFeedbackModal() {
+    const modal = document.getElementById('feedback-modal');
+    if (modal) modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  function handleFeedbackSubmit(e) {
+    e.preventDefault();
+    const codeInput = document.getElementById('feedback-input-code');
+    const nameInput = document.getElementById('feedback-input-name');
+    const roleInput = document.getElementById('feedback-input-role');
+    const projInput = document.getElementById('feedback-input-project');
+    const ratingInput = document.getElementById('feedback-input-rating');
+    const textInput = document.getElementById('feedback-input-text');
+    const avatarInput = document.getElementById('feedback-input-avatar');
+    const tagsInput = document.getElementById('feedback-input-tags');
+    const statusMsg = document.getElementById('feedback-status-msg');
+    const submitBtn = document.getElementById('feedback-submit-btn');
+
+    const enteredCode = codeInput.value.trim().toUpperCase();
+    const name = nameInput.value.trim();
+    const role = roleInput.value.trim();
+    const project = projInput.value.trim();
+    const rating = parseInt(ratingInput.value, 10) || 5;
+    const feedback = textInput.value.trim();
+    const avatar = avatarInput.value.trim() || './assets/images/ely/my-avatar.png';
+    const tags = tagsInput.value.split(',').map(s => s.trim()).filter(Boolean);
+
+    // Validar código
+    const foundCode = feedbackCodes.find(c => c.code.toUpperCase() === enteredCode);
+
+    if (!foundCode) {
+      if (statusMsg) {
+        statusMsg.className = 'p-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-300 text-xs leading-relaxed';
+        statusMsg.innerHTML = '❌ <strong>Código no válido:</strong> El código ingresado no existe en el sistema. Solicita un código a Eliezer para poder publicar tu feedback.';
+        statusMsg.classList.remove('hidden');
+      }
+      return;
+    }
+
+    if (foundCode.disabled) {
+      if (statusMsg) {
+        statusMsg.className = 'p-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-300 text-xs leading-relaxed';
+        statusMsg.innerHTML = '⚠️ <strong>Código deshabilitado:</strong> Este código ha sido pausado temporalmente por el moderador.';
+        statusMsg.classList.remove('hidden');
+      }
+      return;
+    }
+
+    if (foundCode.used) {
+      if (statusMsg) {
+        statusMsg.className = 'p-3 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs leading-relaxed';
+        statusMsg.innerHTML = `⚠️ <strong>Código ya utilizado:</strong> Este código fue registrado${foundCode.usedBy ? ' por ' + foundCode.usedBy : ''}${foundCode.usedAt ? ' el ' + foundCode.usedAt : ''}. Cada código es de un solo uso.`;
+        statusMsg.classList.remove('hidden');
+      }
+      return;
+    }
+
+    // Invalida el código y registra uso
+    foundCode.used = true;
+    foundCode.usedBy = name;
+    foundCode.usedAt = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    // Agregar nuevo testimonio verificado
+    const newFeedback = {
+      id: 'feedback-' + Date.now(),
+      name: name,
+      role: role || 'Cliente Verificado',
+      project: project,
+      year: new Date().getFullYear().toString(),
+      rating: rating,
+      avatar: avatar,
+      feedback: feedback,
+      tags: tags.length > 0 ? tags : ['Feedback Verificado', 'Cliente Satisfecho']
+    };
+
+    satisfiedClients.unshift(newFeedback);
+
+    try {
+      localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients));
+      localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes));
+    } catch (err) {}
+
+    renderTestimonialsPreview();
+    renderSatisfiedClientsModalList();
+
+    if (statusMsg) {
+      statusMsg.className = 'p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs leading-relaxed';
+      statusMsg.innerHTML = '✓ <strong>¡Muchas gracias!</strong> Tu feedback ha sido verificado con éxito y ya aparece publicado en los testimonios de Eliezer Terrero.';
+      statusMsg.classList.remove('hidden');
+    }
+
+    if (submitBtn) submitBtn.disabled = true;
+
+    setTimeout(function () {
+      if (submitBtn) submitBtn.disabled = false;
+      closeFeedbackModal();
+    }, 2500);
+  }
+
+  // 8.2 Panel Moderador de Códigos de Feedback
+  function openFeedbackCodesModal() {
+    if (!isModerator) {
+      openAuthModal();
+      return;
+    }
+    const modal = document.getElementById('feedback-codes-modal');
+    if (!modal) return;
+    renderFeedbackCodesList();
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeFeedbackCodesModal() {
+    const modal = document.getElementById('feedback-codes-modal');
+    if (modal) modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  function renderFeedbackCodesList() {
+    const container = document.getElementById('feedback-codes-list');
+    const countEl = document.getElementById('codes-total-count');
+    if (countEl) countEl.textContent = feedbackCodes.length;
+    if (!container) return;
+
+    if (feedbackCodes.length === 0) {
+      container.innerHTML = `
+        <div class="p-4 rounded-xl bg-[#141822] text-center text-xs text-slate-400">
+          No hay códigos registrados. Genera uno nuevo arriba.
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = feedbackCodes.map(function (c) {
+      const statusBadge = c.used
+        ? `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700">✓ Usado por ${c.usedBy || 'Cliente'} (${c.usedAt || 'Fecha'})</span>`
+        : c.disabled
+        ? `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-red-900/40 text-red-400 border border-red-800/40">✕ Deshabilitado</span>`
+        : `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">● Disponible (1 uso)</span>`;
+
+      return `
+        <div class="rounded-xl bg-[#141822] border border-[#232733] p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-black/60 font-mono text-amber-400 font-bold text-xs border border-amber-400/30 tracking-wider">
+                ${c.code}
+              </span>
+              ${statusBadge}
+            </div>
+            <div class="text-[11px] text-slate-300">
+              ${c.label || 'Para cliente comercial o alumno'}
+              <span class="text-slate-500 text-[10px] ml-1">· Creado: ${c.createdAt || 'Reciente'}</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.copyFeedbackLink('${c.code}')"
+              class="px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
+              title="Copiar enlace directo con este código"
+            >
+              📋 Link
+            </button>
+
+            ${!c.used ? `
+              <button
+                type="button"
+                onclick="window.ElyPortfolio.toggleDisableCode('${c.code}')"
+                class="px-2.5 py-1 rounded ${c.disabled ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30' : 'bg-amber-500/20 text-amber-300 hover:bg-amber-500/30'} text-xs font-semibold transition-colors cursor-pointer"
+              >
+                ${c.disabled ? 'Habilitar' : 'Deshabilitar'}
+              </button>
+            ` : ''}
+
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.deleteFeedbackCode('${c.code}')"
+              class="px-2.5 py-1 rounded bg-red-600/30 hover:bg-red-600 text-red-300 hover:text-white text-xs font-semibold transition-colors cursor-pointer"
+              title="Eliminar código"
+            >
+              🗑️
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function handleCreateCodeSubmit(e) {
+    e.preventDefault();
+    const codeInput = document.getElementById('new-code-input');
+    const labelInput = document.getElementById('new-code-label');
+    const rawCode = codeInput.value.trim().toUpperCase();
+    const label = labelInput.value.trim();
+
+    if (!rawCode) return;
+
+    if (feedbackCodes.some(c => c.code.toUpperCase() === rawCode)) {
+      alert('Ya existe un código con ese nombre: ' + rawCode);
+      return;
+    }
+
+    feedbackCodes.unshift({
+      code: rawCode,
+      label: label || 'Código de cliente',
+      used: false,
+      disabled: false,
+      createdAt: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+    });
+
+    try {
+      localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes));
+    } catch (err) {}
+
+    codeInput.value = '';
+    labelInput.value = '';
+    renderFeedbackCodesList();
+    showStatusNotification({
+      title: 'Código de Feedback Generado',
+      message: `Código "${rawCode}" creado con éxito para ${label || 'cliente'}. Puedes enviárselo para su feedback.`,
+      type: 'success',
+      icon: '🔑'
+    });
+  }
+
+  function generateRandomCodeInput() {
+    const input = document.getElementById('new-code-input');
+    if (!input) return;
+    const randomHex = Math.random().toString(36).substring(2, 6).toUpperCase();
+    input.value = 'ELY-VIP-' + randomHex;
+    showStatusNotification({
+      title: 'Código Aleatorio Generado',
+      message: `Código propuesto "${input.value}". Haz clic en "Crear" para guardarlo en la lista.`,
+      type: 'info',
+      icon: '🎲'
+    });
+  }
+
+  function toggleDisableCode(codeStr) {
+    const target = feedbackCodes.find(c => c.code.toUpperCase() === codeStr.toUpperCase());
+    if (!target) return;
+    target.disabled = !target.disabled;
+    try {
+      localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes));
+    } catch (err) {}
+    renderFeedbackCodesList();
+    showStatusNotification({
+      title: target.disabled ? 'Código Deshabilitado' : 'Código Habilitado',
+      message: `El código "${codeStr}" ha sido ${target.disabled ? 'pausado temporalmente' : 'reactivado para su uso'}.`,
+      type: 'info',
+      icon: '⚡'
+    });
+  }
+
+  function deleteFeedbackCode(codeStr) {
+    if (confirm('¿Eliminar el código ' + codeStr + '?')) {
+      feedbackCodes = feedbackCodes.filter(c => c.code.toUpperCase() !== codeStr.toUpperCase());
+      try {
+        localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes));
+      } catch (err) {}
+      renderFeedbackCodesList();
+      showStatusNotification({
+        title: 'Código Eliminado',
+        message: `El código "${codeStr}" ha sido eliminado del sistema.`,
+        type: 'warning',
+        icon: '🗑️'
+      });
+    }
+  }
+
+  function copyFeedbackLink(codeStr) {
+    const base = window.location.origin + window.location.pathname;
+    const directUrl = base + '?feedback=' + encodeURIComponent(codeStr);
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(directUrl).then(function () {
+        showStatusNotification({
+          title: 'Enlace Directo Copiado',
+          message: `Enlace con código "${codeStr}" copiado al portapapeles. Listo para enviar por WhatsApp o correo.`,
+          type: 'success',
+          icon: '📋'
+        });
+      }).catch(function () {
+        prompt('Copia este enlace directo para tu cliente:', directUrl);
+      });
+    } else {
+      prompt('Copia este enlace directo para tu cliente:', directUrl);
+    }
+  }
+
+  function checkFeedbackUrlParam() {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const hash = window.location.hash || '';
+      const pathname = window.location.pathname || '';
+
+      let targetCode = '';
+      let shouldOpen = false;
+
+      if (urlParams.has('feedback')) {
+        shouldOpen = true;
+        const val = urlParams.get('feedback');
+        if (val && val !== 'true' && val !== '1') {
+          targetCode = val;
+        }
+      } else if (hash.includes('feedback')) {
+        shouldOpen = true;
+        const parts = hash.split('=');
+        if (parts.length > 1) {
+          targetCode = parts[1];
+        }
+      } else if (pathname.endsWith('/feedback') || pathname.endsWith('/feedback/')) {
+        shouldOpen = true;
+      }
+
+      if (shouldOpen) {
+        setTimeout(function () {
+          openFeedbackModal(targetCode);
+        }, 500);
+      }
+    } catch (e) {}
   }
 
   // 9. Modal de Contacto y Envío de Correo Directo desde la Web (FormSubmit AJAX + Fallback Mailto)
@@ -1731,10 +2709,15 @@
       try {
         localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ role: 'moderator', username: 'ElyDev' }));
       } catch (err) {}
-      alert('¡Acceso de Moderador Autorizado! Ahora puedes editar, reordenar y eliminar proyectos en cada cuadro.');
       closeAuthModal();
       updateModeratorUI();
       renderProjectsGrid();
+      showStatusNotification({
+        title: 'Acceso de Moderador Autorizado',
+        message: 'Bienvenido ElyDev. Los controles de edición, reordenar y feedback están activos.',
+        type: 'success',
+        icon: '🛡️'
+      });
     } else {
       alert('Contraseña incorrecta. (Pista: elydev2026)');
     }
@@ -1745,9 +2728,14 @@
     try {
       localStorage.removeItem(AUTH_STORAGE_KEY);
     } catch (err) {}
-    alert('Sesión de moderador cerrada.');
     updateModeratorUI();
     renderProjectsGrid();
+    showStatusNotification({
+      title: 'Sesión Cerrada',
+      message: 'Has salido del modo moderador de manera segura.',
+      type: 'info',
+      icon: '🔒'
+    });
   }
 
   function updateModeratorUI() {
@@ -1763,6 +2751,9 @@
     if (authBtn) {
       authBtn.textContent = isModerator ? 'Cerrar Moderador' : 'Acceso Moderador';
     }
+    renderExperiences();
+    renderTestimonialsPreview();
+    renderSatisfiedClientsModalList();
   }
 
   // 12. Reordenar Proyectos (Subir o Bajar orden)
@@ -1782,6 +2773,41 @@
     } catch (err) {}
 
     renderProjectsGrid();
+    showStatusNotification({
+      title: 'Posición Actualizada',
+      message: `Se movió la posición de "${projects[newIndex].title}".`,
+      type: 'info',
+      icon: '⇅'
+    });
+  }
+
+  // 12.1 Duplicar Proyecto
+  function duplicateProject(projectId) {
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+
+    const copy = JSON.parse(JSON.stringify(project));
+    copy.id = 'proj-' + Date.now();
+    copy.title = '[Copia] ' + (copy.title || 'Proyecto');
+
+    const index = projects.findIndex(p => p.id === projectId);
+    if (index >= 0) {
+      projects.splice(index + 1, 0, copy);
+    } else {
+      projects.unshift(copy);
+    }
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+    } catch (err) {}
+
+    renderProjectsGrid();
+    showStatusNotification({
+      title: 'Proyecto Duplicado',
+      message: `Se ha creado una copia de "${project.title}".`,
+      type: 'success',
+      icon: '📋'
+    });
   }
 
   // 13. Eliminar Proyecto
@@ -1892,7 +2918,12 @@
 
     closeEditProjectModal();
     renderProjectsGrid();
-    alert('¡Ficha actualizada exitosamente!');
+    showStatusNotification({
+      title: 'Proyecto Guardado',
+      message: `Los cambios en "${project.title}" fueron actualizados y guardados exitosamente.`,
+      type: 'success',
+      icon: '✏️'
+    });
   }
 
   // 15. Modal para Agregar Proyecto (Solo moderador)
@@ -1954,7 +2985,315 @@
 
     closeAddProjectModal();
     renderProjectsGrid();
-    alert('¡Proyecto agregado con éxito!');
+    showStatusNotification({
+      title: 'Proyecto Guardado',
+      message: `El proyecto "${newProject.title}" se guardó y publicó exitosamente en el catálogo.`,
+      type: 'success',
+      icon: '🚀'
+    });
+  }
+
+  // 15.1 Experiencia Laboral & Contratos (CRUD, Reordenar, Duplicar)
+  function renderExperiences() {
+    const container = document.getElementById('experiences-list');
+    if (!container) return;
+
+    const sortBtnLabel = document.getElementById('label-sort-experiences');
+    if (sortBtnLabel) {
+      sortBtnLabel.textContent = (experienceSortOrder === 'asc') 
+        ? 'Reordenar: Más Recientes' 
+        : 'Reordenar: Antiguos Primero';
+    }
+
+    if (experiences.length === 0) {
+      container.innerHTML = `
+        <div class="rounded-2xl border border-dashed border-[#282f40] bg-[#10131b] p-6 text-center text-xs text-slate-400">
+          No hay experiencias laborales registradas.
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = experiences.map(function (exp, index) {
+      const colorClass = exp.color || 'text-amber-400';
+      const techBadges = (exp.technologies || []).map(function (t) {
+        return `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">${t}</span>`;
+      }).join('');
+
+      const moderatorBar = isModerator ? `
+        <div class="flex items-center justify-between p-2 mb-2 bg-[#171c26] rounded-xl border border-amber-400/30 text-xs">
+          <div class="flex items-center gap-1">
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.moveExperienceOrder('${exp.id}', -1)"
+              class="px-2 py-0.5 rounded bg-[#10131a] text-amber-400 hover:bg-amber-400 hover:text-black font-bold transition-colors cursor-pointer"
+              title="Mover arriba"
+            >
+              ▲ Subir
+            </button>
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.moveExperienceOrder('${exp.id}', 1)"
+              class="px-2 py-0.5 rounded bg-[#10131a] text-amber-400 hover:bg-amber-400 hover:text-black font-bold transition-colors cursor-pointer"
+              title="Mover abajo"
+            >
+              ▼ Bajar
+            </button>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.duplicateExperience('${exp.id}')"
+              class="px-2 py-0.5 rounded bg-[#202738] text-amber-300 hover:bg-amber-400 hover:text-black font-bold transition-colors cursor-pointer"
+              title="Duplicar experiencia"
+            >
+              📋 Duplicar
+            </button>
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.openEditExperienceModal('${exp.id}')"
+              class="px-2.5 py-0.5 rounded bg-amber-400 text-black font-bold hover:bg-amber-300 transition-colors cursor-pointer"
+              title="Editar experiencia"
+            >
+              ✏️ Editar
+            </button>
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.deleteExperience('${exp.id}')"
+              class="px-2.5 py-0.5 rounded bg-red-600 text-white font-bold hover:bg-red-500 transition-colors cursor-pointer"
+              title="Eliminar experiencia"
+            >
+              🗑️ Eliminar
+            </button>
+          </div>
+        </div>
+      ` : '';
+
+      return `
+        <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-2 hover:border-amber-400/40 transition-colors">
+          ${moderatorBar}
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+            <div>
+              <h4 class="text-sm font-bold text-white font-display">${exp.title}</h4>
+              <div class="text-xs ${colorClass}">${exp.company}${exp.location ? ' · ' + exp.location : ''}</div>
+            </div>
+            <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2.5 py-1 rounded w-fit sm:w-auto">
+              ${exp.period}
+            </div>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">${exp.description}</p>
+          <div class="flex flex-wrap gap-1.5 pt-1">
+            ${techBadges}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function toggleSortExperiencesByDate() {
+    experienceSortOrder = (experienceSortOrder === 'desc') ? 'asc' : 'desc';
+
+    experiences.sort(function (a, b) {
+      const dateA = a.startDate || '2000-01-01';
+      const dateB = b.startDate || '2000-01-01';
+      return experienceSortOrder === 'asc' 
+        ? dateA.localeCompare(dateB)
+        : dateB.localeCompare(dateA);
+    });
+
+    try {
+      localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences));
+    } catch (e) {}
+
+    renderExperiences();
+    showStatusNotification({
+      title: 'Cronología Reordenada',
+      message: experienceSortOrder === 'asc' 
+        ? 'Experiencias ordenadas: Más antiguas primero (cronológico).' 
+        : 'Experiencias ordenadas: Más recientes primero.',
+      type: 'info',
+      icon: '📅'
+    });
+  }
+
+  function moveExperienceOrder(expId, delta) {
+    const index = experiences.findIndex(e => e.id === expId);
+    if (index < 0) return;
+    const newIndex = index + delta;
+    if (newIndex < 0 || newIndex >= experiences.length) return;
+
+    const temp = experiences[index];
+    experiences[index] = experiences[newIndex];
+    experiences[newIndex] = temp;
+
+    try {
+      localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences));
+    } catch (e) {}
+
+    renderExperiences();
+    showStatusNotification({
+      title: 'Posición Actualizada',
+      message: `Se reordenó la experiencia "${experiences[newIndex].title}".`,
+      type: 'info',
+      icon: '⇅'
+    });
+  }
+
+  function duplicateExperience(expId) {
+    const exp = experiences.find(e => e.id === expId);
+    if (!exp) return;
+
+    const copy = JSON.parse(JSON.stringify(exp));
+    copy.id = 'exp-' + Date.now();
+    copy.title = '[Copia] ' + copy.title;
+
+    const index = experiences.findIndex(e => e.id === expId);
+    if (index >= 0) {
+      experiences.splice(index + 1, 0, copy);
+    } else {
+      experiences.unshift(copy);
+    }
+
+    try {
+      localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences));
+    } catch (e) {}
+
+    renderExperiences();
+    showStatusNotification({
+      title: 'Experiencia Duplicada',
+      message: `Se ha duplicado la experiencia "${exp.title}".`,
+      type: 'success',
+      icon: '📋'
+    });
+  }
+
+  function deleteExperience(expId) {
+    const exp = experiences.find(e => e.id === expId);
+    if (!exp) return;
+    if (confirm('¿Eliminar la experiencia "' + exp.title + '" en ' + exp.company + '?')) {
+      experiences = experiences.filter(e => e.id !== expId);
+      try {
+        localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences));
+      } catch (e) {}
+      renderExperiences();
+    }
+  }
+
+  let editingExpId = null;
+
+  function openAddExperienceModal() {
+    if (!isModerator) {
+      openAuthModal();
+      return;
+    }
+    editingExpId = null;
+    const modal = document.getElementById('experience-modal');
+    const titleEl = document.getElementById('experience-modal-title');
+    if (titleEl) titleEl.textContent = '+ Agregar Experiencia Laboral & Contrato';
+
+    document.getElementById('exp-form-id').value = '';
+    document.getElementById('exp-form-title').value = '';
+    document.getElementById('exp-form-company').value = '';
+    document.getElementById('exp-form-location').value = 'Remoto';
+    document.getElementById('exp-form-period').value = '';
+    document.getElementById('exp-form-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('exp-form-color').value = 'text-amber-400';
+    document.getElementById('exp-form-desc').value = '';
+    document.getElementById('exp-form-techs').value = 'Unity, C#';
+
+    if (modal) {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function openEditExperienceModal(expId) {
+    if (!isModerator) {
+      openAuthModal();
+      return;
+    }
+    const exp = experiences.find(e => e.id === expId);
+    if (!exp) return;
+    editingExpId = expId;
+
+    const modal = document.getElementById('experience-modal');
+    const titleEl = document.getElementById('experience-modal-title');
+    if (titleEl) titleEl.textContent = '✏️ Editar Experiencia Laboral & Contrato';
+
+    document.getElementById('exp-form-id').value = exp.id;
+    document.getElementById('exp-form-title').value = exp.title || '';
+    document.getElementById('exp-form-company').value = exp.company || '';
+    document.getElementById('exp-form-location').value = exp.location || '';
+    document.getElementById('exp-form-period').value = exp.period || '';
+    document.getElementById('exp-form-date').value = exp.startDate || '';
+    document.getElementById('exp-form-color').value = exp.color || 'text-amber-400';
+    document.getElementById('exp-form-desc').value = exp.description || '';
+    document.getElementById('exp-form-techs').value = (exp.technologies || []).join(', ');
+
+    if (modal) {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeExperienceModal() {
+    const modal = document.getElementById('experience-modal');
+    if (modal) modal.classList.add('hidden');
+    document.body.style.overflow = '';
+    editingExpId = null;
+  }
+
+  function handleExperienceSubmit(e) {
+    e.preventDefault();
+    const title = document.getElementById('exp-form-title').value.trim();
+    const company = document.getElementById('exp-form-company').value.trim();
+    const location = document.getElementById('exp-form-location').value.trim();
+    const period = document.getElementById('exp-form-period').value.trim();
+    const startDate = document.getElementById('exp-form-date').value;
+    const color = document.getElementById('exp-form-color').value;
+    const desc = document.getElementById('exp-form-desc').value.trim();
+    const techsRaw = document.getElementById('exp-form-techs').value;
+    const techs = techsRaw.split(',').map(s => s.trim()).filter(Boolean);
+
+    if (editingExpId) {
+      const exp = experiences.find(e => e.id === editingExpId);
+      if (exp) {
+        exp.title = title;
+        exp.company = company;
+        exp.location = location;
+        exp.period = period;
+        exp.startDate = startDate || exp.startDate;
+        exp.color = color;
+        exp.description = desc;
+        exp.technologies = techs;
+      }
+    } else {
+      const newExp = {
+        id: 'exp-' + Date.now(),
+        title: title,
+        company: company,
+        location: location,
+        period: period,
+        startDate: startDate || new Date().toISOString().split('T')[0],
+        color: color,
+        description: desc,
+        technologies: techs
+      };
+      experiences.unshift(newExp);
+    }
+
+    try {
+      localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences));
+    } catch (err) {}
+
+    closeExperienceModal();
+    renderExperiences();
+    showStatusNotification({
+      title: editingExpId ? 'Experiencia Editada' : 'Experiencia Guardada',
+      message: `"${title}" en ${company} se guardó exitosamente en la trayectoria.`,
+      type: 'success',
+      icon: '💼'
+    });
   }
 
   // 16. Restablecer datos originales
@@ -2109,6 +3448,18 @@
     const editProjForm = document.getElementById('edit-project-form');
     if (editProjForm) editProjForm.addEventListener('submit', handleEditProjectSubmit);
 
+    const expForm = document.getElementById('experience-form');
+    if (expForm) expForm.addEventListener('submit', handleExperienceSubmit);
+
+    const testForm = document.getElementById('testimonial-form');
+    if (testForm) testForm.addEventListener('submit', handleTestimonialSubmit);
+
+    const feedbackForm = document.getElementById('feedback-submission-form');
+    if (feedbackForm) feedbackForm.addEventListener('submit', handleFeedbackSubmit);
+
+    const createCodeForm = document.getElementById('create-code-form');
+    if (createCodeForm) createCodeForm.addEventListener('submit', handleCreateCodeSubmit);
+
     // Keyboard navigation (Escape, ArrowLeft, ArrowRight)
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
@@ -2119,6 +3470,10 @@
         closeAddProjectModal();
         closeEditProjectModal();
         closeSatisfiedClientsModal();
+        closeExperienceModal();
+        closeTestimonialModal();
+        closeFeedbackModal();
+        closeFeedbackCodesModal();
       } else if (e.key === 'ArrowLeft') {
         navigateProjectModal(-1);
       } else if (e.key === 'ArrowRight') {
@@ -2128,30 +3483,65 @@
 
     updateModeratorUI();
     renderProjectsGrid();
+    renderExperiences();
+    renderTestimonialsPreview();
+    checkFeedbackUrlParam();
   });
 
   // Exponer API global para interactividad
   window.ElyPortfolio = {
+    // Proyectos
     openProjectModal: openProjectModal,
     closeProjectModal: closeProjectModal,
     navigateProjectModal: navigateProjectModal,
     setModalMediaMode: setModalMediaMode,
     selectModalImage: selectModalImage,
     cycleModalImage: cycleModalImage,
+    openAddProjectModal: openAddProjectModal,
+    closeAddProjectModal: closeAddProjectModal,
+    openEditProjectModal: openEditProjectModal,
+    closeEditProjectModal: closeEditProjectModal,
+    moveProjectOrder: moveProjectOrder,
+    duplicateProject: duplicateProject,
+    deleteProject: deleteProject,
+    // Experiencias Laborales & Contratos
+    renderExperiences: renderExperiences,
+    toggleSortExperiencesByDate: toggleSortExperiencesByDate,
+    moveExperienceOrder: moveExperienceOrder,
+    duplicateExperience: duplicateExperience,
+    deleteExperience: deleteExperience,
+    openAddExperienceModal: openAddExperienceModal,
+    openEditExperienceModal: openEditExperienceModal,
+    closeExperienceModal: closeExperienceModal,
+    // Testimonios & Clientes Satisfechos
+    renderTestimonialsPreview: renderTestimonialsPreview,
+    renderSatisfiedClientsModalList: renderSatisfiedClientsModalList,
+    openSatisfiedClientsModal: openSatisfiedClientsModal,
+    closeSatisfiedClientsModal: closeSatisfiedClientsModal,
+    moveTestimonialOrder: moveTestimonialOrder,
+    duplicateTestimonial: duplicateTestimonial,
+    deleteTestimonial: deleteTestimonial,
+    openAddTestimonialModal: openAddTestimonialModal,
+    openEditTestimonialModal: openEditTestimonialModal,
+    closeTestimonialModal: closeTestimonialModal,
+    // Feedback con Código Especial (Clientes)
+    openFeedbackModal: openFeedbackModal,
+    closeFeedbackModal: closeFeedbackModal,
+    // Gestión de Códigos de Feedback (Moderador)
+    openFeedbackCodesModal: openFeedbackCodesModal,
+    closeFeedbackCodesModal: closeFeedbackCodesModal,
+    generateRandomCodeInput: generateRandomCodeInput,
+    toggleDisableCode: toggleDisableCode,
+    deleteFeedbackCode: deleteFeedbackCode,
+    copyFeedbackLink: copyFeedbackLink,
+    // Modales de contacto, auth, CV y utilidades
+    showStatusNotification: showStatusNotification,
     openContactModal: openContactModal,
     closeContactModal: closeContactModal,
     openResumeModal: openResumeModal,
     closeResumeModal: closeResumeModal,
     openAuthModal: openAuthModal,
     closeAuthModal: closeAuthModal,
-    openAddProjectModal: openAddProjectModal,
-    closeAddProjectModal: closeAddProjectModal,
-    openEditProjectModal: openEditProjectModal,
-    closeEditProjectModal: closeEditProjectModal,
-    moveProjectOrder: moveProjectOrder,
-    deleteProject: deleteProject,
-    openSatisfiedClientsModal: openSatisfiedClientsModal,
-    closeSatisfiedClientsModal: closeSatisfiedClientsModal,
     resetSampleData: resetSampleData,
     toggleTheme: toggleTheme
   };

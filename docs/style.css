@@ -188,8 +188,86 @@ html.light .border-\[\#1e2330\] {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* Floating Status Notification System */
+@keyframes toastSlideIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(115%, 0, 0) scale(0.96);
+  }
+  65% {
+    opacity: 1;
+    transform: translate3d(-6px, 0, 0) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes toastSlideOut {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    max-height: 140px;
+    margin-bottom: 10px;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(120%, 0, 0) scale(0.92);
+    max-height: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+  }
+}
+
+@keyframes toastProgress {
+  0% {
+    width: 100%;
+  }
+  100% {
+    width: 0%;
+  }
+}
+
+.status-toast-enter {
+  animation: toastSlideIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.status-toast-exit {
+  animation: toastSlideOut 0.32s cubic-bezier(0.4, 0, 1, 1) forwards !important;
+  pointer-events: none !important;
+}
+
+.status-toast-progress {
+  animation: toastProgress 3s linear forwards;
+}
+
+.status-toast-progress.paused {
+  animation-play-state: paused;
+}
+
+/* Light Theme support for Toast */
+html.light .status-notification-toast {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  color: #0f172a !important;
+}
+
+html.light .status-notification-toast .toast-title {
+  color: #0f172a !important;
+}
+
+html.light .status-notification-toast .toast-desc {
+  color: #475569 !important;
+}
+
 @media print {
-  .no-print {
+  .no-print,
+  #status-notification-container {
     display: none !important;
   }
 }

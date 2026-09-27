@@ -507,128 +507,38 @@
 
         <!-- Línea de Tiempo de Experiencia Comercial -->
         <div class="space-y-4">
-          <h3 class="text-lg font-bold text-white font-display">Experiencia Laboral & Contratos</h3>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="text-lg font-bold text-white font-display">Experiencia Laboral & Contratos</h3>
+              <p class="text-xs text-slate-400">Historial verificado de contratos freelance y desarrollo de videojuegos.</p>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-2">
+              <!-- Botón Reordenar por Fecha -->
+              <button
+                id="btn-sort-experiences"
+                type="button"
+                onclick="window.ElyPortfolio.toggleSortExperiencesByDate()"
+                class="px-3 py-1.5 rounded-lg bg-[#141822] hover:bg-[#1a202e] border border-[#232733] text-xs font-semibold text-slate-300 hover:text-amber-400 transition-colors flex items-center gap-1.5 cursor-pointer"
+                title="Reordenar experiencias por fecha (Antiguo a Nuevo / Nuevo a Antiguo)"
+              >
+                <span>📅</span>
+                <span id="label-sort-experiences">Reordenar: Antiguos Primero</span>
+              </button>
+
+              <!-- Botón Agregar Experiencia (Moderador) -->
+              <button
+                type="button"
+                onclick="window.ElyPortfolio.openAddExperienceModal()"
+                class="moderator-only hidden px-3 py-1.5 rounded-lg bg-amber-400 text-black text-xs font-bold hover:bg-amber-300 transition-colors shadow-sm flex items-center gap-1 cursor-pointer"
+              >
+                <span>+ Agregar Experiencia</span>
+              </button>
+            </div>
+          </div>
           
-          <div class="space-y-4">
-            <!-- 1. MoneyFight & Cesar -->
-            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-2">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                <div>
-                  <h4 class="text-sm font-bold text-white">Freelance Game Developer</h4>
-                  <div class="text-xs text-amber-400">MoneyFight & Cesar · Remoto</div>
-                </div>
-                <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2.5 py-1 rounded">Feb 2025 — Presente</div>
-              </div>
-              <p class="text-xs text-slate-300">Desarrollo en producción activa de un nuevo título confidencial de alto impacto para plataformas interactivas.</p>
-              <div class="flex flex-wrap gap-1.5 pt-1">
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Unity</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">C#</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Game Architecture</span>
-              </div>
-            </div>
-
-            <!-- 2. Capricornio Games (CapricornioTV) -->
-            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-2">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                <div>
-                  <h4 class="text-sm font-bold text-white">Freelance Game & Web Developer</h4>
-                  <div class="text-xs text-cyan-400">Capricornio Games (CapricornioTV) · República Dominicana / Remoto</div>
-                </div>
-                <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2.5 py-1 rounded">Ago 2024 — Ene 2025</div>
-              </div>
-              <p class="text-xs text-slate-300">Desarrollé íntegramente el juego "MotoLoco: En una goma" y creé su plataforma web promocional completa, gestionando frontend y backend con PHP y base de datos a medida.</p>
-              <div class="flex flex-wrap gap-1.5 pt-1">
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Unity</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">PHP</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">MySQL</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Web Full-Stack</span>
-              </div>
-            </div>
-
-            <!-- 3. CaribeAtomic -->
-            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-2">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                <div>
-                  <h4 class="text-sm font-bold text-white">Freelance Game Developer</h4>
-                  <div class="text-xs text-amber-400">CaribeAtomic · Remoto</div>
-                </div>
-                <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2.5 py-1 rounded">Ene 2022 — Ene 2024</div>
-              </div>
-              <p class="text-xs text-slate-300">Contribución en diversas áreas críticas de desarrollo de videojuegos, incluyendo beta testing, mejoras de demos y diseño de niveles.</p>
-              <div class="flex flex-wrap gap-1.5 pt-1">
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Unity</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Level Design</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Beta Testing</span>
-              </div>
-            </div>
-
-            <!-- 4. MoneyFight Game -->
-            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-2">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                <div>
-                  <h4 class="text-sm font-bold text-white">Freelance Lead Game Developer</h4>
-                  <div class="text-xs text-amber-400">MoneyFight · Remoto</div>
-                </div>
-                <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2.5 py-1 rounded">Nov 2022 — Jul 2023</div>
-              </div>
-              <p class="text-xs text-slate-300">Desarrollo integral de "MoneyFight Game", abarcando configuración de servidor, multijugador online, base de datos PHP y arte 2D.</p>
-              <div class="flex flex-wrap gap-1.5 pt-1">
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Unity</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Multiplayer Network</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">PHP/MySQL</span>
-              </div>
-            </div>
-
-            <!-- 5. SHL Dominoes Republic -->
-            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-2">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                <div>
-                  <h4 class="text-sm font-bold text-white">Game Developer (Bug Fixer & Optimization)</h4>
-                  <div class="text-xs text-cyan-400">SHL · Dominoes Republic · Remoto</div>
-                </div>
-                <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2.5 py-1 rounded">Nov 2022</div>
-              </div>
-              <p class="text-xs text-slate-300">Resolución de problemas críticos de rendimiento e interferencias de geolocalización en el juego de dominó competitivo.</p>
-              <div class="flex flex-wrap gap-1.5 pt-1">
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Unity</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Geolocation Services</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Profiling</span>
-              </div>
-            </div>
-
-            <!-- 6. DoGame Dominican Power -->
-            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-2">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                <div>
-                  <h4 class="text-sm font-bold text-white">Freelance Game Developer (UI & Multijugador)</h4>
-                  <div class="text-xs text-cyan-400">DoGame · Dominican Power · Remoto</div>
-                </div>
-                <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2.5 py-1 rounded">Nov 2021 — Feb 2022</div>
-              </div>
-              <p class="text-xs text-slate-300">Renovación técnica integral: corrección de errores, cambio de orientación de juego, rediseño completo de UI e integración de Photon Multiplayer.</p>
-              <div class="flex flex-wrap gap-1.5 pt-1">
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Unity</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Photon PUN 2</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">UI Remake</span>
-              </div>
-            </div>
-
-            <!-- 7. Jobs Laru -->
-            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-2">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                <div>
-                  <h4 class="text-sm font-bold text-white">Freelance Game Developer</h4>
-                  <div class="text-xs text-amber-400">Jobs Laru · Remoto</div>
-                </div>
-                <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2.5 py-1 rounded">Oct 2019 — Dic 2021</div>
-              </div>
-              <p class="text-xs text-slate-300">Desarrollo y mantenimiento de múltiples proyectos comerciales: Simón, LEVA 3D (Google Play), Fireball (Ads), Dark Castle y GUGO.</p>
-              <div class="flex flex-wrap gap-1.5 pt-1">
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Unity 2D/3D</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">AdMob</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Google Play</span>
-              </div>
-            </div>
+          <div id="experiences-list" class="space-y-4">
+            <!-- Inyectado dinámicamente con opciones de subir/bajar, duplicar, editar y eliminar -->
           </div>
         </div>
 
@@ -677,39 +587,33 @@
 
         <!-- Testimonios de Clientes -->
         <div class="space-y-4 pt-4 border-t border-[#1c212c]">
-          <div class="flex items-center justify-between">
-            <h3 class="text-lg font-bold text-white font-display">Testimonios de Clientes & Colaboradores</h3>
-            <button
-              type="button"
-              onclick="window.ElyPortfolio.openSatisfiedClientsModal()"
-              class="text-xs text-amber-400 hover:underline font-semibold"
-            >
-              Ver todos los testimonios (14+) →
-            </button>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="text-lg font-bold text-white font-display">Testimonios de Clientes & Colaboradores</h3>
+              <p class="text-xs text-slate-400">Opiniones directas de empresas, estudios y clientes verificados.</p>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onclick="window.ElyPortfolio.openFeedbackModal()"
+                class="px-3.5 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>⭐ Realizar Feedback</span>
+              </button>
+
+              <button
+                type="button"
+                onclick="window.ElyPortfolio.openSatisfiedClientsModal()"
+                class="text-xs text-amber-400 hover:underline font-semibold"
+              >
+                Ver todos los testimonios (<span id="testimonials-count-badge">8+</span>) →
+              </button>
+            </div>
           </div>
           
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-6 space-y-3">
-              <div class="text-amber-400 text-lg">“</div>
-              <p class="text-xs text-slate-300 italic leading-relaxed">
-                Me siento sumamente satisfecho de haber trabajado mi aplicación con Eliezer; los resultados fueron mucho mejores de lo que esperaba y con un trato muy profesional.
-              </p>
-              <div class="pt-2 border-t border-[#1e2330]">
-                <div class="text-xs font-bold text-white">Joselmin Carmona</div>
-                <div class="text-[11px] text-slate-500">Cliente de Aplicación Móvil (Telesancris)</div>
-              </div>
-            </div>
-
-            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-6 space-y-3">
-              <div class="text-amber-400 text-lg">“</div>
-              <p class="text-xs text-slate-300 italic leading-relaxed">
-                Al principio deposité toda mi confianza en el trabajo de Eliezer y no pudo haber mejor persona. Tuve excelentes resultados de desarrollo en todos los proyectos. Rápido, accesible y con gran nivel técnico.
-              </p>
-              <div class="pt-2 border-t border-[#1e2330]">
-                <div class="text-xs font-bold text-white">Jobs Laru</div>
-                <div class="text-[11px] text-slate-500">Estudio de Videojuegos / Colaborador Frecuente</div>
-              </div>
-            </div>
+          <div id="testimonials-preview-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Inyectado dinámicamente con opciones de duplicar, editar y moderar -->
           </div>
         </div>
       </section>
@@ -764,26 +668,50 @@
       <div class="relative w-full max-w-3xl rounded-2xl bg-[#12151d] border border-[#232733] shadow-2xl p-6 space-y-5 max-h-[90vh] flex flex-col">
         
         <!-- Header de Clientes Satisfechos -->
-        <div class="flex items-center justify-between border-b border-[#1e2330] pb-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1e2330] pb-3 gap-3">
           <div class="flex items-center gap-3">
-            <div class="h-10 w-10 rounded-xl bg-amber-400/20 text-amber-400 flex items-center justify-center text-xl font-bold">
+            <div class="h-10 w-10 rounded-xl bg-amber-400/20 text-amber-400 flex items-center justify-center text-xl font-bold shrink-0">
               ⭐
             </div>
             <div>
               <div class="flex items-center gap-2">
                 <h3 class="text-lg font-bold text-white font-display">Clientes Satisfechos & Colaboraciones</h3>
-                <span class="rounded bg-amber-400 px-2 py-0.5 text-xs font-extrabold text-black">14+ Clientes</span>
+                <span id="modal-clients-count-badge" class="rounded bg-amber-400 px-2 py-0.5 text-xs font-extrabold text-black">8+ Clientes</span>
               </div>
               <p class="text-xs text-slate-400">Testimonios directos de influencers, empresas y desarrolladores con calificación 5 estrellas.</p>
             </div>
           </div>
-          <button
-            type="button"
-            onclick="window.ElyPortfolio.closeSatisfiedClientsModal()"
-            class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 text-lg"
-          >
-            ✕
-          </button>
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.openFeedbackModal()"
+              class="px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-all shadow-sm flex items-center gap-1 cursor-pointer"
+            >
+              <span>⭐ Realizar Feedback</span>
+            </button>
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.openFeedbackCodesModal()"
+              class="moderator-only hidden px-2.5 py-1.5 rounded-lg bg-[#141822] hover:bg-[#1a202e] border border-amber-400/40 text-amber-400 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+              title="Panel de administración de códigos especiales de feedback"
+            >
+              <span>🔑 Códigos</span>
+            </button>
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.openAddTestimonialModal()"
+              class="moderator-only hidden px-2.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+            >
+              <span>+ Testimonio</span>
+            </button>
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.closeSatisfiedClientsModal()"
+              class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 text-lg"
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         <!-- Listado desplazable de clientes (similar a experiencia laboral) -->
@@ -1231,6 +1159,324 @@
         </form>
       </div>
     </div>
+
+    <!-- SUBVENTANA 8: MODAL PARA AGREGAR/EDITAR EXPERIENCIA LABORAL (MODERADOR) -->
+    <div id="experience-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 overflow-y-auto">
+      <div class="relative w-full max-w-lg rounded-2xl bg-[#12151d] border border-[#232733] shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-[#1e2330] pb-2">
+          <div>
+            <h3 id="experience-modal-title" class="text-base font-bold text-white font-display">💼 Experiencia Laboral & Contrato</h3>
+            <p class="text-xs text-slate-400">Agrega o edita el puesto, empresa, periodo y logros.</p>
+          </div>
+          <button type="button" onclick="window.ElyPortfolio.closeExperienceModal()" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        <form id="experience-form" class="space-y-3 text-xs">
+          <input type="hidden" id="exp-form-id" />
+
+          <div>
+            <label class="block text-slate-300 mb-1 font-semibold">Puesto o Cargo:</label>
+            <input id="exp-form-title" type="text" required placeholder="Ej. Freelance Lead Game Developer" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-300 mb-1 font-semibold">Empresa o Cliente:</label>
+              <input id="exp-form-company" type="text" required placeholder="Ej. Capricornio Games (CapricornioTV)" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1 font-semibold">Modalidad / Ubicación:</label>
+              <input id="exp-form-location" type="text" placeholder="Ej. Remoto / Rep. Dominicana" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-300 mb-1 font-semibold">Texto del Periodo (Visual):</label>
+              <input id="exp-form-period" type="text" required placeholder="Ej. Ago 2024 — Ene 2025" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-amber-400 mb-1 font-semibold">📅 Fecha de Inicio (Para ordenar):</label>
+              <input id="exp-form-date" type="date" required class="w-full rounded-xl bg-[#0b0d11] border border-amber-400/40 px-3 py-2 text-white" />
+              <span class="text-[10px] text-slate-500 block mt-0.5">Se usa para ordenar de más antiguo a nuevo o viceversa.</span>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-slate-300 mb-1 font-semibold">Color de Acento en el Subtítulo:</label>
+            <select id="exp-form-color" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white">
+              <option value="text-amber-400">Ámbar (Dorado / Destacado)</option>
+              <option value="text-cyan-400">Cian (Tecnológico / Games)</option>
+              <option value="text-emerald-400">Esmeralda (Monetización / Web)</option>
+              <option value="text-purple-400">Púrpura (Creativo)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-slate-300 mb-1 font-semibold">Descripción del Rol y Aportes Clave:</label>
+            <textarea id="exp-form-desc" rows="3" required placeholder="Describe las responsabilidades, tecnologías implementadas y logros..." class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-slate-300 mb-1 font-semibold">Tecnologías o Tags (separadas por coma):</label>
+            <input id="exp-form-techs" type="text" placeholder="Unity, C#, Photon, PHP, MySQL" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+          </div>
+
+          <div class="flex justify-end gap-2 pt-2 border-t border-[#1e2330]">
+            <button type="button" onclick="window.ElyPortfolio.closeExperienceModal()" class="px-4 py-2 rounded-lg bg-white/10 text-white">Cancelar</button>
+            <button type="submit" class="px-5 py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 shadow">Guardar Experiencia</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- SUBVENTANA 9: MODAL PARA AGREGAR/EDITAR TESTIMONIO DIRECTO (MODERADOR) -->
+    <div id="testimonial-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 overflow-y-auto">
+      <div class="relative w-full max-w-lg rounded-2xl bg-[#12151d] border border-[#232733] shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-[#1e2330] pb-2">
+          <div>
+            <h3 id="testimonial-modal-title" class="text-base font-bold text-white font-display">⭐ Testimonio / Cliente Satisfecho</h3>
+            <p class="text-xs text-slate-400">Edición moderada del testimonio, calificación y proyecto.</p>
+          </div>
+          <button type="button" onclick="window.ElyPortfolio.closeTestimonialModal()" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        <form id="testimonial-form" class="space-y-3 text-xs">
+          <input type="hidden" id="test-form-id" />
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-300 mb-1 font-semibold">Nombre o Empresa del Cliente:</label>
+              <input id="test-form-name" type="text" required placeholder="Ej. CapricornioTV / Jobs Laru" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1 font-semibold">Cargo / Rol:</label>
+              <input id="test-form-role" type="text" required placeholder="Ej. Influencer Masivo / Estudio" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-300 mb-1 font-semibold">Proyecto Trabajado:</label>
+              <input id="test-form-project" type="text" required placeholder="Ej. MotoLoco | En Una Goma" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1 font-semibold">Año / Periodo:</label>
+              <input id="test-form-year" type="text" placeholder="2024 - 2025" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-300 mb-1 font-semibold">Calificación (Estrellas):</label>
+              <select id="test-form-rating" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white">
+                <option value="5">★★★★★ (5 Estrellas - Excelente)</option>
+                <option value="4">★★★★☆ (4 Estrellas - Muy Bueno)</option>
+                <option value="3">★★★☆☆ (3 Estrellas - Bueno)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1 font-semibold">Avatar / Foto URL:</label>
+              <input id="test-form-avatar" type="text" placeholder="./assets/images/ely/my-avatar.png" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-slate-300 mb-1 font-semibold">Testimonio / Opinión:</label>
+            <textarea id="test-form-feedback" rows="3" required placeholder="Escribe aquí las palabras del cliente..." class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-slate-300 mb-1 font-semibold">Etiquetas / Tags (separadas por coma):</label>
+            <input id="test-form-tags" type="text" placeholder="Videojuego Unity, Web PHP, Audiencia Masiva" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+          </div>
+
+          <div class="flex justify-end gap-2 pt-2 border-t border-[#1e2330]">
+            <button type="button" onclick="window.ElyPortfolio.closeTestimonialModal()" class="px-4 py-2 rounded-lg bg-white/10 text-white">Cancelar</button>
+            <button type="submit" class="px-5 py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 shadow">Guardar Testimonio</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- SUBVENTANA 10: MODAL PARA REALIZAR FEEDBACK CON CÓDIGO ESPECIAL DE UN SOLO USO (CLIENTES) -->
+    <div id="feedback-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
+      <div class="relative w-full max-w-lg rounded-2xl bg-[#12151d] border border-[#232733] shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-[#1e2330] pb-3">
+          <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-amber-400/20 text-amber-400 flex items-center justify-center text-xl font-bold shrink-0">
+              ⭐
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-white font-display">Realizar Feedback</h3>
+              <p class="text-xs text-slate-400">Ingresa tu código único de cliente para publicar tu reseña.</p>
+            </div>
+          </div>
+          <button type="button" onclick="window.ElyPortfolio.closeFeedbackModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+        </div>
+
+        <form id="feedback-submission-form" class="space-y-3.5 text-xs">
+          <!-- Código especial con validación -->
+          <div class="p-3.5 rounded-xl bg-[#0b0d11] border border-amber-400/30 space-y-1.5">
+            <label class="block text-amber-400 font-bold flex items-center gap-1.5">
+              <span>🔑 Código Especial de Autorización:</span>
+              <span class="text-[10px] text-slate-400 font-normal">(Uso único)</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <input
+                id="feedback-input-code"
+                type="text"
+                required
+                placeholder="Ej. ELY-VIP-2026"
+                class="flex-1 rounded-xl bg-[#141822] border border-[#2b3346] px-3.5 py-2 text-white font-mono tracking-wider uppercase focus:border-amber-400 focus:outline-none"
+              />
+            </div>
+            <p class="text-[11px] text-slate-400">
+              ¿No tienes un código? Solicítale uno a Eliezer (<span class="text-amber-300">eliezerterrero275@gmail.com</span>) para compartir tu experiencia.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-300 mb-1 font-semibold">Tu Nombre o Empresa:</label>
+              <input id="feedback-input-name" type="text" required placeholder="Ej. Carlos Martínez / DoGame" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white focus:border-amber-400 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1 font-semibold">Tu Cargo / Rol:</label>
+              <input id="feedback-input-role" type="text" placeholder="Ej. CEO / Alumno Unity / Diseñador" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white focus:border-amber-400 focus:outline-none" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-300 mb-1 font-semibold">Proyecto o Servicio Recibido:</label>
+              <input id="feedback-input-project" type="text" required placeholder="Ej. Sistema Ads / Clase Unity / Videojuego" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white focus:border-amber-400 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1 font-semibold">Calificación:</label>
+              <select id="feedback-input-rating" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white focus:border-amber-400 focus:outline-none">
+                <option value="5" selected>★★★★★ 5.0 (Excelente)</option>
+                <option value="4">★★★★☆ 4.0 (Muy Bueno)</option>
+                <option value="3">★★★☆☆ 3.0 (Bueno)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-slate-300 mb-1 font-semibold">Tu Testimonio / Feedback:</label>
+            <textarea id="feedback-input-text" rows="3" required placeholder="Comparte cómo fue trabajar con Eliezer, los resultados del proyecto, comunicación y puntualidad..." class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white focus:border-amber-400 focus:outline-none"></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-300 mb-1 font-semibold">Foto o Logo (Opcional):</label>
+              <input id="feedback-input-avatar" type="text" placeholder="./assets/images/ely/my-avatar.png" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white focus:border-amber-400 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1 font-semibold">Palabras clave / Tags (Opcional):</label>
+              <input id="feedback-input-tags" type="text" placeholder="Unity, Photon, Calidad, Rápido" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white focus:border-amber-400 focus:outline-none" />
+            </div>
+          </div>
+
+          <!-- Mensajes de estado -->
+          <div id="feedback-status-msg" class="hidden p-3 rounded-xl text-xs leading-relaxed"></div>
+
+          <div class="flex items-center justify-end gap-2 pt-2 border-t border-[#1e2330]">
+            <button type="button" onclick="window.ElyPortfolio.closeFeedbackModal()" class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white">Cancelar</button>
+            <button id="feedback-submit-btn" type="submit" class="px-5 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-bold transition-all shadow-sm">
+              Publicar Feedback
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- SUBVENTANA 11: MODAL DE GESTIÓN DE CÓDIGOS DE FEEDBACK (PANEL MODERADOR) -->
+    <div id="feedback-codes-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
+      <div class="relative w-full max-w-2xl rounded-2xl bg-[#12151d] border border-[#232733] shadow-2xl p-6 space-y-4 max-h-[90vh] flex flex-col">
+        <div class="flex items-center justify-between border-b border-[#1e2330] pb-3">
+          <div class="flex items-center gap-3">
+            <div class="h-9 w-9 rounded-xl bg-amber-400/20 text-amber-400 flex items-center justify-center text-lg font-bold">
+              🔑
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-white font-display">Gestión de Códigos de Feedback</h3>
+              <p class="text-xs text-slate-400">Crea, deshabilita o elimina códigos de uso único para enviar a tus clientes.</p>
+            </div>
+          </div>
+          <button type="button" onclick="window.ElyPortfolio.closeFeedbackCodesModal()" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        <!-- Formulario para crear nuevo código -->
+        <div class="p-3.5 rounded-xl bg-[#0b0d11] border border-[#232733] space-y-2.5">
+          <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
+            <span>+ Generar Nuevo Código de Cliente</span>
+          </h4>
+          <form id="create-code-form" class="grid grid-cols-1 sm:grid-cols-12 gap-2 text-xs">
+            <div class="sm:col-span-5">
+              <input
+                id="new-code-input"
+                type="text"
+                required
+                placeholder="Código (Ej. ELY-CLIENT-88)"
+                class="w-full rounded-lg bg-[#141822] border border-[#262c3b] px-3 py-1.5 text-white font-mono uppercase text-xs"
+              />
+            </div>
+            <div class="sm:col-span-4">
+              <input
+                id="new-code-label"
+                type="text"
+                placeholder="Para cliente (Ej. CapricornioTV)"
+                class="w-full rounded-lg bg-[#141822] border border-[#262c3b] px-3 py-1.5 text-white text-xs"
+              />
+            </div>
+            <div class="sm:col-span-3 flex gap-1">
+              <button
+                type="button"
+                onclick="window.ElyPortfolio.generateRandomCodeInput()"
+                class="px-2 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 text-xs font-semibold"
+                title="Generar código aleatorio"
+              >
+                🎲 Azar
+              </button>
+              <button
+                type="submit"
+                class="flex-1 px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs"
+              >
+                Crear
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Lista de códigos existentes -->
+        <div class="space-y-2 flex-1 overflow-y-auto pr-1">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-semibold px-1">
+            <span>Códigos Registrados (<span id="codes-total-count">0</span>):</span>
+            <span class="text-[11px] text-amber-400">Cada código se invalida tras ser utilizado</span>
+          </div>
+
+          <div id="feedback-codes-list" class="space-y-2 text-xs">
+            <!-- Inyectado dinámicamente con opciones de copiar link, deshabilitar/habilitar y eliminar -->
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-3 border-t border-[#1e2330]">
+          <span class="text-[11px] text-slate-400">Puedes enviar el enlace directo con el código ya incluido al cliente.</span>
+          <button type="button" onclick="window.ElyPortfolio.closeFeedbackCodesModal()" class="px-4 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SISTEMA DE NOTIFICACIONES FLOTANTES (STATUS NOTIFICATIONS CON SLIDE-IN TOP-RIGHT) -->
+    <aside
+      id="status-notification-container"
+      aria-live="polite"
+      aria-atomic="true"
+      class="fixed top-5 right-5 z-[99999] pointer-events-none flex flex-col gap-2.5 max-w-sm sm:max-w-md w-full px-4 sm:px-0"
+    ></aside>
 
     <!-- Script Principal NATIVO (Sin Node.js en tiempo de ejecución) -->
     <script src="./portfolio.js"></script>
