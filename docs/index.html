@@ -1,22 +1,1014 @@
 <!doctype html>
-<html lang="es" class="scroll-smooth">
+<html lang="es" class="scroll-smooth dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portafolio Creativo y Desarrollador</title>
-    <meta name="description" content="Portafolio interactivo profesional con listado de proyectos trabajados y propios en juegos, aplicaciones y colaboraciones con panel de detalles." />
-    <meta property="og:title" content="Portafolio Creativo y Desarrollador" />
-    <meta property="og:description" content="Portafolio interactivo profesional con listado de proyectos trabajados y propios en juegos, aplicaciones y colaboraciones con panel de detalles." />
+    <title>Portafolio Creativo y Desarrollador | Eliezer Terrero (ElyDev)</title>
+    <meta name="description" content="Portafolio interactivo profesional de Eliezer Terrero (ElyDev): Game Developer & Unity Specialist. Videojuegos 2D/3D, multijugador Photon, servicios de monetización y clases privadas." />
+    
+    <!-- OpenGraph Social Cards -->
+    <meta property="og:title" content="Portafolio Creativo y Desarrollador | Eliezer Terrero (ElyDev)" />
+    <meta property="og:description" content="Desarrollador de Videojuegos Unity, Photon Network, monetización y aplicaciones interactivas." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="./assets/index-VbIYyA_7.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BCLUi52N.css">
+    
+    <!-- Tailwind CSS CDN para renderizado nativo 100% offline/online sin Node.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+              display: ['"Syne"', 'sans-serif'],
+              mono: ['"JetBrains Mono"', 'monospace'],
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- Estilos Nativos -->
+    <link rel="stylesheet" crossorigin href="./assets/index-4VXj56TA.css">
   </head>
   <body class="bg-[#0b0d11] text-[#ededef] antialiased selection:bg-amber-400 selection:text-black">
-    <div id="root"></div>
+
+    <!-- ========================================== -->
+    <!-- 1. BARRA DE NAVEGACIÓN (NAVBAR)            -->
+    <!-- ========================================== -->
+    <header class="sticky top-0 z-40 w-full border-b border-[#1c212c] bg-[#0b0d11]/90 backdrop-blur-md">
+      <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        
+        <!-- Logo & Identidad -->
+        <a href="#inicio" class="flex items-center gap-3 group">
+          <div class="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 font-extrabold text-black shadow-md shadow-amber-500/20 group-hover:scale-105 transition-transform">
+            <span class="font-display text-lg">E</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-white tracking-tight group-hover:text-amber-400 transition-colors font-display">Eliezer Terrero</span>
+              <span class="rounded bg-amber-400/10 px-1.5 py-0.5 text-[10px] font-mono font-bold text-amber-400 border border-amber-400/20">ElyDev</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Game Developer & Unity Specialist</p>
+          </div>
+        </a>
+
+        <!-- Enlaces de Navegación -->
+        <nav class="hidden md:flex items-center gap-1 text-xs font-medium text-slate-300">
+          <a href="#inicio" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition-colors">Inicio</a>
+          <a href="#proyectos" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition-colors">Proyectos & Catálogo</a>
+          <a href="#resumen" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition-colors">Experiencia</a>
+          <button onclick="window.ElyPortfolio.openResumeModal()" class="px-3 py-1.5 rounded-lg hover:text-amber-400 hover:bg-white/5 transition-colors">Ver CV</button>
+          <button onclick="window.ElyPortfolio.openContactModal('')" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition-colors">Contacto</button>
+        </nav>
+
+        <!-- Acciones Rápidas (Tema, CV, Contacto, Moderador) -->
+        <div class="flex items-center gap-2">
+          <!-- Toggle Tema -->
+          <button
+            id="theme-toggle-btn"
+            type="button"
+            class="p-2 rounded-lg bg-[#141822] border border-[#232733] text-slate-300 hover:text-amber-400 hover:border-amber-400/40 transition-colors"
+            title="Cambiar tema claro / oscuro"
+          >
+            <span id="theme-toggle-icon">☀️</span>
+          </button>
+
+          <!-- Contacto CTA -->
+          <button
+            type="button"
+            onclick="window.ElyPortfolio.openContactModal('')"
+            class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-amber-400 text-black text-xs font-bold hover:bg-amber-300 transition-colors shadow-sm shadow-amber-400/20"
+          >
+            <span>Contratar</span>
+            <span>✉</span>
+          </button>
+
+          <!-- Botón de Moderador -->
+          <button
+            id="nav-auth-btn"
+            type="button"
+            class="text-[11px] text-slate-400 hover:text-slate-200 px-2 py-1 rounded bg-[#141822] border border-[#232733] hover:border-slate-500 transition-colors"
+          >
+            Acceso Moderador
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ========================================== -->
+    <!-- 2. CONTENIDO PRINCIPAL                    -->
+    <!-- ========================================== -->
+    <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-12">
+
+      <!-- ========================================== -->
+      <!-- SECCIÓN HERO COMPACTA                      -->
+      <!-- ========================================== -->
+      <section id="inicio" class="pt-2 pb-6 border-b border-[#1c212c]">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div class="max-w-2xl space-y-3">
+            
+            <!-- Badge de Disponibilidad -->
+            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#141822] border border-[#232733] text-xs text-slate-300">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Disponible para Proyectos, Servicios & Clases</span>
+            </div>
+
+            <!-- Título Principal -->
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white font-display">
+              Portafolio de <span class="text-amber-400">Videojuegos</span>, Apps & Clases
+            </h1>
+
+            <!-- Descripción -->
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Hola, soy <strong class="text-white font-semibold">Eliezer Terrero</strong> (ElyDev).
+              Desarrollador Unity, Photon Network, monetización de videojuegos y tutor de clases privadas.
+            </p>
+
+            <!-- Botones de Acción -->
+            <div class="flex flex-wrap items-center gap-2 pt-1 text-xs">
+              <a
+                href="#proyectos"
+                class="px-3.5 py-1.5 font-semibold rounded-lg bg-amber-400 text-black hover:bg-amber-300 transition-colors shadow-sm"
+              >
+                Ver Catálogo
+              </a>
+              <a
+                href="#resumen"
+                class="px-3.5 py-1.5 font-medium rounded-lg bg-[#141822] border border-[#262c3b] text-slate-200 hover:text-white hover:bg-[#1d2331] transition-colors"
+              >
+                Resumen & Experiencia
+              </a>
+              <button
+                type="button"
+                onclick="window.ElyPortfolio.openContactModal('')"
+                class="px-3 py-1.5 font-medium text-slate-400 hover:text-amber-400 transition-colors"
+              >
+                Contacto Directo →
+              </button>
+            </div>
+          </div>
+
+          <!-- Cuadros de Métricas Rápidas (Interactivos al hacer clic) -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 shrink-0 lg:max-w-md w-full">
+            <div
+              data-hero-metric="propio"
+              class="cursor-pointer p-3 rounded-xl bg-[#12151d] border border-[#232733] hover:border-amber-400/40 transition-colors"
+              title="Filtrar por Proyectos Propios"
+            >
+              <div class="flex items-center justify-between text-[11px] text-slate-400">
+                <span>Propios</span>
+                <span class="text-amber-400">🎮</span>
+              </div>
+              <div id="metric-count-propio" class="text-xl font-bold text-white font-mono mt-0.5">8</div>
+              <div class="text-[10px] text-slate-500">Títulos Indie</div>
+            </div>
+
+            <div
+              data-hero-metric="trabajado"
+              class="cursor-pointer p-3 rounded-xl bg-[#12151d] border border-[#232733] hover:border-cyan-400/40 transition-colors"
+              title="Filtrar por Proyectos para Clientes"
+            >
+              <div class="flex items-center justify-between text-[11px] text-slate-400">
+                <span>Trabajados</span>
+                <span class="text-cyan-400">💼</span>
+              </div>
+              <div id="metric-count-trabajado" class="text-xl font-bold text-white font-mono mt-0.5">5</div>
+              <div class="text-[10px] text-slate-500">Clientes</div>
+            </div>
+
+            <div
+              data-hero-metric="servicios"
+              class="cursor-pointer p-3 rounded-xl bg-[#12151d] border border-[#232733] hover:border-emerald-400/40 transition-colors"
+              title="Filtrar por Servicios Técnicos"
+            >
+              <div class="flex items-center justify-between text-[11px] text-slate-400">
+                <span>Servicios</span>
+                <span class="text-emerald-400">⚙</span>
+              </div>
+              <div id="metric-count-servicios" class="text-xl font-bold text-white font-mono mt-0.5">4</div>
+              <div class="text-[10px] text-slate-500">Ads/IAP/Audio</div>
+            </div>
+
+            <div
+              data-hero-metric="clases"
+              class="cursor-pointer p-3 rounded-xl bg-[#12151d] border border-[#232733] hover:border-amber-400/40 transition-colors"
+              title="Filtrar por Clases Privadas"
+            >
+              <div class="flex items-center justify-between text-[11px] text-slate-400">
+                <span>Clases</span>
+                <span class="text-amber-400">🎓</span>
+              </div>
+              <div id="metric-count-clases" class="text-xl font-bold text-white font-mono mt-0.5">3</div>
+              <div class="text-[10px] text-slate-500">Mentorías 1 a 1</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 3. CATÁLOGO DE PROYECTOS & FILTROS         -->
+      <!-- ========================================== -->
+      <section id="proyectos" class="space-y-6">
+        
+        <!-- Encabezado de Sección con Moderación -->
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400 mb-1">
+              <span>❖</span>
+              <span id="catalog-badge-label">Catálogo de Proyectos (Todos)</span>
+            </div>
+            <h2 id="catalog-header-title" class="text-2xl font-extrabold text-white tracking-tight font-display">
+              Proyectos Trabajados & Propios
+            </h2>
+            <p id="catalog-header-sub" class="text-xs text-slate-400 mt-0.5 max-w-2xl">
+              Filtra por Propios, Trabajados o explora Servicios Comunes y Clases Privadas.
+            </p>
+          </div>
+
+          <!-- Botones de Moderación (Solo visibles para moderador) -->
+          <div class="moderator-only hidden flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.openAddProjectModal()"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-amber-400 text-black hover:bg-amber-300 transition-colors shadow-sm"
+            >
+              <span>+ Agregar Proyecto</span>
+            </button>
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.resetSampleData()"
+              title="Restablecer proyectos iniciales"
+              class="p-1.5 text-slate-400 hover:text-white rounded-lg bg-[#141822] border border-[#232733] hover:bg-[#1f2534] transition-colors"
+            >
+              🔄
+            </button>
+          </div>
+        </div>
+
+        <!-- Barra de Filtros Interactiva -->
+        <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-4 space-y-4">
+          <!-- Pestañas Principales de Origen -->
+          <div class="flex flex-wrap items-center gap-1.5 text-xs">
+            <button
+              type="button"
+              data-origin-filter="todos"
+              class="px-3.5 py-1.5 rounded-lg bg-amber-400 text-black font-bold transition-all"
+            >
+              Todos (Juegos & Apps)
+            </button>
+            <button
+              type="button"
+              data-origin-filter="propio"
+              class="px-3.5 py-1.5 rounded-lg bg-[#141822] text-slate-300 hover:text-white hover:bg-white/10 transition-all"
+            >
+              Propios (Indie)
+            </button>
+            <button
+              type="button"
+              data-origin-filter="trabajado"
+              class="px-3.5 py-1.5 rounded-lg bg-[#141822] text-slate-300 hover:text-white hover:bg-white/10 transition-all"
+            >
+              Trabajados (Clientes)
+            </button>
+            <button
+              type="button"
+              data-origin-filter="servicios"
+              class="px-3.5 py-1.5 rounded-lg bg-[#141822] text-slate-300 hover:text-white hover:bg-white/10 transition-all"
+            >
+              Servicios Comunes ($)
+            </button>
+            <button
+              type="button"
+              data-origin-filter="clases"
+              class="px-3.5 py-1.5 rounded-lg bg-[#141822] text-slate-300 hover:text-white hover:bg-white/10 transition-all"
+            >
+              Clases Privadas (1 a 1)
+            </button>
+          </div>
+
+          <!-- Filtro Secundario por Categoría + Barra de Búsqueda -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-2 border-t border-[#1e2330]">
+            <!-- Píldoras de Categoría -->
+            <div class="flex flex-wrap items-center gap-1.5 text-xs">
+              <span class="text-slate-500 text-[11px] mr-1">Categoría:</span>
+              <button
+                type="button"
+                data-category-filter="todos"
+                class="px-2.5 py-1 rounded-full bg-white/20 text-white border border-amber-400 text-[11px] font-medium"
+              >
+                Todas
+              </button>
+              <button
+                type="button"
+                data-category-filter="juegos"
+                class="px-2.5 py-1 rounded-full bg-white/5 text-slate-400 hover:text-white text-[11px] font-medium"
+              >
+                🎮 Videojuegos
+              </button>
+              <button
+                type="button"
+                data-category-filter="aplicaciones"
+                class="px-2.5 py-1 rounded-full bg-white/5 text-slate-400 hover:text-white text-[11px] font-medium"
+              >
+                📱 Aplicaciones
+              </button>
+              <button
+                type="button"
+                data-category-filter="collab"
+                class="px-2.5 py-1 rounded-full bg-white/5 text-slate-400 hover:text-white text-[11px] font-medium"
+              >
+                🤝 Colaboraciones
+              </button>
+            </div>
+
+            <!-- Input de Búsqueda en Vivo -->
+            <div class="relative max-w-xs w-full">
+              <input
+                id="projects-search-input"
+                type="text"
+                placeholder="Buscar por tecnología, título o rol..."
+                class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3.5 py-1.5 pl-8 text-xs text-white placeholder-slate-500 focus:border-amber-400 focus:outline-none"
+              />
+              <span class="absolute left-2.5 top-2 text-slate-500 text-xs">🔍</span>
+              <button
+                id="projects-search-clear"
+                type="button"
+                class="absolute right-2.5 top-1.5 text-slate-500 hover:text-white text-xs"
+                title="Limpiar búsqueda"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <!-- Conteo de Elementos -->
+          <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+            <span id="projects-count-display">Cargando catálogo...</span>
+            <button
+              id="reset-filters-btn"
+              type="button"
+              class="text-amber-400 hover:underline"
+            >
+              Restablecer Filtros
+            </button>
+          </div>
+        </div>
+
+        <!-- GRID DE TARJETAS DE PROYECTOS (RENDERIZADO NATIVO) -->
+        <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-1">
+          <!-- Las fichas se inyectan automáticamente desde portfolio.js manteniendo HTML semántico -->
+        </div>
+
+        <!-- Estado Vacío (si no hay resultados) -->
+        <div id="projects-empty-state" class="hidden rounded-2xl border border-dashed border-[#282f40] bg-[#10131b] p-10 text-center space-y-3">
+          <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-slate-400">
+            <span>📂</span>
+          </div>
+          <h3 class="text-base font-bold text-white font-display">
+            No se encontraron elementos con los filtros seleccionados
+          </h3>
+          <p class="text-xs text-slate-400 max-w-md mx-auto">
+            Prueba cambiando la pestaña de autoría o limpiando el término de búsqueda.
+          </p>
+          <button
+            type="button"
+            onclick="document.getElementById('reset-filters-btn').click()"
+            class="px-4 py-2 text-xs font-semibold rounded-lg bg-amber-400 text-black hover:bg-amber-300 transition-colors"
+          >
+            Restablecer Filtros
+          </button>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 4. RESUMEN CURRICULAR & EXPERIENCIA         -->
+      <!-- ========================================== -->
+      <section id="resumen" class="space-y-8 pt-8 border-t border-[#1c212c]">
+        
+        <!-- Encabezado -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400 mb-1">
+              <span>📄</span>
+              <span>Trayectoria Profesional</span>
+            </div>
+            <h2 class="text-2xl font-extrabold text-white tracking-tight font-display">
+              Resumen, Experiencia & Habilidades
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">
+              Historial de contratos comerciales, colaboraciones para clientes y capacidades técnicas.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.openResumeModal()"
+              class="px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-colors"
+            >
+              Imprimir CV / PDF
+            </button>
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.openContactModal('')"
+              class="px-3.5 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-colors"
+            >
+              Contactar a Eliezer
+            </button>
+          </div>
+        </div>
+
+        <!-- Biografía & Metas -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="md:col-span-2 rounded-2xl bg-[#12151d] border border-[#232733] p-6 space-y-4">
+            <h3 class="text-base font-bold text-white font-display">Perfil Profesional</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Desarrollador apasionado de videojuegos enfocado en aprovechar el máximo potencial de tecnologías avanzadas como Unity, Photon Network y desarrollo full-stack para crear proyectos innovadores y experiencias inmersivas.
+            </p>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Mi compromiso es consolidarme como un desarrollador vanguardista, ampliando constantemente los límites de lo posible y construyendo una sólida reputación en la industria de los videojuegos. Mi meta principal es fundar y liderar mi propia compañía de videojuegos en República Dominicana, contribuyendo activamente al crecimiento del ecosistema de desarrollo local y generando oportunidades en este mercado emergente.
+            </p>
+            <div class="flex flex-wrap items-center gap-4 pt-2 text-xs text-slate-400 border-t border-[#1e2330]">
+              <div>📍 <span class="text-slate-200">República Dominicana (Disponible Remoto)</span></div>
+              <div>✉ <a href="mailto:eliezerterrero275@gmail.com" class="text-amber-400 hover:underline">eliezerterrero275@gmail.com</a></div>
+            </div>
+          </div>
+
+          <!-- Servicios Destacados -->
+          <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-6 space-y-3">
+            <h3 class="text-base font-bold text-white font-display">Servicios Principales</h3>
+            <ul class="space-y-2 text-xs text-slate-300">
+              <li class="flex items-center gap-2">
+                <span class="text-emerald-400 font-bold">✓</span>
+                <span>Monetización con Anuncios ($80)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-emerald-400 font-bold">✓</span>
+                <span>Compras In-App Purchases ($80)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-emerald-400 font-bold">✓</span>
+                <span>Gestor de Audio & SFX ($50)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-emerald-400 font-bold">✓</span>
+                <span>Multijugador Photon PUN 2 ($120)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-amber-400 font-bold">✓</span>
+                <span>Clases Privadas 1 a 1 ($20 - $25/h)</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Línea de Tiempo de Experiencia Comercial -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-bold text-white font-display">Experiencia Laboral & Contratos</h3>
+          
+          <div class="space-y-4">
+            <!-- 1. MoneyFight & Cesar -->
+            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-2">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <div>
+                  <h4 class="text-sm font-bold text-white">Freelance Game Developer</h4>
+                  <div class="text-xs text-amber-400">MoneyFight & Cesar · Remoto</div>
+                </div>
+                <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2.5 py-1 rounded">Feb 2025 — Presente</div>
+              </div>
+              <p class="text-xs text-slate-300">Desarrollo en producción activa de un nuevo título confidencial de alto impacto para plataformas interactivas.</p>
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Unity</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">C#</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Game Architecture</span>
+              </div>
+            </div>
+
+            <!-- 2. Capricornio Games (CapricornioTV) -->
+            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-2">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <div>
+                  <h4 class="text-sm font-bold text-white">Freelance Game & Web Developer</h4>
+                  <div class="text-xs text-cyan-400">Capricornio Games (CapricornioTV) · República Dominicana / Remoto</div>
+                </div>
+                <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2.5 py-1 rounded">Ago 2024 — Ene 2025</div>
+              </div>
+              <p class="text-xs text-slate-300">Desarrollé íntegramente el juego "MotoLoco: En una goma" y creé su plataforma web promocional completa, gestionando frontend y backend con PHP y base de datos a medida.</p>
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Unity</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">PHP</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">MySQL</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Web Full-Stack</span>
+              </div>
+            </div>
+
+            <!-- 3. CaribeAtomic -->
+            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-2">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <div>
+                  <h4 class="text-sm font-bold text-white">Freelance Game Developer</h4>
+                  <div class="text-xs text-amber-400">CaribeAtomic · Remoto</div>
+                </div>
+                <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2.5 py-1 rounded">Ene 2022 — Ene 2024</div>
+              </div>
+              <p class="text-xs text-slate-300">Contribución en diversas áreas críticas de desarrollo de videojuegos, incluyendo beta testing, mejoras de demos y diseño de niveles.</p>
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Unity</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Level Design</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Beta Testing</span>
+              </div>
+            </div>
+
+            <!-- 4. MoneyFight Game -->
+            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-2">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <div>
+                  <h4 class="text-sm font-bold text-white">Freelance Lead Game Developer</h4>
+                  <div class="text-xs text-amber-400">MoneyFight · Remoto</div>
+                </div>
+                <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2.5 py-1 rounded">Nov 2022 — Jul 2023</div>
+              </div>
+              <p class="text-xs text-slate-300">Desarrollo integral de "MoneyFight Game", abarcando configuración de servidor, multijugador online, base de datos PHP y arte 2D.</p>
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Unity</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Multiplayer Network</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">PHP/MySQL</span>
+              </div>
+            </div>
+
+            <!-- 5. SHL Dominoes Republic -->
+            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-2">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <div>
+                  <h4 class="text-sm font-bold text-white">Game Developer (Bug Fixer & Optimization)</h4>
+                  <div class="text-xs text-cyan-400">SHL · Dominoes Republic · Remoto</div>
+                </div>
+                <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2.5 py-1 rounded">Nov 2022</div>
+              </div>
+              <p class="text-xs text-slate-300">Resolución de problemas críticos de rendimiento e interferencias de geolocalización en el juego de dominó competitivo.</p>
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Unity</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Geolocation Services</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Profiling</span>
+              </div>
+            </div>
+
+            <!-- 6. DoGame Dominican Power -->
+            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-2">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <div>
+                  <h4 class="text-sm font-bold text-white">Freelance Game Developer (UI & Multijugador)</h4>
+                  <div class="text-xs text-cyan-400">DoGame · Dominican Power · Remoto</div>
+                </div>
+                <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2.5 py-1 rounded">Nov 2021 — Feb 2022</div>
+              </div>
+              <p class="text-xs text-slate-300">Renovación técnica integral: corrección de errores, cambio de orientación de juego, rediseño completo de UI e integración de Photon Multiplayer.</p>
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Unity</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Photon PUN 2</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">UI Remake</span>
+              </div>
+            </div>
+
+            <!-- 7. Jobs Laru -->
+            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-2">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <div>
+                  <h4 class="text-sm font-bold text-white">Freelance Game Developer</h4>
+                  <div class="text-xs text-amber-400">Jobs Laru · Remoto</div>
+                </div>
+                <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2.5 py-1 rounded">Oct 2019 — Dic 2021</div>
+              </div>
+              <p class="text-xs text-slate-300">Desarrollo y mantenimiento de múltiples proyectos comerciales: Simón, LEVA 3D (Google Play), Fireball (Ads), Dark Castle y GUGO.</p>
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Unity 2D/3D</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">AdMob</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">Google Play</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Matriz de Habilidades Técnicas -->
+        <div class="space-y-4 pt-4 border-t border-[#1c212c]">
+          <h3 class="text-lg font-bold text-white font-display">Habilidades & Especialidades</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-3">
+              <h4 class="text-sm font-bold text-amber-400">Desarrollo Videojuegos 2D/3D</h4>
+              <ul class="space-y-1.5 text-xs text-slate-300">
+                <li>• Unity Engine (Especialista C#)</li>
+                <li>• Físicas 2D & 3D (Rigidbody, Colisiones)</li>
+                <li>• Diseño de Niveles & Mecánicas</li>
+                <li>• Animación & Controladores de Estado</li>
+                <li>• Optimización Móvil (Draw Calls)</li>
+                <li>• Publicación en Google Play Store</li>
+              </ul>
+            </div>
+
+            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-3">
+              <h4 class="text-sm font-bold text-cyan-400">Multijugador & Red</h4>
+              <ul class="space-y-1.5 text-xs text-slate-300">
+                <li>• Photon Network & Photon PUN 2</li>
+                <li>• Sincronización de Salas & Matchmaking</li>
+                <li>• Replicación de Estados en Tiempo Real</li>
+                <li>• Economía Dentro del Juego & Tiendas</li>
+                <li>• Personalización de Avatares / Skins</li>
+                <li>• WebSockets & Cliente-Servidor</li>
+              </ul>
+            </div>
+
+            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-3">
+              <h4 class="text-sm font-bold text-emerald-400">Monetización & Backend</h4>
+              <ul class="space-y-1.5 text-xs text-slate-300">
+                <li>• Anuncios (Banner, Interstitial, Rewarded)</li>
+                <li>• Compras Integradas (IAP Billing)</li>
+                <li>• PHP & Bases de Datos MySQL</li>
+                <li>• Desarrollo Web (HTML5, CSS3, JS)</li>
+                <li>• Arquitectura de Audio & Sound FX</li>
+                <li>• Git & GitHub Version Control</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonios de Clientes -->
+        <div class="space-y-4 pt-4 border-t border-[#1c212c]">
+          <h3 class="text-lg font-bold text-white font-display">Testimonios de Clientes & Colaboradores</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-6 space-y-3">
+              <div class="text-amber-400 text-lg">“</div>
+              <p class="text-xs text-slate-300 italic leading-relaxed">
+                Me siento sumamente satisfecho de haber trabajado mi aplicación con Eliezer; los resultados fueron mucho mejores de lo que esperaba y con un trato muy profesional.
+              </p>
+              <div class="pt-2 border-t border-[#1e2330]">
+                <div class="text-xs font-bold text-white">Joselmin Carmona</div>
+                <div class="text-[11px] text-slate-500">Cliente de Aplicación Móvil</div>
+              </div>
+            </div>
+
+            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-6 space-y-3">
+              <div class="text-amber-400 text-lg">“</div>
+              <p class="text-xs text-slate-300 italic leading-relaxed">
+                Al principio deposité toda mi confianza en el trabajo de Eliezer y no pudo haber mejor persona. Tuve excelentes resultados de desarrollo en todos los proyectos. Rápido, accesible y con gran nivel técnico.
+              </p>
+              <div class="pt-2 border-t border-[#1e2330]">
+                <div class="text-xs font-bold text-white">Jobs Laru</div>
+                <div class="text-[11px] text-slate-500">Estudio de Videojuegos / Colaborador Frecuente</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ========================================== -->
+    <!-- 5. PIE DE PÁGINA (FOOTER)                  -->
+    <!-- ========================================== -->
+    <footer class="mt-16 border-t border-[#1c212c] bg-[#08090d] py-10">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div class="flex items-center gap-3">
+            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-400 text-black font-extrabold font-display">
+              E
+            </div>
+            <div>
+              <div class="text-sm font-bold text-white">Eliezer Terrero · ElyDev</div>
+              <div class="text-xs text-slate-400">Game Developer & Unity Specialist</div>
+            </div>
+          </div>
+
+          <!-- Redes Sociales -->
+          <div class="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-400">
+            <a href="https://linktr.ee/elydev" target="_blank" rel="noopener noreferrer" class="hover:text-amber-400 transition-colors">Linktree</a>
+            <a href="https://www.youtube.com/channel/UCuiY3lZrlrbXsX-RR9v3Kbg" target="_blank" rel="noopener noreferrer" class="hover:text-amber-400 transition-colors">YouTube</a>
+            <a href="https://www.instagram.com/_elydev" target="_blank" rel="noopener noreferrer" class="hover:text-amber-400 transition-colors">Instagram</a>
+            <a href="https://github.com/eliezeryt" target="_blank" rel="noopener noreferrer" class="hover:text-amber-400 transition-colors">GitHub</a>
+            <a href="mailto:eliezerterrero275@gmail.com" class="hover:text-amber-400 transition-colors">Email</a>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-2 pt-6 border-t border-[#171a23] text-[11px] text-slate-500">
+          <div>© 2026 Eliezer Terrero (ElyDev). Todos los derechos reservados.</div>
+          <div>República Dominicana · Disponible para Proyectos Remotos en todo el mundo</div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- ========================================== -->
+    <!-- 6. MODALES INTERACTIVOS (NATIVOS)          -->
+    <!-- ========================================== -->
+
+    <!-- MODAL DE DETALLE DE PROYECTO (SLIDE-OVER DRAWER) -->
+    <div id="project-detail-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+      <div class="relative w-full max-w-3xl rounded-2xl bg-[#12151d] border border-[#232733] shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
+        
+        <!-- Barra de Navegación de Modal (Cerrar, Anterior, Siguiente) -->
+        <div class="flex items-center justify-between p-4 border-b border-[#1e2330] bg-[#0e1118]">
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.navigateProjectModal(-1)"
+              class="px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-xs text-slate-300 transition-colors"
+            >
+              ← Anterior
+            </button>
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.navigateProjectModal(1)"
+              class="px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-xs text-slate-300 transition-colors"
+            >
+              Siguiente →
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onclick="window.ElyPortfolio.closeProjectModal()"
+            class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 text-base"
+          >
+            ✕
+          </button>
+        </div>
+
+        <!-- Contenido Desplazable del Modal -->
+        <div class="p-6 space-y-6 overflow-y-auto flex-1">
+          <!-- Imagen de Portada -->
+          <div class="relative h-64 w-full rounded-xl overflow-hidden bg-black/40">
+            <img
+              id="modal-project-img"
+              src="./assets/my-avatar-CJwZIz-y.png"
+              alt="Proyecto"
+              class="h-full w-full object-cover object-center"
+            />
+          </div>
+
+          <!-- Título y Tagline -->
+          <div class="space-y-1">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h2 id="modal-project-title" class="text-2xl font-bold text-white font-display">Título</h2>
+              <div class="hidden">
+                <span id="modal-project-price" class="px-3 py-1 rounded-lg bg-amber-400 text-black font-extrabold text-sm"></span>
+              </div>
+            </div>
+            <p id="modal-project-tagline" class="text-xs text-amber-300 font-medium"></p>
+            <div class="flex flex-wrap gap-4 text-xs text-slate-400 pt-1">
+              <div>Rol: <strong id="modal-project-role" class="text-slate-200"></strong></div>
+              <div class="hidden">Cliente: <strong id="modal-project-client" class="text-cyan-400"></strong></div>
+            </div>
+          </div>
+
+          <!-- Métricas -->
+          <div class="space-y-2 hidden">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Métricas & Estado</h4>
+            <div id="modal-project-metrics" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+          </div>
+
+          <!-- Historia / Descripción Completa -->
+          <div class="space-y-2">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Descripción del Proyecto</h4>
+            <p id="modal-project-desc" class="text-xs text-slate-300 leading-relaxed whitespace-pre-line"></p>
+          </div>
+
+          <!-- Contribuciones Clave -->
+          <div class="space-y-2 hidden">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Contribuciones Técnicas Clave</h4>
+            <ul id="modal-project-contributions" class="space-y-1.5"></ul>
+          </div>
+
+          <!-- Requisitos (si es servicio o clase) -->
+          <div class="space-y-2 hidden">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Requisitos Previos</h4>
+            <ul id="modal-project-requirements" class="space-y-1.5"></ul>
+          </div>
+
+          <!-- Tecnologías -->
+          <div class="space-y-2">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Stack Tecnológico</h4>
+            <div id="modal-project-techs" class="flex flex-wrap gap-1.5"></div>
+          </div>
+
+          <!-- Enlaces Externos -->
+          <div id="modal-project-links" class="flex flex-wrap gap-2 pt-2"></div>
+        </div>
+
+        <!-- Footer del Modal -->
+        <div class="p-4 border-t border-[#1e2330] bg-[#0e1118] flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onclick="window.ElyPortfolio.closeProjectModal()"
+            class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition-colors"
+          >
+            Cerrar Ficha
+          </button>
+
+          <button
+            id="modal-project-contact-btn"
+            type="button"
+            class="px-5 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-xs font-bold text-black transition-colors shadow-sm"
+          >
+            Solicitar Servicio / Contactar por este Proyecto →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DE CONTACTO DIRECTO -->
+    <div id="contact-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+      <div class="relative w-full max-w-lg rounded-2xl bg-[#12151d] border border-[#232733] shadow-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-[#1e2330] pb-3">
+          <div>
+            <h3 class="text-lg font-bold text-white font-display">Enviar Mensaje a Eliezer</h3>
+            <p class="text-xs text-slate-400">Respuesta directa en menos de 24 horas.</p>
+          </div>
+          <button type="button" onclick="window.ElyPortfolio.closeContactModal()" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        <form id="contact-form" class="space-y-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Tu Nombre:</label>
+            <input id="contact-name" type="text" required placeholder="Ej. Carlos Martínez" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3.5 py-2 text-xs text-white focus:border-amber-400 focus:outline-none" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Tu Correo Electrónico:</label>
+            <input id="contact-email" type="email" required placeholder="tu@correo.com" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3.5 py-2 text-xs text-white focus:border-amber-400 focus:outline-none" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Asunto / Proyecto de Interés:</label>
+            <input id="contact-subject" type="text" placeholder="Ej. Sistema de Anuncios / Clase Unity" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3.5 py-2 text-xs text-white focus:border-amber-400 focus:outline-none" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Mensaje o Detalles:</label>
+            <textarea id="contact-message" rows="4" required placeholder="Describe tu juego, duda o requerimiento técnico..." class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3.5 py-2 text-xs text-white focus:border-amber-400 focus:outline-none"></textarea>
+          </div>
+
+          <div id="contact-success-msg" class="hidden p-2 rounded bg-emerald-500/20 text-emerald-300 text-xs text-center">
+            ✓ Abriendo tu cliente de correo para enviar mensaje...
+          </div>
+
+          <div class="flex items-center justify-end gap-2 pt-2">
+            <button type="button" onclick="window.ElyPortfolio.closeContactModal()" class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white">Cancelar</button>
+            <button type="submit" class="px-5 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold shadow-sm">Enviar Mensaje</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL DE CV IMPRIMIBLE (PDF) -->
+    <div id="resume-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 overflow-y-auto">
+      <div class="relative w-full max-w-2xl rounded-2xl bg-[#12151d] border border-[#232733] shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-[#1e2330] pb-3">
+          <div>
+            <h3 class="text-base font-bold text-white font-display">Currículum Vitae · Eliezer Terrero</h3>
+            <p class="text-xs text-slate-400">Game Developer & Unity Specialist</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="window.print()" class="px-3 py-1.5 rounded-lg bg-amber-400 text-black text-xs font-bold hover:bg-amber-300">🖨 Imprimir / Guardar PDF</button>
+            <button type="button" onclick="window.ElyPortfolio.closeResumeModal()" class="text-slate-400 hover:text-white text-base">✕</button>
+          </div>
+        </div>
+
+        <div class="space-y-4 text-xs text-slate-300 leading-relaxed bg-[#0b0d11] p-6 rounded-xl border border-[#232733]">
+          <div>
+            <h4 class="text-sm font-bold text-amber-400">Eliezer Terrero (ElyDev)</h4>
+            <div class="text-[11px] text-slate-400">República Dominicana · eliezerterrero275@gmail.com · github.com/eliezeryt</div>
+          </div>
+
+          <div class="border-t border-[#1e2330] pt-2">
+            <h5 class="font-bold text-white uppercase text-[11px] mb-1">Perfil Profesional</h5>
+            <p class="text-slate-300">Desarrollador de videojuegos especializado en Unity Engine, C# y Photon Network. Experiencia en proyectos comerciales para influencers (CapricornioTV), empresas (DoGame, SHL) y títulos propios.</p>
+          </div>
+
+          <div class="border-t border-[#1e2330] pt-2 space-y-2">
+            <h5 class="font-bold text-white uppercase text-[11px]">Experiencia Laboral Relevante</h5>
+            <div>
+              <strong>Freelance Game Developer</strong> — MoneyFight & Cesar (2025 — Presente)<br/>
+              <span class="text-slate-400">Desarrollo en producción activa de nuevo título interactivo confidencial.</span>
+            </div>
+            <div>
+              <strong>Lead Game & Web Developer</strong> — Capricornio Games (2024 — 2025)<br/>
+              <span class="text-slate-400">Creación del juego "MotoLoco | En una goma", web promocional, backend PHP y base de datos.</span>
+            </div>
+            <div>
+              <strong>Game Developer UI & Multijugador</strong> — DoGame · Dominican Power (2021 — 2022)<br/>
+              <span class="text-slate-400">Remake visual total, integración de Photon PUN 2 y catálogo de economía in-game.</span>
+            </div>
+            <div>
+              <strong>Game Developer</strong> — Jobs Laru (2019 — 2021)<br/>
+              <span class="text-slate-400">Publicación de Simón, LEVA 3D en Google Play y monetización con AdMob.</span>
+            </div>
+          </div>
+
+          <div class="border-t border-[#1e2330] pt-2">
+            <h5 class="font-bold text-white uppercase text-[11px] mb-1">Habilidades Principales</h5>
+            <p>Unity 2D & 3D, C#, Photon PUN 2, Google AdMob, In-App Purchases, PHP, MySQL, FMOD Audio, Git.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DE AUTENTICACIÓN DE MODERADOR -->
+    <div id="auth-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+      <div class="relative w-full max-w-sm rounded-2xl bg-[#12151d] border border-[#232733] shadow-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-[#1e2330] pb-2">
+          <h3 class="text-base font-bold text-white font-display">Acceso Moderador</h3>
+          <button type="button" onclick="window.ElyPortfolio.closeAuthModal()" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+        <p class="text-xs text-slate-400">Ingresa la clave para agregar o editar proyectos en el portafolio.</p>
+        <form id="auth-form" class="space-y-3">
+          <div>
+            <input id="auth-password" type="password" placeholder="Contraseña de moderador" required class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3.5 py-2 text-xs text-white focus:border-amber-400 focus:outline-none" />
+          </div>
+          <div class="flex justify-end gap-2">
+            <button type="button" onclick="window.ElyPortfolio.closeAuthModal()" class="px-3 py-1.5 rounded-lg bg-white/10 text-xs text-white">Cancelar</button>
+            <button type="submit" class="px-4 py-1.5 rounded-lg bg-amber-400 text-black text-xs font-bold hover:bg-amber-300">Entrar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL PARA AGREGAR NUEVO PROYECTO (SOLO MODERADOR) -->
+    <div id="add-project-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+      <div class="relative w-full max-w-lg rounded-2xl bg-[#12151d] border border-[#232733] shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-[#1e2330] pb-2">
+          <h3 class="text-base font-bold text-white font-display">+ Agregar Nuevo Proyecto o Servicio</h3>
+          <button type="button" onclick="window.ElyPortfolio.closeAddProjectModal()" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+        <form id="add-project-form" class="space-y-3 text-xs">
+          <div>
+            <label class="block text-slate-300 mb-1">Título del Proyecto:</label>
+            <input id="new-proj-title" type="text" required class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Subtítulo / Tagline:</label>
+            <input id="new-proj-tagline" type="text" required class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-slate-300 mb-1">Origen:</label>
+              <select id="new-proj-origin" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white">
+                <option value="propio">Proyecto Propio</option>
+                <option value="trabajado">Para Cliente</option>
+                <option value="servicios">Servicio Técnico</option>
+                <option value="clases">Clase Privada</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1">Categoría:</label>
+              <select id="new-proj-category" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white">
+                <option value="juegos">Videojuego</option>
+                <option value="aplicaciones">Aplicación</option>
+                <option value="collab">Colaboración</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Precio (Opcional, ej. $80 USD):</label>
+            <input id="new-proj-price" type="text" placeholder="Ej. $80 USD" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Descripción:</label>
+            <textarea id="new-proj-desc" rows="3" required class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white"></textarea>
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Tecnologías (separadas por coma):</label>
+            <input id="new-proj-techs" type="text" placeholder="Unity, C#, Photon" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" onclick="window.ElyPortfolio.closeAddProjectModal()" class="px-4 py-2 rounded-lg bg-white/10 text-white">Cancelar</button>
+            <button type="submit" class="px-5 py-2 rounded-lg bg-amber-400 text-black font-bold">Guardar Proyecto</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Script Principal NATIVO (Sin Node.js en tiempo de ejecución) -->
+    <script src="./portfolio.js"></script>
+
+    <!-- Compatibilidad de doble clic y Pinegrow: Fallback directo para rutas locales -->
+    <script>
+      // Asegurar que si se abre en file:/// o Pinegrow, todas las imágenes relativas resuelvan correctamente
+      document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('img').forEach(function (img) {
+          img.addEventListener('error', function () {
+            if (!this.src.includes('my-avatar.png')) {
+              this.src = './assets/images/ely/my-avatar.png';
+            }
+          });
+        });
+      });
+    </script>
   </body>
 </html>
-
