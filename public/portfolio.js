@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'portfolio_projects_elydev_v6';
+  const STORAGE_KEY = 'portfolio_projects_elydev_v8';
   const AUTH_STORAGE_KEY = 'portfolio_auth_user_v2';
   const THEME_STORAGE_KEY = 'portfolio_theme_elydev';
 
@@ -45,6 +45,11 @@
       role: 'Lead Game Designer & Programador Principal',
       featured: true,
       coverImage: './assets/images/ely/overdrivers-teaser.jpg',
+      galleryImages: [
+        './assets/images/ely/overdrivers-teaser.jpg',
+        './assets/images/ely/my-avatar.png'
+      ],
+      youtubeVideo: 'https://www.youtube.com/watch?v=PH6cK45nkto',
       technologies: ['Unity 3D', 'C#', 'Vehicle Physics', 'FMOD Audio', 'Cinemachine', 'Custom Shaders'],
       metrics: [
         { label: 'Estado', value: 'En Desarrollo Activo' },
@@ -75,6 +80,11 @@
       role: 'Freelance Lead Game Developer & Web Full-Stack',
       featured: true,
       coverImage: './assets/images/ely/icon-enunagoma.png',
+      galleryImages: [
+        './assets/images/ely/icon-enunagoma.png',
+        './assets/images/ely/overdrivers-teaser.jpg'
+      ],
+      youtubeVideo: '',
       technologies: ['Unity', 'C#', 'PHP', 'MySQL', 'Web Development', 'Physics Tuning'],
       metrics: [
         { label: 'Cliente', value: 'CapricornioTV' },
@@ -104,6 +114,11 @@
       role: 'Freelance Game Developer (UI, Red & Gameplay)',
       featured: true,
       coverImage: './assets/images/ely/icon-dominicanpower.png',
+      galleryImages: [
+        './assets/images/ely/icon-dominicanpower.png',
+        './assets/images/ely/icon-yunonline.png'
+      ],
+      youtubeVideo: '',
       technologies: ['Unity', 'C#', 'Photon Network', 'Photon PUN 2', 'UI/UX Redesign', 'In-Game Economy'],
       metrics: [
         { label: 'Multijugador', value: 'Photon Online' },
@@ -133,6 +148,8 @@
       role: 'Desarrollador de Aplicación Móvil',
       featured: true,
       coverImage: './assets/images/ely/icon-telesancris.png',
+      galleryImages: ['./assets/images/ely/icon-telesancris.png'],
+      youtubeVideo: '',
       technologies: ['C# / Unity Mobile Tools', 'HLS Video Streaming', 'UI/UX Design', 'Android Deployment'],
       metrics: [
         { label: 'Plataforma', value: 'Mobile Android' },
@@ -161,6 +178,8 @@
       role: 'Programador de Juego & Reskin',
       featured: false,
       coverImage: './assets/images/ely/icon-yunonline.png',
+      galleryImages: ['./assets/images/ely/icon-yunonline.png'],
+      youtubeVideo: '',
       technologies: ['Unity', 'C#', 'Photon Network', 'Sprite Pipeline', 'Mobile Controls'],
       metrics: [
         { label: 'Tipo', value: 'Colaboración / Spin-off' },
@@ -188,6 +207,8 @@
       role: 'Desarrollador Integral de Juego',
       featured: false,
       coverImage: './assets/images/ely/icon-retopolis.jpg',
+      galleryImages: ['./assets/images/ely/icon-retopolis.jpg'],
+      youtubeVideo: '',
       technologies: ['Unity', 'C#', 'Modular Gameplay Architecture', 'Mobile UI', 'Audio Manager'],
       metrics: [
         { label: 'Estructura', value: 'Hub Multi-Juego' },
@@ -214,6 +235,8 @@
       role: 'Creador & Desarrollador Principal',
       featured: false,
       coverImage: './assets/images/ely/icon-helptuber.jpg',
+      galleryImages: ['./assets/images/ely/icon-helptuber.jpg'],
+      youtubeVideo: '',
       technologies: ['Unity UI / C#', 'REST API Integration', 'Data Serialization', 'Productivity UX'],
       metrics: [
         { label: 'Objetivo', value: 'Asistente para YouTubers' },
@@ -241,6 +264,8 @@
       role: 'Freelance Game Developer (Bug Fixer & Optimization)',
       featured: false,
       coverImage: './assets/images/ely/icon-dominoesrepublic.png',
+      galleryImages: ['./assets/images/ely/icon-dominoesrepublic.png'],
+      youtubeVideo: '',
       technologies: ['Unity', 'C#', 'Geolocation Services', 'Board Game Logic', 'Profiling'],
       metrics: [
         { label: 'Resolución', value: 'Bugs Críticos Solucionados' },
@@ -266,6 +291,8 @@
       role: 'Desarrollador & Diseñador de Niveles',
       featured: false,
       coverImage: './assets/images/ely/picon-aworld.png',
+      galleryImages: ['./assets/images/ely/picon-aworld.png'],
+      youtubeVideo: '',
       technologies: ['Unity 2D', 'C#', '2D Tilemaps', 'Player Controller', 'Sound Effects'],
       metrics: [
         { label: 'Género', value: 'Plataformas 2D' },
@@ -291,6 +318,8 @@
       role: 'Creador & Programador de Jugabilidad',
       featured: false,
       coverImage: './assets/images/ely/picon-hellishF.png',
+      galleryImages: ['./assets/images/ely/picon-hellishF.png'],
+      youtubeVideo: '',
       technologies: ['Unity', 'C#', 'Particle Systems', 'Score Management', 'Arcade Loop'],
       metrics: [
         { label: 'Estilo', value: 'Arcade de Reflejos' },
@@ -317,6 +346,8 @@
       role: 'Creador & Desarrollador de Red',
       featured: false,
       coverImage: './assets/images/ely/picon-thespider.png',
+      galleryImages: ['./assets/images/ely/picon-thespider.png'],
+      youtubeVideo: '',
       technologies: ['Unity', 'Photon PUN 2', 'C#', 'Multiplayer Sync', 'Lobby System'],
       metrics: [
         { label: 'Modo', value: 'Multijugador en Línea' },
@@ -342,6 +373,8 @@
       role: 'Diseñador de Físicas & Programador',
       featured: false,
       coverImage: './assets/images/ely/picon-Rball.png',
+      galleryImages: ['./assets/images/ely/picon-Rball.png'],
+      youtubeVideo: '',
       technologies: ['Unity 3D', 'C#', 'Rigidbody & Physics Materials', 'Dynamic Camera'],
       metrics: [
         { label: 'Motor de Físicas', value: 'Unity 3D PhysX' },
@@ -367,6 +400,8 @@
       role: 'Desarrollador Integral',
       featured: false,
       coverImage: './assets/images/ely/picon-maddys.png',
+      galleryImages: ['./assets/images/ely/picon-maddys.png'],
+      youtubeVideo: '',
       technologies: ['Unity 2D', 'C#', 'Animation Controllers', 'Tilemap Design'],
       metrics: [
         { label: 'Tipo', value: 'Aventura 2D' },
@@ -392,6 +427,8 @@
       role: 'Programador & Diseñador',
       featured: false,
       coverImage: './assets/images/ely/picon-snakes.png',
+      galleryImages: ['./assets/images/ely/picon-snakes.png'],
+      youtubeVideo: '',
       technologies: ['Unity', 'C#', 'Grid Logic', 'AI Pathfinding', 'Power-ups'],
       metrics: [
         { label: 'IA', value: 'Enemigos Autónomos' },
@@ -417,6 +454,8 @@
       role: 'Desarrollador',
       featured: false,
       coverImage: './assets/images/ely/picon-peace.png',
+      galleryImages: ['./assets/images/ely/picon-peace.png'],
+      youtubeVideo: '',
       technologies: ['Unity', 'C#', 'Atmospheric Lighting', 'Touch Controls'],
       metrics: [
         { label: 'Enfoque', value: 'Casual & Relax' }
@@ -444,6 +483,8 @@
       role: 'Especialista en Monetización & SDKs',
       featured: true,
       coverImage: './assets/images/ely/icon-appads.png',
+      galleryImages: ['./assets/images/ely/icon-appads.png'],
+      youtubeVideo: '',
       technologies: ['Google AdMob', 'Unity Ads', 'Mediation SDKs', 'C# Event Callbacks', 'Google Play Policy'],
       metrics: [
         { label: 'Precio Fijo', value: '$80 USD' },
@@ -481,6 +522,8 @@
       role: 'Ingeniero de Integración IAP & Billing',
       featured: true,
       coverImage: './assets/images/ely/icon-inapppurchase.png',
+      galleryImages: ['./assets/images/ely/icon-inapppurchase.png'],
+      youtubeVideo: '',
       technologies: ['Unity IAP', 'Google Play Billing', 'Apple StoreKit', 'C# State Manager', 'Data Encryption'],
       metrics: [
         { label: 'Precio Fijo', value: '$80 USD' },
@@ -518,6 +561,8 @@
       role: 'Arquitecto de Audio & Sound Design',
       featured: false,
       coverImage: './assets/images/ely/icon-soundsystempng.png',
+      galleryImages: ['./assets/images/ely/icon-soundsystempng.png'],
+      youtubeVideo: '',
       technologies: ['Unity AudioSource', 'AudioMixer', 'FMOD Integration', 'PlayerPrefs Sound Persistence', 'C#'],
       metrics: [
         { label: 'Precio Fijo', value: '$50 USD' },
@@ -554,6 +599,8 @@
       role: 'Ingeniero de Redes & Multijugador',
       featured: false,
       coverImage: './assets/images/ely/icon-dominicanpower.png',
+      galleryImages: ['./assets/images/ely/icon-dominicanpower.png'],
+      youtubeVideo: '',
       technologies: ['Photon PUN 2', 'Photon Voice', 'C# Network Streams', 'Multiplayer Interpolation', 'Lobby System'],
       metrics: [
         { label: 'Precio', value: '$120 USD' },
@@ -590,6 +637,8 @@
       role: 'Tutor & Desarrollador Senior',
       featured: true,
       coverImage: './assets/images/ely/my-avatar.png',
+      galleryImages: ['./assets/images/ely/my-avatar.png'],
+      youtubeVideo: '',
       technologies: ['Unity 2D & 3D', 'C# Programming', 'Game Architecture', 'Debugging', 'Live Screen Share'],
       metrics: [
         { label: 'Tarifa', value: '$20 USD / hora' },
@@ -627,6 +676,8 @@
       role: 'Mentor de Publicación & Monetización',
       featured: false,
       coverImage: './assets/images/ely/icon-appads.png',
+      galleryImages: ['./assets/images/ely/icon-appads.png'],
+      youtubeVideo: '',
       technologies: ['Google Play Console', 'Unity IAP', 'Google AdMob', 'Android App Bundles (.aab)', 'Keystore Security'],
       metrics: [
         { label: 'Tarifa', value: '$25 USD / hora' },
@@ -663,6 +714,8 @@
       role: 'Mentor de Multijugador & Networking',
       featured: false,
       coverImage: './assets/images/ely/icon-dominicanpower.png',
+      galleryImages: ['./assets/images/ely/icon-dominicanpower.png'],
+      youtubeVideo: '',
       technologies: ['Photon PUN 2', 'Unity C#', 'Network RPCs', 'Lobby & Room Management', 'Smooth Interpolation'],
       metrics: [
         { label: 'Tarifa', value: '$25 USD / hora' },
@@ -686,25 +739,119 @@
     }
   ];
 
+  // Listado Oficial de Clientes Satisfechos
+  const satisfiedClients = [
+    {
+      id: 'client-capricornio',
+      name: 'CapricornioTV & Capricornio Games',
+      role: 'Influencer Masivo & Productora',
+      project: 'MotoLoco | En Una Goma (Juego + Web + Backend)',
+      year: '2024 - 2025',
+      rating: 5,
+      avatar: './assets/images/ely/icon-enunagoma.png',
+      feedback: 'Desarrollo completo del juego y la plataforma web oficial. Eliezer manejó tanto la programación del videojuego en Unity como la web promocional con base de datos en tiempo récord para nuestra comunidad.',
+      tags: ['Videojuego Unity', 'Web PHP/MySQL', 'Audiencia Masiva']
+    },
+    {
+      id: 'client-dogame',
+      name: 'DoGame (Estudio de Videojuegos)',
+      role: 'Estudio de Videojuegos & Producción',
+      project: 'Dominican Power & Yun Online',
+      year: '2021 - 2022',
+      rating: 5,
+      avatar: './assets/images/ely/icon-dominicanpower.png',
+      feedback: 'Nos apoyó en un momento crucial realizando el remake integral de interfaz, corrigiendo bugs críticos de red y conectando el multijugador con Photon Network. Un profesional serio, ágil y con gran dominio de Unity.',
+      tags: ['Photon PUN 2', 'UI/UX Remake', 'Economía In-Game']
+    },
+    {
+      id: 'client-shl',
+      name: 'SHL (Empresa / Cliente Comercial)',
+      role: 'Cliente Comercial',
+      project: 'Dominoes Republic (Optimización & Reglas)',
+      year: '2022',
+      rating: 5,
+      avatar: './assets/images/ely/icon-dominoesrepublic.png',
+      feedback: 'Excelente diagnóstico para solucionar errores críticos de geolocalización y sincronización de reglas en partidas competitivas. Muy resolutivo en situaciones de alta presión.',
+      tags: ['Bug Fixing', 'Geolocalización', 'Reglas de Juego']
+    },
+    {
+      id: 'client-jobslaru',
+      name: 'Jobs Laru',
+      role: 'Estudio de Videojuegos / Colaborador Frecuente',
+      project: 'LEVA 3D, Simón, Fireball, Dark Castle, GUGO',
+      year: '2019 - 2021',
+      rating: 5,
+      avatar: './assets/images/ely/my-avatar.png',
+      feedback: 'Al principio deposité toda mi confianza en el trabajo de Eliezer y no pudo haber mejor persona. Tuve excelentes resultados de desarrollo en todos los proyectos. Rápido, accesible y con gran nivel técnico.',
+      tags: ['Multi-Juegos', 'Google Play', 'Monetización AdMob']
+    },
+    {
+      id: 'client-telesancris',
+      name: 'Telesancris (Canal de Televisión)',
+      role: 'Joselmin Carmona · Directiva Telesancris',
+      project: 'Telesancris Mobile Streaming App',
+      year: '2023',
+      rating: 5,
+      avatar: './assets/images/ely/icon-telesancris.png',
+      feedback: 'Me siento sumamente satisfecho de haber trabajado mi aplicación con Eliezer; los resultados fueron mucho mejores de lo que esperaba y con un trato muy profesional.',
+      tags: ['Streaming HLS', 'App Móvil', 'Android']
+    },
+    {
+      id: 'client-cifraslimk',
+      name: 'Cifra Slimk (Artista Musical)',
+      role: 'Artista Urbano / Producción Sonora',
+      project: 'OverDrivers Soundtrack ("Quieren Quitarme")',
+      year: '2024 - 2025',
+      rating: 5,
+      avatar: './assets/images/ely/overdrivers-teaser.jpg',
+      feedback: 'Increíble visión para sincronizar el ritmo de la música con las físicas de carreras del juego y crear los teasers cinematográficos oficiales con excelente calidad audiovisual.',
+      tags: ['Banda Sonora', 'Teasers YouTube', 'Colaboración']
+    },
+    {
+      id: 'client-moneyfight',
+      name: 'MoneyFight & Cesar',
+      role: 'Empresa / Desarrolladores Asociados',
+      project: 'Nuevo Título Interactivo Confidencial',
+      year: '2025 - Presente',
+      rating: 5,
+      avatar: './assets/images/ely/my-avatar.png',
+      feedback: 'Actualmente trabajando en un proyecto comercial interactivo de alto impacto. Gran rigurosidad técnica, cumplimiento de hitos y comunicación fluida en cada fase.',
+      tags: ['En Desarrollo Activo', 'Unity C#', 'Arquitectura']
+    },
+    {
+      id: 'client-students',
+      name: 'Alumnos de Clases Privadas Unity',
+      role: 'Comunidad de Alumnos & Desarrolladores Indie',
+      project: 'Mentorías Personalizadas en Unity, C# & Monetización',
+      year: '2024 - 2025',
+      rating: 5,
+      avatar: './assets/images/ely/icon-appads.png',
+      feedback: 'Las clases personalizadas 1 a 1 te ahorran meses de ensayo y error. Eliezer te enseña directamente en tu proyecto cómo implementar Ads, IAP, multijugador online y cómo compilar sin fallos para la tienda.',
+      tags: ['Mentoría 1 a 1', 'Unity & C#', 'Monetización']
+    }
+  ];
+
   // 2. Estado de la aplicación
   let projects = [];
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0 && parsed.some(p => p.id === 'overdrivers' || p.id === 'service-ads-monetization')) {
+      if (Array.isArray(parsed) && parsed.length > 0) {
         projects = parsed;
       }
     }
   } catch (e) {}
   if (!projects || projects.length === 0) {
-    projects = [...initialProjects];
+    projects = JSON.parse(JSON.stringify(initialProjects));
   }
 
   let selectedOrigin = 'todos';
   let selectedCategory = 'todos';
   let searchQuery = '';
   let selectedProject = null;
+  let activeMediaIndex = 0; // Para el carrusel de imágenes
+  let activeMediaMode = 'image'; // 'image' o 'video'
   let filteredProjects = [];
   let isModerator = false;
 
@@ -749,8 +896,20 @@
     applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
   }
 
-  // 4. Filtrado de proyectos con la regla crítica:
-  // "los servicios comunes y clases privadas no deben filtrarse en TODOS"
+  // Helper para extraer ID de video de YouTube
+  function getYouTubeEmbedUrl(url) {
+    if (!url || typeof url !== 'string') return null;
+    const trimmed = url.trim();
+    if (!trimmed) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = trimmed.match(regExp);
+    return (match && match[2] && match[2].length === 11)
+      ? 'https://www.youtube.com/embed/' + match[2] + '?rel=0&modestbranding=1'
+      : null;
+  }
+
+  // 4. Filtrado de proyectos
+  // Regla del usuario: "al seleccionar servicios comunes o clases privadas no deben aparecer las categorías secundarias"
   function getFilteredProjects() {
     return projects.filter(function (project) {
       if (selectedOrigin === 'todos') {
@@ -761,8 +920,11 @@
         return false;
       }
 
-      if (selectedCategory !== 'todos' && project.category !== selectedCategory) {
-        return false;
+      // Si es servicios o clases, se ignoran las categorías de juegos/apps
+      if (selectedOrigin !== 'servicios' && selectedOrigin !== 'clases') {
+        if (selectedCategory !== 'todos' && project.category !== selectedCategory) {
+          return false;
+        }
       }
 
       if (searchQuery.trim()) {
@@ -783,15 +945,28 @@
     });
   }
 
-  // 5. Renderizado de las tarjetas de proyectos
-  function renderProjectsGrid() {
-    filteredProjects = getFilteredProjects();
-    const container = document.getElementById('projects-grid');
-    const emptyState = document.getElementById('projects-empty-state');
+  // 5. Renderizado de las tarjetas de proyectos con colapso hacia atrás
+  let filterTransitionTimer = null;
+  let lastFilterOrigin = 'todos';
+  let lastFilterCategory = 'todos';
+  let lastFilterSearch = '';
+  let renderedCardIds = new Set();
+
+  function updateCatalogHeaders() {
     const countDisplay = document.getElementById('projects-count-display');
     const headerTitle = document.getElementById('catalog-header-title');
     const headerSub = document.getElementById('catalog-header-sub');
     const badgeLabel = document.getElementById('catalog-badge-label');
+    const secondaryFilters = document.getElementById('secondary-category-filters');
+
+    // Ocultar categorías secundarias si se elige Servicios o Clases
+    if (secondaryFilters) {
+      if (selectedOrigin === 'servicios' || selectedOrigin === 'clases') {
+        secondaryFilters.classList.add('hidden');
+      } else {
+        secondaryFilters.classList.remove('hidden');
+      }
+    }
 
     if (countDisplay) {
       countDisplay.textContent = 'Mostrando ' + filteredProjects.length + ' de ' + projects.length + ' elementos';
@@ -829,12 +1004,68 @@
     if (workedCountEl) workedCountEl.textContent = projects.filter(p => p.origin === 'trabajado').length;
     if (servicesCountEl) servicesCountEl.textContent = projects.filter(p => p.origin === 'servicios').length;
     if (classesCountEl) classesCountEl.textContent = projects.filter(p => p.origin === 'clases').length;
+  }
 
+  function renderProjectsGrid(forceFilterTransition) {
+    filteredProjects = getFilteredProjects();
+    updateCatalogHeaders();
+
+    const container = document.getElementById('projects-grid');
+    if (!container) return;
+
+    const currentCards = Array.from(container.querySelectorAll('article[data-id]'));
+    const isFilterChange = forceFilterTransition === true || (
+      currentCards.length > 0 && (
+        lastFilterOrigin !== selectedOrigin ||
+        lastFilterCategory !== selectedCategory ||
+        lastFilterSearch !== searchQuery
+      )
+    );
+
+    lastFilterOrigin = selectedOrigin;
+    lastFilterCategory = selectedCategory;
+    lastFilterSearch = searchQuery;
+
+    // Si es cambio de filtro y ya hay elementos en pantalla:
+    // Los cuadros que no van en el nuevo filtro se colapsan hacia atrás (scale down + fade out)
+    if (isFilterChange && currentCards.length > 0) {
+      if (filterTransitionTimer) {
+        clearTimeout(filterTransitionTimer);
+      }
+
+      const nextIds = new Set(filteredProjects.map(p => p.id));
+      const exitingCards = currentCards.filter(function (card) {
+        const id = card.getAttribute('data-id');
+        return !nextIds.has(id);
+      });
+
+      // Si hay elementos que no van a estar en el nuevo filtro, colapsarlos hacia atrás
+      if (exitingCards.length > 0) {
+        exitingCards.forEach(function (card) {
+          card.classList.remove('card-fade-in');
+          card.classList.add('card-collapse-exit');
+        });
+
+        filterTransitionTimer = setTimeout(function () {
+          renderProjectsGridDOM();
+          filterTransitionTimer = null;
+        }, 220);
+        return;
+      }
+    }
+
+    renderProjectsGridDOM();
+  }
+
+  function renderProjectsGridDOM() {
+    const container = document.getElementById('projects-grid');
+    const emptyState = document.getElementById('projects-empty-state');
     if (!container) return;
 
     if (filteredProjects.length === 0) {
       container.innerHTML = '';
       container.classList.add('hidden');
+      renderedCardIds.clear();
       if (emptyState) emptyState.classList.remove('hidden');
       return;
     }
@@ -843,10 +1074,12 @@
     container.classList.remove('hidden');
 
     let html = '';
-    filteredProjects.forEach(function (project) {
+    filteredProjects.forEach(function (project, index) {
       const isServ = project.origin === 'servicios';
       const isClas = project.origin === 'clases';
       const isProp = project.origin === 'propio';
+      const isAlreadyInDom = renderedCardIds.has(project.id);
+      const entranceClass = isAlreadyInDom ? '' : 'card-fade-in';
 
       const originBadge = isServ
         ? '<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Servicio Técnico</span>'
@@ -866,6 +1099,11 @@
         ? '<div class="inline-flex items-center px-2.5 py-1 rounded-lg bg-amber-400 text-black font-extrabold text-xs shadow-md">' + project.priceTag + '</div>'
         : '';
 
+      const hasVideo = !!project.youtubeVideo;
+      const mediaBadge = hasVideo
+        ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-red-600/80 text-white backdrop-blur-sm shadow">▶ Video YouTube</span>'
+        : '';
+
       const techBadges = (project.technologies || []).slice(0, 4).map(function (t) {
         return '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300 border border-white/10">' + t + '</span>';
       }).join('');
@@ -874,26 +1112,72 @@
         ? '<div class="text-[11px] text-cyan-400 font-medium mb-1 truncate">Cliente: ' + project.clientOrTeam + '</div>'
         : '';
 
+      // Barra de controles de moderador (Ajustar Orden, Editar, Eliminar)
+      const moderatorBar = isModerator ? `
+        <div class="flex items-center justify-between p-2.5 bg-amber-400/10 border-b border-amber-400/20 text-xs">
+          <div class="flex items-center gap-1">
+            <button
+              type="button"
+              onclick="event.stopPropagation(); window.ElyPortfolio.moveProjectOrder('${project.id}', -1)"
+              class="px-2 py-1 rounded bg-[#12151d] text-amber-400 hover:bg-amber-400 hover:text-black font-bold transition-colors"
+              title="Mover hacia arriba en la lista"
+            >
+              ▲ Subir
+            </button>
+            <button
+              type="button"
+              onclick="event.stopPropagation(); window.ElyPortfolio.moveProjectOrder('${project.id}', 1)"
+              class="px-2 py-1 rounded bg-[#12151d] text-amber-400 hover:bg-amber-400 hover:text-black font-bold transition-colors"
+              title="Mover hacia abajo en la lista"
+            >
+              ▼ Bajar
+            </button>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button
+              type="button"
+              onclick="event.stopPropagation(); window.ElyPortfolio.openEditProjectModal('${project.id}')"
+              class="px-2.5 py-1 rounded bg-amber-400 text-black font-bold hover:bg-amber-300 transition-colors shadow-sm"
+              title="Editar título, descripciones, imágenes o video en grande"
+            >
+              ✏️ Editar
+            </button>
+            <button
+              type="button"
+              onclick="event.stopPropagation(); window.ElyPortfolio.deleteProject('${project.id}')"
+              class="px-2.5 py-1 rounded bg-red-600 text-white font-bold hover:bg-red-500 transition-colors shadow-sm"
+              title="Eliminar este cuadro de información"
+            >
+              🗑️ Eliminar
+            </button>
+          </div>
+        </div>
+      ` : '';
+
       html += `
-        <article class="group relative flex flex-col overflow-hidden rounded-2xl bg-[#12151d] border border-[#232733] hover:border-amber-400/50 transition-all duration-300 shadow-lg hover:shadow-amber-500/10">
-          <!-- Imagen de Cabecera -->
-          <div class="relative h-48 w-full overflow-hidden bg-[#181d28] cursor-pointer" onclick="window.ElyPortfolio.openProjectModal('${project.id}')">
+        <article data-id="${project.id}" class="${entranceClass} group relative flex flex-col overflow-hidden rounded-2xl bg-[#12151d] border border-[#232733] hover:border-amber-400/60 transform hover:scale-105 transition-all duration-300 ease-out shadow-lg hover:shadow-2xl hover:shadow-amber-500/20 z-0 hover:z-10">
+          
+          ${moderatorBar}
+
+          <!-- Imagen de Cabecera (Soporta 16:9 y cliqueable) -->
+          <div class="relative aspect-16-9 w-full overflow-hidden bg-[#181d28] cursor-pointer" onclick="window.ElyPortfolio.openProjectModal('${project.id}')">
             <img
-              src="${project.coverImage}"
+              src="${project.coverImage || './assets/images/ely/my-avatar.png'}"
               alt="${project.title}"
               class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
               onerror="this.src='./assets/images/ely/my-avatar.png'"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-[#12151d] via-transparent to-black/40"></div>
             
-            <div class="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
+            <div class="absolute top-3 left-3 flex flex-wrap items-center gap-1.5 z-10">
               ${originBadge}
               ${categoryBadge}
+              ${mediaBadge}
             </div>
 
-            ${priceBadge ? '<div class="absolute top-3 right-3">' + priceBadge + '</div>' : ''}
+            ${priceBadge ? '<div class="absolute top-3 right-3 z-10">' + priceBadge + '</div>' : ''}
 
-            ${project.year && !isServ && !isClas ? '<div class="absolute bottom-2.5 right-3 text-[11px] font-mono text-slate-300 bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm">' + project.year + '</div>' : ''}
+            ${project.year && !isServ && !isClas ? '<div class="absolute bottom-2.5 right-3 text-[11px] font-mono text-slate-300 bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm z-10">' + project.year + '</div>' : ''}
           </div>
 
           <!-- Contenido de la Ficha -->
@@ -948,27 +1232,26 @@
     });
 
     container.innerHTML = html;
+    renderedCardIds = new Set(filteredProjects.map(p => p.id));
   }
 
-  // 6. Modal de detalle del proyecto (Slide-Over Drawer)
+  // 6. Modal de detalle del proyecto (Soporta 16:9, Múltiples Imágenes y Videos de YouTube en Grande)
   function openProjectModal(projectId) {
     const project = projects.find(p => p.id === projectId);
     if (!project) return;
     selectedProject = project;
+    activeMediaIndex = 0;
+    
+    // Si tiene video de YouTube configurado, activarlo por defecto o permitir alternar
+    activeMediaMode = (project.youtubeVideo && getYouTubeEmbedUrl(project.youtubeVideo)) ? 'video' : 'image';
 
     const modal = document.getElementById('project-detail-modal');
     if (!modal) return;
 
-    // Actualizar campos
+    // Actualizar campos de texto
     document.getElementById('modal-project-title').textContent = project.title;
     document.getElementById('modal-project-tagline').textContent = project.tagline;
     document.getElementById('modal-project-desc').textContent = project.fullStory || project.description;
-    
-    const imgEl = document.getElementById('modal-project-img');
-    if (imgEl) {
-      imgEl.src = project.coverImage;
-      imgEl.onerror = function () { this.src = './assets/images/ely/my-avatar.png'; };
-    }
 
     const priceEl = document.getElementById('modal-project-price');
     if (priceEl) {
@@ -992,6 +1275,9 @@
         clientEl.parentElement.classList.add('hidden');
       }
     }
+
+    // Renderizar el visor multimedia (16:9)
+    renderModalMediaViewer();
 
     // Métricas
     const metricsContainer = document.getElementById('modal-project-metrics');
@@ -1091,10 +1377,151 @@
     document.body.style.overflow = 'hidden';
   }
 
+  // Renderizar visor 16:9 con soporte de Video de YouTube en Grande y Múltiples Imágenes
+  function renderModalMediaViewer() {
+    if (!selectedProject) return;
+    const mediaContainer = document.getElementById('modal-media-viewport');
+    const tabsContainer = document.getElementById('modal-media-tabs');
+    const thumbsContainer = document.getElementById('modal-media-thumbs');
+
+    const embedUrl = getYouTubeEmbedUrl(selectedProject.youtubeVideo);
+    
+    // Lista de imágenes (incluye coverImage y galleryImages)
+    let images = [];
+    if (Array.isArray(selectedProject.galleryImages) && selectedProject.galleryImages.length > 0) {
+      images = selectedProject.galleryImages;
+    } else if (selectedProject.coverImage) {
+      images = [selectedProject.coverImage];
+    } else {
+      images = ['./assets/images/ely/my-avatar.png'];
+    }
+
+    // Pestañas superiores (si tiene video y fotos a la vez)
+    if (tabsContainer) {
+      if (embedUrl) {
+        tabsContainer.innerHTML = `
+          <div class="flex items-center gap-2 mb-2">
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.setModalMediaMode('video')"
+              class="px-3 py-1 rounded-lg text-xs font-bold transition-all ${activeMediaMode === 'video' ? 'bg-red-600 text-white shadow' : 'bg-white/10 text-slate-300 hover:bg-white/20'}"
+            >
+              ▶ Ver Video en Grande (YouTube)
+            </button>
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.setModalMediaMode('image')"
+              class="px-3 py-1 rounded-lg text-xs font-bold transition-all ${activeMediaMode === 'image' ? 'bg-amber-400 text-black shadow' : 'bg-white/10 text-slate-300 hover:bg-white/20'}"
+            >
+              📷 Galería de Fotos (${images.length})
+            </button>
+          </div>
+        `;
+        tabsContainer.classList.remove('hidden');
+      } else {
+        tabsContainer.innerHTML = '';
+        tabsContainer.classList.add('hidden');
+      }
+    }
+
+    // Contenido del visor (16:9)
+    if (mediaContainer) {
+      if (activeMediaMode === 'video' && embedUrl) {
+        mediaContainer.innerHTML = `
+          <div class="aspect-16-9 w-full rounded-xl overflow-hidden bg-black shadow-inner">
+            <iframe
+              src="${embedUrl}"
+              title="${selectedProject.title}"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              class="w-full h-full"
+            ></iframe>
+          </div>
+        `;
+      } else {
+        const currentImgSrc = images[activeMediaIndex] || images[0];
+        mediaContainer.innerHTML = `
+          <div class="relative aspect-16-9 w-full rounded-xl overflow-hidden bg-black/60 shadow-inner group">
+            <img
+              src="${currentImgSrc}"
+              alt="${selectedProject.title}"
+              class="w-full h-full object-cover object-center transition-all duration-300"
+              onerror="this.src='./assets/images/ely/my-avatar.png'"
+            />
+            
+            ${images.length > 1 ? `
+              <button
+                type="button"
+                onclick="window.ElyPortfolio.cycleModalImage(-1)"
+                class="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 hover:bg-black/90 text-white text-sm transition-all"
+                title="Foto anterior"
+              >
+                ◀
+              </button>
+              <button
+                type="button"
+                onclick="window.ElyPortfolio.cycleModalImage(1)"
+                class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 hover:bg-black/90 text-white text-sm transition-all"
+                title="Siguiente foto"
+              >
+                ▶
+              </button>
+            ` : ''}
+          </div>
+        `;
+      }
+    }
+
+    // Miniaturas (Thumbs) si hay múltiples fotos y está en modo 'image'
+    if (thumbsContainer) {
+      if (activeMediaMode === 'image' && images.length > 1) {
+        thumbsContainer.innerHTML = images.map(function (src, idx) {
+          const isActive = idx === activeMediaIndex;
+          return `
+            <button
+              type="button"
+              onclick="window.ElyPortfolio.selectModalImage(${idx})"
+              class="h-16 w-24 shrink-0 rounded-lg overflow-hidden border-2 transition-all ${isActive ? 'border-amber-400 scale-105 shadow-md' : 'border-transparent opacity-60 hover:opacity-100'}"
+            >
+              <img src="${src}" class="w-full h-full object-cover" onerror="this.src='./assets/images/ely/my-avatar.png'" />
+            </button>
+          `;
+        }).join('');
+        thumbsContainer.classList.remove('hidden');
+      } else {
+        thumbsContainer.innerHTML = '';
+        thumbsContainer.classList.add('hidden');
+      }
+    }
+  }
+
+  function setModalMediaMode(mode) {
+    activeMediaMode = mode;
+    renderModalMediaViewer();
+  }
+
+  function selectModalImage(index) {
+    activeMediaIndex = index;
+    renderModalMediaViewer();
+  }
+
+  function cycleModalImage(delta) {
+    if (!selectedProject) return;
+    const images = (selectedProject.galleryImages && selectedProject.galleryImages.length > 0)
+      ? selectedProject.galleryImages
+      : [selectedProject.coverImage];
+    activeMediaIndex = (activeMediaIndex + delta + images.length) % images.length;
+    renderModalMediaViewer();
+  }
+
   function closeProjectModal() {
     const modal = document.getElementById('project-detail-modal');
     if (modal) modal.classList.add('hidden');
     document.body.style.overflow = '';
+    // Detener reproducción de iframes al cerrar
+    const mediaContainer = document.getElementById('modal-media-viewport');
+    if (mediaContainer) mediaContainer.innerHTML = '';
   }
 
   // 7. Navegación Anterior / Siguiente en Modal
@@ -1109,7 +1536,61 @@
     }
   }
 
-  // 8. Modal de Contacto
+  // 8. Modal de Clientes Satisfechos (Subventana interactiva solicitada)
+  function openSatisfiedClientsModal() {
+    const modal = document.getElementById('satisfied-clients-modal');
+    const container = document.getElementById('satisfied-clients-list');
+    if (!modal) return;
+
+    if (container) {
+      container.innerHTML = satisfiedClients.map(function (c) {
+        const starIcons = '★★★★★';
+        const tagBadges = (c.tags || []).map(function (t) {
+          return '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300 border border-white/10">' + t + '</span>';
+        }).join('');
+
+        return `
+          <div class="rounded-2xl bg-[#0e1118] border border-[#232733] p-5 space-y-3 hover:border-amber-400/40 transition-colors">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="h-12 w-12 rounded-xl overflow-hidden bg-black/40 border border-[#232733] shrink-0">
+                  <img src="${c.avatar}" alt="${c.name}" class="h-full w-full object-cover" onerror="this.src='./assets/images/ely/my-avatar.png'" />
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold text-white font-display">${c.name}</h4>
+                  <div class="text-xs text-amber-400">${c.project}</div>
+                  <div class="text-[11px] text-slate-400">${c.role}</div>
+                </div>
+              </div>
+              <div class="flex flex-col sm:items-end gap-1 shrink-0">
+                <div class="star-rating text-sm font-bold text-amber-400">${starIcons} <span class="text-xs text-slate-300">5.0</span></div>
+                <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2 py-0.5 rounded">${c.year}</div>
+              </div>
+            </div>
+
+            <div class="rounded-xl bg-[#141822] p-3 border border-[#1f2534] text-xs text-slate-300 italic leading-relaxed">
+              “${c.feedback}”
+            </div>
+
+            <div class="flex flex-wrap items-center gap-1.5 pt-1">
+              ${tagBadges}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSatisfiedClientsModal() {
+    const modal = document.getElementById('satisfied-clients-modal');
+    if (modal) modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  // 9. Modal de Contacto y Envío de Correo Directo desde la Web (FormSubmit AJAX + Fallback Mailto)
   function openContactModal(initialSubject) {
     const modal = document.getElementById('contact-modal');
     if (!modal) return;
@@ -1117,6 +1598,11 @@
     if (subjInput && initialSubject) {
       subjInput.value = initialSubject;
     }
+    const successMsg = document.getElementById('contact-success-msg');
+    const errorMsg = document.getElementById('contact-error-msg');
+    if (successMsg) successMsg.classList.add('hidden');
+    if (errorMsg) errorMsg.classList.add('hidden');
+
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
   }
@@ -1127,27 +1613,83 @@
     document.body.style.overflow = '';
   }
 
-  function handleContactSubmit(e) {
+  async function handleContactSubmit(e) {
     e.preventDefault();
-    const name = document.getElementById('contact-name').value;
-    const email = document.getElementById('contact-email').value;
-    const subject = document.getElementById('contact-subject').value;
-    const message = document.getElementById('contact-message').value;
+    const name = document.getElementById('contact-name').value.trim();
+    const email = document.getElementById('contact-email').value.trim();
+    const subject = document.getElementById('contact-subject').value.trim();
+    const message = document.getElementById('contact-message').value.trim();
+    const submitBtn = document.getElementById('contact-submit-btn');
+    const successMsg = document.getElementById('contact-success-msg');
+    const errorMsg = document.getElementById('contact-error-msg');
 
-    const mailto = `mailto:eliezerterrero275@gmail.com?subject=${encodeURIComponent(subject || 'Consulta Portafolio')}&body=${encodeURIComponent('De: ' + name + ' (' + email + ')\n\n' + message)}`;
-    window.location.href = mailto;
+    if (!name || !email || !message) {
+      alert('Por favor completa tu nombre, correo y mensaje.');
+      return;
+    }
 
-    const msg = document.getElementById('contact-success-msg');
-    if (msg) {
-      msg.classList.remove('hidden');
+    // Estado cargando en el botón
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Enviando mensaje... ⏳</span>';
+    }
+    if (successMsg) successMsg.classList.add('hidden');
+    if (errorMsg) errorMsg.classList.add('hidden');
+
+    try {
+      // 1. Envío AJAX directo sin recargar página (FormSubmit API hacia el correo de Eliezer)
+      const response = await fetch('https://formsubmit.co/ajax/eliezerterrero275@gmail.com', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          Nombre: name,
+          Correo: email,
+          Asunto: subject || 'Consulta desde Portafolio ElyDev',
+          Mensaje: message,
+          _subject: '[Portafolio ElyDev] ' + (subject || 'Nuevo Mensaje de Contacto'),
+          _template: 'table'
+        })
+      });
+
+      const result = await response.json();
+
+      if (response.ok && (result.success === 'true' || result.success === true || result.message)) {
+        if (successMsg) {
+          successMsg.innerHTML = '✓ ¡Mensaje enviado con éxito directamente a Eliezer Terrero! Recibirás respuesta pronto a tu correo.';
+          successMsg.classList.remove('hidden');
+        }
+        document.getElementById('contact-form').reset();
+        setTimeout(function () {
+          closeContactModal();
+        }, 3000);
+      } else {
+        throw new Error(result.message || 'Error al enviar');
+      }
+    } catch (err) {
+      console.warn('Fallo envío AJAX, intentando vía mailto o contact.php...', err);
+      // Fallback automático para que el mensaje NUNCA se pierda
+      const mailto = `mailto:eliezerterrero275@gmail.com?subject=${encodeURIComponent(subject || 'Consulta Portafolio ElyDev')}&body=${encodeURIComponent('De: ' + name + ' (' + email + ')\n\n' + message)}`;
+      window.location.href = mailto;
+
+      if (successMsg) {
+        successMsg.innerHTML = '✓ Abriendo tu gestor de correo para enviar mensaje a eliezerterrero275@gmail.com...';
+        successMsg.classList.remove('hidden');
+      }
       setTimeout(function () {
-        msg.classList.add('hidden');
         closeContactModal();
-      }, 2500);
+      }, 3000);
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Enviar Mensaje</span>';
+      }
     }
   }
 
-  // 9. Modal de CV Imprimible
+  // 10. Modal de CV Imprimible
   function openResumeModal() {
     const modal = document.getElementById('resume-modal');
     if (modal) {
@@ -1164,7 +1706,7 @@
     }
   }
 
-  // 10. Modal de Autenticación de Moderador
+  // 11. Modal de Autenticación de Moderador
   function openAuthModal() {
     const modal = document.getElementById('auth-modal');
     if (modal) {
@@ -1189,9 +1731,10 @@
       try {
         localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ role: 'moderator', username: 'ElyDev' }));
       } catch (err) {}
-      alert('¡Acceso de Moderador Autorizado!');
+      alert('¡Acceso de Moderador Autorizado! Ahora puedes editar, reordenar y eliminar proyectos en cada cuadro.');
       closeAuthModal();
       updateModeratorUI();
+      renderProjectsGrid();
     } else {
       alert('Contraseña incorrecta. (Pista: elydev2026)');
     }
@@ -1204,6 +1747,7 @@
     } catch (err) {}
     alert('Sesión de moderador cerrada.');
     updateModeratorUI();
+    renderProjectsGrid();
   }
 
   function updateModeratorUI() {
@@ -1221,7 +1765,137 @@
     }
   }
 
-  // 11. Modal para Agregar Proyecto (Solo moderador)
+  // 12. Reordenar Proyectos (Subir o Bajar orden)
+  function moveProjectOrder(projectId, delta) {
+    const index = projects.findIndex(p => p.id === projectId);
+    if (index < 0) return;
+    const newIndex = index + delta;
+    if (newIndex < 0 || newIndex >= projects.length) return;
+
+    // Intercambiar posición en el array
+    const temp = projects[index];
+    projects[index] = projects[newIndex];
+    projects[newIndex] = temp;
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+    } catch (err) {}
+
+    renderProjectsGrid();
+  }
+
+  // 13. Eliminar Proyecto
+  function deleteProject(projectId) {
+    const target = projects.find(p => p.id === projectId);
+    if (!target) return;
+    if (confirm('¿Estás seguro de eliminar el cuadro de información "' + target.title + '"?')) {
+      projects = projects.filter(p => p.id !== projectId);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+      } catch (err) {}
+      renderProjectsGrid();
+    }
+  }
+
+  // 14. Modal para Editar Proyecto Existente (Solo moderador)
+  let editingProjectId = null;
+
+  function openEditProjectModal(projectId) {
+    if (!isModerator) {
+      openAuthModal();
+      return;
+    }
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+    editingProjectId = projectId;
+
+    const modal = document.getElementById('edit-project-modal');
+    if (!modal) return;
+
+    document.getElementById('edit-proj-id').value = project.id;
+    document.getElementById('edit-proj-title').value = project.title || '';
+    document.getElementById('edit-proj-tagline').value = project.tagline || '';
+    document.getElementById('edit-proj-origin').value = project.origin || 'propio';
+    document.getElementById('edit-proj-category').value = project.category || 'juegos';
+    document.getElementById('edit-proj-price').value = project.priceTag || '';
+    document.getElementById('edit-proj-role').value = project.role || '';
+    document.getElementById('edit-proj-client').value = project.clientOrTeam || '';
+    document.getElementById('edit-proj-year').value = project.year || '';
+    document.getElementById('edit-proj-cover').value = project.coverImage || '';
+    
+    // Múltiples imágenes (galería) separadas por salto de línea
+    const galleryImgs = Array.isArray(project.galleryImages) ? project.galleryImages.join('\n') : (project.coverImage || '');
+    document.getElementById('edit-proj-gallery').value = galleryImgs;
+
+    // Video de YouTube en grande
+    document.getElementById('edit-proj-video').value = project.youtubeVideo || '';
+
+    document.getElementById('edit-proj-desc').value = project.description || '';
+    document.getElementById('edit-proj-story').value = project.fullStory || project.description || '';
+    document.getElementById('edit-proj-techs').value = (project.technologies || []).join(', ');
+    document.getElementById('edit-proj-contribs').value = (project.keyContributions || []).join('\n');
+    document.getElementById('edit-proj-reqs').value = (project.requirements || []).join('\n');
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeEditProjectModal() {
+    const modal = document.getElementById('edit-project-modal');
+    if (modal) modal.classList.add('hidden');
+    document.body.style.overflow = '';
+    editingProjectId = null;
+  }
+
+  function handleEditProjectSubmit(e) {
+    e.preventDefault();
+    if (!editingProjectId) return;
+    const project = projects.find(p => p.id === editingProjectId);
+    if (!project) return;
+
+    project.title = document.getElementById('edit-proj-title').value.trim();
+    project.tagline = document.getElementById('edit-proj-tagline').value.trim();
+    project.origin = document.getElementById('edit-proj-origin').value;
+    project.category = document.getElementById('edit-proj-category').value;
+    project.priceTag = document.getElementById('edit-proj-price').value.trim() || undefined;
+    project.role = document.getElementById('edit-proj-role').value.trim();
+    project.clientOrTeam = document.getElementById('edit-proj-client').value.trim() || undefined;
+    project.year = document.getElementById('edit-proj-year').value.trim();
+    project.coverImage = document.getElementById('edit-proj-cover').value.trim() || './assets/images/ely/my-avatar.png';
+
+    // Parsear galería de imágenes (una por línea o por coma)
+    const galleryRaw = document.getElementById('edit-proj-gallery').value;
+    const parsedGallery = galleryRaw
+      .split(/[\n,]+/)
+      .map(s => s.trim())
+      .filter(Boolean);
+    project.galleryImages = parsedGallery.length > 0 ? parsedGallery : [project.coverImage];
+
+    // Video de YouTube en grande
+    project.youtubeVideo = document.getElementById('edit-proj-video').value.trim();
+
+    project.description = document.getElementById('edit-proj-desc').value.trim();
+    project.fullStory = document.getElementById('edit-proj-story').value.trim() || project.description;
+
+    const techsRaw = document.getElementById('edit-proj-techs').value;
+    project.technologies = techsRaw.split(',').map(s => s.trim()).filter(Boolean);
+
+    const contribsRaw = document.getElementById('edit-proj-contribs').value;
+    project.keyContributions = contribsRaw.split('\n').map(s => s.trim()).filter(Boolean);
+
+    const reqsRaw = document.getElementById('edit-proj-reqs').value;
+    project.requirements = reqsRaw.split('\n').map(s => s.trim()).filter(Boolean);
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+    } catch (err) {}
+
+    closeEditProjectModal();
+    renderProjectsGrid();
+    alert('¡Ficha actualizada exitosamente!');
+  }
+
+  // 15. Modal para Agregar Proyecto (Solo moderador)
   function openAddProjectModal() {
     if (!isModerator) {
       openAuthModal();
@@ -1244,13 +1918,18 @@
 
   function handleAddProjectSubmit(e) {
     e.preventDefault();
-    const title = document.getElementById('new-proj-title').value;
-    const tagline = document.getElementById('new-proj-tagline').value;
+    const title = document.getElementById('new-proj-title').value.trim();
+    const tagline = document.getElementById('new-proj-tagline').value.trim();
     const origin = document.getElementById('new-proj-origin').value;
     const category = document.getElementById('new-proj-category').value;
-    const priceTag = document.getElementById('new-proj-price').value;
-    const desc = document.getElementById('new-proj-desc').value;
+    const priceTag = document.getElementById('new-proj-price').value.trim();
+    const coverImage = document.getElementById('new-proj-cover').value.trim() || './assets/images/ely/my-avatar.png';
+    const galleryRaw = document.getElementById('new-proj-gallery').value;
+    const videoUrl = document.getElementById('new-proj-video').value.trim();
+    const desc = document.getElementById('new-proj-desc').value.trim();
     const techs = document.getElementById('new-proj-techs').value.split(',').map(s => s.trim()).filter(Boolean);
+
+    const parsedGallery = galleryRaw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
 
     const newProject = {
       id: 'proj-' + Date.now(),
@@ -1261,7 +1940,9 @@
       priceTag: priceTag || undefined,
       description: desc,
       fullStory: desc,
-      coverImage: './assets/images/ely/my-avatar.png',
+      coverImage: coverImage,
+      galleryImages: parsedGallery.length > 0 ? parsedGallery : [coverImage],
+      youtubeVideo: videoUrl || '',
       technologies: techs.length > 0 ? techs : ['Unity', 'C#'],
       role: 'Desarrollador'
     };
@@ -1276,10 +1957,10 @@
     alert('¡Proyecto agregado con éxito!');
   }
 
-  // 12. Restablecer datos originales
+  // 16. Restablecer datos originales
   function resetSampleData() {
     if (confirm('¿Restablecer los proyectos y servicios originales de muestra?')) {
-      projects = [...initialProjects];
+      projects = JSON.parse(JSON.stringify(initialProjects));
       try {
         localStorage.removeItem(STORAGE_KEY);
       } catch (err) {}
@@ -1288,7 +1969,7 @@
     }
   }
 
-  // 13. Event Listeners y arranque
+  // 17. Event Listeners y arranque
   document.addEventListener('DOMContentLoaded', function () {
     applyTheme(currentTheme);
 
@@ -1320,7 +2001,7 @@
         btn.classList.remove('bg-[#141822]', 'text-slate-300');
 
         selectedOrigin = btn.getAttribute('data-origin-filter');
-        renderProjectsGrid();
+        renderProjectsGrid(true);
       });
     });
 
@@ -1336,7 +2017,7 @@
         btn.classList.remove('bg-white/5', 'text-slate-400');
 
         selectedCategory = btn.getAttribute('data-category-filter');
-        renderProjectsGrid();
+        renderProjectsGrid(true);
       });
     });
 
@@ -1345,7 +2026,7 @@
     if (searchInput) {
       searchInput.addEventListener('input', function (e) {
         searchQuery = e.target.value;
-        renderProjectsGrid();
+        renderProjectsGrid(true);
       });
     }
 
@@ -1354,7 +2035,7 @@
       searchClear.addEventListener('click', function () {
         searchInput.value = '';
         searchQuery = '';
-        renderProjectsGrid();
+        renderProjectsGrid(true);
       });
     }
 
@@ -1388,7 +2069,7 @@
           }
         });
 
-        renderProjectsGrid();
+        renderProjectsGrid(true);
       });
     }
 
@@ -1407,7 +2088,7 @@
             b.classList.add('bg-[#141822]', 'text-slate-300');
           }
         });
-        renderProjectsGrid();
+        renderProjectsGrid(true);
         const projSection = document.getElementById('proyectos');
         if (projSection) {
           projSection.scrollIntoView({ behavior: 'smooth' });
@@ -1425,6 +2106,9 @@
     const addProjForm = document.getElementById('add-project-form');
     if (addProjForm) addProjForm.addEventListener('submit', handleAddProjectSubmit);
 
+    const editProjForm = document.getElementById('edit-project-form');
+    if (editProjForm) editProjForm.addEventListener('submit', handleEditProjectSubmit);
+
     // Keyboard navigation (Escape, ArrowLeft, ArrowRight)
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
@@ -1433,6 +2117,8 @@
         closeResumeModal();
         closeAuthModal();
         closeAddProjectModal();
+        closeEditProjectModal();
+        closeSatisfiedClientsModal();
       } else if (e.key === 'ArrowLeft') {
         navigateProjectModal(-1);
       } else if (e.key === 'ArrowRight') {
@@ -1449,6 +2135,9 @@
     openProjectModal: openProjectModal,
     closeProjectModal: closeProjectModal,
     navigateProjectModal: navigateProjectModal,
+    setModalMediaMode: setModalMediaMode,
+    selectModalImage: selectModalImage,
+    cycleModalImage: cycleModalImage,
     openContactModal: openContactModal,
     closeContactModal: closeContactModal,
     openResumeModal: openResumeModal,
@@ -1457,6 +2146,12 @@
     closeAuthModal: closeAuthModal,
     openAddProjectModal: openAddProjectModal,
     closeAddProjectModal: closeAddProjectModal,
+    openEditProjectModal: openEditProjectModal,
+    closeEditProjectModal: closeEditProjectModal,
+    moveProjectOrder: moveProjectOrder,
+    deleteProject: deleteProject,
+    openSatisfiedClientsModal: openSatisfiedClientsModal,
+    closeSatisfiedClientsModal: closeSatisfiedClientsModal,
     resetSampleData: resetSampleData,
     toggleTheme: toggleTheme
   };
