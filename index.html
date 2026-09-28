@@ -1013,6 +1013,7 @@
               <input type="file" id="edit-proj-gallery-files" accept="image/*" multiple class="hidden" />
             </div>
 
+            <div class="flex items-center justify-between gap-3 mt-2"><div class="flex items-center gap-2 text-[10px] text-slate-400"><span>📐 Tamaño</span><input type="range" min="48" max="180" value="72" class="gallery-size-slider w-28 accent-amber-400"><span class="gallery-size-value font-mono text-amber-400">72px</span></div><span class="text-[10px] text-slate-500">Arrastra para reordenar</span></div>
             <div id="edit-proj-gallery-thumbs" class="flex flex-wrap gap-2 pt-1 min-h-[44px]">
               <!-- Miniaturas renderizadas interactivamente con botón de borrar -->
             </div>
@@ -1284,6 +1285,7 @@
               <input type="file" id="new-proj-gallery-files" accept="image/*" multiple class="hidden" />
             </div>
 
+            <div class="flex items-center justify-between gap-3 mt-2"><div class="flex items-center gap-2 text-[10px] text-slate-400"><span>📐 Tamaño</span><input type="range" min="48" max="180" value="72" class="gallery-size-slider w-28 accent-amber-400"><span class="gallery-size-value font-mono text-amber-400">72px</span></div><span class="text-[10px] text-slate-500">Arrastra para reordenar</span></div>
             <div id="new-proj-gallery-thumbs" class="flex flex-wrap gap-2 pt-1 min-h-[44px]">
               <!-- Miniaturas interactivas -->
             </div>
@@ -1748,9 +1750,8 @@
             />
             <span class="absolute left-2.5 top-1.5 text-slate-500 text-xs">🔍</span>
           </div>
-          <div class="text-xs text-slate-400">
-            Imágenes en biblioteca: <strong id="library-images-count" class="text-amber-400">0</strong>
-          </div>
+          <div class="flex items-center gap-2 text-[10px] text-slate-400"><span>📐 Tamaño</span><input id="library-size-slider" type="range" min="120" max="300" value="190" class="w-32 accent-amber-400"><span id="library-size-value" class="font-mono text-amber-400 w-12">190px</span></div>
+          <div class="text-xs text-slate-400">Imágenes: <strong id="library-images-count" class="text-amber-400">0</strong></div>
         </div>
 
         <!-- Cuadrícula de Imágenes -->
@@ -1760,7 +1761,8 @@
 
         <!-- Footer -->
         <div class="flex items-center justify-between pt-3 border-t border-[#1e2330]">
-          <span class="text-[11px] text-slate-500">Haz clic en "Seleccionar" en cualquier imagen para asignarla directamente a tu proyecto o formulario.</span>
+          <span id="library-selection-help" class="text-[11px] text-slate-500">Haz clic en "Seleccionar" para asignar una imagen.</span>
+          <button id="library-gallery-apply-btn" type="button" onclick="window.ElyPortfolio.applySelectedGalleryLibraryImages()" class="hidden px-4 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-xs text-black font-bold">Agregar seleccionadas (0)</button>
           <button type="button" onclick="window.ElyPortfolio.closeImageLibraryModal()" class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white font-semibold">
             Cerrar Biblioteca
           </button>
