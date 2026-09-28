@@ -3716,7 +3716,7 @@
       const extension = imageExtension(dataUrl);
       const filename = sanitizeGithubImageName(image.name, extension);
       const path = 'assets/images/ely/' + filename;
-      const url = 'https://raw.githubusercontent.com/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/' + GITHUB_BRANCH + '/' + path;
+      const url = './' + path;
 
       await putGithubFile(path, dataUrlToBase64(dataUrl), 'Upload library image ' + filename);
       uploadedImages.set(dataUrl, { path, url });
