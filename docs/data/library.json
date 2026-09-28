@@ -1,5 +1,12 @@
 [
   {
+    "id": "custom-1790625267181-yv1v",
+    "name": "icon.png",
+    "category": "maddys",
+    "folder": "maddys",
+    "path": "./assets/images/ely/maddys/icon.png"
+  },
+  {
     "id": "custom-1790621912877-i3a1",
     "name": "MotoLocoLogo.png",
     "category": "MotoLoco",
