@@ -1494,6 +1494,8 @@
       const isProp = project.origin === 'propio';
       const isAlreadyInDom = renderedCardIds.has(project.id);
       const entranceClass = isAlreadyInDom ? '' : 'card-fade-in';
+      const cardEffect = project.cardEffect || 'none';
+      const cardEffectClass = cardEffect !== 'none' ? ' card-effect-' + cardEffect : '';
 
       const originBadge = isServ
         ? '<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Servicio Técnico</span>'
@@ -1598,7 +1600,7 @@
       ` : '';
 
       html += `
-        <article data-id="${project.id}" class="${entranceClass} group relative flex flex-col overflow-hidden rounded-2xl bg-[#12151d] border border-[#232733] hover:border-amber-400/60 transform hover:scale-105 transition-all duration-300 ease-out shadow-lg hover:shadow-2xl hover:shadow-amber-500/20 z-0 hover:z-10">
+        <article data-id="${project.id}" class="${entranceClass}${cardEffectClass} group relative flex flex-col overflow-hidden rounded-2xl bg-[#12151d] border border-[#232733] hover:border-amber-400/60 transform hover:scale-105 transition-all duration-300 ease-out shadow-lg hover:shadow-2xl hover:shadow-amber-500/20 z-0 hover:z-10">
           
           ${moderatorBar}
 
@@ -1945,6 +1947,8 @@
       }
     }
 
+    if (activeMediaMode === 'image' && images.length > 1) attachModalGallerySwipe();
+
     // Miniaturas (Thumbs) si hay múltiples fotos y está en modo 'image'
     if (thumbsContainer) {
       if (activeMediaMode === 'image' && images.length > 1) {
@@ -1966,6 +1970,31 @@
         thumbsContainer.classList.add('hidden');
       }
     }
+  }
+
+  function attachModalGallerySwipe() {
+    const mediaContainer = document.getElementById('modal-media-viewport');
+    if (!mediaContainer || mediaContainer.dataset.swipeReady === '1') return;
+    mediaContainer.dataset.swipeReady = '1';
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+    mediaContainer.addEventListener('touchstart', function (event) {
+      if (activeMediaMode !== 'image' || !selectedProject) return;
+      const touch = event.changedTouches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+      tracking = true;
+    }, { passive: true });
+    mediaContainer.addEventListener('touchend', function (event) {
+      if (!tracking || activeMediaMode !== 'image') return;
+      tracking = false;
+      const touch = event.changedTouches[0];
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+      if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy)) return;
+      cycleModalImage(dx < 0 ? 1 : -1);
+    }, { passive: true });
   }
 
   function setModalMediaMode(mode) {
@@ -3116,6 +3145,8 @@
     document.getElementById('edit-proj-role').value = project.role || '';
     document.getElementById('edit-proj-client').value = project.clientOrTeam || '';
     document.getElementById('edit-proj-year').value = project.year || '';
+    const editCardEffect = document.getElementById('edit-proj-card-effect');
+    if (editCardEffect) editCardEffect.value = project.cardEffect || 'none';
     document.getElementById('edit-proj-cover').value = project.coverImage || '';
     const editPlayCheck = document.getElementById('edit-proj-play-check');
     const editPlayUrl = document.getElementById('edit-proj-play-url');
@@ -3179,6 +3210,8 @@
     project.role = document.getElementById('edit-proj-role').value.trim();
     project.clientOrTeam = document.getElementById('edit-proj-client').value.trim() || undefined;
     project.year = document.getElementById('edit-proj-year').value.trim();
+    const editCardEffect = document.getElementById('edit-proj-card-effect');
+    project.cardEffect = editCardEffect ? editCardEffect.value : 'none';
     project.icon = document.getElementById('edit-proj-icon').value.trim() || project.icon || project.coverImage || './assets/images/ely/my-avatar.png';
     project.coverImage = document.getElementById('edit-proj-cover').value.trim() || './assets/images/ely/my-avatar.png';
     const editPlayCheck = document.getElementById('edit-proj-play-check');
