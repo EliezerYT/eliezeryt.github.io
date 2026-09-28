@@ -1,5 +1,5 @@
 import React from 'react';
-import { Download, PlusCircle, Mail, User, ShieldCheck, LogIn } from 'lucide-react';
+import { Download, PlusCircle, Mail, User, ShieldCheck, LogIn, Github } from 'lucide-react';
 import { AuthUser } from '../types/portfolio';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -9,6 +9,7 @@ interface NavbarProps {
   onOpenNewProject: () => void;
   onOpenContact: () => void;
   onPrintResume: () => void;
+  onOpenSyncFile?: () => void;
   currentUser: AuthUser | null;
   onOpenAuth: () => void;
   theme: 'dark' | 'light';
@@ -21,6 +22,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenNewProject,
   onOpenContact,
   onPrintResume,
+  onOpenSyncFile,
   currentUser,
   onOpenAuth,
   theme,
@@ -97,16 +99,30 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Zone 3: Actions + Auth switch */}
         <div className="flex items-center gap-2">
-          {/* ONLY show "Nuevo Proyecto" if logged in as Moderator */}
+          {/* ONLY show "Nuevo Proyecto" and "GitHub Sync" if logged in as Moderator */}
           {isModerator && (
-            <button
-              onClick={onOpenNewProject}
-              title="Añadir un nuevo proyecto al portafolio (Vista Moderador)"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-black bg-amber-400 rounded-md hover:bg-amber-300 transition-colors shadow-sm"
-            >
-              <PlusCircle className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Nuevo Proyecto</span>
-            </button>
+            <>
+              {onOpenSyncFile && (
+                <button
+                  type="button"
+                  onClick={onOpenSyncFile}
+                  title="Sincronizar archivo projects.json para GitHub"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-200 bg-[#141822] border border-[#2a3040] hover:border-amber-400/40 hover:text-amber-400 rounded-md transition-colors"
+                >
+                  <Github className="w-3.5 h-3.5 text-amber-400" />
+                  <span>GitHub Sync</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onOpenNewProject}
+                title="Añadir un nuevo proyecto al portafolio (Vista Moderador)"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-black bg-amber-400 rounded-md hover:bg-amber-300 transition-colors shadow-sm"
+              >
+                <PlusCircle className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Nuevo Proyecto</span>
+              </button>
+            </>
           )}
 
           <button

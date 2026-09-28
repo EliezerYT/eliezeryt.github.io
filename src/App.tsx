@@ -9,6 +9,7 @@ import { ProjectModalForm } from './components/ProjectModalForm';
 import { ContactModal } from './components/ContactModal';
 import { PrintableResumeModal } from './components/PrintableResumeModal';
 import { AuthModal } from './components/AuthModal';
+import { SyncFileModal } from './components/SyncFileModal';
 import { Footer } from './components/Footer';
 
 import {
@@ -27,6 +28,9 @@ import {
   Briefcase,
   Layers,
   GraduationCap,
+  Github,
+  FileJson,
+  CheckCircle2,
 } from 'lucide-react';
 
 const STORAGE_KEY = 'portfolio_projects_elydev_v6';
@@ -130,6 +134,63 @@ export default function App() {
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [selectedSubjectForContact, setSelectedSubjectForContact] = useState('');
   const [isPrintResumeOpen, setIsPrintResumeOpen] = useState(false);
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
+  const [syncToast, setSyncToast] = useState<{ show: boolean; message: string }>({
+    show: false,
+    message: '',
+  });
+
+  // Helper to persist projects to disk via server API
+  const saveProjectsToFileSystem = async (projectsToSave: Project[]): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projects: projectsToSave }),
+      });
+      if (res.ok) {
+        setSyncToast({
+          show: true,
+          message: '✓ Guardado en archivo (src/data/projects.json) listo para sincronizar con GitHub',
+        });
+        setTimeout(() => setSyncToast({ show: false, message: '' }), 4000);
+        return true;
+      }
+    } catch (err) {
+      console.warn('Backend /api/projects no disponible en este momento:', err);
+    }
+    return false;
+  };
+
+  // Load from backend projects.json file on first render
+  useEffect(() => {
+    const loadFromDisk = async () => {
+      try {
+        const res = await fetch('/api/projects');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.projects) && data.projects.length > 0) {
+            setProjects(data.projects);
+            try {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(data.projects));
+            } catch {}
+            return;
+          }
+        }
+      } catch {}
+      try {
+        const res2 = await fetch('./data/projects.json');
+        if (res2.ok) {
+          const data2 = await res2.json();
+          if (Array.isArray(data2) && data2.length > 0) {
+            setProjects(data2);
+            return;
+          }
+        }
+      } catch {}
+    };
+    loadFromDisk();
+  }, []);
 
   // Save projects to localStorage whenever modified
   useEffect(() => {
@@ -221,19 +282,26 @@ export default function App() {
   };
 
   const handleDeleteProject = (projectId: string) => {
-    setProjects((prev) => prev.filter((p) => p.id !== projectId));
+    setProjects((prev) => {
+      const next = prev.filter((p) => p.id !== projectId);
+      saveProjectsToFileSystem(next);
+      return next;
+    });
     setIsDrawerOpen(false);
   };
 
   const handleSaveProject = (savedProject: Project) => {
     setProjects((prev) => {
       const existsIndex = prev.findIndex((p) => p.id === savedProject.id);
+      let next: Project[];
       if (existsIndex >= 0) {
-        const next = [...prev];
+        next = [...prev];
         next[existsIndex] = savedProject;
-        return next;
+      } else {
+        next = [savedProject, ...prev];
       }
-      return [savedProject, ...prev];
+      saveProjectsToFileSystem(next);
+      return next;
     });
   };
 
@@ -241,7 +309,17 @@ export default function App() {
     if (confirm('¿Restablecer los proyectos y servicios originales de muestra?')) {
       setProjects(initialProjects);
       localStorage.removeItem(STORAGE_KEY);
+      saveProjectsToFileSystem(initialProjects);
     }
+  };
+
+  const handleImportProjects = (importedList: Project[]) => {
+    setProjects(importedList);
+    saveProjectsToFileSystem(importedList);
+  };
+
+  const handleManualSaveToFile = async (): Promise<boolean> => {
+    return await saveProjectsToFileSystem(projects);
   };
 
   // Smooth Navigation
@@ -276,6 +354,7 @@ export default function App() {
           setIsContactOpen(true);
         }}
         onPrintResume={() => setIsPrintResumeOpen(true)}
+        onOpenSyncFile={() => setIsSyncModalOpen(true)}
         currentUser={currentUser}
         onOpenAuth={() => setIsAuthOpen(true)}
         theme={theme}
@@ -414,27 +493,39 @@ export default function App() {
               </p>
             </div>
 
-            {/* Moderation Controls: Only visible when logged in as moderator! */}
-            {isModerator && (
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={handleOpenNewProject}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-amber-400 text-black hover:bg-amber-300 transition-colors shadow-sm"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>+ Agregar Proyecto/Ficha</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleResetSampleData}
-                  title="Restablecer proyectos iniciales (Moderador)"
-                  className="p-1.5 text-slate-400 hover:text-white rounded-lg bg-[#141822] border border-[#232733] hover:bg-[#1f2534] transition-colors"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                </button>
-              </div>
-            )}
+            {/* Moderation & File Sync Controls */}
+            <div className="flex items-center flex-wrap gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsSyncModalOpen(true)}
+                title="Sincronizar archivo src/data/projects.json para GitHub"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#141822] text-slate-200 border border-[#232733] hover:border-amber-400/50 hover:text-amber-400 transition-colors shadow-sm"
+              >
+                <Github className="w-3.5 h-3.5 text-amber-400" />
+                <span>Sincronizar con GitHub</span>
+              </button>
+
+              {isModerator && (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleOpenNewProject}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-amber-400 text-black hover:bg-amber-300 transition-colors shadow-sm"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>+ Agregar Proyecto/Ficha</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleResetSampleData}
+                    title="Restablecer proyectos iniciales (Moderador)"
+                    className="p-1.5 text-slate-400 hover:text-white rounded-lg bg-[#141822] border border-[#232733] hover:bg-[#1f2534] transition-colors"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Interactive Filters Bar */}
@@ -567,6 +658,22 @@ export default function App() {
         experience={experienceData}
         skills={skillCategories}
       />
+
+      <SyncFileModal
+        isOpen={isSyncModalOpen}
+        onClose={() => setIsSyncModalOpen(false)}
+        projects={projects}
+        onImportProjects={handleImportProjects}
+        onSaveToFile={handleManualSaveToFile}
+      />
+
+      {/* Toast Feedback for Disk / File Sync */}
+      {syncToast.show && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-xl border border-amber-400/40 bg-[#121622]/95 px-4 py-3 text-xs font-semibold text-amber-300 shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom-5">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{syncToast.message}</span>
+        </div>
+      )}
 
       {/* 7. Footer */}
       <Footer

@@ -50,15 +50,15 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onOpenDetails
   return (
     <motion.article
       layout
-      initial={{ opacity: 0, y: 26 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.96, y: 14 }}
+      initial={{ opacity: 0, scale: 0.94, y: 22 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.94, y: 12 }}
       transition={{
-        duration: 0.38,
+        duration: 0.42,
         ease: [0.22, 1, 0.36, 1],
-        delay: Math.min(index * 0.05, 0.3),
+        delay: Math.min(index * 0.065, 0.45),
       }}
-      whileHover={{ y: -5, transition: { duration: 0.2, ease: 'easeOut' } }}
+      whileHover={{ y: -6, scale: 1.015, transition: { duration: 0.22, ease: 'easeOut' } }}
       onClick={() => onOpenDetails(project)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
