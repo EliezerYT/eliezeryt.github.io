@@ -3127,9 +3127,10 @@
     document.getElementById('edit-proj-gallery').value = galleryImgs;
 
     const iconPrev = document.getElementById('edit-proj-icon-preview');
-    if (iconPrev) iconPrev.src = project.coverImage || './assets/images/ely/my-avatar.png';
+    const savedIcon = project.icon || project.coverImage || './assets/images/ely/my-avatar.png';
+    if (iconPrev) iconPrev.src = savedIcon;
     const iconInp = document.getElementById('edit-proj-icon');
-    if (iconInp) iconInp.value = project.coverImage || '';
+    if (iconInp) iconInp.value = savedIcon;
     const coverPrev = document.getElementById('edit-proj-cover-preview');
     if (coverPrev) coverPrev.src = project.coverImage || './assets/images/ely/overdrivers-teaser.jpg';
     renderGalleryThumbnails('edit-proj-gallery-thumbs', 'edit-proj-gallery');
@@ -3168,6 +3169,7 @@
     project.role = document.getElementById('edit-proj-role').value.trim();
     project.clientOrTeam = document.getElementById('edit-proj-client').value.trim() || undefined;
     project.year = document.getElementById('edit-proj-year').value.trim();
+    project.icon = document.getElementById('edit-proj-icon').value.trim() || project.icon || project.coverImage || './assets/images/ely/my-avatar.png';
     project.coverImage = document.getElementById('edit-proj-cover').value.trim() || './assets/images/ely/my-avatar.png';
     const editPlayCheck = document.getElementById('edit-proj-play-check');
     const editPlayUrl = document.getElementById('edit-proj-play-url');
@@ -3301,6 +3303,7 @@
       priceTag: priceTag || undefined,
       description: desc,
       fullStory: desc,
+      icon: document.getElementById('new-proj-icon').value.trim() || './assets/images/ely/my-avatar.png',
       coverImage: coverImage,
       galleryImages: parsedGallery.length > 0 ? parsedGallery : [coverImage],
       youtubeVideo: videoUrl || '',
