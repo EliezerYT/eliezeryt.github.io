@@ -590,11 +590,12 @@
     "category": "juegos",
     "origin": "propio",
     "year": "2021",
-    "role": "Desarrollador Integral",
+    "role": "Desarrollador",
     "featured": false,
     "coverImage": "./assets/images/ely/picon-maddys.png",
     "galleryImages": [
-      "./assets/images/ely/picon-maddys.png"
+      "./assets/images/ely/picon-maddys.png",
+      "./assets/images/ely/maddys/4.png"
     ],
     "youtubeVideo": "",
     "technologies": [
@@ -617,13 +618,7 @@
       "Implementación del sistema de vida, daño y checkpoints.",
       "Diseño de mecánicas interactivas con el entorno (llaves, puertas, resortes)."
     ],
-    "links": [
-      {
-        "label": "Ver Ficha en Canva",
-        "url": "https://www.canva.com/design/DAG0IFpYdNI/nNmvLL1L61rDTfBl8RWKuQ/view",
-        "type": "canva"
-      }
-    ],
+    "links": [],
     "icon": "./assets/images/ely/maddys/icon.png",
     "playStoreUrl": "https://play.google.com/store/apps/details?id=com.EliezerYT.MaddyAdventure",
     "itchUrl": "https://elydev.itch.io/maddys-adventures",
