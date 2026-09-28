@@ -1,7 +1,7 @@
 [
   {
     "id": "overdrivers",
-    "title": "OverDrivers: Racing Game",
+    "title": "OverDrivers",
     "tagline": "Juego de carreras y velocidad de alta adrenalina con banda sonora original",
     "description": "Proyecto de carreras en 3D desarrollado por ElyDev, con físicas dinámicas de derrape, personalización de vehículos y colaboración musical con artistas urbanos en el soundtrack oficial.",
     "fullStory": "OverDrivers representa mi proyecto insignia de carreras y acción. Diseñado con modelos de alta fidelidad, sistema de cámaras dinámicas de seguimiento y un pipeline de audio integrado que incluye colaboraciones oficiales con artistas musicales (canción \"Quieren Quitarme\" de Cifra Slimk). Cuenta con teasers oficiales en YouTube y optimización continua de rendimiento.",
@@ -10,7 +10,11 @@
     "year": "2024 - 2025",
     "role": "Lead Game Designer & Programador Principal",
     "featured": true,
-    "coverImage": "/src/assets/images/ely/overdrivers-teaser.jpg",
+    "coverImage": "https://raw.githubusercontent.com/EliezerYT/portfolio2026/main/assets/images/moderator/22684bc35b53a844b33621864079a024dc0c1ae9b54cbc9b915f602dd1638fb2.png",
+    "galleryImages": [
+      "./assets/images/ely/overdrivers-teaser.jpg"
+    ],
+    "youtubeVideo": "https://www.youtube.com/watch?v=JiyzvWfYUKA",
     "technologies": [
       "Unity 3D",
       "C#",
@@ -51,68 +55,6 @@
         "type": "video"
       }
     ],
-    "galleryImages": [
-      "/src/assets/images/ely/overdrivers-teaser.jpg"
-    ],
-    "youtubeVideo": "",
-    "requirements": []
-  },
-  {
-    "id": "proj-1790598970376",
-    "title": "[Copia] OverDrivers: Racing Game",
-    "tagline": "Juego de carreras y velocidad de alta adrenalina con banda sonora original",
-    "description": "Proyecto de carreras en 3D desarrollado por ElyDev, con físicas dinámicas de derrape, personalización de vehículos y colaboración musical con artistas urbanos en el soundtrack oficial.",
-    "fullStory": "OverDrivers representa mi proyecto insignia de carreras y acción. Diseñado con modelos de alta fidelidad, sistema de cámaras dinámicas de seguimiento y un pipeline de audio integrado que incluye colaboraciones oficiales con artistas musicales (canción \"Quieren Quitarme\" de Cifra Slimk). Cuenta con teasers oficiales en YouTube y optimización continua de rendimiento.",
-    "category": "juegos",
-    "origin": "propio",
-    "year": "2024 - 2025",
-    "role": "Lead Game Designer & Programador Principal",
-    "featured": true,
-    "coverImage": "/src/assets/images/ely/overdrivers-teaser.jpg",
-    "technologies": [
-      "Unity 3D",
-      "C#",
-      "Vehicle Physics",
-      "FMOD Audio",
-      "Cinemachine",
-      "Custom Shaders"
-    ],
-    "metrics": [
-      {
-        "label": "Estado",
-        "value": "En Desarrollo Activo"
-      },
-      {
-        "label": "Teasers Oficiales",
-        "value": "#1 y #2 en YouTube"
-      },
-      {
-        "label": "Colaboración",
-        "value": "Soundtrack Original"
-      }
-    ],
-    "keyContributions": [
-      "Implementación del modelo de físicas de vehículos con tracción en las cuatro ruedas y derrape asistido.",
-      "Sistema de sonido adaptativo con motores reactivos a RPM y cambios de marcha.",
-      "Dirección y edición de los teasers cinematográficos oficiales publicados en el canal de YouTube.",
-      "Diseño de circuitos urbanos nocturnos con iluminación optimizada para tasas de cuadros estables."
-    ],
-    "links": [
-      {
-        "label": "Ver Teaser #2 en YouTube",
-        "url": "https://www.youtube.com/watch?v=PH6cK45nkto",
-        "type": "video"
-      },
-      {
-        "label": "Colaboración Musical Cifra Slimk",
-        "url": "https://www.youtube.com/watch?v=jA9kxcgnPmw",
-        "type": "video"
-      }
-    ],
-    "galleryImages": [
-      "/src/assets/images/ely/overdrivers-teaser.jpg"
-    ],
-    "youtubeVideo": "",
     "requirements": []
   },
   {
@@ -125,9 +67,14 @@
     "origin": "trabajado",
     "clientOrTeam": "Capricornio Games & CapricornioTV",
     "year": "2024 - 2025",
-    "role": "Freelance Lead Game Developer & Web Full-Stack",
+    "role": "Full Develop",
     "featured": true,
-    "coverImage": "/src/assets/images/ely/icon-enunagoma.png",
+    "coverImage": "./assets/images/ely/icon-enunagoma.png",
+    "galleryImages": [
+      "./assets/images/ely/icon-enunagoma.png",
+      "./assets/images/ely/overdrivers-teaser.jpg"
+    ],
+    "youtubeVideo": "",
     "technologies": [
       "Unity",
       "C#",
@@ -162,7 +109,8 @@
         "url": "https://www.canva.com/design/DAHCkhIcWiA/6wdEoS2nzQ9AS30-C88Rqw/view",
         "type": "external"
       }
-    ]
+    ],
+    "requirements": []
   },
   {
     "id": "dominican-power",
@@ -176,7 +124,12 @@
     "year": "2021 - 2022",
     "role": "Freelance Game Developer (UI, Red & Gameplay)",
     "featured": true,
-    "coverImage": "/src/assets/images/ely/icon-dominicanpower.png",
+    "coverImage": "./assets/images/ely/icon-dominicanpower.png",
+    "galleryImages": [
+      "./assets/images/ely/icon-dominicanpower.png",
+      "./assets/images/ely/icon-yunonline.png"
+    ],
+    "youtubeVideo": "",
     "technologies": [
       "Unity",
       "C#",
@@ -225,7 +178,11 @@
     "year": "2023",
     "role": "Desarrollador de Aplicación Móvil",
     "featured": true,
-    "coverImage": "/src/assets/images/ely/icon-telesancris.png",
+    "coverImage": "./assets/images/ely/icon-telesancris.png",
+    "galleryImages": [
+      "./assets/images/ely/icon-telesancris.png"
+    ],
+    "youtubeVideo": "",
     "technologies": [
       "C# / Unity Mobile Tools",
       "HLS Video Streaming",
@@ -271,7 +228,11 @@
     "year": "2022",
     "role": "Programador de Juego & Reskin",
     "featured": false,
-    "coverImage": "/src/assets/images/ely/icon-yunonline.png",
+    "coverImage": "./assets/images/ely/icon-yunonline.png",
+    "galleryImages": [
+      "./assets/images/ely/icon-yunonline.png"
+    ],
+    "youtubeVideo": "",
     "technologies": [
       "Unity",
       "C#",
@@ -314,7 +275,11 @@
     "year": "2023",
     "role": "Desarrollador Integral de Juego",
     "featured": false,
-    "coverImage": "/src/assets/images/ely/icon-retopolis.jpg",
+    "coverImage": "./assets/images/ely/icon-retopolis.jpg",
+    "galleryImages": [
+      "./assets/images/ely/icon-retopolis.jpg"
+    ],
+    "youtubeVideo": "",
     "technologies": [
       "Unity",
       "C#",
@@ -356,7 +321,11 @@
     "year": "2023",
     "role": "Creador & Desarrollador Principal",
     "featured": false,
-    "coverImage": "/src/assets/images/ely/icon-helptuber.jpg",
+    "coverImage": "./assets/images/ely/icon-helptuber.jpg",
+    "galleryImages": [
+      "./assets/images/ely/icon-helptuber.jpg"
+    ],
+    "youtubeVideo": "",
     "technologies": [
       "Unity UI / C#",
       "REST API Integration",
@@ -398,7 +367,11 @@
     "year": "2022",
     "role": "Freelance Game Developer (Bug Fixer & Optimization)",
     "featured": false,
-    "coverImage": "/src/assets/images/ely/icon-dominoesrepublic.png",
+    "coverImage": "./assets/images/ely/icon-dominoesrepublic.png",
+    "galleryImages": [
+      "./assets/images/ely/icon-dominoesrepublic.png"
+    ],
+    "youtubeVideo": "",
     "technologies": [
       "Unity",
       "C#",
@@ -439,7 +412,11 @@
     "year": "2022",
     "role": "Desarrollador & Diseñador de Niveles",
     "featured": false,
-    "coverImage": "/src/assets/images/ely/picon-aworld.png",
+    "coverImage": "./assets/images/ely/picon-aworld.png",
+    "galleryImages": [
+      "./assets/images/ely/picon-aworld.png"
+    ],
+    "youtubeVideo": "",
     "technologies": [
       "Unity 2D",
       "C#",
@@ -480,7 +457,11 @@
     "year": "2022",
     "role": "Creador & Programador de Jugabilidad",
     "featured": false,
-    "coverImage": "/src/assets/images/ely/picon-hellishF.png",
+    "coverImage": "./assets/images/ely/picon-hellishF.png",
+    "galleryImages": [
+      "./assets/images/ely/picon-hellishF.png"
+    ],
+    "youtubeVideo": "",
     "technologies": [
       "Unity",
       "C#",
@@ -522,7 +503,11 @@
     "year": "2022",
     "role": "Creador & Desarrollador de Red",
     "featured": false,
-    "coverImage": "/src/assets/images/ely/picon-thespider.png",
+    "coverImage": "./assets/images/ely/picon-thespider.png",
+    "galleryImages": [
+      "./assets/images/ely/picon-thespider.png"
+    ],
+    "youtubeVideo": "",
     "technologies": [
       "Unity",
       "Photon PUN 2",
@@ -563,7 +548,11 @@
     "year": "2021",
     "role": "Diseñador de Físicas & Programador",
     "featured": false,
-    "coverImage": "/src/assets/images/ely/picon-Rball.png",
+    "coverImage": "./assets/images/ely/picon-Rball.png",
+    "galleryImages": [
+      "./assets/images/ely/picon-Rball.png"
+    ],
+    "youtubeVideo": "",
     "technologies": [
       "Unity 3D",
       "C#",
@@ -603,7 +592,11 @@
     "year": "2021",
     "role": "Desarrollador Integral",
     "featured": false,
-    "coverImage": "/src/assets/images/ely/picon-maddys.png",
+    "coverImage": "./assets/images/ely/picon-maddys.png",
+    "galleryImages": [
+      "./assets/images/ely/picon-maddys.png"
+    ],
+    "youtubeVideo": "",
     "technologies": [
       "Unity 2D",
       "C#",
@@ -643,7 +636,11 @@
     "year": "2021",
     "role": "Programador & Diseñador",
     "featured": false,
-    "coverImage": "/src/assets/images/ely/picon-snakes.png",
+    "coverImage": "./assets/images/ely/picon-snakes.png",
+    "galleryImages": [
+      "./assets/images/ely/picon-snakes.png"
+    ],
+    "youtubeVideo": "",
     "technologies": [
       "Unity",
       "C#",
@@ -684,7 +681,11 @@
     "year": "2020",
     "role": "Desarrollador",
     "featured": false,
-    "coverImage": "/src/assets/images/ely/picon-peace.png",
+    "coverImage": "./assets/images/ely/picon-peace.png",
+    "galleryImages": [
+      "./assets/images/ely/picon-peace.png"
+    ],
+    "youtubeVideo": "",
     "technologies": [
       "Unity",
       "C#",
@@ -723,12 +724,11 @@
     "deliveryTime": "2 - 4 días hábiles",
     "role": "Especialista en Monetización & SDKs",
     "featured": true,
-    "coverImage": "/src/assets/images/ely/icon-appads.png",
-    "gallery": [
-      "/src/assets/images/ely/icon-appads.png",
-      "/src/assets/images/ely/icon-inapppurchase.png",
-      "/src/assets/images/ely/icon-soundsystempng.png"
+    "coverImage": "./assets/images/ely/icon-appads.png",
+    "galleryImages": [
+      "./assets/images/ely/icon-appads.png"
     ],
+    "youtubeVideo": "",
     "technologies": [
       "Google AdMob",
       "Unity Ads",
@@ -784,11 +784,11 @@
     "deliveryTime": "2 - 3 días hábiles",
     "role": "Ingeniero de Integración IAP & Billing",
     "featured": true,
-    "coverImage": "/src/assets/images/ely/icon-inapppurchase.png",
-    "gallery": [
-      "/src/assets/images/ely/icon-inapppurchase.png",
-      "/src/assets/images/ely/icon-appads.png"
+    "coverImage": "./assets/images/ely/icon-inapppurchase.png",
+    "galleryImages": [
+      "./assets/images/ely/icon-inapppurchase.png"
     ],
+    "youtubeVideo": "",
     "technologies": [
       "Unity IAP",
       "Google Play Billing",
@@ -844,11 +844,11 @@
     "deliveryTime": "1 - 2 días hábiles",
     "role": "Arquitecto de Audio & Sound Design",
     "featured": false,
-    "coverImage": "/src/assets/images/ely/icon-soundsystempng.png",
-    "gallery": [
-      "/src/assets/images/ely/icon-soundsystempng.png",
-      "/src/assets/images/ely/overdrivers-teaser.jpg"
+    "coverImage": "./assets/images/ely/icon-soundsystempng.png",
+    "galleryImages": [
+      "./assets/images/ely/icon-soundsystempng.png"
     ],
+    "youtubeVideo": "",
     "technologies": [
       "Unity AudioSource",
       "AudioMixer",
@@ -878,7 +878,7 @@
     ],
     "requirements": [
       "Archivos de sonido y pistas musicales en formatos .wav, .mp3 o .ogg.",
-      "Lista o guion de eventos donde debe sonar cada efecto (ej. botones, salto, disparos, derrota, victoria).",
+      "Lista o guion de eventos donde debe sonar cada efecto.",
       "Proyecto de Unity donde se importará y configurará el Sound Manager."
     ],
     "links": [
@@ -903,12 +903,11 @@
     "deliveryTime": "4 - 7 días hábiles",
     "role": "Ingeniero de Redes & Multijugador",
     "featured": false,
-    "coverImage": "/src/assets/images/ely/icon-dominicanpower.png",
-    "gallery": [
-      "/src/assets/images/ely/icon-dominicanpower.png",
-      "/src/assets/images/ely/icon-yunonline.png",
-      "/src/assets/images/ely/picon-thespider.png"
+    "coverImage": "./assets/images/ely/icon-dominicanpower.png",
+    "galleryImages": [
+      "./assets/images/ely/icon-dominicanpower.png"
     ],
+    "youtubeVideo": "",
     "technologies": [
       "Photon PUN 2",
       "Photon Voice",
@@ -939,7 +938,7 @@
     "requirements": [
       "Cuenta gratuita de Photon Engine (photonengine.com) con App ID de PUN 2 listo.",
       "Prefabs de personajes con scripts básicos de movimiento y animaciones ya creados.",
-      "Mecánicas centrales del juego definidas (ej. disparos, movimiento en arena, carreras)."
+      "Mecánicas centrales del juego definidas."
     ],
     "links": [
       {
@@ -953,28 +952,24 @@
     "id": "clase-unity-csharp",
     "title": "Clase Privada: Desarrollo de Juegos Unity & C#",
     "tagline": "Sesiones personalizadas 1 a 1 para aprender programación y diseño de videojuegos",
-    "description": "Aprende a programar videojuegos desde cero o sube de nivel con proyectos reales. Clases prácticas uno a uno enfocadas en lo que tú quieras aprender.",
+    "description": "Solicita una clase privada de nivel basico, para aprender lo basico o algun tema especifico de tu interes!",
     "fullStory": "Clases particulares personalizadas impartidas por ElyDev a través de Discord o Google Meet con pantalla compartida. Adaptadas a tu ritmo, desde los fundamentos de programación en C# y físicas en Unity hasta mecánicas complejas, inteligencia artificial y arquitectura de código limpio.",
     "category": "juegos",
     "origin": "clases",
-    "year": "2024 - 2025",
+    "year": "",
     "showDate": false,
-    "priceTag": "$20 USD / hora",
+    "priceTag": "$7 USD / hora",
     "deliveryTime": "Horarios Flexibles a Convenir",
-    "role": "Tutor & Desarrollador Senior",
+    "role": "Tutoria",
     "featured": true,
-    "coverImage": "/src/assets/images/ely/my-avatar.png",
-    "gallery": [
-      "/src/assets/images/ely/my-avatar.png",
-      "/src/assets/images/ely/picon-aworld.png",
-      "/src/assets/images/ely/picon-Rball.png"
+    "coverImage": "./assets/images/ely/my-avatar.png",
+    "galleryImages": [
+      "./assets/images/ely/my-avatar.png"
     ],
+    "youtubeVideo": "",
     "technologies": [
       "Unity 2D & 3D",
-      "C# Programming",
-      "Game Architecture",
-      "Debugging",
-      "Live Screen Share"
+      "C# Programming"
     ],
     "metrics": [
       {
@@ -997,8 +992,8 @@
       "Revisión y optimización del código de tus propios proyectos."
     ],
     "requirements": [
-      "Computadora con Unity Hub y versión reciente de Unity instalada.",
-      "Visual Studio o VS Code configurado con soporte para C#.",
+      "Unity Hub y  Unity instalada.",
+      "Visual Studio .",
       "Discord instalado con micrófono funcional para audio y compartir pantalla.",
       "Lista de dudas o proyecto personal sobre el cual quieras avanzar en clase."
     ],
@@ -1006,124 +1001,6 @@
       {
         "label": "Ver Información en Canva",
         "url": "https://www.canva.com/design/DAG0NrslxiM/YHdVdLQOt2poFI0yOj-qCQ/view",
-        "type": "canva"
-      }
-    ]
-  },
-  {
-    "id": "clase-monetizacion-publicacion",
-    "title": "Clase Privada: Monetización & Lanzamiento Play Store",
-    "tagline": "Aprende a monetizar y publicar tu juego en Google Play Store con éxito",
-    "description": "Sesión práctica guiada donde aprenderás a compilar APK/AAB, configurar Google Play Console, integrar anuncios AdMob/Unity Ads e implementar compras integradas IAP.",
-    "fullStory": "Tutoría especializada donde te guío en todo el proceso para transformar tu proyecto de Unity en un producto comercial listo para el público. Cubrimos desde la generación de Keystores y paquetes AAB hasta la integración de anuncios, compras in-app y políticas de privacidad obligatorias.",
-    "category": "aplicaciones",
-    "origin": "clases",
-    "year": "2024 - 2025",
-    "showDate": false,
-    "priceTag": "$25 USD / hora",
-    "deliveryTime": "Sesión en Vivo con Pantalla Compartida",
-    "role": "Mentor de Publicación & Monetización",
-    "featured": false,
-    "coverImage": "/src/assets/images/ely/icon-appads.png",
-    "gallery": [
-      "/src/assets/images/ely/icon-appads.png",
-      "/src/assets/images/ely/icon-inapppurchase.png"
-    ],
-    "technologies": [
-      "Google Play Console",
-      "Unity IAP",
-      "Google AdMob",
-      "Android App Bundles (.aab)",
-      "Keystore Security"
-    ],
-    "metrics": [
-      {
-        "label": "Tarifa",
-        "value": "$25 USD / hora"
-      },
-      {
-        "label": "Enfoque",
-        "value": "Lanzamiento Comercial"
-      },
-      {
-        "label": "Resultado",
-        "value": "Juego Publicado"
-      }
-    ],
-    "keyContributions": [
-      "Paso a paso para crear y firmar tu aplicación para Google Play Store.",
-      "Configuración de cuenta de desarrollador, fichas de tienda y cuestionarios de contenido.",
-      "Integración práctica de banners y rewarded ads con AdMob.",
-      "Evita los rechazos más comunes de Google Play."
-    ],
-    "requirements": [
-      "Proyecto de Unity terminado o en fase final listo para compilar.",
-      "Cuenta de Google Play Console (o intención de adquirirla).",
-      "Conexión estable a internet para sesión por Discord / Google Meet."
-    ],
-    "links": [
-      {
-        "label": "Ver Información en Canva",
-        "url": "https://www.canva.com/design/DAG0NrslxiM/YHdVdLQOt2poFI0yOj-qCQ/view",
-        "type": "canva"
-      }
-    ]
-  },
-  {
-    "id": "clase-multijugador-photon",
-    "title": "Clase Privada: Multijugador Online con Photon PUN 2",
-    "tagline": "Aprende a crear juegos multijugador online desde cero",
-    "description": "Domina la programación de videojuegos online: estructura cliente-servidor, sincronización sin lag, interpolación de movimientos, manejo de salas y RPCs con Photon Network.",
-    "fullStory": "Una clase intensiva donde desmitificamos la programación en red. Aprenderás cómo sincronizar personajes entre jugadores, sincronizar disparos y proyectiles, manejar la desconexión de usuarios y crear lobbies con búsqueda de partidas de forma comprensible y modular.",
-    "category": "juegos",
-    "origin": "clases",
-    "year": "2024 - 2025",
-    "showDate": false,
-    "priceTag": "$25 USD / hora",
-    "deliveryTime": "Sesión en Vivo con Pantalla Compartida",
-    "role": "Mentor de Multijugador & Networking",
-    "featured": false,
-    "coverImage": "/src/assets/images/ely/icon-dominicanpower.png",
-    "gallery": [
-      "/src/assets/images/ely/icon-dominicanpower.png",
-      "/src/assets/images/ely/picon-thespider.png"
-    ],
-    "technologies": [
-      "Photon PUN 2",
-      "Unity C#",
-      "Network RPCs",
-      "Lobby & Room Management",
-      "Smooth Interpolation"
-    ],
-    "metrics": [
-      {
-        "label": "Tarifa",
-        "value": "$25 USD / hora"
-      },
-      {
-        "label": "Enfoque",
-        "value": "Arquitectura Online"
-      },
-      {
-        "label": "Tecnología",
-        "value": "Photon Network"
-      }
-    ],
-    "keyContributions": [
-      "Entendimiento profundo de RPCs y Custom Properties de Photon.",
-      "Técnicas de interpolación de red para que el movimiento de otros jugadores se vea fluido.",
-      "Estructura de lobbies para invitar amigos con códigos de sala.",
-      "Plantilla de proyecto multijugador funcional para tus futuros juegos."
-    ],
-    "requirements": [
-      "Conocimientos básicos de C# y programación de scripts en Unity.",
-      "Unity instalado y cuenta en photonengine.com creada.",
-      "Discord para llamada en vivo y visualización compartida de código."
-    ],
-    "links": [
-      {
-        "label": "Ver Ficha en Canva",
-        "url": "https://www.canva.com/design/DAHCk6iQVwY/FlPYVFA3lew686sjP3Cyvw/view",
         "type": "canva"
       }
     ]
