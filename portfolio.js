@@ -3944,8 +3944,9 @@
 
       const dataUrl = image.path;
       const extension = imageExtension(dataUrl);
+      const folder = (image.folder || image.category || 'Profile').replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
       const filename = sanitizeGithubImageName(image.name, extension);
-      const path = 'assets/images/ely/' + filename;
+      const path = 'assets/images/ely/' + folder + '/' + filename;
       const url = './' + path;
 
       await putGithubFile(path, dataUrlToBase64(dataUrl), 'Upload library image ' + filename);
@@ -4282,6 +4283,23 @@
     return [...customLibraryImages, ...DEFAULT_LIBRARY_IMAGES];
   }
 
+  function getLibraryFolderConfig() {
+    const styleEl = document.getElementById('library-folder-style');
+    const customEl = document.getElementById('library-custom-folder');
+    const style = styleEl ? styleEl.value : 'Profile';
+    if (style === 'Custom') {
+      const custom = (customEl ? customEl.value : '').trim().replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
+      return custom || 'Custom';
+    }
+    return style;
+  }
+
+  function setLibraryFolderUI() {
+    const styleEl = document.getElementById('library-folder-style');
+    const customWrap = document.getElementById('library-custom-folder-wrap');
+    if (customWrap) customWrap.classList.toggle('hidden', !styleEl || styleEl.value !== 'Custom');
+  }
+
   function renderLibraryGrid(searchFilter = '') {
     const grid = document.getElementById('library-images-grid');
     const countEl = document.getElementById('library-images-count');
@@ -4463,6 +4481,11 @@
       document.body.style.overflow = 'hidden';
       const searchInput = document.getElementById('library-search-input');
       if (searchInput) searchInput.value = '';
+      const styleEl = document.getElementById('library-folder-style');
+      const customEl = document.getElementById('library-custom-folder');
+      if (styleEl) styleEl.value = 'Profile';
+      if (customEl) customEl.value = '';
+      setLibraryFolderUI();
       renderLibraryGrid();
     }
   }
@@ -4583,7 +4606,8 @@
     const newImg = {
       id: 'custom-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
       name: name || 'Imagen Subida',
-      category: 'Subido',
+      category: getLibraryFolderConfig(),
+      folder: getLibraryFolderConfig(),
       path: dataUrl
     };
     customLibraryImages.unshift(newImg);
@@ -4595,6 +4619,10 @@
   }
 
   function setupImageDropzones() {
+    const folderStyle = document.getElementById('library-folder-style');
+    if (folderStyle) folderStyle.addEventListener('change', setLibraryFolderUI);
+    setLibraryFolderUI();
+
     // 1. Search in library
     const searchInput = document.getElementById('library-search-input');
     if (searchInput) {
