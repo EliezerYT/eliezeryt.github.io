@@ -1697,7 +1697,7 @@
 
     <!-- SUBVENTANA 12: MODAL DE BIBLIOTECA DE IMÁGENES (DRAG & DROP + SELECCIÓN VISUAL) -->
     <div id="image-library-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
-      <div class="relative w-full max-w-4xl rounded-2xl bg-[#12151d] border border-[#232733] shadow-2xl p-6 space-y-4 max-h-[92vh] flex flex-col">
+      <div class="relative w-full max-w-5xl rounded-2xl bg-[#12151d] border border-[#232733] shadow-2xl p-5 sm:p-6 space-y-4 max-h-[96vh] flex flex-col overflow-hidden">
         
         <!-- Header -->
         <div class="flex items-center justify-between border-b border-[#1e2330] pb-3">
@@ -1755,7 +1755,7 @@
         </div>
 
         <!-- Cuadrícula de Imágenes -->
-        <div id="library-images-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 overflow-y-auto flex-1 p-1 max-h-[50vh]">
+        <div id="library-images-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 overflow-y-auto flex-1 min-h-0 p-2 max-h-[62vh] pr-3 items-start">
           <!-- Inyectado dinámicamente con thumbnails, nombres y botón de seleccionar -->
         </div>
 
