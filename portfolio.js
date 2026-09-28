@@ -4882,7 +4882,7 @@
     });
   }
 
-  function addCustomImageToLibrary(name, dataUrl) {
+  function addCustomImageToLibrary(name, dataUrl, onUploaded) {
     const folder = getLibraryFolderConfig();
     const newImg = {
       id: 'custom-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
@@ -4894,7 +4894,9 @@
     customLibraryImages.unshift(newImg);
     persistCustomLibraryImages();
     renderLibraryGrid();
-    uploadCustomImageImmediately(newImg, dataUrl);
+    uploadCustomImageImmediately(newImg, dataUrl).then(() => {
+      if (typeof onUploaded === 'function') onUploaded(newImg, dataUrl);
+    });
     return newImg;
   }
 
