@@ -1602,10 +1602,10 @@
           
           ${moderatorBar}
 
-          <!-- Imagen de Cabecera (Soporta 16:9 y cliqueable) -->
-          <div class="relative aspect-16-9 w-full overflow-hidden bg-[#181d28] cursor-pointer" onclick="window.ElyPortfolio.openProjectModal('${project.id}')">
+          <!-- Icono cuadrado de representación del proyecto -->
+          <div class="relative aspect-square w-full overflow-hidden bg-[#181d28] cursor-pointer" onclick="window.ElyPortfolio.openProjectModal('${project.id}')">
             <img
-              src="${project.coverImage || './assets/images/ely/my-avatar.png'}"
+              src="${project.icon || project.coverImage || './assets/images/ely/my-avatar.png'}"
               alt="${project.title}"
               class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
               onerror="this.src='./assets/images/ely/my-avatar.png'"
