@@ -4484,8 +4484,8 @@
             </div>
           </div>
           <div class="grid grid-cols-2 gap-1.5 mt-3">
-            <button type="button" class="rounded-md bg-amber-400 hover:bg-amber-300 py-1.5 text-[11px] font-bold text-black transition-colors select-image-btn">Seleccionar</button>
-            <button type="button" class="rounded-md bg-white/10 hover:bg-white/20 py-1.5 text-[11px] font-bold text-white transition-colors library-preview-btn">Ver grande</button>
+            <button type="button" class="rounded-md bg-amber-400 hover:bg-amber-300 px-2 py-1 text-[9px] font-bold text-black transition-colors select-image-btn">Seleccionar</button>
+            <button type="button" class="rounded-md bg-white/10 hover:bg-white/20 px-2 py-1 text-[9px] font-bold text-white transition-colors library-preview-btn">Ver grande</button>
           </div>
           ${canMove ? `
             <div class="grid grid-cols-2 gap-1.5 mt-1.5">
@@ -4883,19 +4883,73 @@
   }
 
   function addCustomImageToLibrary(name, dataUrl) {
+    const folder = getLibraryFolderConfig();
     const newImg = {
       id: 'custom-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
       name: name || 'Imagen Subida',
-      category: getLibraryFolderConfig(),
-      folder: getLibraryFolderConfig(),
+      category: folder,
+      folder: folder,
       path: dataUrl
     };
     customLibraryImages.unshift(newImg);
-    try {
-      localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages));
-    } catch (e) {}
+    persistCustomLibraryImages();
     renderLibraryGrid();
+    uploadCustomImageImmediately(newImg, dataUrl);
     return newImg;
+  }
+
+  async function uploadCustomImageImmediately(image, dataUrl) {
+    if (!image || !dataUrl || !dataUrl.startsWith('data:image/')) return;
+    if (!getGithubToken()) return;
+
+    const extension = imageExtension(dataUrl);
+    const folder = normalizeLibraryFolder(image.folder || getLibraryFolderConfig());
+    const filename = sanitizeGithubImageName(image.name, extension);
+    const githubPath = 'assets/images/ely/' + folder + '/' + filename;
+
+    try {
+      showStatusNotification({
+        title: 'Subiendo imagen',
+        message: '"' + (image.name || 'Imagen') + '" se está subiendo a GitHub...',
+        type: 'info',
+        icon: '☁️'
+      });
+
+      await putGithubFile(githubPath, dataUrlToBase64(dataUrl), 'Upload library image ' + filename);
+
+      const previousPath = image.path;
+      image.path = './' + githubPath;
+      persistCustomLibraryImages();
+
+      if (currentLibraryTarget && currentLibraryTarget.type === 'gallery') {
+        const galleryInput = document.getElementById(currentLibraryTarget.hiddenInputId);
+        if (galleryInput && galleryInput.value.includes(previousPath)) {
+          galleryInput.value = galleryInput.value.split(previousPath).join(image.path);
+          renderGalleryThumbnails(currentLibraryTarget.thumbsContainerId, currentLibraryTarget.hiddenInputId);
+        }
+        if (selectedGalleryLibraryImages.has(previousPath)) {
+          selectedGalleryLibraryImages.delete(previousPath);
+          selectedGalleryLibraryImages.add(image.path);
+          updateLibraryGallerySelectionUI();
+        }
+      }
+
+      renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
+      showStatusNotification({
+        title: 'Imagen subida',
+        message: '"' + (image.name || 'Imagen') + '" ya está disponible en GitHub.',
+        type: 'success',
+        icon: '☁️'
+      });
+    } catch (error) {
+      console.error('[LIBRARY UPLOAD ERROR]', error);
+      showStatusNotification({
+        title: 'No se pudo subir',
+        message: '"' + (image.name || 'Imagen') + '" quedó disponible localmente. Puedes sincronizarla después.',
+        type: 'error',
+        icon: '⚠️'
+      });
+    }
   }
 
   function setupImageDropzones() {
@@ -5007,7 +5061,10 @@
         reader.onload = (event) => {
           const dataUrl = event.target.result;
           if (inp) inp.value = dataUrl;
-          if (prev) prev.src = dataUrl;
+          if (prev) {
+            prev.onerror = null;
+            prev.src = dataUrl;
+          }
           addCustomImageToLibrary(file.name, dataUrl);
           showStatusNotification({
             title: 'Imagen Cargada',
@@ -5058,19 +5115,21 @@
           const reader = new FileReader();
           reader.onload = (event) => {
             const dataUrl = event.target.result;
-            addCustomImageToLibrary(file.name, dataUrl);
+            const added = addCustomImageToLibrary(file.name, dataUrl);
             if (hiddenInput) {
               const current = hiddenInput.value ? hiddenInput.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
               if (!current.includes(dataUrl)) current.push(dataUrl);
               hiddenInput.value = current.join('\n');
               renderGalleryThumbnails(containerId, hiddenInputId);
+
+
             }
           };
           reader.readAsDataURL(file);
         });
         showStatusNotification({
           title: 'Galería Actualizada',
-          message: `Se agregaron ${files.length} capturas a la galería.`,
+          message: `Las ${files.length} capturas se están cargando inmediatamente.`,
           type: 'success',
           icon: '📸'
         });
