@@ -2802,6 +2802,7 @@
     } catch (err) {}
 
     renderProjectsGrid();
+    syncProjectsWithBackend(projects);
     showStatusNotification({
       title: 'Proyecto Duplicado',
       message: `Se ha creado una copia de "${project.title}".`,
@@ -2820,6 +2821,7 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
       } catch (err) {}
       renderProjectsGrid();
+      syncProjectsWithBackend(projects);
     }
   }
 
@@ -2852,6 +2854,14 @@
     // Múltiples imágenes (galería) separadas por salto de línea
     const galleryImgs = Array.isArray(project.galleryImages) ? project.galleryImages.join('\n') : (project.coverImage || '');
     document.getElementById('edit-proj-gallery').value = galleryImgs;
+
+    const iconPrev = document.getElementById('edit-proj-icon-preview');
+    if (iconPrev) iconPrev.src = project.coverImage || './assets/images/ely/my-avatar.png';
+    const iconInp = document.getElementById('edit-proj-icon');
+    if (iconInp) iconInp.value = project.coverImage || '';
+    const coverPrev = document.getElementById('edit-proj-cover-preview');
+    if (coverPrev) coverPrev.src = project.coverImage || './assets/images/ely/overdrivers-teaser.jpg';
+    renderGalleryThumbnails('edit-proj-gallery-thumbs', 'edit-proj-gallery');
 
     // Video de YouTube en grande
     document.getElementById('edit-proj-video').value = project.youtubeVideo || '';
@@ -2918,6 +2928,7 @@
 
     closeEditProjectModal();
     renderProjectsGrid();
+    syncProjectsWithBackend(projects);
     showStatusNotification({
       title: 'Proyecto Guardado',
       message: `Los cambios en "${project.title}" fueron actualizados y guardados exitosamente.`,
@@ -2934,6 +2945,18 @@
     }
     const modal = document.getElementById('add-project-modal');
     if (modal) {
+      const iconPrev = document.getElementById('new-proj-icon-preview');
+      if (iconPrev) iconPrev.src = './assets/images/ely/my-avatar.png';
+      const iconInp = document.getElementById('new-proj-icon');
+      if (iconInp) iconInp.value = './assets/images/ely/my-avatar.png';
+      const coverPrev = document.getElementById('new-proj-cover-preview');
+      if (coverPrev) coverPrev.src = './assets/images/ely/overdrivers-teaser.jpg';
+      const coverInp = document.getElementById('new-proj-cover');
+      if (coverInp) coverInp.value = './assets/images/ely/overdrivers-teaser.jpg';
+      const galleryInp = document.getElementById('new-proj-gallery');
+      if (galleryInp) galleryInp.value = '';
+      renderGalleryThumbnails('new-proj-gallery-thumbs', 'new-proj-gallery');
+
       modal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
     }
@@ -2985,6 +3008,7 @@
 
     closeAddProjectModal();
     renderProjectsGrid();
+    syncProjectsWithBackend(projects);
     showStatusNotification({
       title: 'Proyecto Guardado',
       message: `El proyecto "${newProject.title}" se guardó y publicó exitosamente en el catálogo.`,
@@ -3304,13 +3328,464 @@
         localStorage.removeItem(STORAGE_KEY);
       } catch (err) {}
       renderProjectsGrid();
+      syncProjectsWithBackend(projects);
       alert('Proyectos restablecidos.');
     }
+  }
+
+  // Sincronización automática de proyectos con el backend (src/data/projects.json)
+  function syncProjectsWithBackend(list) {
+    if (typeof fetch === 'function') {
+      fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projects: list })
+      }).catch(function () {});
+    }
+  }
+
+  function loadProjectsFromBackend() {
+    if (typeof fetch === 'function') {
+      fetch('/api/projects')
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data && data.success && Array.isArray(data.projects) && data.projects.length > 0) {
+            projects = data.projects;
+            renderProjectsGrid();
+          }
+        })
+        .catch(function () {});
+    }
+  }
+
+  // 16.1 Biblioteca de Imágenes & Drag and Drop Multimedia
+  const CUSTOM_IMAGES_KEY = 'portfolio_custom_images_v2';
+  const DEFAULT_LIBRARY_IMAGES = [
+    { id: 'overdrivers', name: 'OverDrivers Teaser', category: 'Juegos', path: './assets/images/ely/overdrivers-teaser.jpg' },
+    { id: 'enunagoma', name: 'MotoLoco (En Una Goma)', category: 'Juegos', path: './assets/images/ely/icon-enunagoma.png' },
+    { id: 'dominicanpower', name: 'Dominican Power', category: 'Juegos', path: './assets/images/ely/icon-dominicanpower.png' },
+    { id: 'telesancris', name: 'Telesancris Mobile App', category: 'Apps', path: './assets/images/ely/icon-telesancris.png' },
+    { id: 'yunonline', name: 'Yun Online', category: 'Juegos', path: './assets/images/ely/icon-yunonline.png' },
+    { id: 'retopolis', name: 'Retopolis Hub', category: 'Juegos', path: './assets/images/ely/icon-retopolis.jpg' },
+    { id: 'helptuber', name: 'HELPTUBER Suite', category: 'Apps', path: './assets/images/ely/icon-helptuber.jpg' },
+    { id: 'dominoesrepublic', name: 'Dominoes Republic', category: 'Juegos', path: './assets/images/ely/icon-dominoesrepublic.png' },
+    { id: 'adventureworld', name: 'Adventure World', category: 'Juegos', path: './assets/images/ely/picon-aworld.png' },
+    { id: 'hellishflash', name: 'Hellish Flash', category: 'Juegos', path: './assets/images/ely/picon-hellishF.png' },
+    { id: 'thespider', name: 'La Arañita Online', category: 'Juegos', path: './assets/images/ely/picon-thespider.png' },
+    { id: 'rollingball', name: 'Rolling Ball 3D', category: 'Juegos', path: './assets/images/ely/picon-Rball.png' },
+    { id: 'maddys', name: 'Maddys Adventures', category: 'Juegos', path: './assets/images/ely/picon-maddys.png' },
+    { id: 'snakes', name: 'Snakes Battles', category: 'Juegos', path: './assets/images/ely/picon-snakes.png' },
+    { id: 'peace', name: 'Peace In The Forest', category: 'Juegos', path: './assets/images/ely/picon-peace.png' },
+    { id: 'wallball', name: 'Wall Ball Reflex', category: 'Juegos', path: './assets/images/ely/picon-wallball.png' },
+    { id: 'adsmonetization', name: 'Ads Monetization System', category: 'Servicios', path: './assets/images/ely/icon-appads.png' },
+    { id: 'inapppurchases', name: 'In-App Purchases System', category: 'Servicios', path: './assets/images/ely/icon-inapppurchase.png' },
+    { id: 'soundsfx', name: 'Sounds FX & Music System', category: 'Servicios', path: './assets/images/ely/icon-soundsystempng.png' },
+    { id: 'avatar', name: 'Avatar Eliezer (ElyDev)', category: 'Perfil', path: './assets/images/ely/my-avatar.png' }
+  ];
+
+  let customLibraryImages = [];
+  try {
+    const savedCustom = localStorage.getItem(CUSTOM_IMAGES_KEY);
+    if (savedCustom) {
+      customLibraryImages = JSON.parse(savedCustom);
+    }
+  } catch (e) {
+    customLibraryImages = [];
+  }
+
+  let currentLibraryTarget = null;
+
+  function getAllLibraryImages() {
+    return [...customLibraryImages, ...DEFAULT_LIBRARY_IMAGES];
+  }
+
+  function renderLibraryGrid(searchFilter = '') {
+    const grid = document.getElementById('library-images-grid');
+    const countEl = document.getElementById('library-images-count');
+    if (!grid) return;
+
+    const allImages = getAllLibraryImages();
+    const query = (searchFilter || '').toLowerCase().trim();
+
+    const filtered = allImages.filter(img => {
+      if (!query) return true;
+      return (img.name && img.name.toLowerCase().includes(query)) ||
+             (img.category && img.category.toLowerCase().includes(query)) ||
+             (img.path && img.path.toLowerCase().includes(query));
+    });
+
+    if (countEl) {
+      countEl.textContent = filtered.length;
+    }
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `
+        <div class="col-span-full py-8 text-center text-slate-500">
+          <p class="text-sm">No se encontraron imágenes que coincidan con la búsqueda.</p>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(img => `
+      <div class="group relative flex flex-col overflow-hidden rounded-xl border border-[#232733] bg-[#0d1017] hover:border-amber-400/50 hover:shadow-lg hover:shadow-amber-500/5 transition-all p-2.5 text-left cursor-pointer" data-library-img-path="${img.path}" data-library-img-name="${img.name || ''}">
+        <div class="relative aspect-video w-full overflow-hidden rounded-lg bg-[#141822] mb-2 border border-white/5">
+          <img src="${img.path}" alt="${img.name || 'Imagen'}" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" onerror="this.src='./assets/images/ely/my-avatar.png'" />
+          <span class="absolute top-1 left-1 rounded bg-black/80 px-1.5 py-0.5 text-[9px] font-mono text-amber-400 border border-amber-400/20 backdrop-blur-sm">
+            ${img.category || 'Asset'}
+          </span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="truncate text-xs font-semibold text-slate-200 group-hover:text-amber-400 font-display" title="${img.name}">
+            ${img.name || 'Imagen'}
+          </div>
+          <div class="truncate text-[10px] text-slate-500 font-mono mt-0.5" title="${img.path}">
+            ${img.path}
+          </div>
+        </div>
+        <button type="button" class="mt-2 w-full rounded-md bg-amber-400 hover:bg-amber-300 py-1 text-[11px] font-bold text-black transition-colors select-image-btn">
+          Seleccionar
+        </button>
+      </div>
+    `).join('');
+
+    grid.querySelectorAll('[data-library-img-path]').forEach(card => {
+      card.addEventListener('click', function () {
+        const path = this.getAttribute('data-library-img-path');
+        const name = this.getAttribute('data-library-img-name');
+        selectImageFromLibrary(path, name);
+      });
+    });
+  }
+
+  function openImageLibraryModal() {
+    const modal = document.getElementById('image-library-modal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      const searchInput = document.getElementById('library-search-input');
+      if (searchInput) searchInput.value = '';
+      renderLibraryGrid();
+    }
+  }
+
+  function closeImageLibraryModal() {
+    const modal = document.getElementById('image-library-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+      currentLibraryTarget = null;
+    }
+  }
+
+  function openImageLibraryForInput(inputId, previewId) {
+    currentLibraryTarget = {
+      type: 'input',
+      inputId: inputId,
+      previewId: previewId
+    };
+    openImageLibraryModal();
+  }
+
+  function openImageLibraryForGallery(thumbsContainerId, hiddenInputId) {
+    currentLibraryTarget = {
+      type: 'gallery',
+      thumbsContainerId: thumbsContainerId,
+      hiddenInputId: hiddenInputId
+    };
+    openImageLibraryModal();
+  }
+
+  function selectImageFromLibrary(imagePath, imageName) {
+    if (!currentLibraryTarget) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(imagePath);
+      }
+      showStatusNotification({
+        title: 'Ruta Copiada',
+        message: `Ruta copiada al portapapeles: ${imagePath}`,
+        type: 'info',
+        icon: '📋'
+      });
+      closeImageLibraryModal();
+      return;
+    }
+
+    if (currentLibraryTarget.type === 'input') {
+      const inputEl = document.getElementById(currentLibraryTarget.inputId);
+      if (inputEl) {
+        inputEl.value = imagePath;
+      }
+      if (currentLibraryTarget.previewId) {
+        const previewEl = document.getElementById(currentLibraryTarget.previewId);
+        if (previewEl) {
+          previewEl.src = imagePath;
+        }
+      }
+      showStatusNotification({
+        title: 'Imagen Asignada',
+        message: `Se asignó "${imageName || imagePath}" correctamente.`,
+        type: 'success',
+        icon: '🖼️'
+      });
+    } else if (currentLibraryTarget.type === 'gallery') {
+      const inputEl = document.getElementById(currentLibraryTarget.hiddenInputId);
+      if (inputEl) {
+        const currentItems = inputEl.value ? inputEl.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
+        if (!currentItems.includes(imagePath)) {
+          currentItems.push(imagePath);
+          inputEl.value = currentItems.join('\n');
+        }
+        renderGalleryThumbnails(currentLibraryTarget.thumbsContainerId, currentLibraryTarget.hiddenInputId);
+      }
+      showStatusNotification({
+        title: 'Agregada a Galería',
+        message: `Se añadió "${imageName || imagePath}" a las capturas.`,
+        type: 'success',
+        icon: '📸'
+      });
+    }
+
+    closeImageLibraryModal();
+  }
+
+  function renderGalleryThumbnails(containerId, inputId) {
+    const container = document.getElementById(containerId);
+    const input = document.getElementById(inputId);
+    if (!container || !input) return;
+
+    const items = input.value ? input.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
+    container.innerHTML = '';
+
+    if (items.length === 0) {
+      container.innerHTML = '<span class="text-[11px] text-slate-500 italic py-1">Sin imágenes secundarias aún.</span>';
+      return;
+    }
+
+    items.forEach((src, idx) => {
+      const thumb = document.createElement('div');
+      thumb.className = 'relative group w-14 h-14 rounded-lg overflow-hidden border border-[#2c3345] bg-[#0c0e14] shrink-0';
+      thumb.innerHTML = `
+        <img src="${src}" alt="Screenshot ${idx + 1}" class="w-full h-full object-cover" onerror="this.src='./assets/images/ely/my-avatar.png'" />
+        <button type="button" title="Eliminar de galería" class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center text-red-400 font-bold text-xs transition-opacity cursor-pointer">
+          ✕
+        </button>
+      `;
+      thumb.querySelector('button').addEventListener('click', (e) => {
+        e.stopPropagation();
+        items.splice(idx, 1);
+        input.value = items.join('\n');
+        renderGalleryThumbnails(containerId, inputId);
+      });
+      container.appendChild(thumb);
+    });
+  }
+
+  function addCustomImageToLibrary(name, dataUrl) {
+    const newImg = {
+      id: 'custom-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+      name: name || 'Imagen Subida',
+      category: 'Subido',
+      path: dataUrl
+    };
+    customLibraryImages.unshift(newImg);
+    try {
+      localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages.slice(0, 30)));
+    } catch (e) {}
+    renderLibraryGrid();
+    return newImg;
+  }
+
+  function setupImageDropzones() {
+    // 1. Search in library
+    const searchInput = document.getElementById('library-search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', function (e) {
+        renderLibraryGrid(e.target.value);
+      });
+    }
+
+    // 2. Library modal upload dropzone
+    const libDropzone = document.getElementById('library-upload-dropzone');
+    const libFileInput = document.getElementById('library-upload-file-input');
+
+    if (libDropzone && libFileInput) {
+      libDropzone.addEventListener('click', () => libFileInput.click());
+      libDropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        libDropzone.classList.add('border-amber-400', 'bg-amber-400/10');
+      });
+      libDropzone.addEventListener('dragleave', () => {
+        libDropzone.classList.remove('border-amber-400', 'bg-amber-400/10');
+      });
+      libDropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        libDropzone.classList.remove('border-amber-400', 'bg-amber-400/10');
+        if (e.dataTransfer && e.dataTransfer.files) {
+          handleMultipleFilesUpload(e.dataTransfer.files);
+        }
+      });
+      libFileInput.addEventListener('change', (e) => {
+        if (e.target.files) {
+          handleMultipleFilesUpload(e.target.files);
+          e.target.value = '';
+        }
+      });
+    }
+
+    function handleMultipleFilesUpload(fileList) {
+      const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+      if (files.length === 0) return;
+
+      let processed = 0;
+      let firstAdded = null;
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const dataUrl = event.target.result;
+          const added = addCustomImageToLibrary(file.name, dataUrl);
+          if (!firstAdded) firstAdded = added;
+          processed++;
+          if (processed === files.length) {
+            showStatusNotification({
+              title: 'Imágenes Guardadas',
+              message: `Se agregaron ${files.length} imágenes a tu biblioteca local.`,
+              type: 'success',
+              icon: '☁️'
+            });
+            if (currentLibraryTarget && firstAdded) {
+              selectImageFromLibrary(firstAdded.path, firstAdded.name);
+            }
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Helper for single image dropzones
+    function bindSingleDropzone(dropzoneId, fileInputId, inputId, previewId) {
+      const dz = document.getElementById(dropzoneId);
+      const fi = document.getElementById(fileInputId);
+      const inp = document.getElementById(inputId);
+      const prev = document.getElementById(previewId);
+
+      if (!dz) return;
+      if (fi) {
+        dz.addEventListener('click', () => fi.click());
+        fi.addEventListener('change', (e) => {
+          if (e.target.files && e.target.files[0]) {
+            processSingleFile(e.target.files[0]);
+            e.target.value = '';
+          }
+        });
+      }
+      dz.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dz.classList.add('border-amber-400', 'bg-amber-400/10');
+      });
+      dz.addEventListener('dragleave', () => {
+        dz.classList.remove('border-amber-400', 'bg-amber-400/10');
+      });
+      dz.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dz.classList.remove('border-amber-400', 'bg-amber-400/10');
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+          processSingleFile(e.dataTransfer.files[0]);
+        }
+      });
+
+      function processSingleFile(file) {
+        if (!file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const dataUrl = event.target.result;
+          if (inp) inp.value = dataUrl;
+          if (prev) prev.src = dataUrl;
+          addCustomImageToLibrary(file.name, dataUrl);
+          showStatusNotification({
+            title: 'Imagen Cargada',
+            message: `"${file.name}" cargada correctamente.`,
+            type: 'success',
+            icon: '🖼️'
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Helper for gallery dropzones
+    function bindGalleryDropzone(dropzoneId, fileInputId, containerId, hiddenInputId) {
+      const dz = document.getElementById(dropzoneId);
+      const fi = document.getElementById(fileInputId);
+      const hiddenInput = document.getElementById(hiddenInputId);
+
+      if (!dz) return;
+      if (fi) {
+        dz.addEventListener('click', () => fi.click());
+        fi.addEventListener('change', (e) => {
+          if (e.target.files) {
+            processGalleryFiles(e.target.files);
+            e.target.value = '';
+          }
+        });
+      }
+      dz.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dz.classList.add('border-amber-400', 'bg-amber-400/10');
+      });
+      dz.addEventListener('dragleave', () => {
+        dz.classList.remove('border-amber-400', 'bg-amber-400/10');
+      });
+      dz.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dz.classList.remove('border-amber-400', 'bg-amber-400/10');
+        if (e.dataTransfer && e.dataTransfer.files) {
+          processGalleryFiles(e.dataTransfer.files);
+        }
+      });
+
+      function processGalleryFiles(fileList) {
+        const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+        if (files.length === 0) return;
+        files.forEach(file => {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const dataUrl = event.target.result;
+            addCustomImageToLibrary(file.name, dataUrl);
+            if (hiddenInput) {
+              const current = hiddenInput.value ? hiddenInput.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
+              current.push(dataUrl);
+              hiddenInput.value = current.join('\n');
+              renderGalleryThumbnails(containerId, hiddenInputId);
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+        showStatusNotification({
+          title: 'Galería Actualizada',
+          message: `Se agregaron ${files.length} capturas a la galería.`,
+          type: 'success',
+          icon: '📸'
+        });
+      }
+    }
+
+    bindSingleDropzone('edit-proj-icon-dropzone', 'edit-proj-icon-file', 'edit-proj-icon', 'edit-proj-icon-preview');
+    bindSingleDropzone('edit-proj-cover-dropzone', 'edit-proj-cover-file', 'edit-proj-cover', 'edit-proj-cover-preview');
+    bindGalleryDropzone('edit-proj-gallery-dropzone', 'edit-proj-gallery-files', 'edit-proj-gallery-thumbs', 'edit-proj-gallery');
+
+    bindSingleDropzone('new-proj-icon-dropzone', 'new-proj-icon-file', 'new-proj-icon', 'new-proj-icon-preview');
+    bindSingleDropzone('new-proj-cover-dropzone', 'new-proj-cover-file', 'new-proj-cover', 'new-proj-cover-preview');
+    bindGalleryDropzone('new-proj-gallery-dropzone', 'new-proj-gallery-files', 'new-proj-gallery-thumbs', 'new-proj-gallery');
+
+    bindSingleDropzone('test-form-avatar-dropzone', 'test-form-avatar-file', 'test-form-avatar', 'test-form-avatar-preview');
   }
 
   // 17. Event Listeners y arranque
   document.addEventListener('DOMContentLoaded', function () {
     applyTheme(currentTheme);
+    setupImageDropzones();
+    loadProjectsFromBackend();
 
     // Theme toggle button
     const themeBtn = document.getElementById('theme-toggle-btn');
@@ -3474,6 +3949,7 @@
         closeTestimonialModal();
         closeFeedbackModal();
         closeFeedbackCodesModal();
+        closeImageLibraryModal();
       } else if (e.key === 'ArrowLeft') {
         navigateProjectModal(-1);
       } else if (e.key === 'ArrowRight') {
@@ -3543,6 +4019,12 @@
     openAuthModal: openAuthModal,
     closeAuthModal: closeAuthModal,
     resetSampleData: resetSampleData,
-    toggleTheme: toggleTheme
+    toggleTheme: toggleTheme,
+    // Biblioteca de Imágenes & Multimedia (Drag and Drop & Assets)
+    openImageLibraryModal: openImageLibraryModal,
+    closeImageLibraryModal: closeImageLibraryModal,
+    openImageLibraryForInput: openImageLibraryForInput,
+    openImageLibraryForGallery: openImageLibraryForGallery,
+    renderGalleryThumbnails: renderGalleryThumbnails
   };
 })();
