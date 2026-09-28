@@ -73,8 +73,7 @@
     "featured": true,
     "coverImage": "./assets/images/ely/icon-enunagoma.png",
     "galleryImages": [
-      "./assets/images/ely/icon-enunagoma.png",
-      "./assets/images/ely/MotoLoco/MotoLoco-En-Una-Goma.png"
+      "./assets/images/ely/icon-enunagoma.png"
     ],
     "youtubeVideo": "https://www.youtube.com/watch?v=F7P-RS2P1i0",
     "technologies": [
