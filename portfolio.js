@@ -4348,9 +4348,59 @@
 
   let currentLibraryTarget = null;
   let selectedGalleryLibraryImages = new Set();
+  let githubElyFolderImages = [];
+  let githubElyFolderLoading = false;
 
   function getAllLibraryImages() {
-    return [...customLibraryImages, ...DEFAULT_LIBRARY_IMAGES];
+    const automaticImages = githubElyFolderImages.filter(function (remoteImage) {
+      return !DEFAULT_LIBRARY_IMAGES.some(function (defaultImage) {
+        return defaultImage.path === remoteImage.path;
+      }) && !customLibraryImages.some(function (customImage) {
+        return customImage.path === remoteImage.path;
+      });
+    });
+    return [...customLibraryImages, ...automaticImages, ...DEFAULT_LIBRARY_IMAGES];
+  }
+
+  async function loadImagesFromMainElyFolder() {
+    if (githubElyFolderLoading) return;
+    githubElyFolderLoading = true;
+
+    const endpoint = GITHUB_API_BASE + '/repos/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/contents/assets/images/ely?ref=' + GITHUB_BRANCH;
+    const headers = { Accept: 'application/vnd.github+json' };
+    const token = getGithubToken();
+    if (token) headers.Authorization = 'Bearer ' + token;
+
+    try {
+      const response = await fetch(endpoint, { headers: headers, cache: 'no-store' });
+      if (!response.ok) throw new Error('GitHub API: ' + response.status);
+
+      const entries = await response.json();
+      if (!Array.isArray(entries)) return;
+
+      const imageExtensions = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'avif', 'bmp', 'svg'];
+      githubElyFolderImages = entries
+        .filter(function (entry) {
+          if (!entry || entry.type !== 'file' || !entry.name || !entry.download_url) return false;
+          const extension = entry.name.split('.').pop().toLowerCase();
+          return imageExtensions.includes(extension);
+        })
+        .map(function (entry) {
+          return {
+            id: 'ely-folder-' + entry.sha,
+            name: entry.name.replace(/\.[^.]+$/, ''),
+            category: 'Ely',
+            folder: 'Ely',
+            path: './assets/images/ely/' + entry.name
+          };
+        });
+
+      renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
+    } catch (error) {
+      console.warn('[LIBRARY] No se pudo cargar la carpeta principal ely:', error);
+    } finally {
+      githubElyFolderLoading = false;
+    }
   }
 
   function getLibraryFolderConfig() {
@@ -4725,6 +4775,7 @@
       if (customEl) customEl.value = '';
       setLibraryFolderUI();
       renderLibraryGrid();
+      loadImagesFromMainElyFolder();
       const sizeSlider = document.getElementById('library-size-slider');
       if (sizeSlider && !sizeSlider.dataset.bound) {
         sizeSlider.dataset.bound = 'true';
@@ -5163,6 +5214,7 @@
     setupImageDropzones();
     loadAllDataFromBackend();
     loadLibraryManifestFromGithub();
+    loadImagesFromMainElyFolder();
 
     // Confirm Modal Action Button
     const confirmActionBtn = document.getElementById('confirm-modal-action-btn');
