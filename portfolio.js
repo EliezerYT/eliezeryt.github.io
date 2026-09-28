@@ -3738,10 +3738,10 @@
 
       const bytes = dataUrlToBytes(value);
       const hash = await sha256Hex(bytes);
-      const path = GITHUB_IMAGE_PATH + '/' + hash + '.' + imageExtension(value);
-      const url = 'https://raw.githubusercontent.com/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/' + GITHUB_BRANCH + '/' + path;
+      const path = 'assets/images/ely/' + hash + '.' + imageExtension(value);
+      const url = './' + path;
 
-      await putGithubFile(path, dataUrlToBase64(value), 'Update portfolio image ' + hash.slice(0, 8));
+      await putGithubFile(path, dataUrlToBase64(value), 'Upload portfolio image ' + hash.slice(0, 8));
       uploadedImages.set(value, { path, url });
       return url;
     }
@@ -4026,34 +4026,149 @@
       return;
     }
 
-    grid.innerHTML = filtered.map(img => `
-      <div class="group relative flex flex-col overflow-hidden rounded-xl border border-[#232733] bg-[#0d1017] hover:border-amber-400/50 hover:shadow-lg hover:shadow-amber-500/5 transition-all p-2.5 text-left cursor-pointer" data-library-img-path="${img.path}" data-library-img-name="${img.name || ''}">
-        <div class="relative aspect-video w-full overflow-hidden rounded-lg bg-[#141822] mb-2 border border-white/5">
-          <img src="${img.path}" alt="${img.name || 'Imagen'}" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" onerror="this.src='./assets/images/ely/my-avatar.png'" />
-          <span class="absolute top-1 left-1 rounded bg-black/80 px-1.5 py-0.5 text-[9px] font-mono text-amber-400 border border-amber-400/20 backdrop-blur-sm">
-            ${img.category || 'Asset'}
-          </span>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="truncate text-xs font-semibold text-slate-200 group-hover:text-amber-400 font-display" title="${img.name}">
-            ${img.name || 'Imagen'}
+    grid.innerHTML = filtered.map(img => {
+      const isCustom = String(img.id || '').startsWith('custom-');
+      return `
+        <div class="group relative flex flex-col overflow-hidden rounded-xl border border-[#232733] bg-[#0d1017] hover:border-amber-400/50 hover:shadow-lg hover:shadow-amber-500/5 transition-all p-2.5 text-left" data-library-img-path="${img.path}" data-library-img-name="${img.name || ''}">
+          <div class="relative aspect-video w-full overflow-hidden rounded-lg bg-[#141822] mb-2 border border-white/5 cursor-zoom-in library-preview-btn">
+            <img src="${img.path}" alt="${img.name || 'Imagen'}" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" onerror="this.src='./assets/images/ely/my-avatar.png'" />
+            <span class="absolute top-1 left-1 rounded bg-black/80 px-1.5 py-0.5 text-[9px] font-mono text-amber-400 border border-amber-400/20 backdrop-blur-sm">
+              ${img.category || 'Asset'}
+            </span>
           </div>
-          <div class="truncate text-[10px] text-slate-500 font-mono mt-0.5" title="${img.path}">
-            ${img.path}
+          <div class="flex-1 min-w-0">
+            <div class="truncate text-xs font-semibold text-slate-200 group-hover:text-amber-400 font-display" title="${img.name}">
+              ${img.name || 'Imagen'}
+            </div>
+            <div class="truncate text-[10px] text-slate-500 font-mono mt-0.5" title="${img.path}">
+              ${img.path}
+            </div>
           </div>
+          <div class="grid grid-cols-2 gap-1.5 mt-2">
+            <button type="button" class="rounded-md bg-amber-400 hover:bg-amber-300 py-1 text-[11px] font-bold text-black transition-colors select-image-btn">
+              Seleccionar
+            </button>
+            <button type="button" class="rounded-md bg-white/10 hover:bg-white/20 py-1 text-[11px] font-bold text-white transition-colors library-preview-btn">
+              Ver grande
+            </button>
+          </div>
+          ${isCustom ? `
+            <button type="button" class="mt-1.5 rounded-md bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 py-1 text-[11px] font-bold text-red-400 transition-colors delete-library-image-btn">
+              Eliminar
+            </button>
+          ` : ''}
         </div>
-        <button type="button" class="mt-2 w-full rounded-md bg-amber-400 hover:bg-amber-300 py-1 text-[11px] font-bold text-black transition-colors select-image-btn">
-          Seleccionar
-        </button>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
-    grid.querySelectorAll('[data-library-img-path]').forEach(card => {
-      card.addEventListener('click', function () {
-        const path = this.getAttribute('data-library-img-path');
-        const name = this.getAttribute('data-library-img-name');
-        selectImageFromLibrary(path, name);
+    grid.querySelectorAll('.select-image-btn').forEach(button => {
+      button.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const card = this.closest('[data-library-img-path]');
+        selectImageFromLibrary(card.getAttribute('data-library-img-path'), card.getAttribute('data-library-img-name'));
       });
+    });
+
+    grid.querySelectorAll('.library-preview-btn').forEach(button => {
+      button.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const card = this.closest('[data-library-img-path]');
+        openLibraryImagePreview(card.getAttribute('data-library-img-path'), card.getAttribute('data-library-img-name'));
+      });
+    });
+
+    grid.querySelectorAll('.delete-library-image-btn').forEach(button => {
+      button.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const card = this.closest('[data-library-img-path]');
+        const imageId = filtered.find(img => img.path === card.getAttribute('data-library-img-path'))?.id;
+        if (imageId) deleteCustomLibraryImage(imageId);
+      });
+    });
+  }
+
+  function openLibraryImagePreview(imagePath, imageName) {
+    const modal = document.getElementById('library-image-preview-modal');
+    const image = document.getElementById('library-image-preview');
+    const title = document.getElementById('library-image-preview-title');
+    if (!modal || !image) return;
+    image.src = imagePath;
+    image.alt = imageName || 'Imagen';
+    if (title) title.textContent = imageName || 'Vista previa';
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLibraryImagePreview() {
+    const modal = document.getElementById('library-image-preview-modal');
+    if (modal) modal.classList.add('hidden');
+    if (!document.getElementById('image-library-modal') || document.getElementById('image-library-modal').classList.contains('hidden')) {
+      document.body.style.overflow = '';
+    }
+  }
+
+  async function deleteGithubImageFile(path) {
+    if (!path || !path.startsWith('assets/images/ely/')) return;
+    const file = await getGithubFile(path);
+    if (!file) return;
+    await githubApiRequest('/repos/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/contents/' + path.split('/').map(encodeURIComponent).join('/'), {
+      method: 'DELETE',
+      body: JSON.stringify({
+        message: 'Delete library image ' + path.split('/').pop(),
+        sha: file.sha,
+        branch: GITHUB_BRANCH
+      })
+    });
+  }
+
+  function deleteCustomLibraryImage(imageId) {
+    const image = customLibraryImages.find(item => item.id === imageId);
+    if (!image) return;
+    showConfirmModal({
+      title: '¿Eliminar imagen de la biblioteca?',
+      message: 'Se eliminará "' + (image.name || 'Imagen') + '" de la biblioteca. Si ya fue sincronizada, también se eliminará del repositorio.',
+      icon: '🗑️',
+      confirmText: 'Sí, Eliminar Imagen',
+      danger: true,
+      onConfirm: async function () {
+        const previous = customLibraryImages.slice();
+        customLibraryImages = customLibraryImages.filter(item => item.id !== imageId);
+        try {
+          localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages.slice(0, 30)));
+        } catch (e) {}
+        renderLibraryGrid();
+        try {
+          const token = getGithubToken();
+          if (token && typeof image.path === 'string' && image.path.startsWith('./assets/images/ely/')) {
+            await deleteGithubImageFile(image.path.substring(2));
+            showStatusNotification({
+              title: 'Imagen Eliminada',
+              message: 'La imagen fue eliminada de la biblioteca y de GitHub.',
+              type: 'success',
+              icon: '🗑️'
+            });
+          } else {
+            showStatusNotification({
+              title: 'Imagen Eliminada',
+              message: 'La imagen fue eliminada de la biblioteca local.',
+              type: 'success',
+              icon: '🗑️'
+            });
+          }
+        } catch (error) {
+          customLibraryImages = previous;
+          try {
+            localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages.slice(0, 30)));
+          } catch (e) {}
+          renderLibraryGrid();
+          showStatusNotification({
+            title: 'Error al eliminar',
+            message: error.message || 'No se pudo eliminar la imagen de GitHub.',
+            type: 'error',
+            icon: '⚠️'
+          });
+        }
+      }
     });
   }
 
@@ -4691,6 +4806,9 @@
     // Biblioteca de Imágenes & Multimedia (Drag and Drop & Assets)
     openImageLibraryModal: openImageLibraryModal,
     closeImageLibraryModal: closeImageLibraryModal,
+    openLibraryImagePreview: openLibraryImagePreview,
+    closeLibraryImagePreview: closeLibraryImagePreview,
+    deleteCustomLibraryImage: deleteCustomLibraryImage,
     openImageLibraryForInput: openImageLibraryForInput,
     openImageLibraryForGallery: openImageLibraryForGallery,
     renderGalleryThumbnails: renderGalleryThumbnails
