@@ -771,7 +771,7 @@
         "type": "canva"
       }
     ],
-    "workedCount": 147
+    "workedCount": 15
   },
   {
     "id": "service-in-app-purchases",
@@ -831,7 +831,8 @@
         "url": "https://www.canva.com/design/DAHCkjRi0ls/YmC7BlfJ8XV_C34xoBTw3g/view",
         "type": "canva"
       }
-    ]
+    ],
+    "workedCount": 8
   },
   {
     "id": "service-sounds-fx",
@@ -890,7 +891,8 @@
         "url": "https://www.canva.com/design/DAG0eNukPlg/6Rbu0zCNNBiQZp2IjRZzyQ/view",
         "type": "canva"
       }
-    ]
+    ],
+    "workedCount": 47
   },
   {
     "id": "service-multiplayer-pun",
@@ -949,7 +951,8 @@
         "url": "https://www.canva.com/design/DAHCk6iQVwY/FlPYVFA3lew686sjP3Cyvw/view",
         "type": "canva"
       }
-    ]
+    ],
+    "workedCount": 12
   },
   {
     "id": "clase-unity-csharp",
@@ -1007,6 +1010,6 @@
         "type": "canva"
       }
     ],
-    "workedCount": 1
+    "workedCount": 320
   }
 ]
