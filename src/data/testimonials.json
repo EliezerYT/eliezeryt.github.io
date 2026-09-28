@@ -15,21 +15,6 @@
     ]
   },
   {
-    "id": "client-dogame",
-    "name": "DoGame (Estudio de Videojuegos)",
-    "role": "Estudio de Videojuegos & Producción",
-    "project": "Dominican Power & Yun Online",
-    "year": "2021 - 2022",
-    "rating": 5,
-    "avatar": "./assets/images/ely/icon-dominicanpower.png",
-    "feedback": "Nos apoyó en un momento crucial realizando el remake integral de interfaz, corrigiendo bugs críticos de red y conectando el multijugador con Photon Network. Un profesional serio, ágil y con gran dominio de Unity.",
-    "tags": [
-      "Photon PUN 2",
-      "UI/UX Remake",
-      "Economía In-Game"
-    ]
-  },
-  {
     "id": "client-shl",
     "name": "SHL (Empresa / Cliente Comercial)",
     "role": "Cliente Comercial",
@@ -66,8 +51,8 @@
     "project": "Telesancris Mobile Streaming App",
     "year": "2023",
     "rating": 5,
-    "avatar": "./assets/images/ely/icon-telesancris.png",
-    "feedback": "Me siento sumamente satisfecho de haber trabajado mi aplicación con Eliezer; los resultados fueron mucho mejores de lo que esperaba y con un trato muy profesional.",
+    "avatar": "./assets/images/ely/telesancrilogo.jpg",
+    "feedback": "Me siento sumamente satisfecho de haber trabajado mi aplicación con Eliezer, nuestra aplicacion esta corriendo perfectamente con nuestros streams!",
     "tags": [
       "Streaming HLS",
       "App Móvil",
