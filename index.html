@@ -1810,6 +1810,25 @@
       </div>
     </div>
 
+    <!-- VISTA PREVIA GRANDE DE IMAGEN DE BIBLIOTECA -->
+    <div id="library-image-preview-modal" class="hidden fixed inset-0 z-[100001] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+      <div class="relative w-full max-w-6xl max-h-[94vh] rounded-2xl bg-[#0b0d11] border border-[#2b3140] shadow-2xl p-4 flex flex-col">
+        <div class="flex items-center justify-between gap-3 border-b border-[#1e2330] pb-3 mb-3">
+          <div class="min-w-0">
+            <h3 id="library-image-preview-title" class="text-sm font-bold text-white truncate">Vista previa</h3>
+            <p class="text-[10px] text-slate-500">Vista completa de la imagen</p>
+          </div>
+          <button type="button" onclick="window.ElyPortfolio.closeLibraryImagePreview()" class="shrink-0 h-8 w-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white">✕</button>
+        </div>
+        <div class="flex-1 min-h-0 flex items-center justify-center overflow-auto rounded-xl bg-black/30 p-2">
+          <img id="library-image-preview" src="" alt="Vista previa" class="max-w-full max-h-[78vh] object-contain rounded-lg" />
+        </div>
+        <div class="flex justify-end pt-3">
+          <button type="button" onclick="window.ElyPortfolio.closeLibraryImagePreview()" class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white font-semibold">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
     <!-- MODAL DE CONFIRMACIÓN MODERNO (REEMPLAZA CONFIRM NATIVO BLOQUEADO EN IFRAMES) -->
     <div id="confirm-action-modal" class="hidden fixed inset-0 z-[100000] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
       <div class="relative w-full max-w-md rounded-2xl bg-[#12151d] border border-amber-400/40 shadow-2xl p-6 space-y-4">
