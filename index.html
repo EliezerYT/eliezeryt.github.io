@@ -110,6 +110,15 @@
 
           <!-- Botón de Moderador -->
           <button
+            id="visitor-preview-btn"
+            type="button"
+            class="moderator-only hidden text-[11px] text-cyan-300 hover:text-white px-2 py-1 rounded bg-cyan-500/10 border border-cyan-500/20 hover:border-cyan-400 transition-colors"
+            onclick="window.ElyPortfolio.toggleVisitorPreview()"
+          >
+            👁 Preview visitante
+          </button>
+
+          <button
             id="nav-auth-btn"
             type="button"
             class="text-[11px] text-slate-400 hover:text-slate-200 px-2 py-1 rounded bg-[#141822] border border-[#232733] hover:border-slate-500 transition-colors"
@@ -535,6 +544,20 @@
             <button type="button" onclick="window.ElyPortfolio.openSatisfiedClientsModal()" class="text-xs text-amber-400 hover:underline font-semibold">
               Ver todo el feedback (<span id="testimonials-count-badge">8+</span>) →
             </button>
+          </div>
+        </div>
+        <div id="feedback-stats" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="rounded-xl bg-[#12151d] border border-[#232733] p-4">
+            <div class="text-[10px] uppercase tracking-wider text-slate-500">Promedio de Feedback</div>
+            <div class="mt-1 flex items-end gap-2">
+              <span id="feedback-average-value" class="text-2xl font-black text-amber-400 font-mono">0.0</span>
+              <span class="text-amber-400 text-sm pb-0.5">★★★★★</span>
+              <span id="feedback-average-count" class="text-[10px] text-slate-500 pb-1">(0)</span>
+            </div>
+          </div>
+          <div class="rounded-xl bg-[#12151d] border border-[#232733] p-4">
+            <div class="text-[10px] uppercase tracking-wider text-slate-500">Distribución de Estrellas</div>
+            <div id="feedback-star-distribution" class="mt-2 space-y-1.5"></div>
           </div>
         </div>
         <div id="testimonials-preview-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
