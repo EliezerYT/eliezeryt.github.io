@@ -3870,74 +3870,50 @@
   function loadAllDataFromBackend() {
     if (typeof fetch !== 'function') return;
 
-    // 1. Proyectos
-    fetch('/api/projects')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.success && Array.isArray(data.projects) && data.projects.length > 0) {
-          projects = data.projects;
-          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (e) {}
-          renderProjectsGrid();
-        }
-      })
-      .catch(() => {
-        // Fallback a archivo estático relativo
-        fetch('./data/projects.json')
-          .then(res => res.json())
-          .then(list => {
-            if (Array.isArray(list) && list.length > 0) {
-              projects = list;
-              renderProjectsGrid();
-            }
-          })
-          .catch(() => {});
-      });
+    const cacheBust = Date.now();
+    const githubDataBase = 'https://github.com/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/raw/refs/heads/' + GITHUB_BRANCH + '/public/data';
 
-    // 2. Experiencias
-    fetch('/api/experiences')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.success && Array.isArray(data.experiences) && data.experiences.length > 0) {
-          experiences = data.experiences;
-          try { localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences)); } catch (e) {}
-          renderExperiences();
-        }
-      })
-      .catch(() => {
-        fetch('./data/experiences.json')
-          .then(res => res.json())
-          .then(list => {
-            if (Array.isArray(list) && list.length > 0) {
-              experiences = list;
-              renderExperiences();
-            }
-          })
-          .catch(() => {});
-      });
+    const loadJson = async (name, onData) => {
+      const urls = [
+        githubDataBase + '/' + name + '.json?v=' + cacheBust,
+        './data/' + name + '.json?v=' + cacheBust,
+        './public/data/' + name + '.json?v=' + cacheBust,
+        './docs/data/' + name + '.json?v=' + cacheBust
+      ];
 
-    // 3. Testimonios
-    fetch('/api/testimonials')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.success && Array.isArray(data.testimonials) && data.testimonials.length > 0) {
-          satisfiedClients = data.testimonials;
-          try { localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients)); } catch (e) {}
-          renderTestimonialsPreview();
-          renderSatisfiedClientsModalList();
-        }
-      })
-      .catch(() => {
-        fetch('./data/testimonials.json')
-          .then(res => res.json())
-          .then(list => {
-            if (Array.isArray(list) && list.length > 0) {
-              satisfiedClients = list;
-              renderTestimonialsPreview();
-              renderSatisfiedClientsModalList();
-            }
-          })
-          .catch(() => {});
-      });
+      for (const url of urls) {
+        try {
+          const response = await fetch(url, { cache: 'no-store' });
+          if (!response.ok) continue;
+          const data = await response.json();
+          if (Array.isArray(data) && data.length > 0) {
+            onData(data);
+            return true;
+          }
+        } catch (e) {}
+      }
+
+      return false;
+    };
+
+    loadJson('projects', (list) => {
+      projects = list;
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (e) {}
+      renderProjectsGrid();
+    });
+
+    loadJson('experiences', (list) => {
+      experiences = list;
+      try { localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences)); } catch (e) {}
+      renderExperiences();
+    });
+
+    loadJson('testimonials', (list) => {
+      satisfiedClients = list;
+      try { localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients)); } catch (e) {}
+      renderTestimonialsPreview();
+      renderSatisfiedClientsModalList();
+    });
   }
 
   // 16.1 Biblioteca de Imágenes & Drag and Drop Multimedia
