@@ -1421,7 +1421,7 @@
   }
 
   function renderProjectsGrid(forceFilterTransition) {
-    filteredProjects = getFilteredProjects();
+    filteredProjects = getFilteredProjects().sort(function(a, b) { return (b.pinned === true ? 1 : 0) - (a.pinned === true ? 1 : 0); });
     updateCatalogHeaders();
 
     const container = document.getElementById('projects-grid');
@@ -1500,7 +1500,8 @@
       const cardEffectClass = cardEffects.map(function(effect) {
         return ' card-effect-' + effect;
       }).join('');
-      const cardEffectStyle = project.cardEffectColor ? ' style="--card-effect-color:' + project.cardEffectColor + ';--card-effect-soft:' + project.cardEffectColor + 'aa;--card-effect-light:' + project.cardEffectColor + ';--glow-a:' + project.cardEffectColor + ';--glow-b:#ffffff;--glow-bg:#060c21;"' : '';
+      const cardEffectStyle = project.cardEffectColor ? ' style="--card-effect-color:' + project.cardEffectColor + ';--card-effect-soft:' + project.cardEffectColor + 'aa;--card-effect-light:' + project.cardEffectColor + ';"' : '';
+      const pinnedBadge = project.pinned ? '<span class="card-pinned-badge">📌 Fijado</span>' : '';
       const originBadge = isServ
         ? '<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Servicio Técnico</span>'
         : isClas
@@ -1607,6 +1608,8 @@
         <article data-id="${project.id}"${cardEffectStyle} class="${entranceClass}${cardEffectClass} group relative flex flex-col overflow-hidden rounded-2xl bg-[#12151d] border border-[#232733] hover:border-amber-400/60 transform hover:scale-105 transition-all duration-300 ease-out shadow-lg hover:shadow-2xl hover:shadow-amber-500/20 z-0 hover:z-10">
           
           ${moderatorBar}
+
+          ${pinnedBadge}
 
           <!-- Portada principal 16:9 del proyecto -->
           <div class="relative aspect-video w-full overflow-hidden bg-[#181d28] cursor-pointer" onclick="window.ElyPortfolio.openProjectModal('${project.id}')">
@@ -3149,6 +3152,8 @@
     document.getElementById('edit-proj-role').value = project.role || '';
     document.getElementById('edit-proj-client').value = project.clientOrTeam || '';
     document.getElementById('edit-proj-year').value = project.year || '';
+    const editPinned = document.getElementById('edit-proj-pinned');
+    if (editPinned) editPinned.checked = project.pinned === true;
     const editEffectElectrify = document.getElementById('edit-proj-effect-electrify');
     const editEffectRainbow = document.getElementById('edit-proj-effect-rainbow');
     const editEffectGlow = document.getElementById('edit-proj-effect-glow');
@@ -3223,6 +3228,8 @@
     project.role = document.getElementById('edit-proj-role').value.trim();
     project.clientOrTeam = document.getElementById('edit-proj-client').value.trim() || undefined;
     project.year = document.getElementById('edit-proj-year').value.trim();
+    const editPinned = document.getElementById('edit-proj-pinned');
+    project.pinned = !!(editPinned && editPinned.checked);
     const effectList = [];
     const editEffectElectrify = document.getElementById('edit-proj-effect-electrify');
     const editEffectRainbow = document.getElementById('edit-proj-effect-rainbow');
