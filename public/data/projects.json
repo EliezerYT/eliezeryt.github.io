@@ -592,12 +592,20 @@
     "year": "2021",
     "role": "Desarrollador",
     "featured": false,
-    "coverImage": "./assets/images/ely/picon-maddys.png",
+    "coverImage": "./assets/images/ely/maddys/3.png",
     "galleryImages": [
       "./assets/images/ely/picon-maddys.png",
-      "./assets/images/ely/maddys/4.png"
+      "./assets/images/ely/maddys/2.png",
+      "./assets/images/ely/maddys/4.png",
+      "./assets/images/ely/maddys/10.png",
+      "./assets/images/ely/maddys/3.png",
+      "./assets/images/ely/maddys/5.png",
+      "./assets/images/ely/maddys/6.png",
+      "./assets/images/ely/maddys/9.png",
+      "./assets/images/ely/maddys/8.png",
+      "./assets/images/ely/maddys/7.png"
     ],
-    "youtubeVideo": "",
+    "youtubeVideo": "https://www.youtube.com/watch?v=4AoHQsqAUWM",
     "technologies": [
       "Unity 2D",
       "C#",
