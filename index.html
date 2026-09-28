@@ -1723,6 +1723,21 @@
           <input type="file" id="library-upload-file-input" accept="image/*" multiple class="hidden" />
         </div>
 
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-3">
+          <div>
+            <label class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">Carpeta de destino</label>
+            <select id="library-folder-style" class="w-full rounded-lg bg-[#0d1017] border border-[#262c3b] px-2.5 py-2 text-xs text-white focus:border-amber-400 focus:outline-none">
+              <option value="Profile">Profile</option>
+              <option value="Screenshot">Screenshot</option>
+              <option value="Custom">Custom</option>
+            </select>
+          </div>
+          <div id="library-custom-folder-wrap" class="hidden sm:col-span-2">
+            <label class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">Nombre de carpeta personalizada</label>
+            <input id="library-custom-folder" type="text" placeholder="Ej. Banners, Logos, OverDrivers" class="w-full rounded-lg bg-[#0d1017] border border-[#262c3b] px-2.5 py-2 text-xs text-white placeholder-slate-600 focus:border-amber-400 focus:outline-none" />
+          </div>
+        </div>
+
         <!-- Barra de búsqueda y conteo -->
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
           <div class="relative w-full sm:max-w-xs">
