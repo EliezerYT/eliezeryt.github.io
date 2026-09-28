@@ -4362,47 +4362,72 @@
     return [...customLibraryImages, ...automaticImages, ...DEFAULT_LIBRARY_IMAGES];
   }
 
-  async function loadImagesFromMainElyFolder() {
+  async async function loadImagesFromMainElyFolder(showNotification = false) {
     if (githubElyFolderLoading) return;
     githubElyFolderLoading = true;
 
-    const endpoint = GITHUB_API_BASE + '/repos/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/contents/assets/images/ely?ref=' + GITHUB_BRANCH;
     const headers = { Accept: 'application/vnd.github+json' };
     const token = getGithubToken();
     if (token) headers.Authorization = 'Bearer ' + token;
+    const imageExtensions = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'avif', 'bmp', 'svg'];
+    const foundImages = [];
 
-    try {
+    async function scanFolder(folderPath) {
+      const endpoint = GITHUB_API_BASE + '/repos/' + GITHUB_REPOSITORY + '/contents/' + folderPath + '?ref=' + GITHUB_BRANCH;
       const response = await fetch(endpoint, { headers: headers, cache: 'no-store' });
       if (!response.ok) throw new Error('GitHub API: ' + response.status);
-
       const entries = await response.json();
       if (!Array.isArray(entries)) return;
 
-      const imageExtensions = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'avif', 'bmp', 'svg'];
-      githubElyFolderImages = entries
-        .filter(function (entry) {
-          if (!entry || entry.type !== 'file' || !entry.name || !entry.download_url) return false;
-          const extension = entry.name.split('.').pop().toLowerCase();
-          return imageExtensions.includes(extension);
-        })
-        .map(function (entry) {
-          return {
-            id: 'ely-folder-' + entry.sha,
-            name: entry.name.replace(/\.[^.]+$/, ''),
-            category: 'Ely',
-            folder: 'Ely',
-            path: './assets/images/ely/' + entry.name
-          };
-        });
+      for (const entry of entries) {
+        if (!entry || !entry.name) continue;
+        if (entry.type === 'dir') {
+          await scanFolder(entry.path);
+          continue;
+        }
+        if (entry.type !== 'file') continue;
+        const extension = entry.name.split('.').pop().toLowerCase();
+        if (!imageExtensions.includes(extension)) continue;
 
+        const relativePath = entry.path.replace(/^assets\/images\/ely\//i, '');
+        const folder = relativePath.includes('/') ? relativePath.substring(0, relativePath.lastIndexOf('/')) : 'Ely';
+        foundImages.push({
+          id: 'ely-folder-' + entry.sha,
+          name: entry.name.replace(/\.[^.]+$/, ''),
+          category: folder,
+          folder: folder,
+          path: './' + entry.path
+        });
+      }
+    }
+
+    try {
+      await scanFolder('assets/images/ely');
+      githubElyFolderImages = foundImages;
       renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
+
+      if (showNotification) {
+        showStatusNotification({
+          title: 'Biblioteca Actualizada',
+          message: 'Se recargaron ' + foundImages.length + ' imágenes de ely y todas sus subcarpetas.',
+          type: 'success',
+          icon: '🔄'
+        });
+      }
     } catch (error) {
-      console.warn('[LIBRARY] No se pudo cargar la carpeta principal ely:', error);
+      console.warn('[LIBRARY] No se pudieron cargar las imágenes de ely:', error);
+      if (showNotification) {
+        showStatusNotification({
+          title: 'Error al recargar',
+          message: 'No se pudo leer la carpeta assets/images/ely en GitHub.',
+          type: 'error',
+          icon: '⚠️'
+        });
+      }
     } finally {
       githubElyFolderLoading = false;
     }
   }
-
   function getLibraryFolderConfig() {
     const styleEl = document.getElementById('library-folder-style');
     const customEl = document.getElementById('library-custom-folder');
@@ -5529,6 +5554,7 @@
     closeImageLibraryModal: closeImageLibraryModal,
     openLibraryImagePreview: openLibraryImagePreview,
     closeLibraryImagePreview: closeLibraryImagePreview,
+    refreshElyImageLibrary: function () { return loadImagesFromMainElyFolder(true); },
     deleteCustomLibraryImage: deleteCustomLibraryImage,
     moveCustomLibraryImageOrder: moveCustomLibraryImageOrder,
     moveCustomLibraryImageTo: moveCustomLibraryImageTo,
