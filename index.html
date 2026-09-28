@@ -72,7 +72,7 @@
         <nav class="hidden md:flex items-center gap-1 text-xs font-medium text-slate-300">
           <a href="#inicio" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition-colors">Inicio</a>
           <a href="#proyectos" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition-colors">Proyectos & Catálogo</a>
-          <a href="#resumen" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition-colors">Experiencia</a>
+          <a href="#feedback" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition-colors">Feedback</a>
           <button onclick="window.ElyPortfolio.openResumeModal()" class="px-3 py-1.5 rounded-lg hover:text-amber-400 hover:bg-white/5 transition-colors">Ver CV</button>
           <button onclick="window.ElyPortfolio.openContactModal('')" class="px-3 py-1.5 rounded-lg hover:text-white hover:bg-white/5 transition-colors">Contacto</button>
         </nav>
@@ -158,7 +158,7 @@
                 Ver Catálogo
               </a>
               <a
-                href="#resumen"
+                href="#feedback"
                 class="px-3.5 py-1.5 font-medium rounded-lg bg-[#141822] border border-[#262c3b] text-slate-200 hover:text-white hover:bg-[#1d2331] transition-colors"
               >
                 Resumen & Experiencia
@@ -181,7 +181,7 @@
               id="btn-satisfied-clients"
               onclick="window.ElyPortfolio.openSatisfiedClientsModal()"
               class="cursor-pointer p-3 rounded-xl bg-gradient-to-br from-amber-500/15 via-[#12151d] to-[#12151d] border border-amber-400/40 hover:border-amber-400 transition-all hover:scale-[1.02] shadow-md group col-span-2 sm:col-span-4"
-              title="Haz clic para ver el listado de clientes satisfechos y testimonios"
+              title="Haz clic para ver el listado de clientes satisfechos y feedback"
             >
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
@@ -448,6 +448,86 @@
         </div>
       </section>
 
+
+      <!-- ========================================== -->
+      <!-- 4. HABILIDADES TÉCNICAS                    -->
+      <!-- ========================================== -->
+      <section id="habilidades" class="space-y-4 pt-8 border-t border-[#1c212c]">
+        <div>
+          <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400 mb-1">
+            <span>⚡</span>
+            <span>Especialidades</span>
+          </div>
+          <h2 class="text-2xl font-extrabold text-white tracking-tight font-display">Habilidades & Especialidades</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Tecnologías y áreas en las que trabajo habitualmente.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-3">
+            <h4 class="text-sm font-bold text-amber-400">Desarrollo Videojuegos 2D/3D</h4>
+            <ul class="space-y-1.5 text-xs text-slate-300">
+              <li>• Unity Engine (Especialista C#)</li>
+              <li>• Físicas 2D & 3D (Rigidbody, Colisiones)</li>
+              <li>• Diseño de Niveles & Mecánicas</li>
+              <li>• Animación & Controladores de Estado</li>
+              <li>• Optimización Móvil (Draw Calls)</li>
+              <li>• Publicación en Google Play Store</li>
+            </ul>
+          </div>
+
+          <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-3">
+            <h4 class="text-sm font-bold text-cyan-400">Multijugador & Red</h4>
+            <ul class="space-y-1.5 text-xs text-slate-300">
+              <li>• Photon Network & Photon PUN 2</li>
+              <li>• Sincronización de Salas & Matchmaking</li>
+              <li>• Replicación de Estados en Tiempo Real</li>
+              <li>• Economía Dentro del Juego & Tiendas</li>
+              <li>• Personalización de Avatares / Skins</li>
+              <li>• WebSockets & Cliente-Servidor</li>
+            </ul>
+          </div>
+
+          <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-3">
+            <h4 class="text-sm font-bold text-emerald-400">Monetización & Backend</h4>
+            <ul class="space-y-1.5 text-xs text-slate-300">
+              <li>• Anuncios (Banner, Interstitial, Rewarded)</li>
+              <li>• Compras Integradas (IAP Billing)</li>
+              <li>• PHP & Bases de Datos MySQL</li>
+              <li>• Desarrollo Web (HTML5, CSS3, JS)</li>
+              <li>• Arquitectura de Audio & Sound FX</li>
+              <li>• Git & GitHub Version Control</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 5. FEEDBACK DE CLIENTES                    -->
+      <!-- ========================================== -->
+      <section id="feedback" class="space-y-4 pt-8 border-t border-[#1c212c]">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400 mb-1">
+              <span>💬</span>
+              <span>Feedback de Clientes & Colaboradores</span>
+            </div>
+            <h2 class="text-2xl font-extrabold text-white tracking-tight font-display">Feedback de Clientes</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Opiniones directas de empresas, estudios, alumnos y clientes verificados.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="window.ElyPortfolio.openFeedbackModal()" class="px-3.5 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer">
+              <span>⭐ Realizar Feedback</span>
+            </button>
+            <button type="button" onclick="window.ElyPortfolio.openSatisfiedClientsModal()" class="text-xs text-amber-400 hover:underline font-semibold">
+              Ver todo el feedback (<span id="testimonials-count-badge">8+</span>) →
+            </button>
+          </div>
+        </div>
+        <div id="testimonials-preview-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Inyectado dinámicamente con opciones de duplicar, editar y moderar -->
+        </div>
+      </section>
+
     </main>
 
     <!-- ========================================== -->
@@ -508,7 +588,7 @@
                 <h3 class="text-lg font-bold text-white font-display">Clientes Satisfechos & Colaboraciones</h3>
                 <span id="modal-clients-count-badge" class="rounded bg-amber-400 px-2 py-0.5 text-xs font-extrabold text-black">8+ Clientes</span>
               </div>
-              <p class="text-xs text-slate-400">Testimonios directos de influencers, empresas y desarrolladores con calificación 5 estrellas.</p>
+              <p class="text-xs text-slate-400">Feedback directo de influencers, empresas y desarrolladores con calificación 5 estrellas.</p>
             </div>
           </div>
           <div class="flex flex-wrap items-center gap-2">
@@ -532,7 +612,7 @@
               onclick="window.ElyPortfolio.openAddTestimonialModal()"
               class="moderator-only hidden px-2.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
             >
-              <span>+ Testimonio</span>
+              <span>+ Feedback</span>
             </button>
             <button
               type="button"
@@ -546,7 +626,7 @@
 
         <!-- Listado desplazable de clientes (similar a experiencia laboral) -->
         <div id="satisfied-clients-list" class="space-y-4 overflow-y-auto flex-1 pr-1">
-          <!-- Inyectado dinámicamente con fotos, nombres, proyectos y testimonios -->
+          <!-- Inyectado dinámicamente con fotos, nombres, proyectos y feedback -->
         </div>
 
         <!-- Footer del Modal -->
@@ -1305,13 +1385,13 @@
       </div>
     </div>
 
-    <!-- SUBVENTANA 9: MODAL PARA AGREGAR/EDITAR TESTIMONIO DIRECTO (MODERADOR) -->
+    <!-- SUBVENTANA 9: MODAL PARA AGREGAR/EDITAR FEEDBACK DIRECTO (MODERADOR) -->
     <div id="testimonial-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 overflow-y-auto">
       <div class="relative w-full max-w-lg rounded-2xl bg-[#12151d] border border-[#232733] shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between border-b border-[#1e2330] pb-2">
           <div>
-            <h3 id="testimonial-modal-title" class="text-base font-bold text-white font-display">⭐ Testimonio / Cliente Satisfecho</h3>
-            <p class="text-xs text-slate-400">Edición moderada del testimonio, calificación y proyecto.</p>
+            <h3 id="testimonial-modal-title" class="text-base font-bold text-white font-display">⭐ Feedback / Cliente Satisfecho</h3>
+            <p class="text-xs text-slate-400">Edición moderada del feedback, calificación y proyecto.</p>
           </div>
           <button type="button" onclick="window.ElyPortfolio.closeTestimonialModal()" class="text-slate-400 hover:text-white">✕</button>
         </div>
@@ -1377,7 +1457,7 @@
           </div>
 
           <div>
-            <label class="block text-slate-300 mb-1 font-semibold">Testimonio / Opinión:</label>
+            <label class="block text-slate-300 mb-1 font-semibold">Feedback / Opinión:</label>
             <textarea id="test-form-feedback" rows="3" required placeholder="Escribe aquí las palabras del cliente..." class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white"></textarea>
           </div>
 
@@ -1388,7 +1468,7 @@
 
           <div class="flex justify-end gap-2 pt-2 border-t border-[#1e2330]">
             <button type="button" onclick="window.ElyPortfolio.closeTestimonialModal()" class="px-4 py-2 rounded-lg bg-white/10 text-white">Cancelar</button>
-            <button type="submit" class="px-5 py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 shadow">Guardar Testimonio</button>
+            <button type="submit" class="px-5 py-2 rounded-lg bg-amber-400 text-black font-bold hover:bg-amber-300 shadow">Guardar Feedback</button>
           </div>
         </form>
       </div>
@@ -1458,7 +1538,7 @@
           </div>
 
           <div>
-            <label class="block text-slate-300 mb-1 font-semibold">Tu Testimonio / Feedback:</label>
+            <label class="block text-slate-300 mb-1 font-semibold">Tu Feedback:</label>
             <textarea id="feedback-input-text" rows="3" required placeholder="Comparte cómo fue trabajar con Eliezer, los resultados del proyecto, comunicación y puntualidad..." class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white focus:border-amber-400 focus:outline-none"></textarea>
           </div>
 
