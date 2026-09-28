@@ -3970,7 +3970,7 @@
 
     if (changed) {
       try {
-        localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages.slice(0, 30)));
+        localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages));
       } catch (e) {}
       renderLibraryGrid();
     }
@@ -4035,6 +4035,56 @@
     try { localStorage.setItem(SYNC_FINGERPRINT_KEY, getGithubSyncFingerprint()); } catch (e) {}
   }
 
+  function getLibraryManifest() {
+    return customLibraryImages.map(function (image) {
+      return {
+        id: image.id,
+        name: image.name || '',
+        category: image.category || getLibraryImageFolder(image),
+        folder: getLibraryImageFolder(image),
+        path: image.path || ''
+      };
+    });
+  }
+
+  async function loadLibraryManifestFromGithub() {
+    const cacheBust = Date.now();
+    const githubDataBase = 'https://github.com/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/raw/refs/heads/' + GITHUB_BRANCH + '/public/data';
+    const urls = [
+      githubDataBase + '/library.json?v=' + cacheBust,
+      './data/library.json?v=' + cacheBust,
+      './public/data/library.json?v=' + cacheBust,
+      './docs/data/library.json?v=' + cacheBust
+    ];
+
+    for (const url of urls) {
+      try {
+        const response = await fetch(url, { cache: 'no-store' });
+        if (!response.ok) continue;
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          customLibraryImages = data;
+          persistCustomLibraryImages();
+          renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
+          return true;
+        }
+      } catch (e) {}
+    }
+    return false;
+  }
+
+  async function syncLibraryManifestToGithub() {
+    const manifest = getLibraryManifest();
+    const files = [
+      ['src/data/library.json', manifest],
+      ['public/data/library.json', manifest],
+      ['docs/data/library.json', manifest]
+    ];
+    for (const [path, data] of files) {
+      await syncGithubJson(path, data);
+    }
+  }
+
   async function syncAllToGithub() {
     if (!hasGithubSyncChanges()) {
       showStatusNotification({ title: 'Todo sincronizado', message: 'No hay cambios pendientes para enviar a GitHub.', type: 'info', icon: '✓' });
@@ -4076,6 +4126,7 @@
       const syncedProjects = await prepareGithubData(projects, uploadedImages);
       const syncedExperiences = await prepareGithubData(experiences, uploadedImages);
       const syncedTestimonials = await prepareGithubData(satisfiedClients, uploadedImages);
+      const syncedLibrary = await prepareGithubData(getLibraryManifest(), uploadedImages);
 
       const files = [
         ['src/data/projects.json', syncedProjects],
@@ -4086,7 +4137,10 @@
         ['docs/data/experiences.json', syncedExperiences],
         ['src/data/testimonials.json', syncedTestimonials],
         ['public/data/testimonials.json', syncedTestimonials],
-        ['docs/data/testimonials.json', syncedTestimonials]
+        ['docs/data/testimonials.json', syncedTestimonials],
+        ['src/data/library.json', syncedLibrary],
+        ['public/data/library.json', syncedLibrary],
+        ['docs/data/library.json', syncedLibrary]
       ];
 
       let commits = 0;
@@ -4359,7 +4413,7 @@
       }
       image.folder = newFolder;
       image.category = newFolder;
-      try { localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages.slice(0, 30))); } catch (e) {}
+      try { localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages)); } catch (e) {}
       renderLibraryGrid();
       showStatusNotification({ title: 'Carpeta actualizada', message: '"' + (image.name || 'Imagen') + '" movida a ' + newFolder + '.', type: 'success', icon: '📁' });
     } catch (error) {
@@ -4395,32 +4449,42 @@
       return;
     }
 
-    grid.innerHTML = filtered.map(img => {
+    grid.innerHTML = filtered.map((img, filteredIndex) => {
       const isCustom = String(img.id || '').startsWith('custom-');
+      const allIndex = allImages.findIndex(item => item.id === img.id);
+      const customIndex = customLibraryImages.findIndex(item => item.id === img.id);
+      const canMove = isCustom && customIndex >= 0;
       return `
-        <div class="group relative flex h-max min-h-0 flex-col overflow-visible rounded-xl border border-[#232733] bg-[#0d1017] hover:border-amber-400/50 hover:shadow-lg hover:shadow-amber-500/5 transition-all p-2.5 text-left self-start" data-library-img-path="${img.path}" data-library-img-name="${img.name || ''}">
-          <div class="relative h-32 sm:h-36 w-full shrink-0 overflow-hidden rounded-lg bg-[#141822] mb-2 border border-white/5 cursor-zoom-in library-preview-btn">
-            <img src="${img.path}" alt="${img.name || 'Imagen'}" class="h-full w-full object-contain p-1 transition-transform duration-300 group-hover:scale-105" onerror="this.src='./assets/images/ely/my-avatar.png'" />
-            <span class="absolute top-1 left-1 rounded bg-black/80 px-1.5 py-0.5 text-[9px] font-mono text-amber-400 border border-amber-400/20 backdrop-blur-sm">
+        <div class="group relative flex h-max min-h-0 flex-col overflow-visible rounded-xl border border-[#232733] bg-[#0d1017] hover:border-amber-400/50 hover:shadow-lg hover:shadow-amber-500/5 transition-all p-3 text-left self-start library-card"
+             draggable="${canMove ? 'true' : 'false'}"
+             data-library-img-id="${img.id || ''}"
+             data-library-img-path="${img.path}"
+             data-library-img-name="${img.name || ''}">
+          <div class="relative h-44 sm:h-52 w-full shrink-0 overflow-hidden rounded-xl bg-[#141822] mb-3 border border-white/5 cursor-zoom-in library-preview-btn">
+            <img src="${img.path}" alt="${img.name || 'Imagen'}" class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105" onerror="this.src='./assets/images/ely/my-avatar.png'" />
+            <span class="absolute top-2 left-2 rounded bg-black/80 px-2 py-1 text-[10px] font-mono text-amber-400 border border-amber-400/20 backdrop-blur-sm">
               ${img.category || 'Asset'}
             </span>
+            ${canMove ? `<span class="absolute top-2 right-2 rounded bg-black/80 px-2 py-1 text-[10px] text-slate-300 border border-white/10">↕ Arrastra</span>` : ''}
           </div>
           <div class="flex-1 min-w-0">
-            <div class="truncate text-xs font-semibold text-slate-200 group-hover:text-amber-400 font-display" title="${img.name}">
+            <div class="truncate text-sm font-semibold text-slate-200 group-hover:text-amber-400 font-display" title="${img.name}">
               ${img.name || 'Imagen'}
             </div>
             <div class="truncate text-[10px] text-slate-500 font-mono mt-0.5" title="${img.path}">
               ${img.path}
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-1.5 mt-2">
-            <button type="button" class="rounded-md bg-amber-400 hover:bg-amber-300 py-1 text-[11px] font-bold text-black transition-colors select-image-btn">
-              Seleccionar
-            </button>
-            <button type="button" class="rounded-md bg-white/10 hover:bg-white/20 py-1 text-[11px] font-bold text-white transition-colors library-preview-btn">
-              Ver grande
-            </button>
+          <div class="grid grid-cols-2 gap-1.5 mt-3">
+            <button type="button" class="rounded-md bg-amber-400 hover:bg-amber-300 py-1.5 text-[11px] font-bold text-black transition-colors select-image-btn">Seleccionar</button>
+            <button type="button" class="rounded-md bg-white/10 hover:bg-white/20 py-1.5 text-[11px] font-bold text-white transition-colors library-preview-btn">Ver grande</button>
           </div>
+          ${canMove ? `
+            <div class="grid grid-cols-2 gap-1.5 mt-1.5">
+              <button type="button" class="rounded-md bg-white/5 hover:bg-white/10 border border-white/10 py-1 text-[10px] font-bold text-slate-300 library-move-up-btn">▲ Subir</button>
+              <button type="button" class="rounded-md bg-white/5 hover:bg-white/10 border border-white/10 py-1 text-[10px] font-bold text-slate-300 library-move-down-btn">▼ Bajar</button>
+            </div>
+          ` : ''}
           ${isCustom ? `
             <div class="mt-2 space-y-1.5">
               <select class="library-folder-move-select w-full rounded-md bg-[#0b0d11] border border-[#262c3b] px-2 py-1.5 text-[10px] text-white focus:border-amber-400 focus:outline-none">
@@ -4434,9 +4498,7 @@
             </div>
           ` : ''}
           ${isCustom ? `
-            <button type="button" class="mt-1.5 rounded-md bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 py-1 text-[11px] font-bold text-red-400 transition-colors delete-library-image-btn">
-              Eliminar
-            </button>
+            <button type="button" class="mt-1.5 rounded-md bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 py-1 text-[11px] font-bold text-red-400 transition-colors delete-library-image-btn">Eliminar</button>
           ` : ''}
         </div>
       `;
@@ -4455,6 +4517,47 @@
         e.stopPropagation();
         const card = this.closest('[data-library-img-path]');
         openLibraryImagePreview(card.getAttribute('data-library-img-path'), card.getAttribute('data-library-img-name'));
+      });
+    });
+
+    grid.querySelectorAll('.library-move-up-btn').forEach(button => {
+      button.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const card = this.closest('[data-library-img-id]');
+        if (card) moveCustomLibraryImageOrder(card.getAttribute('data-library-img-id'), -1);
+      });
+    });
+
+    grid.querySelectorAll('.library-move-down-btn').forEach(button => {
+      button.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const card = this.closest('[data-library-img-id]');
+        if (card) moveCustomLibraryImageOrder(card.getAttribute('data-library-img-id'), 1);
+      });
+    });
+
+    grid.querySelectorAll('.library-card[draggable="true"]').forEach(card => {
+      card.addEventListener('dragstart', function (e) {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', this.getAttribute('data-library-img-id'));
+        this.classList.add('opacity-50');
+      });
+      card.addEventListener('dragend', function () {
+        this.classList.remove('opacity-50');
+      });
+      card.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        this.classList.add('border-amber-400');
+      });
+      card.addEventListener('dragleave', function () {
+        this.classList.remove('border-amber-400');
+      });
+      card.addEventListener('drop', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.classList.remove('border-amber-400');
+        moveCustomLibraryImageTo(e.dataTransfer.getData('text/plain'), this.getAttribute('data-library-img-id'));
       });
     });
 
@@ -4483,6 +4586,35 @@
         if (imageId) deleteCustomLibraryImage(imageId);
       });
     });
+  }
+
+  function persistCustomLibraryImages() {
+    try {
+      localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages));
+    } catch (e) {}
+  }
+
+  function moveCustomLibraryImageOrder(imageId, delta) {
+    const index = customLibraryImages.findIndex(item => item.id === imageId);
+    if (index < 0) return;
+    const newIndex = index + delta;
+    if (newIndex < 0 || newIndex >= customLibraryImages.length) return;
+    const temp = customLibraryImages[index];
+    customLibraryImages[index] = customLibraryImages[newIndex];
+    customLibraryImages[newIndex] = temp;
+    persistCustomLibraryImages();
+    renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
+  }
+
+  function moveCustomLibraryImageTo(imageId, targetId) {
+    if (!imageId || !targetId || imageId === targetId) return;
+    const from = customLibraryImages.findIndex(item => item.id === imageId);
+    const to = customLibraryImages.findIndex(item => item.id === targetId);
+    if (from < 0 || to < 0 || from === to) return;
+    const item = customLibraryImages.splice(from, 1)[0];
+    customLibraryImages.splice(to, 0, item);
+    persistCustomLibraryImages();
+    renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
   }
 
   function openLibraryImagePreview(imagePath, imageName) {
@@ -4532,7 +4664,7 @@
         const previous = customLibraryImages.slice();
         customLibraryImages = customLibraryImages.filter(item => item.id !== imageId);
         try {
-          localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages.slice(0, 30)));
+          localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages));
         } catch (e) {}
         renderLibraryGrid();
         try {
@@ -4556,7 +4688,7 @@
         } catch (error) {
           customLibraryImages = previous;
           try {
-            localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages.slice(0, 30)));
+            localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages));
           } catch (e) {}
           renderLibraryGrid();
           showStatusNotification({
@@ -4708,7 +4840,7 @@
     };
     customLibraryImages.unshift(newImg);
     try {
-      localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages.slice(0, 30)));
+      localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages));
     } catch (e) {}
     renderLibraryGrid();
     return newImg;
@@ -4908,6 +5040,7 @@
     applyTheme(currentTheme);
     setupImageDropzones();
     loadAllDataFromBackend();
+    loadLibraryManifestFromGithub();
 
     // Confirm Modal Action Button
     const confirmActionBtn = document.getElementById('confirm-modal-action-btn');
@@ -5223,6 +5356,8 @@
     openLibraryImagePreview: openLibraryImagePreview,
     closeLibraryImagePreview: closeLibraryImagePreview,
     deleteCustomLibraryImage: deleteCustomLibraryImage,
+    moveCustomLibraryImageOrder: moveCustomLibraryImageOrder,
+    moveCustomLibraryImageTo: moveCustomLibraryImageTo,
     openImageLibraryForInput: openImageLibraryForInput,
     openImageLibraryForGallery: openImageLibraryForGallery,
     renderGalleryThumbnails: renderGalleryThumbnails
