@@ -2073,8 +2073,8 @@
       return `
         <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-6 space-y-3 hover:border-amber-400/40 transition-colors">
           ${moderatorBar}
-          <div class="flex items-center justify-end">
-            <span class="text-[11px] font-mono text-slate-400 bg-black/40 px-2 py-0.5 rounded">${c.year || '2025'}</span>
+          <div class="relative h-0">
+            <span class="absolute right-0 -top-1 text-[9px] font-mono text-slate-500">${c.year || '2025'}</span>
           </div>
           <p class="text-xs text-slate-300 italic leading-relaxed whitespace-pre-line">
             “${c.feedback}”
