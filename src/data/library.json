@@ -1,5 +1,19 @@
 [
   {
+    "id": "custom-1790629764273-d1t3",
+    "name": "4.png",
+    "category": "maddys",
+    "folder": "maddys",
+    "path": "./assets/images/ely/maddys/4.png"
+  },
+  {
+    "id": "custom-1790629764232-f5zy",
+    "name": "3.png",
+    "category": "Profile",
+    "folder": "Profile",
+    "path": "./assets/images/ely/Profile/3.png"
+  },
+  {
     "id": "custom-1790625267181-yv1v",
     "name": "icon.png",
     "category": "maddys",
