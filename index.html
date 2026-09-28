@@ -92,6 +92,15 @@
           <!-- Contacto CTA -->
           <button
             type="button"
+            onclick="window.ElyPortfolio.openResumeModal()"
+            class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white/10 text-white text-xs font-semibold hover:bg-white/20 transition-colors"
+          >
+            <span>Imprimir CV / PDF</span>
+            <span>📄</span>
+          </button>
+
+          <button
+            type="button"
             onclick="window.ElyPortfolio.openContactModal('')"
             class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-amber-400 text-black text-xs font-bold hover:bg-amber-300 transition-colors shadow-sm shadow-amber-400/20"
           >
@@ -436,201 +445,6 @@
           >
             Restablecer Filtros
           </button>
-        </div>
-      </section>
-
-      <!-- ========================================== -->
-      <!-- 4. RESUMEN CURRICULAR & EXPERIENCIA         -->
-      <!-- ========================================== -->
-      <section id="resumen" class="space-y-8 pt-8 border-t border-[#1c212c]">
-        
-        <!-- Encabezado -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400 mb-1">
-              <span>📄</span>
-              <span>Trayectoria Profesional</span>
-            </div>
-            <h2 class="text-2xl font-extrabold text-white tracking-tight font-display">
-              Resumen, Experiencia & Habilidades
-            </h2>
-            <p class="text-xs text-slate-400 mt-0.5">
-              Historial de contratos comerciales, colaboraciones para clientes y capacidades técnicas.
-            </p>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <button
-              type="button"
-              onclick="window.ElyPortfolio.openResumeModal()"
-              class="px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-colors"
-            >
-              Imprimir CV / PDF
-            </button>
-            <button
-              type="button"
-              onclick="window.ElyPortfolio.openContactModal('')"
-              class="px-3.5 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-colors"
-            >
-              Contactar a Eliezer
-            </button>
-          </div>
-        </div>
-
-        <!-- Biografía & Metas -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="md:col-span-2 rounded-2xl bg-[#12151d] border border-[#232733] p-6 space-y-4">
-            <h3 class="text-base font-bold text-white font-display">Perfil Profesional</h3>
-            <p class="text-xs text-slate-300 leading-relaxed">
-              Desarrollador apasionado de videojuegos enfocado en aprovechar el máximo potencial de tecnologías avanzadas como Unity, Photon Network y desarrollo full-stack para crear proyectos innovadores y experiencias inmersivas.
-            </p>
-            <p class="text-xs text-slate-400 leading-relaxed">
-              Mi compromiso es consolidarme como un desarrollador vanguardista, ampliando constantemente los límites de lo posible y construyendo una sólida reputación en la industria de los videojuegos. Mi meta principal es fundar y liderar mi propia compañía de videojuegos en República Dominicana, contribuyendo activamente al crecimiento del ecosistema de desarrollo local y generando oportunidades en este mercado emergente.
-            </p>
-            <div class="flex flex-wrap items-center gap-4 pt-2 text-xs text-slate-400 border-t border-[#1e2330]">
-              <div>📍 <span class="text-slate-200">República Dominicana (Disponible Remoto)</span></div>
-              <div>✉ <a href="mailto:eliezerterrero275@gmail.com" class="text-amber-400 hover:underline">eliezerterrero275@gmail.com</a></div>
-            </div>
-          </div>
-
-          <!-- Servicios Destacados -->
-          <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-6 space-y-3">
-            <h3 class="text-base font-bold text-white font-display">Servicios Principales</h3>
-            <ul class="space-y-2 text-xs text-slate-300">
-              <li class="flex items-center gap-2">
-                <span class="text-emerald-400 font-bold">✓</span>
-                <span>Monetización con Anuncios ($80)</span>
-              </li>
-              <li class="flex items-center gap-2">
-                <span class="text-emerald-400 font-bold">✓</span>
-                <span>Compras In-App Purchases ($80)</span>
-              </li>
-              <li class="flex items-center gap-2">
-                <span class="text-emerald-400 font-bold">✓</span>
-                <span>Gestor de Audio & SFX ($50)</span>
-              </li>
-              <li class="flex items-center gap-2">
-                <span class="text-emerald-400 font-bold">✓</span>
-                <span>Multijugador Photon PUN 2 ($120)</span>
-              </li>
-              <li class="flex items-center gap-2">
-                <span class="text-amber-400 font-bold">✓</span>
-                <span>Clases Privadas 1 a 1 ($20 - $25/h)</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Línea de Tiempo de Experiencia Comercial -->
-        <div class="space-y-4">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h3 class="text-lg font-bold text-white font-display">Experiencia Laboral & Contratos</h3>
-              <p class="text-xs text-slate-400">Historial verificado de contratos freelance y desarrollo de videojuegos.</p>
-            </div>
-            
-            <div class="flex flex-wrap items-center gap-2">
-              <!-- Botón Reordenar por Fecha -->
-              <button
-                id="btn-sort-experiences"
-                type="button"
-                onclick="window.ElyPortfolio.toggleSortExperiencesByDate()"
-                class="px-3 py-1.5 rounded-lg bg-[#141822] hover:bg-[#1a202e] border border-[#232733] text-xs font-semibold text-slate-300 hover:text-amber-400 transition-colors flex items-center gap-1.5 cursor-pointer"
-                title="Reordenar experiencias por fecha (Antiguo a Nuevo / Nuevo a Antiguo)"
-              >
-                <span>📅</span>
-                <span id="label-sort-experiences">Reordenar: Antiguos Primero</span>
-              </button>
-
-              <!-- Botón Agregar Experiencia (Moderador) -->
-              <button
-                type="button"
-                onclick="window.ElyPortfolio.openAddExperienceModal()"
-                class="moderator-only hidden px-3 py-1.5 rounded-lg bg-amber-400 text-black text-xs font-bold hover:bg-amber-300 transition-colors shadow-sm flex items-center gap-1 cursor-pointer"
-              >
-                <span>+ Agregar Experiencia</span>
-              </button>
-            </div>
-          </div>
-          
-          <div id="experiences-list" class="space-y-4">
-            <!-- Inyectado dinámicamente con opciones de subir/bajar, duplicar, editar y eliminar -->
-          </div>
-        </div>
-
-        <!-- Matriz de Habilidades Técnicas -->
-        <div class="space-y-4 pt-4 border-t border-[#1c212c]">
-          <h3 class="text-lg font-bold text-white font-display">Habilidades & Especialidades</h3>
-          
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-3">
-              <h4 class="text-sm font-bold text-amber-400">Desarrollo Videojuegos 2D/3D</h4>
-              <ul class="space-y-1.5 text-xs text-slate-300">
-                <li>• Unity Engine (Especialista C#)</li>
-                <li>• Físicas 2D & 3D (Rigidbody, Colisiones)</li>
-                <li>• Diseño de Niveles & Mecánicas</li>
-                <li>• Animación & Controladores de Estado</li>
-                <li>• Optimización Móvil (Draw Calls)</li>
-                <li>• Publicación en Google Play Store</li>
-              </ul>
-            </div>
-
-            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-3">
-              <h4 class="text-sm font-bold text-cyan-400">Multijugador & Red</h4>
-              <ul class="space-y-1.5 text-xs text-slate-300">
-                <li>• Photon Network & Photon PUN 2</li>
-                <li>• Sincronización de Salas & Matchmaking</li>
-                <li>• Replicación de Estados en Tiempo Real</li>
-                <li>• Economía Dentro del Juego & Tiendas</li>
-                <li>• Personalización de Avatares / Skins</li>
-                <li>• WebSockets & Cliente-Servidor</li>
-              </ul>
-            </div>
-
-            <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-3">
-              <h4 class="text-sm font-bold text-emerald-400">Monetización & Backend</h4>
-              <ul class="space-y-1.5 text-xs text-slate-300">
-                <li>• Anuncios (Banner, Interstitial, Rewarded)</li>
-                <li>• Compras Integradas (IAP Billing)</li>
-                <li>• PHP & Bases de Datos MySQL</li>
-                <li>• Desarrollo Web (HTML5, CSS3, JS)</li>
-                <li>• Arquitectura de Audio & Sound FX</li>
-                <li>• Git & GitHub Version Control</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Testimonios de Clientes -->
-        <div class="space-y-4 pt-4 border-t border-[#1c212c]">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h3 class="text-lg font-bold text-white font-display">Testimonios de Clientes & Colaboradores</h3>
-              <p class="text-xs text-slate-400">Opiniones directas de empresas, estudios y clientes verificados.</p>
-            </div>
-            
-            <div class="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onclick="window.ElyPortfolio.openFeedbackModal()"
-                class="px-3.5 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
-              >
-                <span>⭐ Realizar Feedback</span>
-              </button>
-
-              <button
-                type="button"
-                onclick="window.ElyPortfolio.openSatisfiedClientsModal()"
-                class="text-xs text-amber-400 hover:underline font-semibold"
-              >
-                Ver todos los testimonios (<span id="testimonials-count-badge">8+</span>) →
-              </button>
-            </div>
-          </div>
-          
-          <div id="testimonials-preview-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Inyectado dinámicamente con opciones de duplicar, editar y moderar -->
-          </div>
         </div>
       </section>
 
@@ -1852,78 +1666,34 @@
       </div>
     </div>
 
-    <!-- MODAL DE GESTIÓN Y SINCRONIZACIÓN DE ARCHIVOS PARA GITHUB Y SITIO ONLINE -->
-    <div id="sync-files-modal" class="hidden fixed inset-0 z-[99990] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 overflow-y-auto">
-      <div class="relative w-full max-w-2xl rounded-2xl bg-[#12151d] border border-amber-400/50 shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+    <!-- MODAL DE GESTIÓN Y SINCRONIZACIÓN DE ARCHIVOS -->
+    <div id="sync-files-modal" class="hidden fixed inset-0 z-[99990] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+      <div class="relative w-full max-w-md rounded-2xl bg-[#12151d] border border-amber-400/50 shadow-2xl p-6">
         <div class="flex items-center justify-between border-b border-[#1e2330] pb-3">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 text-xl font-bold">
-              💾
-            </div>
+            <div class="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 text-xl font-bold">💾</div>
             <div>
-              <h3 class="text-base font-bold text-white font-display">Gestor de Archivos & Sincronización GitHub</h3>
-              <p class="text-xs text-slate-400">Guarda, descarga o importa los archivos JSON directamente para tu web y repositorio.</p>
+              <h3 class="text-base font-bold text-white font-display">Archivos / GitHub</h3>
+              <p class="text-xs text-slate-400">Sincroniza los cambios directamente con GitHub.</p>
             </div>
           </div>
           <button type="button" onclick="window.ElyPortfolio.closeSyncFilesModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
         </div>
 
-        <!-- Estado de la sincronización backend -->
-        <div class="rounded-xl bg-[#0b0d11] border border-[#232733] p-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span id="sync-status-indicator" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span id="sync-status-text" class="text-xs font-semibold text-emerald-400">Servidor de Archivos: Sincronización Automática Activa</span>
-            </div>
-            <span id="sync-last-saved" class="text-[11px] font-mono text-slate-400">Sincronizado</span>
-          </div>
-          
-          <div class="text-xs text-slate-300 space-y-1">
-            <p>Cada vez que agregas, editas o eliminas un proyecto, experiencia o testimonio, se guarda automáticamente en el disco en:</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 font-mono text-[11px]">
-              <div class="p-2 rounded bg-[#141822] border border-[#232733] text-amber-400">
-                📁 src/data/*.json (Código fuente)
-              </div>
-              <div class="p-2 rounded bg-[#141822] border border-[#232733] text-cyan-400">
-                🌐 public/data & docs/ (Online / GitHub Pages)
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="rounded-xl bg-[#0b0d11] border border-[#232733] p-5 space-y-4">
-          <div>
-            <h4 class="text-sm font-bold text-white">Sincronización nativa con GitHub</h4>
-            <p class="text-xs text-slate-400 mt-1">Modifica directamente los archivos del repositorio usando la API nativa de archivos de GitHub. Las imágenes nuevas se suben automáticamente a una única ubicación.</p>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 font-mono text-[10px]">
-            <div class="p-2 rounded bg-[#141822] border border-[#232733] text-amber-400">src/data/*.json</div>
-            <div class="p-2 rounded bg-[#141822] border border-[#232733] text-cyan-400">public/data/*.json</div>
-            <div class="p-2 rounded bg-[#141822] border border-[#232733] text-emerald-400">docs/data/*.json</div>
-          </div>
-          <div class="p-3 rounded-xl bg-amber-400/5 border border-amber-400/20 text-xs text-slate-300">
-            <div class="font-semibold text-amber-400 mb-1">Imágenes</div>
-            <div>Una sola ubicación: <span class="font-mono text-white">assets/images/moderator/</span></div>
-          </div>
+        <div class="py-6">
           <button
             id="github-native-sync-btn"
             type="button"
             onclick="window.ElyPortfolio.syncAllToGithub()"
-            class="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+            class="w-full py-4 rounded-xl bg-amber-400 hover:bg-amber-300 text-black text-sm font-bold transition-all shadow-lg shadow-amber-400/20 flex items-center justify-center gap-2 cursor-pointer"
           >
             <span>🚀 Sincronizar directamente con GitHub</span>
           </button>
+          <p class="text-[11px] text-slate-500 text-center mt-3">Actualiza los archivos de contenido y las imágenes del repositorio sin necesidad de recompilar la web.</p>
         </div>
 
-        <div class="flex items-center justify-between gap-3 pt-3 border-t border-[#1e2330]">
-          <span class="text-[11px] text-slate-500">El token se solicita la primera vez y se guarda localmente en este navegador.</span>
-          <button
-            type="button"
-            onclick="window.ElyPortfolio.closeSyncFilesModal()"
-            class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 text-xs font-semibold cursor-pointer"
-          >
-            Cerrar
-          </button>
+        <div class="flex justify-end pt-3 border-t border-[#1e2330]">
+          <button type="button" onclick="window.ElyPortfolio.closeSyncFilesModal()" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 text-xs font-semibold cursor-pointer">Cerrar</button>
         </div>
       </div>
     </div>
