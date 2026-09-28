@@ -1158,6 +1158,8 @@
       }, 340);
     }
 
+    toast.dismiss = dismissToast;
+
     function startTimer(time) {
       startTime = Date.now();
       timerId = setTimeout(dismissToast, time);
@@ -3853,8 +3855,26 @@
   }
 
   async function syncAllToGithub() {
+    let syncNotification = null;
+    syncNotification = showStatusNotification({
+      title: 'Sincronizando',
+      message: 'Enviando datos e imágenes a GitHub...',
+      type: 'info',
+      icon: '⏳',
+      duration: 60000
+    });
+
     const token = getGithubToken();
-    if (!token) return;
+    if (!token) {
+      if (syncNotification && typeof syncNotification.dismiss === 'function') syncNotification.dismiss();
+      showStatusNotification({
+        title: 'Error de GitHub',
+        message: 'No hay un token de GitHub configurado.',
+        type: 'error',
+        icon: '⚠️'
+      });
+      return;
+    }
 
     const syncButton = document.getElementById('github-native-sync-btn');
     if (syncButton) {
@@ -3892,6 +3912,7 @@
       const lastSavedEl = document.getElementById('sync-last-saved');
       if (lastSavedEl) lastSavedEl.textContent = new Date().toLocaleTimeString();
 
+      if (syncNotification && typeof syncNotification.dismiss === 'function') syncNotification.dismiss();
       showStatusNotification({
         title: 'GitHub Sincronizado',
         message: 'Datos e imágenes enviados directamente al repositorio. Archivos actualizados: ' + commits + '. Imágenes nuevas: ' + uploadedImages.size + '.',
@@ -3900,6 +3921,7 @@
       });
     } catch (error) {
       console.error('[GITHUB SYNC ERROR]', error);
+      if (syncNotification && typeof syncNotification.dismiss === 'function') syncNotification.dismiss();
       showStatusNotification({
         title: 'Error de GitHub',
         message: error.message || 'No se pudo sincronizar el repositorio.',
