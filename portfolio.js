@@ -2076,20 +2076,20 @@
           <div class="relative h-0">
             <span class="absolute right-0 -top-1 text-[9px] font-mono text-slate-500">${c.year || '2025'}</span>
           </div>
-          <p class="text-xs text-slate-300 italic leading-relaxed whitespace-pre-line">
-            “${c.feedback}”
-          </p>
-          <div class="pt-3 border-t border-[#1e2330] flex items-center justify-between gap-3">
-            <div class="flex items-center gap-2.5">
-              <div class="h-9 w-9 rounded-lg overflow-hidden bg-black/40 border border-[#232733] shrink-0">
-                <img src="${c.avatar || './assets/images/ely/my-avatar.png'}" alt="${c.name}" class="h-full w-full object-cover" onerror="this.src='./assets/images/ely/my-avatar.png'" />
-              </div>
-              <div>
-                <div class="text-xs font-bold text-white">${c.name}</div>
-                <div class="text-[11px] text-amber-400/90 truncate">${c.project}</div>
-                <div class="text-[10px] text-slate-500">${c.role}</div>
-              </div>
+          <div class="flex items-center gap-2.5">
+            <div class="h-9 w-9 rounded-lg overflow-hidden bg-black/40 border border-[#232733] shrink-0">
+              <img src="${c.avatar || './assets/images/ely/my-avatar.png'}" alt="${c.name}" class="h-full w-full object-cover" onerror="this.src='./assets/images/ely/my-avatar.png'" />
             </div>
+            <div class="min-w-0">
+              <div class="text-xs font-bold text-white">${c.name}</div>
+              <div class="text-[11px] text-amber-400/90 truncate">${c.project}</div>
+              <div class="text-[10px] text-slate-500">${c.role}</div>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-[#1e2330]">
+            <p class="text-xs text-slate-300 italic leading-relaxed whitespace-pre-line">
+              “${c.feedback}”
+            </p>
           </div>
           <div class="flex items-end justify-between gap-3 pt-1">
             <div class="flex flex-wrap gap-1">${tagBadges}</div>
