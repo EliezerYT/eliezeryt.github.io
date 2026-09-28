@@ -3150,11 +3150,11 @@
     document.getElementById('edit-proj-client').value = project.clientOrTeam || '';
     document.getElementById('edit-proj-year').value = project.year || '';
     const editEffectElectrify = document.getElementById('edit-proj-effect-electrify');
-    const editEffectShake = document.getElementById('edit-proj-effect-shake');
+    const editEffectShake = document.getElementById('edit-proj-effect-shake');\nconst editEffectRainbow = document.getElementById('edit-proj-effect-rainbow');\nconst editEffectRainbow = document.getElementById('edit-proj-effect-rainbow');
     const editEffectColor = document.getElementById('edit-proj-effect-color');
     const storedEffects = Array.isArray(project.cardEffects) ? project.cardEffects : (project.cardEffect && project.cardEffect !== 'none' ? [project.cardEffect] : []);
     if (editEffectElectrify) editEffectElectrify.checked = storedEffects.includes('electrify') || storedEffects.includes('red') || storedEffects.includes('gold') || storedEffects.includes('blue');
-    if (editEffectShake) editEffectShake.checked = storedEffects.includes('shake');
+    if (editEffectShake) editEffectShake.checked = storedEffects.includes('shake');\nif (editEffectRainbow) editEffectRainbow.checked = storedEffects.includes('rainbow');
     if (editEffectColor) editEffectColor.value = /^#[0-9a-fA-F]{6}$/.test(project.cardEffectColor || '') ? project.cardEffectColor : '#fbbf24';
     document.getElementById('edit-proj-cover').value = project.coverImage || '';
     const editPlayCheck = document.getElementById('edit-proj-play-check');
@@ -3224,7 +3224,7 @@
     const editEffectShake = document.getElementById('edit-proj-effect-shake');
     const editEffectColor = document.getElementById('edit-proj-effect-color');
     if (editEffectElectrify && editEffectElectrify.checked) effectList.push('electrify');
-    if (editEffectShake && editEffectShake.checked) effectList.push('shake');
+    if (editEffectShake && editEffectShake.checked) effectList.push('shake');\nif (editEffectRainbow && editEffectRainbow.checked) effectList.push('rainbow');
     project.cardEffects = effectList;
     project.cardEffect = effectList.length ? effectList[0] : 'none';
     project.cardEffectColor = editEffectColor ? editEffectColor.value : '#fbbf24';
