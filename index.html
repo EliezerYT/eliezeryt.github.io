@@ -37,20 +37,36 @@
     <!-- Estilos Nativos -->
     <link rel="stylesheet" href="./style.css">
   <style>
-.card-effect-red,.card-effect-gold,.card-effect-blue,.card-effect-shake{position:relative;isolation:isolate;}
-.card-effect-red{color:#ef4444;animation:card-shake-red 1.05s ease-in-out infinite;}
-.card-effect-gold{color:#fbbf24;animation:card-shake-gold 1.1s ease-in-out infinite;}
-.card-effect-blue{color:#38bdf8;animation:card-shake-blue 1s ease-in-out infinite;}
+.card-effect-red,.card-effect-gold,.card-effect-blue,.card-effect-shake{position:relative;isolation:isolate;--card-effect-color:currentColor;}
+.card-effect-red{--card-effect-color:#ef4444;animation:card-shake-red 1.05s ease-in-out infinite;}
+.card-effect-gold{--card-effect-color:#fbbf24;animation:card-shake-gold 1.1s ease-in-out infinite;}
+.card-effect-blue{--card-effect-color:#38bdf8;animation:card-shake-blue 1s ease-in-out infinite;}
 .card-effect-shake{animation:card-shake 0.42s ease-in-out infinite;}
-.card-effect-red::before,.card-effect-gold::before,.card-effect-blue::before{content:"";position:absolute;inset:-3px;border-radius:inherit;pointer-events:none;z-index:-1;padding:2px;background:repeating-conic-gradient(from 0deg,transparent 0deg 6deg,currentColor 7deg 10deg,transparent 11deg 18deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;filter:blur(1px);animation:electric-wave .65s linear infinite;}
-.card-effect-red::after,.card-effect-gold::after,.card-effect-blue::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:20;box-shadow:inset 0 0 18px currentColor,0 0 13px currentColor;opacity:.42;animation:electric-pulse .75s ease-in-out infinite alternate;}
-@keyframes electric-wave{0%{transform:rotate(0) scale(1);opacity:.45}35%{transform:rotate(7deg) scale(1.015);opacity:1}70%{transform:rotate(-5deg) scale(.995);opacity:.6}100%{transform:rotate(0) scale(1);opacity:.9}}
-@keyframes electric-pulse{from{opacity:.18}to{opacity:.7}}
-@keyframes card-shake-red{0%,100%{transform:translate(0,0)}25%{transform:translate(-.5px,.4px)}50%{transform:translate(.6px,-.3px)}75%{transform:translate(-.3px,.5px)}}
-@keyframes card-shake-gold{0%,100%{transform:translate(0,0)}20%{transform:translate(.4px,-.5px)}43%{transform:translate(-.6px,.3px)}67%{transform:translate(.3px,.5px)}}
-@keyframes card-shake-blue{0%,100%{transform:translate(0,0)}30%{transform:translate(-.4px,.5px)}55%{transform:translate(.5px,-.4px)}80%{transform:translate(-.3px,-.2px)}}
+.card-effect-red::before,.card-effect-gold::before,.card-effect-blue::before,.card-effect-red::after,.card-effect-gold::after,.card-effect-blue::after{content:"";position:absolute;border:2px solid var(--card-effect-color);border-radius:inherit;pointer-events:none;z-index:30;box-sizing:border-box;mix-blend-mode:screen;}
+.card-effect-red::before,.card-effect-gold::before,.card-effect-blue::before{inset:-2px;animation:border-wave-out 1.35s cubic-bezier(.35,.05,.65,.95) infinite;}
+.card-effect-red::after,.card-effect-gold::after,.card-effect-blue::after{inset:-2px;animation:border-wave-in 1.35s cubic-bezier(.35,.05,.65,.95) .675s infinite;}
+.card-effect-red{box-shadow:0 0 0 1px color-mix(in srgb,var(--card-effect-color) 55%,transparent),0 0 18px color-mix(in srgb,var(--card-effect-color) 25%,transparent);}
+.card-effect-gold{box-shadow:0 0 0 1px color-mix(in srgb,var(--card-effect-color) 55%,transparent),0 0 18px color-mix(in srgb,var(--card-effect-color) 25%,transparent);}
+.card-effect-blue{box-shadow:0 0 0 1px color-mix(in srgb,var(--card-effect-color) 55%,transparent),0 0 18px color-mix(in srgb,var(--card-effect-color) 25%,transparent);}
+@keyframes border-wave-out{
+  0%{inset:-2px;opacity:0;filter:blur(1px);box-shadow:0 0 0 0 var(--card-effect-color);}
+  12%{opacity:1;}
+  55%{inset:-11px;opacity:.85;filter:blur(1.5px);box-shadow:0 0 0 2px color-mix(in srgb,var(--card-effect-color) 55%,transparent),0 0 16px color-mix(in srgb,var(--card-effect-color) 45%,transparent);}
+  100%{inset:-2px;opacity:0;filter:blur(3px);box-shadow:0 0 0 0 var(--card-effect-color);}
+}
+@keyframes border-wave-in{
+  0%{inset:-11px;opacity:0;filter:blur(3px);box-shadow:0 0 0 0 var(--card-effect-color);}
+  20%{opacity:.85;}
+  55%{inset:-2px;opacity:1;filter:blur(1px);box-shadow:0 0 0 2px color-mix(in srgb,var(--card-effect-color) 55%,transparent),0 0 16px color-mix(in srgb,var(--card-effect-color) 45%,transparent);}
+  100%{inset:-11px;opacity:0;filter:blur(3px);box-shadow:0 0 0 0 var(--card-effect-color);}
+}
+@keyframes card-shake-red{0%,100%{transform:translate(0,0)}25%{transform:translate(-.35px,.3px)}50%{transform:translate(.4px,-.25px)}75%{transform:translate(-.25px,.35px)}}
+@keyframes card-shake-gold{0%,100%{transform:translate(0,0)}20%{transform:translate(.3px,-.35px)}43%{transform:translate(-.4px,.25px)}67%{transform:translate(.25px,.35px)}}
+@keyframes card-shake-blue{0%,100%{transform:translate(0,0)}30%{transform:translate(-.3px,.35px)}55%{transform:translate(.35px,-.3px)}80%{transform:translate(-.25px,-.15px)}}
 @keyframes card-shake{0%,100%{transform:translate(0,0) rotate(0)}20%{transform:translate(-1px,.5px) rotate(-.15deg)}40%{transform:translate(1px,-.5px) rotate(.15deg)}60%{transform:translate(-.7px,-.4px) rotate(-.1deg)}80%{transform:translate(.7px,.4px) rotate(.1deg)}}
-@media (prefers-reduced-motion:reduce){.card-effect-red,.card-effect-gold,.card-effect-blue,.card-effect-shake,.card-effect-red::before,.card-effect-gold::before,.card-effect-blue::before,.card-effect-red::after,.card-effect-gold::after,.card-effect-blue::after{animation-duration:2.5s}}
+@media (prefers-reduced-motion:reduce){
+  .card-effect-red,.card-effect-gold,.card-effect-blue,.card-effect-shake,.card-effect-red::before,.card-effect-gold::before,.card-effect-blue::before,.card-effect-red::after,.card-effect-gold::after,.card-effect-blue::after{animation-duration:2.5s}
+}
 </style></head>
   <body class="bg-[#0b0d11] text-[#ededef] antialiased selection:bg-amber-400 selection:text-black">
 
