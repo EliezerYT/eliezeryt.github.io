@@ -1494,9 +1494,13 @@
       const isProp = project.origin === 'propio';
       const isAlreadyInDom = renderedCardIds.has(project.id);
       const entranceClass = isAlreadyInDom ? '' : 'card-fade-in';
-      const cardEffect = project.cardEffect || 'none';
-      const cardEffectClass = cardEffect !== 'none' ? ' card-effect-' + cardEffect : '';
-
+      const cardEffects = Array.isArray(project.cardEffects)
+        ? project.cardEffects
+        : (project.cardEffect && project.cardEffect !== 'none' ? [project.cardEffect] : []);
+      const cardEffectClass = cardEffects.map(function(effect) {
+        return ' card-effect-' + effect;
+      }).join('');
+      const cardEffectStyle = project.cardEffectColor ? ' style="--card-effect-color:' + project.cardEffectColor + ';--card-effect-soft:' + project.cardEffectColor + 'aa;--card-effect-light:' + project.cardEffectColor + ';"' : '';
       const originBadge = isServ
         ? '<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Servicio Técnico</span>'
         : isClas
@@ -1600,7 +1604,7 @@
       ` : '';
 
       html += `
-        <article data-id="${project.id}" class="${entranceClass}${cardEffectClass} group relative flex flex-col overflow-hidden rounded-2xl bg-[#12151d] border border-[#232733] hover:border-amber-400/60 transform hover:scale-105 transition-all duration-300 ease-out shadow-lg hover:shadow-2xl hover:shadow-amber-500/20 z-0 hover:z-10">
+        <article data-id="${project.id}"${cardEffectStyle} class="${entranceClass}${cardEffectClass} group relative flex flex-col overflow-hidden rounded-2xl bg-[#12151d] border border-[#232733] hover:border-amber-400/60 transform hover:scale-105 transition-all duration-300 ease-out shadow-lg hover:shadow-2xl hover:shadow-amber-500/20 z-0 hover:z-10">
           
           ${moderatorBar}
 
@@ -3145,8 +3149,13 @@
     document.getElementById('edit-proj-role').value = project.role || '';
     document.getElementById('edit-proj-client').value = project.clientOrTeam || '';
     document.getElementById('edit-proj-year').value = project.year || '';
-    const editCardEffect = document.getElementById('edit-proj-card-effect');
-    if (editCardEffect) editCardEffect.value = project.cardEffect || 'none';
+    const editEffectElectrify = document.getElementById('edit-proj-effect-electrify');
+    const editEffectShake = document.getElementById('edit-proj-effect-shake');
+    const editEffectColor = document.getElementById('edit-proj-effect-color');
+    const storedEffects = Array.isArray(project.cardEffects) ? project.cardEffects : (project.cardEffect && project.cardEffect !== 'none' ? [project.cardEffect] : []);
+    if (editEffectElectrify) editEffectElectrify.checked = storedEffects.includes('electrify') || storedEffects.includes('red') || storedEffects.includes('gold') || storedEffects.includes('blue');
+    if (editEffectShake) editEffectShake.checked = storedEffects.includes('shake');
+    if (editEffectColor) editEffectColor.value = /^#[0-9a-fA-F]{6}$/.test(project.cardEffectColor || '') ? project.cardEffectColor : '#fbbf24';
     document.getElementById('edit-proj-cover').value = project.coverImage || '';
     const editPlayCheck = document.getElementById('edit-proj-play-check');
     const editPlayUrl = document.getElementById('edit-proj-play-url');
@@ -3210,8 +3219,15 @@
     project.role = document.getElementById('edit-proj-role').value.trim();
     project.clientOrTeam = document.getElementById('edit-proj-client').value.trim() || undefined;
     project.year = document.getElementById('edit-proj-year').value.trim();
-    const editCardEffect = document.getElementById('edit-proj-card-effect');
-    project.cardEffect = editCardEffect ? editCardEffect.value : 'none';
+    const effectList = [];
+    const editEffectElectrify = document.getElementById('edit-proj-effect-electrify');
+    const editEffectShake = document.getElementById('edit-proj-effect-shake');
+    const editEffectColor = document.getElementById('edit-proj-effect-color');
+    if (editEffectElectrify && editEffectElectrify.checked) effectList.push('electrify');
+    if (editEffectShake && editEffectShake.checked) effectList.push('shake');
+    project.cardEffects = effectList;
+    project.cardEffect = effectList.length ? effectList[0] : 'none';
+    project.cardEffectColor = editEffectColor ? editEffectColor.value : '#fbbf24';
     project.icon = document.getElementById('edit-proj-icon').value.trim() || project.icon || project.coverImage || './assets/images/ely/my-avatar.png';
     project.coverImage = document.getElementById('edit-proj-cover').value.trim() || './assets/images/ely/my-avatar.png';
     const editPlayCheck = document.getElementById('edit-proj-play-check');
