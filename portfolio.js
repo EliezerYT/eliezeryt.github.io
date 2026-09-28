@@ -4362,22 +4362,50 @@
     return [...customLibraryImages, ...automaticImages, ...DEFAULT_LIBRARY_IMAGES];
   }
 
+  const FALLBACK_ELY_IMAGE_MANIFEST = [
+    "Captura-de-pantalla-2025-08-07-211620.png",
+    "Imagen_de_WhatsApp_2025-03-01_a_las_21.29.15_ff053395.jpg",
+    "icon-appads.png","icon-dominicanpower.png","icon-dominoesrepublic.png","icon-enunagoma.png",
+    "icon-helptuber.jpg","icon-inapppurchase.png","icon-retopolis.jpg","icon-soundsystempng.png",
+    "icon-telesancris.png","icon-yunonline.png","my-avatar.png","odd.png","overdrivers-teaser.jpg",
+    "picon-Rball.png","picon-aworld.png","picon-hellishF.png","picon-maddys.png","picon-peace.png",
+    "picon-snakes.png","picon-thespider.png","picon-wallball.png","vlcsnap-2025-02-10-12h53m54s498.png",
+    "vlcsnap-2026-09-24-08h57m21s128.png","MotoLoco/MotoLoco-En-Una-Goma.png","MotoLoco/MotoLocoLogo.png",
+    "Profile/telesancrilogo.jpg","maddys/1.png","maddys/10.png","maddys/2.png","maddys/3.png",
+    "maddys/4.png","maddys/5.png","maddys/6.png","maddys/7.png","maddys/8.png","maddys/9.png","maddys/icon.png"
+  ];
+
   async function loadImagesFromMainElyFolder(showNotification = false) {
     if (githubElyFolderLoading) return;
     githubElyFolderLoading = true;
-
     const imageExtensions = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'avif', 'bmp', 'svg'];
 
     try {
-      const response = await fetch('./assets/images/ely/manifest.json?cache=' + Date.now(), {
-        cache: 'no-store'
-      });
-      if (!response.ok) throw new Error('Manifest: ' + response.status);
+      const urls = [
+        './assets/images/ely/manifest.json?cache=' + Date.now(),
+        'assets/images/ely/manifest.json?cache=' + Date.now(),
+        '/assets/images/ely/manifest.json?cache=' + Date.now()
+      ];
+      let imagePaths = [];
+      let source = 'manifest.json';
 
-      const manifest = await response.json();
-      const imagePaths = Array.isArray(manifest)
-        ? manifest
-        : (Array.isArray(manifest.images) ? manifest.images : []);
+      for (const url of urls) {
+        try {
+          const response = await fetch(url, { cache: 'no-store' });
+          if (!response.ok) continue;
+          const manifest = await response.json();
+          const parsed = Array.isArray(manifest) ? manifest : (Array.isArray(manifest.images) ? manifest.images : []);
+          if (parsed.length) {
+            imagePaths = parsed;
+            break;
+          }
+        } catch (e) {}
+      }
+
+      if (!imagePaths.length) {
+        imagePaths = FALLBACK_ELY_IMAGE_MANIFEST.slice();
+        source = 'respaldo local';
+      }
 
       const foundImages = imagePaths
         .filter(function (item) {
@@ -4387,10 +4415,7 @@
           const cleanPath = relativePath.replace(/^\/+/, '').replace(/\\/g, '/');
           const fullPath = './assets/images/ely/' + cleanPath;
           const fileName = cleanPath.split('/').pop();
-          const folder = cleanPath.includes('/')
-            ? cleanPath.substring(0, cleanPath.lastIndexOf('/'))
-            : 'Ely';
-
+          const folder = cleanPath.includes('/') ? cleanPath.substring(0, cleanPath.lastIndexOf('/')) : 'Ely';
           return {
             id: 'ely-folder-' + cleanPath,
             name: fileName.replace(/\.[^.]+$/, ''),
@@ -4405,18 +4430,18 @@
 
       if (showNotification) {
         showStatusNotification({
-          title: 'Biblioteca Actualizada',
-          message: 'Se recargaron ' + foundImages.length + ' imágenes de ely y todas sus subcarpetas.',
+          title: 'Manifest reconstruido',
+          message: 'Se cargaron ' + foundImages.length + ' imágenes de ely y todas sus subcarpetas (' + source + ').',
           type: 'success',
           icon: '🔄'
         });
       }
     } catch (error) {
-      console.warn('[LIBRARY] No se pudo cargar el manifiesto de imágenes de ely:', error);
+      console.warn('[LIBRARY] Error reconstruyendo el manifest de imágenes de ely:', error);
       if (showNotification) {
         showStatusNotification({
           title: 'Error al recargar',
-          message: 'No se pudo cargar el manifiesto de imágenes de ely.',
+          message: 'No se pudo reconstruir la lista de imágenes de ely.',
           type: 'error',
           icon: '⚠️'
         });
