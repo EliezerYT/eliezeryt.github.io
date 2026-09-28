@@ -1949,8 +1949,7 @@
       return `
         <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-6 space-y-3 hover:border-amber-400/40 transition-colors">
           ${moderatorBar}
-          <div class="flex items-center justify-between">
-            <div class="text-amber-400 text-sm font-bold tracking-wider">${starIcons} <span class="text-xs text-slate-400 font-mono">${(c.rating || 5).toFixed(1)}</span></div>
+          <div class="flex items-center justify-end">
             <span class="text-[11px] font-mono text-slate-400 bg-black/40 px-2 py-0.5 rounded">${c.year || '2025'}</span>
           </div>
           <p class="text-xs text-slate-300 italic leading-relaxed whitespace-pre-line">
@@ -1968,8 +1967,9 @@
               </div>
             </div>
           </div>
-          <div class="flex flex-wrap gap-1 pt-1">
-            ${tagBadges}
+          <div class="flex items-end justify-between gap-3 pt-1">
+            <div class="flex flex-wrap gap-1">${tagBadges}</div>
+            <div class="text-amber-400 text-sm font-bold tracking-wider shrink-0">${starIcons} <span class="text-xs text-slate-400 font-mono">${(c.rating || 5).toFixed(1)}</span></div>
           </div>
         </div>
       `;
@@ -2323,7 +2323,7 @@
 
     const enteredCode = codeInput.value.trim().toUpperCase();
     const name = nameInput.value.trim();
-    const role = roleInput.value.trim();
+    const role = roleInput ? roleInput.value.trim() : '';
     const project = projInput.value.trim();
     const rating = parseInt(ratingInput.value, 10) || 5;
     const feedback = textInput.value.trim();
