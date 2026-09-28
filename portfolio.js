@@ -633,7 +633,7 @@
     },
     {
       id: 'clase-unity-csharp',
-      title: 'Clase Privada: Desarrollo de Juegos Unity & C#',
+      title: 'Clases Impartidas Mentorías 1 a 1',
       tagline: 'Sesiones personalizadas 1 a 1 para aprender programación y diseño de videojuegos',
       description: 'Aprende a programar videojuegos desde cero o sube de nivel con proyectos reales. Clases prácticas uno a uno enfocadas en lo que tú quieras aprender.',
       fullStory: 'Clases particulares personalizadas impartidas por ElyDev a través de Discord o Google Meet con pantalla compartida. Adaptadas a tu ritmo, desde los fundamentos de programación en C# y físicas en Unity hasta mecánicas complejas, inteligencia artificial y arquitectura de código limpio.',
