@@ -1522,8 +1522,8 @@
                 <div class="mt-3 rounded-xl bg-gradient-to-r from-amber-400/10 via-amber-400/5 to-transparent border border-amber-400/20 p-3" onclick="event.stopPropagation()">
                   <div class="flex items-center justify-between gap-2">
                     <div>
-                      <div class="text-[10px] uppercase tracking-wider font-bold text-amber-400">Veces trabajado</div>
-                      <div class="text-[9px] text-slate-500 mt-0.5">Trabajos realizados</div>
+                      <div class="text-[10px] uppercase tracking-wider font-bold text-amber-400">${isClas ? 'Horas impartidas' : 'Veces trabajado'}</div>
+                      <div class="text-[9px] text-slate-500 mt-0.5">${isClas ? 'Horas de clases impartidas' : 'Trabajos realizados'}</div>
                     </div>
                     <div class="flex items-center gap-1.5">
                       ${isModerator ? `
@@ -1562,7 +1562,7 @@
                     class="text-xs text-slate-400 hover:text-white transition-colors"
                     title="${project.links[0].label}"
                   >
-                    ↗ ${project.links[0].type === 'canva' ? 'Canva' : project.links[0].type === 'video' ? 'YouTube' : 'Enlace'}
+                    ↗ ${project.links[0].label || (project.links[0].type === 'canva' ? 'Canva' : project.links[0].type === 'video' ? 'YouTube' : 'Enlace')}
                   </a>
                 ` : ''}
               </div>
@@ -1882,8 +1882,10 @@
     const container = document.getElementById('testimonials-preview-grid');
     const badge = document.getElementById('testimonials-count-badge');
     if (badge) {
-      badge.textContent = satisfiedClients.length + '+';
+      badge.textContent = satisfiedClients.length + ' Feedbacks';
     }
+    const heroFeedbackCount = document.getElementById('hero-feedback-count');
+    if (heroFeedbackCount) heroFeedbackCount.textContent = satisfiedClients.length + ' Feedbacks';
     if (!container) return;
 
     // Mostrar los primeros feedbacks en la página principal
@@ -1978,7 +1980,7 @@
     const container = document.getElementById('satisfied-clients-list');
     const badge = document.getElementById('modal-clients-count-badge');
     if (badge) {
-      badge.textContent = satisfiedClients.length + ' Clientes';
+      badge.textContent = satisfiedClients.length + ' Feedbacks';
     }
     if (!container) return;
 
@@ -2783,7 +2785,7 @@
         icon: '🛡️'
       });
     } else {
-      alert('Contraseña incorrecta. (Pista: elydev2026)');
+      alert('Contraseña incorrecta.');
     }
   }
 
@@ -2970,6 +2972,8 @@
     
     // Múltiples imágenes (galería) separadas por salto de línea
     const galleryImgs = Array.isArray(project.galleryImages) ? project.galleryImages.join('\n') : (project.coverImage || '');
+    const linksInput = document.getElementById('edit-proj-links');
+    if (linksInput) linksInput.value = (project.links || []).map(link => `${link.label || ''} | ${link.url || ''}`).join('\n');
     document.getElementById('edit-proj-gallery').value = galleryImgs;
 
     const iconPrev = document.getElementById('edit-proj-icon-preview');
@@ -3026,6 +3030,8 @@
 
     // Video de YouTube en grande
     project.youtubeVideo = document.getElementById('edit-proj-video').value.trim();
+    const linksRaw = document.getElementById('edit-proj-links') ? document.getElementById('edit-proj-links').value : '';
+    project.links = linksRaw.split('\n').map(line => { const parts = line.split('|'); const url = parts.slice(1).join('|').trim(); return { label: (parts[0] || '').trim(), url: url, type: /canva\.com/i.test(url) ? 'canva' : 'external' }; }).filter(link => link.label && link.url);
 
     project.description = document.getElementById('edit-proj-desc').value.trim();
     project.fullStory = document.getElementById('edit-proj-story').value.trim() || project.description;
@@ -3072,6 +3078,8 @@
       if (coverInp) coverInp.value = './assets/images/ely/overdrivers-teaser.jpg';
       const galleryInp = document.getElementById('new-proj-gallery');
       if (galleryInp) galleryInp.value = '';
+      const linksInp = document.getElementById('new-proj-links');
+      if (linksInp) linksInp.value = '';
       renderGalleryThumbnails('new-proj-gallery-thumbs', 'new-proj-gallery');
 
       modal.classList.remove('hidden');
@@ -3097,6 +3105,8 @@
     const coverImage = document.getElementById('new-proj-cover').value.trim() || './assets/images/ely/my-avatar.png';
     const galleryRaw = document.getElementById('new-proj-gallery').value;
     const videoUrl = document.getElementById('new-proj-video').value.trim();
+    const linksRaw = document.getElementById('new-proj-links') ? document.getElementById('new-proj-links').value : '';
+    const links = linksRaw.split('\n').map(line => { const parts = line.split('|'); const url = parts.slice(1).join('|').trim(); return { label: (parts[0] || '').trim(), url: url, type: /canva\.com/i.test(url) ? 'canva' : 'external' }; }).filter(link => link.label && link.url);
     const desc = document.getElementById('new-proj-desc').value.trim();
     const techs = document.getElementById('new-proj-techs').value.split(',').map(s => s.trim()).filter(Boolean);
 
@@ -3114,6 +3124,7 @@
       coverImage: coverImage,
       galleryImages: parsedGallery.length > 0 ? parsedGallery : [coverImage],
       youtubeVideo: videoUrl || '',
+      links: links,
       technologies: techs.length > 0 ? techs : ['Unity', 'C#'],
       role: 'Desarrollador'
     };
