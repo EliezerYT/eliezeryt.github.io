@@ -4430,6 +4430,11 @@
     if (!grid) return;
 
     const allImages = getAllLibraryImages();
+    const librarySizeSlider = document.getElementById('library-size-slider');
+    const librarySize = Math.max(120, Math.min(300, parseInt((librarySizeSlider && librarySizeSlider.value) || '190', 10) || 190));
+    const librarySizeValue = document.getElementById('library-size-value');
+    if (librarySizeValue) librarySizeValue.textContent = librarySize + 'px';
+    grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(' + librarySize + 'px, 1fr))';
     const query = (searchFilter || '').toLowerCase().trim();
 
     const filtered = allImages.filter(img => {
@@ -4506,6 +4511,8 @@
         </div>
       `;
     }).join('');
+
+    grid.querySelectorAll('.library-preview-btn').forEach(el => { el.style.height = Math.max(90, Math.round(librarySize * 0.78)) + 'px'; });
 
     grid.querySelectorAll('.select-image-btn').forEach(button => {
       button.addEventListener('click', function (e) {
@@ -4718,6 +4725,13 @@
       if (customEl) customEl.value = '';
       setLibraryFolderUI();
       renderLibraryGrid();
+      const sizeSlider = document.getElementById('library-size-slider');
+      if (sizeSlider && !sizeSlider.dataset.bound) {
+        sizeSlider.dataset.bound = 'true';
+        sizeSlider.addEventListener('input', function () {
+          renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
+        });
+      }
     }
   }
 
