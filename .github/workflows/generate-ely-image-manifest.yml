@@ -1,0 +1,50 @@
+name: Generate Ely image manifest
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'assets/images/ely/**'
+      - '.github/workflows/generate-ely-image-manifest.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate manifest
+        shell: python
+        run: |
+          import json
+          import os
+
+          root = "assets/images/ely"
+          extensions = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".avif", ".bmp", ".svg"}
+          images = []
+
+          for current_root, dirs, files in os.walk(root):
+              dirs.sort()
+              for filename in sorted(files):
+                  if os.path.splitext(filename)[1].lower() in extensions:
+                      full_path = os.path.join(current_root, filename)
+                      images.append(os.path.relpath(full_path, root).replace(os.sep, "/"))
+
+          with open(os.path.join(root, "manifest.json"), "w", encoding="utf-8") as file:
+              json.dump(images, file, ensure_ascii=False, indent=2)
+              file.write("\\n")
+
+      - name: Commit manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/images/ely/manifest.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Update Ely image manifest"
+          git push
