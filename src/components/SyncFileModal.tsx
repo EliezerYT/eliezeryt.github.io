@@ -11,9 +11,7 @@ import {
   HardDrive,
   Info,
   Loader2,
-  RefreshCw,
   Cloud,
-  AlertTriangle
 } from 'lucide-react';
 
 interface SyncFileModalProps {
