@@ -237,8 +237,15 @@
                 <span>Servicios</span>
                 <span class="text-emerald-400">⚙</span>
               </div>
-              <div id="metric-count-servicios" class="text-xl font-bold text-white font-mono mt-0.5">4</div>
-              <div class="text-[10px] text-slate-500">Ads/IAP/Audio</div>
+              <div class="flex items-center justify-between gap-2 mt-1">
+                <div class="flex items-center gap-1.5">
+                  <button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.changeCategoryWorkCount('servicios', -1)" class="moderator-only hidden w-6 h-6 rounded-md bg-white/10 hover:bg-red-500/30 text-white font-black leading-none">−</button>
+                  <input id="metric-count-servicios" type="number" min="0" step="1" value="0" onclick="event.stopPropagation()" onchange="window.ElyPortfolio.setCategoryWorkCount('servicios', this.value)" class="moderator-only hidden w-14 h-7 rounded-md bg-[#0b0d11] border border-emerald-400/30 text-center text-sm font-black text-emerald-300 outline-none focus:border-emerald-400" />
+                  <span id="metric-count-servicios-public" class="text-xl font-bold text-white font-mono">0</span>
+                  <button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.changeCategoryWorkCount('servicios', 1)" class="moderator-only hidden w-6 h-6 rounded-md bg-emerald-400 hover:bg-emerald-300 text-black font-black leading-none">+</button>
+                </div>
+              </div>
+              <div class="text-[10px] text-slate-500">Veces trabajado</div>
             </div>
 
             <div
@@ -250,8 +257,15 @@
                 <span>Clases</span>
                 <span class="text-amber-400">🎓</span>
               </div>
-              <div id="metric-count-clases" class="text-xl font-bold text-white font-mono mt-0.5">3</div>
-              <div class="text-[10px] text-slate-500">Clases Impartidas Mentorías 1 a 1</div>
+              <div class="flex items-center justify-between gap-2 mt-1">
+                <div class="flex items-center gap-1.5">
+                  <button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.changeCategoryWorkCount('clases', -1)" class="moderator-only hidden w-6 h-6 rounded-md bg-white/10 hover:bg-red-500/30 text-white font-black leading-none">−</button>
+                  <input id="metric-count-clases" type="number" min="0" step="1" value="0" onclick="event.stopPropagation()" onchange="window.ElyPortfolio.setCategoryWorkCount('clases', this.value)" class="moderator-only hidden w-14 h-7 rounded-md bg-[#0b0d11] border border-amber-400/30 text-center text-sm font-black text-amber-300 outline-none focus:border-amber-400" />
+                  <span id="metric-count-clases-public" class="text-xl font-bold text-white font-mono">0</span>
+                  <button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.changeCategoryWorkCount('clases', 1)" class="moderator-only hidden w-6 h-6 rounded-md bg-amber-400 hover:bg-amber-300 text-black font-black leading-none">+</button>
+                </div>
+              </div>
+              <div class="text-[10px] text-slate-500">Horas impartidas</div>
             </div>
           </div>
         </div>
