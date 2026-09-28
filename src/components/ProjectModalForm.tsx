@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Project, ProjectCategory, ProjectOrigin } from '../types/portfolio';
-import { X, Save, Plus, Trash2, Upload, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { X, Save, Plus, Trash2 } from 'lucide-react';
 
 interface ProjectModalFormProps {
   isOpen: boolean;
@@ -33,11 +33,6 @@ export const ProjectModalForm: React.FC<ProjectModalFormProps> = ({
   const [metricLabel, setMetricLabel] = useState('');
   const [metricValue, setMetricValue] = useState('');
   const [metrics, setMetrics] = useState<{ label: string; value: string }[]>([]);
-  const [gallery, setGallery] = useState<string[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const coverFileRef = useRef<HTMLInputElement>(null);
-  const galleryFileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (initialProject) {
@@ -55,7 +50,6 @@ export const ProjectModalForm: React.FC<ProjectModalFormProps> = ({
       setTechnologiesStr((initialProject.technologies || []).join(', '));
       setRequirementsStr((initialProject.requirements || []).join('\n'));
       setMetrics(initialProject.metrics || []);
-      setGallery(initialProject.gallery || []);
 
       const demo = initialProject.links?.find((l) => l.type === 'demo');
       const git = initialProject.links?.find((l) => l.type === 'github');
@@ -77,8 +71,6 @@ export const ProjectModalForm: React.FC<ProjectModalFormProps> = ({
       setTechnologiesStr('Unity, C#, HLSL');
       setRequirementsStr('');
       setMetrics([]);
-      setGallery([]);
-      setUploadError(null);
       setDemoUrl('');
       setGithubUrl('');
     }
@@ -95,52 +87,6 @@ export const ProjectModalForm: React.FC<ProjectModalFormProps> = ({
 
   const handleRemoveMetric = (idx: number) => {
     setMetrics(metrics.filter((_, i) => i !== idx));
-  };
-
-  const uploadImage = async (file: File): Promise<string | null> => {
-    setIsUploading(true);
-    setUploadError(null);
-    try {
-      const formData = new FormData();
-      formData.append('image', file);
-      const res = await fetch('/api/upload-image', { method: 'POST', body: formData });
-      const data = await res.json();
-      if (data.success) {
-        return data.imageUrl;
-      } else {
-        setUploadError(data.error || 'Error al subir la imagen');
-        return null;
-      }
-    } catch (err: any) {
-      setUploadError('No se pudo conectar al servidor para subir la imagen: ' + err.message);
-      return null;
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = await uploadImage(file);
-    if (url) setCoverImage(url);
-    e.target.value = '';
-  };
-
-  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-    const urls: string[] = [];
-    for (const file of files) {
-      const url = await uploadImage(file);
-      if (url) urls.push(url);
-    }
-    if (urls.length > 0) setGallery([...gallery, ...urls]);
-    e.target.value = '';
-  };
-
-  const handleRemoveGalleryImage = (idx: number) => {
-    setGallery(gallery.filter((_, i) => i !== idx));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -189,7 +135,6 @@ export const ProjectModalForm: React.FC<ProjectModalFormProps> = ({
       technologies: techs.length > 0 ? techs : ['Unity', 'C#'],
       metrics: metrics.length > 0 ? metrics : undefined,
       requirements: reqs.length > 0 ? reqs : undefined,
-      gallery: gallery.length > 0 ? gallery : undefined,
       links: links.length > 0 ? links : undefined,
     };
 
@@ -353,37 +298,14 @@ export const ProjectModalForm: React.FC<ProjectModalFormProps> = ({
 
           {/* Imagen de Portada */}
           <div className="space-y-1">
-            <label className="text-xs font-medium text-slate-400">Imagen de Portada</label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={coverImage}
-                onChange={(e) => setCoverImage(e.target.value)}
-                placeholder="/images/... o URL directa"
-                className="flex-1 rounded-lg border border-[#232733] bg-[#0b0d11] px-3 py-2 text-xs text-white focus:border-amber-400 focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => coverFileRef.current?.click()}
-                disabled={isUploading}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-400/15 border border-amber-400/30 text-amber-400 text-xs font-semibold hover:bg-amber-400/25 transition-colors disabled:opacity-50"
-              >
-                {isUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                <span>Subir</span>
-              </button>
-              <input
-                type="file"
-                accept="image/*"
-                ref={coverFileRef}
-                onChange={handleCoverUpload}
-                className="hidden"
-              />
-            </div>
-            {coverImage && (
-              <div className="mt-1.5 rounded-lg overflow-hidden border border-[#232733] max-w-[200px]">
-                <img src={coverImage} alt="Vista previa" className="w-full h-auto object-cover" />
-              </div>
-            )}
+            <label className="text-xs font-medium text-slate-400">URL de Imagen de Portada</label>
+            <input
+              type="text"
+              value={coverImage}
+              onChange={(e) => setCoverImage(e.target.value)}
+              placeholder="/src/assets/images/... o URL directa"
+              className="w-full rounded-lg border border-[#232733] bg-[#0b0d11] px-3 py-2 text-xs text-white focus:border-amber-400 focus:outline-none"
+            />
             <div className="flex gap-2 text-[11px] text-slate-500 pt-1">
               <span>Plantillas rápidas:</span>
               <button
@@ -407,54 +329,15 @@ export const ProjectModalForm: React.FC<ProjectModalFormProps> = ({
               >
                 Fantasy 3D
               </button>
-            </div>
-          </div>
-
-          {/* Galería de imágenes */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-slate-400">Galería de Imágenes (opcional)</label>
-            <div className="flex gap-2 items-center">
               <button
                 type="button"
-                onClick={() => galleryFileRef.current?.click()}
-                disabled={isUploading}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#171b26] border border-[#232733] text-slate-200 text-xs font-semibold hover:bg-[#1d2230] hover:border-amber-400/40 transition-colors disabled:opacity-50"
+                onClick={() => setCoverImage('/src/assets/images/collab_interactive_xr_1790482628352.jpg')}
+                className="text-purple-400 hover:underline"
               >
-                {isUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImageIcon className="w-3.5 h-3.5" />}
-                <span>Añadir imágenes a la galería</span>
+                Collab XR
               </button>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                ref={galleryFileRef}
-                onChange={handleGalleryUpload}
-                className="hidden"
-              />
             </div>
-            {gallery.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-1.5">
-                {gallery.map((img, idx) => (
-                  <div key={idx} className="relative group">
-                    <img src={img} alt={`Galería ${idx + 1}`} className="w-16 h-16 object-cover rounded-lg border border-[#232733]" />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveGalleryImage(idx)}
-                      className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
-
-          {uploadError && (
-            <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-xs text-rose-400">
-              {uploadError}
-            </div>
-          )}
 
           {/* Enlaces: Demo y GitHub */}
           <div className="grid grid-cols-2 gap-3">

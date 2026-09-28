@@ -149,38 +149,15 @@ export default function App() {
         body: JSON.stringify({ projects: projectsToSave }),
       });
       if (res.ok) {
-        const data = await res.json();
-        if (data.success) {
-          setSyncToast({
-            show: true,
-            message: `✓ Guardado automático: ${projectsToSave.length} elementos en projects.json listos para git push`,
-          });
-          setTimeout(() => setSyncToast({ show: false, message: '' }), 4000);
-          return true;
-        }
-      } else {
-        console.warn('Backend /api/projects respondió con error:', res.status);
-      }
-    } catch (err) {
-      console.warn('Backend /api/projects no disponible en este momento:', err);
-    }
-    // Fallback: try sync-all endpoint
-    try {
-      const res = await fetch('/api/sync-all', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projects: projectsToSave }),
-      });
-      if (res.ok) {
         setSyncToast({
           show: true,
-          message: `✓ Guardado automático: ${projectsToSave.length} elementos sincronizados`,
+          message: '✓ Guardado en archivo (src/data/projects.json) listo para sincronizar con GitHub',
         });
         setTimeout(() => setSyncToast({ show: false, message: '' }), 4000);
         return true;
       }
-    } catch (err2) {
-      console.warn('Fallback /api/sync-all también falló:', err2);
+    } catch (err) {
+      console.warn('Backend /api/projects no disponible en este momento:', err);
     }
     return false;
   };
