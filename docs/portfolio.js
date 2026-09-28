@@ -2097,28 +2097,14 @@
   function deleteTestimonial(testimonialId) {
     const target = satisfiedClients.find(c => c.id === testimonialId);
     if (!target) return;
-    showConfirmModal({
-      title: '¿Eliminar Testimonio?',
-      message: `¿Estás seguro de eliminar el testimonio de "${target.name}"? Los cambios se guardarán automáticamente en los archivos (src/data/testimonials.json).`,
-      icon: '💬',
-      confirmText: 'Sí, Eliminar Testimonio',
-      danger: true,
-      onConfirm: function () {
-        satisfiedClients = satisfiedClients.filter(c => c.id !== testimonialId);
-        try {
-          localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients));
-        } catch (e) {}
-        renderTestimonialsPreview();
-        renderSatisfiedClientsModalList();
-        syncTestimonialsWithBackend(satisfiedClients);
-        showStatusNotification({
-          title: 'Testimonio Eliminado',
-          message: `El testimonio de "${target.name}" ha sido eliminado y guardado.`,
-          type: 'info',
-          icon: '🗑️'
-        });
-      }
-    });
+    if (confirm('¿Eliminar el testimonio de "' + target.name + '"?')) {
+      satisfiedClients = satisfiedClients.filter(c => c.id !== testimonialId);
+      try {
+        localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients));
+      } catch (e) {}
+      renderTestimonialsPreview();
+      renderSatisfiedClientsModalList();
+    }
   }
 
   let editingTestimonialId = null;
@@ -2231,7 +2217,6 @@
     closeTestimonialModal();
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
-    syncTestimonialsWithBackend(satisfiedClients);
     showStatusNotification({
       title: editingTestimonialId ? 'Testimonio Actualizado' : 'Testimonio Guardado',
       message: `El testimonio de "${name}" se guardó exitosamente.`,
@@ -2515,26 +2500,19 @@
   }
 
   function deleteFeedbackCode(codeStr) {
-    showConfirmModal({
-      title: '¿Eliminar Código de Feedback?',
-      message: `¿Estás seguro de eliminar el código "${codeStr}"? No se podrá reutilizar.`,
-      icon: '🔑',
-      confirmText: 'Sí, Eliminar Código',
-      danger: true,
-      onConfirm: function () {
-        feedbackCodes = feedbackCodes.filter(c => c.code.toUpperCase() !== codeStr.toUpperCase());
-        try {
-          localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes));
-        } catch (err) {}
-        renderFeedbackCodesList();
-        showStatusNotification({
-          title: 'Código Eliminado',
-          message: `El código "${codeStr}" ha sido eliminado del sistema.`,
-          type: 'warning',
-          icon: '🗑️'
-        });
-      }
-    });
+    if (confirm('¿Eliminar el código ' + codeStr + '?')) {
+      feedbackCodes = feedbackCodes.filter(c => c.code.toUpperCase() !== codeStr.toUpperCase());
+      try {
+        localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes));
+      } catch (err) {}
+      renderFeedbackCodesList();
+      showStatusNotification({
+        title: 'Código Eliminado',
+        message: `El código "${codeStr}" ha sido eliminado del sistema.`,
+        type: 'warning',
+        icon: '🗑️'
+      });
+    }
   }
 
   function copyFeedbackLink(codeStr) {
@@ -2824,7 +2802,6 @@
     } catch (err) {}
 
     renderProjectsGrid();
-    syncProjectsWithBackend(projects);
     showStatusNotification({
       title: 'Proyecto Duplicado',
       message: `Se ha creado una copia de "${project.title}".`,
@@ -2833,71 +2810,17 @@
     });
   }
 
-  // Modal de Confirmación Moderno (Reemplaza confirm nativo bloqueado en iframes)
-  let activeConfirmCallback = null;
-
-  function showConfirmModal(options) {
-    const { title, message, icon = '🗑️', confirmText = 'Sí, Eliminar', danger = true, onConfirm } = options || {};
-    activeConfirmCallback = onConfirm;
-
-    const modal = document.getElementById('confirm-action-modal');
-    if (!modal) {
-      if (typeof onConfirm === 'function') onConfirm();
-      return;
-    }
-
-    const titleEl = document.getElementById('confirm-modal-title');
-    const msgEl = document.getElementById('confirm-modal-message');
-    const iconEl = document.getElementById('confirm-modal-icon');
-    const actionBtn = document.getElementById('confirm-modal-action-btn');
-
-    if (titleEl) titleEl.textContent = title || 'Confirmar Acción';
-    if (msgEl) msgEl.textContent = message || '¿Estás seguro de realizar esta acción?';
-    if (iconEl) iconEl.textContent = icon;
-    if (actionBtn) {
-      actionBtn.textContent = confirmText;
-      actionBtn.className = danger
-        ? 'px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-xs text-white font-bold transition-colors shadow-lg shadow-red-600/30 cursor-pointer'
-        : 'px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-xs text-black font-bold transition-colors shadow-lg shadow-amber-400/30 cursor-pointer';
-    }
-
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeConfirmModal() {
-    const modal = document.getElementById('confirm-action-modal');
-    if (modal) modal.classList.add('hidden');
-    document.body.style.overflow = '';
-    activeConfirmCallback = null;
-  }
-
   // 13. Eliminar Proyecto
   function deleteProject(projectId) {
     const target = projects.find(p => p.id === projectId);
     if (!target) return;
-
-    showConfirmModal({
-      title: '¿Eliminar Proyecto / Ficha?',
-      message: `¿Estás seguro de eliminar el cuadro de información "${target.title}"? Los cambios se guardarán automáticamente en los archivos (src/data/projects.json).`,
-      icon: '🗑️',
-      confirmText: 'Sí, Eliminar Proyecto',
-      danger: true,
-      onConfirm: function () {
-        projects = projects.filter(p => p.id !== projectId);
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-        } catch (err) {}
-        renderProjectsGrid();
-        syncProjectsWithBackend(projects);
-        showStatusNotification({
-          title: 'Proyecto Eliminado',
-          message: `"${target.title}" ha sido eliminado y los archivos fueron actualizados.`,
-          type: 'info',
-          icon: '🗑️'
-        });
-      }
-    });
+    if (confirm('¿Estás seguro de eliminar el cuadro de información "' + target.title + '"?')) {
+      projects = projects.filter(p => p.id !== projectId);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+      } catch (err) {}
+      renderProjectsGrid();
+    }
   }
 
   // 14. Modal para Editar Proyecto Existente (Solo moderador)
@@ -2929,14 +2852,6 @@
     // Múltiples imágenes (galería) separadas por salto de línea
     const galleryImgs = Array.isArray(project.galleryImages) ? project.galleryImages.join('\n') : (project.coverImage || '');
     document.getElementById('edit-proj-gallery').value = galleryImgs;
-
-    const iconPrev = document.getElementById('edit-proj-icon-preview');
-    if (iconPrev) iconPrev.src = project.coverImage || './assets/images/ely/my-avatar.png';
-    const iconInp = document.getElementById('edit-proj-icon');
-    if (iconInp) iconInp.value = project.coverImage || '';
-    const coverPrev = document.getElementById('edit-proj-cover-preview');
-    if (coverPrev) coverPrev.src = project.coverImage || './assets/images/ely/overdrivers-teaser.jpg';
-    renderGalleryThumbnails('edit-proj-gallery-thumbs', 'edit-proj-gallery');
 
     // Video de YouTube en grande
     document.getElementById('edit-proj-video').value = project.youtubeVideo || '';
@@ -3003,7 +2918,6 @@
 
     closeEditProjectModal();
     renderProjectsGrid();
-    syncProjectsWithBackend(projects);
     showStatusNotification({
       title: 'Proyecto Guardado',
       message: `Los cambios en "${project.title}" fueron actualizados y guardados exitosamente.`,
@@ -3020,18 +2934,6 @@
     }
     const modal = document.getElementById('add-project-modal');
     if (modal) {
-      const iconPrev = document.getElementById('new-proj-icon-preview');
-      if (iconPrev) iconPrev.src = './assets/images/ely/my-avatar.png';
-      const iconInp = document.getElementById('new-proj-icon');
-      if (iconInp) iconInp.value = './assets/images/ely/my-avatar.png';
-      const coverPrev = document.getElementById('new-proj-cover-preview');
-      if (coverPrev) coverPrev.src = './assets/images/ely/overdrivers-teaser.jpg';
-      const coverInp = document.getElementById('new-proj-cover');
-      if (coverInp) coverInp.value = './assets/images/ely/overdrivers-teaser.jpg';
-      const galleryInp = document.getElementById('new-proj-gallery');
-      if (galleryInp) galleryInp.value = '';
-      renderGalleryThumbnails('new-proj-gallery-thumbs', 'new-proj-gallery');
-
       modal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
     }
@@ -3083,7 +2985,6 @@
 
     closeAddProjectModal();
     renderProjectsGrid();
-    syncProjectsWithBackend(projects);
     showStatusNotification({
       title: 'Proyecto Guardado',
       message: `El proyecto "${newProject.title}" se guardó y publicó exitosamente en el catálogo.`,
@@ -3230,7 +3131,6 @@
     } catch (e) {}
 
     renderExperiences();
-    syncExperiencesWithBackend(experiences);
     showStatusNotification({
       title: 'Posición Actualizada',
       message: `Se reordenó la experiencia "${experiences[newIndex].title}".`,
@@ -3259,7 +3159,6 @@
     } catch (e) {}
 
     renderExperiences();
-    syncExperiencesWithBackend(experiences);
     showStatusNotification({
       title: 'Experiencia Duplicada',
       message: `Se ha duplicado la experiencia "${exp.title}".`,
@@ -3271,28 +3170,13 @@
   function deleteExperience(expId) {
     const exp = experiences.find(e => e.id === expId);
     if (!exp) return;
-
-    showConfirmModal({
-      title: '¿Eliminar Experiencia Laboral?',
-      message: `¿Estás seguro de eliminar la trayectoria "${exp.title}" en "${exp.company}"? Los cambios se guardarán automáticamente en src/data/experiences.json.`,
-      icon: '💼',
-      confirmText: 'Sí, Eliminar Experiencia',
-      danger: true,
-      onConfirm: function () {
-        experiences = experiences.filter(e => e.id !== expId);
-        try {
-          localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences));
-        } catch (e) {}
-        renderExperiences();
-        syncExperiencesWithBackend(experiences);
-        showStatusNotification({
-          title: 'Experiencia Eliminada',
-          message: `"${exp.title}" ha sido eliminada y guardada en el archivo.`,
-          type: 'info',
-          icon: '🗑️'
-        });
-      }
-    });
+    if (confirm('¿Eliminar la experiencia "' + exp.title + '" en ' + exp.company + '?')) {
+      experiences = experiences.filter(e => e.id !== expId);
+      try {
+        localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences));
+      } catch (e) {}
+      renderExperiences();
+    }
   }
 
   let editingExpId = null;
@@ -3307,32 +3191,15 @@
     const titleEl = document.getElementById('experience-modal-title');
     if (titleEl) titleEl.textContent = '+ Agregar Experiencia Laboral & Contrato';
 
-    const setVal = (id, val) => {
-      const el = document.getElementById(id);
-      if (el) el.value = val;
-    };
-
-    setVal('exp-form-id', '');
-    setVal('exp-form-title', '');
-    setVal('exp-form-company', '');
-    setVal('exp-form-location', 'Remoto / Rep. Dominicana');
-    const today = new Date().toISOString().split('T')[0];
-    setVal('exp-form-start-date', today);
-    setVal('exp-form-end-date', '');
-    setVal('exp-form-period', 'Presente');
-    setVal('exp-form-color', 'text-amber-400');
-    setVal('exp-form-desc', '');
-    setVal('exp-form-techs', 'Unity, C#');
-
-    const currentCheck = document.getElementById('exp-form-current');
-    const endInput = document.getElementById('exp-form-end-date');
-    if (currentCheck) {
-      currentCheck.checked = true;
-    }
-    if (endInput) {
-      endInput.disabled = true;
-      endInput.style.opacity = '0.4';
-    }
+    document.getElementById('exp-form-id').value = '';
+    document.getElementById('exp-form-title').value = '';
+    document.getElementById('exp-form-company').value = '';
+    document.getElementById('exp-form-location').value = 'Remoto';
+    document.getElementById('exp-form-period').value = '';
+    document.getElementById('exp-form-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('exp-form-color').value = 'text-amber-400';
+    document.getElementById('exp-form-desc').value = '';
+    document.getElementById('exp-form-techs').value = 'Unity, C#';
 
     if (modal) {
       modal.classList.remove('hidden');
@@ -3353,32 +3220,15 @@
     const titleEl = document.getElementById('experience-modal-title');
     if (titleEl) titleEl.textContent = '✏️ Editar Experiencia Laboral & Contrato';
 
-    const setVal = (id, val) => {
-      const el = document.getElementById(id);
-      if (el) el.value = val;
-    };
-
-    setVal('exp-form-id', exp.id || '');
-    setVal('exp-form-title', exp.title || '');
-    setVal('exp-form-company', exp.company || '');
-    setVal('exp-form-location', exp.location || '');
-    setVal('exp-form-start-date', exp.startDate || '');
-    setVal('exp-form-end-date', exp.endDate || '');
-    setVal('exp-form-period', exp.period || '');
-    setVal('exp-form-color', exp.color || 'text-amber-400');
-    setVal('exp-form-desc', exp.description || '');
-    setVal('exp-form-techs', (exp.technologies || []).join(', '));
-
-    const currentCheck = document.getElementById('exp-form-current');
-    const endInput = document.getElementById('exp-form-end-date');
-    const isCurrent = !exp.endDate || (exp.period && exp.period.toLowerCase().includes('presente'));
-    if (currentCheck) {
-      currentCheck.checked = !!isCurrent;
-    }
-    if (endInput) {
-      endInput.disabled = !!isCurrent;
-      endInput.style.opacity = isCurrent ? '0.4' : '1';
-    }
+    document.getElementById('exp-form-id').value = exp.id;
+    document.getElementById('exp-form-title').value = exp.title || '';
+    document.getElementById('exp-form-company').value = exp.company || '';
+    document.getElementById('exp-form-location').value = exp.location || '';
+    document.getElementById('exp-form-period').value = exp.period || '';
+    document.getElementById('exp-form-date').value = exp.startDate || '';
+    document.getElementById('exp-form-color').value = exp.color || 'text-amber-400';
+    document.getElementById('exp-form-desc').value = exp.description || '';
+    document.getElementById('exp-form-techs').value = (exp.technologies || []).join(', ');
 
     if (modal) {
       modal.classList.remove('hidden');
@@ -3394,28 +3244,16 @@
   }
 
   function handleExperienceSubmit(e) {
-    if (e && e.preventDefault) e.preventDefault();
-
-    const getVal = (id) => {
-      const el = document.getElementById(id);
-      return el ? el.value.trim() : '';
-    };
-
-    const title = getVal('exp-form-title');
-    const company = getVal('exp-form-company');
-    const location = getVal('exp-form-location');
-    const startDate = getVal('exp-form-start-date');
-    const endDate = getVal('exp-form-end-date');
-    const isCurrent = document.getElementById('exp-form-current')?.checked || false;
-    let period = getVal('exp-form-period');
-    const color = getVal('exp-form-color') || 'text-amber-400';
-    const desc = getVal('exp-form-desc');
-    const techsRaw = getVal('exp-form-techs');
+    e.preventDefault();
+    const title = document.getElementById('exp-form-title').value.trim();
+    const company = document.getElementById('exp-form-company').value.trim();
+    const location = document.getElementById('exp-form-location').value.trim();
+    const period = document.getElementById('exp-form-period').value.trim();
+    const startDate = document.getElementById('exp-form-date').value;
+    const color = document.getElementById('exp-form-color').value;
+    const desc = document.getElementById('exp-form-desc').value.trim();
+    const techsRaw = document.getElementById('exp-form-techs').value;
     const techs = techsRaw.split(',').map(s => s.trim()).filter(Boolean);
-
-    if (!period) {
-      period = isCurrent ? 'Presente' : (startDate ? startDate : '');
-    }
 
     if (editingExpId) {
       const exp = experiences.find(e => e.id === editingExpId);
@@ -3423,9 +3261,8 @@
         exp.title = title;
         exp.company = company;
         exp.location = location;
-        exp.startDate = startDate;
-        exp.endDate = isCurrent ? '' : endDate;
         exp.period = period;
+        exp.startDate = startDate || exp.startDate;
         exp.color = color;
         exp.description = desc;
         exp.technologies = techs;
@@ -3436,9 +3273,8 @@
         title: title,
         company: company,
         location: location,
-        startDate: startDate,
-        endDate: isCurrent ? '' : endDate,
         period: period,
+        startDate: startDate || new Date().toISOString().split('T')[0],
         color: color,
         description: desc,
         technologies: techs
@@ -3452,10 +3288,9 @@
 
     closeExperienceModal();
     renderExperiences();
-    syncExperiencesWithBackend(experiences);
     showStatusNotification({
       title: editingExpId ? 'Experiencia Editada' : 'Experiencia Guardada',
-      message: `"${title}" en ${company} guardada y sincronizada en src/data/experiences.json.`,
+      message: `"${title}" en ${company} se guardó exitosamente en la trayectoria.`,
       type: 'success',
       icon: '💼'
     });
@@ -3463,753 +3298,19 @@
 
   // 16. Restablecer datos originales
   function resetSampleData() {
-    showConfirmModal({
-      title: '¿Restablecer Proyectos Originales?',
-      message: 'Esta acción restablecerá el catálogo a la muestra inicial y sincronizará el archivo src/data/projects.json.',
-      icon: '🔄',
-      confirmText: 'Sí, Restablecer',
-      danger: false,
-      onConfirm: function () {
-        projects = JSON.parse(JSON.stringify(initialProjects));
-        try {
-          localStorage.removeItem(STORAGE_KEY);
-        } catch (err) {}
-        renderProjectsGrid();
-        syncProjectsWithBackend(projects);
-        showStatusNotification({
-          title: 'Datos Restablecidos',
-          message: 'Los proyectos han sido restablecidos a los valores predeterminados y guardados en el archivo.',
-          type: 'info',
-          icon: '🔄'
-        });
-      }
-    });
-  }
-
-  // Sincronización completa con el backend y almacenamiento en disco
-  function syncProjectsWithBackend(list) {
-    if (typeof fetch === 'function') {
-      fetch('/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projects: list })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.success) {
-          updateSyncModalCounters();
-          console.log('[PROYECTOS GUARDADOS]', data.message);
-        }
-      })
-      .catch(function () {});
+    if (confirm('¿Restablecer los proyectos y servicios originales de muestra?')) {
+      projects = JSON.parse(JSON.stringify(initialProjects));
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (err) {}
+      renderProjectsGrid();
+      alert('Proyectos restablecidos.');
     }
-  }
-
-  function syncExperiencesWithBackend(list) {
-    if (typeof fetch === 'function') {
-      fetch('/api/experiences', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ experiences: list })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.success) {
-          updateSyncModalCounters();
-          console.log('[EXPERIENCIAS GUARDADAS]', data.message);
-        }
-      })
-      .catch(function () {});
-    }
-  }
-
-  function syncTestimonialsWithBackend(list) {
-    if (typeof fetch === 'function') {
-      fetch('/api/testimonials', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ testimonials: list })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.success) {
-          updateSyncModalCounters();
-          console.log('[TESTIMONIOS GUARDADOS]', data.message);
-        }
-      })
-      .catch(function () {});
-    }
-  }
-
-  function saveAllDataToBackend() {
-    if (typeof fetch === 'function') {
-      fetch('/api/sync-all', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          projects: projects,
-          experiences: experiences,
-          testimonials: satisfiedClients
-        })
-      })
-      .then(res => res.json())
-      .then(data => {
-        updateSyncModalCounters();
-        const lastSavedEl = document.getElementById('sync-last-saved');
-        if (lastSavedEl) lastSavedEl.textContent = new Date().toLocaleTimeString();
-        showStatusNotification({
-          title: 'Archivos Guardados',
-          message: 'Todos los datos (proyectos, experiencias, testimonios) han sido guardados en src/data, public/data y docs/data.',
-          type: 'success',
-          icon: '💾'
-        });
-      })
-      .catch(() => {
-        // Si el backend no está disponible, ofrecer descarga directa
-        downloadDataJson('all');
-      });
-    } else {
-      downloadDataJson('all');
-    }
-  }
-
-  function updateSyncModalCounters() {
-    const projCount = document.getElementById('sync-projects-count');
-    const expCount = document.getElementById('sync-experiences-count');
-    const testCount = document.getElementById('sync-testimonials-count');
-
-    if (projCount) projCount.textContent = String(projects.length);
-    if (expCount) expCount.textContent = String(experiences.length);
-    if (testCount) testCount.textContent = String(satisfiedClients.length);
-  }
-
-  function openSyncFilesModal() {
-    const modal = document.getElementById('sync-files-modal');
-    if (!modal) return;
-    updateSyncModalCounters();
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeSyncFilesModal() {
-    const modal = document.getElementById('sync-files-modal');
-    if (modal) modal.classList.add('hidden');
-    document.body.style.overflow = '';
-  }
-
-  function downloadDataJson(type) {
-    let filename = 'projects.json';
-    let content = '';
-
-    if (type === 'projects') {
-      filename = 'projects.json';
-      content = JSON.stringify(projects, null, 2);
-    } else if (type === 'experiences') {
-      filename = 'experiences.json';
-      content = JSON.stringify(experiences, null, 2);
-    } else if (type === 'testimonials') {
-      filename = 'testimonials.json';
-      content = JSON.stringify(satisfiedClients, null, 2);
-    } else {
-      filename = 'portfolio-full-data.json';
-      content = JSON.stringify({ projects, experiences, testimonials: satisfiedClients }, null, 2);
-    }
-
-    const blob = new Blob([content], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    showStatusNotification({
-      title: 'Archivo Descargado',
-      message: `Se descargó "${filename}". Puedes colocarlo en tu carpeta src/data o en tu repositorio de GitHub.`,
-      type: 'success',
-      icon: '⬇️'
-    });
-  }
-
-  function copyAllDataJson() {
-    const fullData = {
-      projects: projects,
-      experiences: experiences,
-      testimonials: satisfiedClients
-    };
-    const str = JSON.stringify(fullData, null, 2);
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(str).then(() => {
-        showStatusNotification({
-          title: 'JSON Copiado',
-          message: 'Todo el contenido de proyectos, experiencias y testimonios ha sido copiado al portapapeles.',
-          type: 'success',
-          icon: '📋'
-        });
-      });
-    }
-  }
-
-  function loadAllDataFromBackend() {
-    if (typeof fetch !== 'function') return;
-
-    // 1. Proyectos
-    fetch('/api/projects')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.success && Array.isArray(data.projects) && data.projects.length > 0) {
-          projects = data.projects;
-          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (e) {}
-          renderProjectsGrid();
-        }
-      })
-      .catch(() => {
-        // Fallback a archivo estático relativo
-        fetch('./data/projects.json')
-          .then(res => res.json())
-          .then(list => {
-            if (Array.isArray(list) && list.length > 0) {
-              projects = list;
-              renderProjectsGrid();
-            }
-          })
-          .catch(() => {});
-      });
-
-    // 2. Experiencias
-    fetch('/api/experiences')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.success && Array.isArray(data.experiences) && data.experiences.length > 0) {
-          experiences = data.experiences;
-          try { localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences)); } catch (e) {}
-          renderExperiences();
-        }
-      })
-      .catch(() => {
-        fetch('./data/experiences.json')
-          .then(res => res.json())
-          .then(list => {
-            if (Array.isArray(list) && list.length > 0) {
-              experiences = list;
-              renderExperiences();
-            }
-          })
-          .catch(() => {});
-      });
-
-    // 3. Testimonios
-    fetch('/api/testimonials')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.success && Array.isArray(data.testimonials) && data.testimonials.length > 0) {
-          satisfiedClients = data.testimonials;
-          try { localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients)); } catch (e) {}
-          renderTestimonialsPreview();
-          renderSatisfiedClientsModalList();
-        }
-      })
-      .catch(() => {
-        fetch('./data/testimonials.json')
-          .then(res => res.json())
-          .then(list => {
-            if (Array.isArray(list) && list.length > 0) {
-              satisfiedClients = list;
-              renderTestimonialsPreview();
-              renderSatisfiedClientsModalList();
-            }
-          })
-          .catch(() => {});
-      });
-  }
-
-  // 16.1 Biblioteca de Imágenes & Drag and Drop Multimedia
-  const CUSTOM_IMAGES_KEY = 'portfolio_custom_images_v2';
-  const DEFAULT_LIBRARY_IMAGES = [
-    { id: 'overdrivers', name: 'OverDrivers Teaser', category: 'Juegos', path: './assets/images/ely/overdrivers-teaser.jpg' },
-    { id: 'enunagoma', name: 'MotoLoco (En Una Goma)', category: 'Juegos', path: './assets/images/ely/icon-enunagoma.png' },
-    { id: 'dominicanpower', name: 'Dominican Power', category: 'Juegos', path: './assets/images/ely/icon-dominicanpower.png' },
-    { id: 'telesancris', name: 'Telesancris Mobile App', category: 'Apps', path: './assets/images/ely/icon-telesancris.png' },
-    { id: 'yunonline', name: 'Yun Online', category: 'Juegos', path: './assets/images/ely/icon-yunonline.png' },
-    { id: 'retopolis', name: 'Retopolis Hub', category: 'Juegos', path: './assets/images/ely/icon-retopolis.jpg' },
-    { id: 'helptuber', name: 'HELPTUBER Suite', category: 'Apps', path: './assets/images/ely/icon-helptuber.jpg' },
-    { id: 'dominoesrepublic', name: 'Dominoes Republic', category: 'Juegos', path: './assets/images/ely/icon-dominoesrepublic.png' },
-    { id: 'adventureworld', name: 'Adventure World', category: 'Juegos', path: './assets/images/ely/picon-aworld.png' },
-    { id: 'hellishflash', name: 'Hellish Flash', category: 'Juegos', path: './assets/images/ely/picon-hellishF.png' },
-    { id: 'thespider', name: 'La Arañita Online', category: 'Juegos', path: './assets/images/ely/picon-thespider.png' },
-    { id: 'rollingball', name: 'Rolling Ball 3D', category: 'Juegos', path: './assets/images/ely/picon-Rball.png' },
-    { id: 'maddys', name: 'Maddys Adventures', category: 'Juegos', path: './assets/images/ely/picon-maddys.png' },
-    { id: 'snakes', name: 'Snakes Battles', category: 'Juegos', path: './assets/images/ely/picon-snakes.png' },
-    { id: 'peace', name: 'Peace In The Forest', category: 'Juegos', path: './assets/images/ely/picon-peace.png' },
-    { id: 'wallball', name: 'Wall Ball Reflex', category: 'Juegos', path: './assets/images/ely/picon-wallball.png' },
-    { id: 'adsmonetization', name: 'Ads Monetization System', category: 'Servicios', path: './assets/images/ely/icon-appads.png' },
-    { id: 'inapppurchases', name: 'In-App Purchases System', category: 'Servicios', path: './assets/images/ely/icon-inapppurchase.png' },
-    { id: 'soundsfx', name: 'Sounds FX & Music System', category: 'Servicios', path: './assets/images/ely/icon-soundsystempng.png' },
-    { id: 'avatar', name: 'Avatar Eliezer (ElyDev)', category: 'Perfil', path: './assets/images/ely/my-avatar.png' }
-  ];
-
-  let customLibraryImages = [];
-  try {
-    const savedCustom = localStorage.getItem(CUSTOM_IMAGES_KEY);
-    if (savedCustom) {
-      customLibraryImages = JSON.parse(savedCustom);
-    }
-  } catch (e) {
-    customLibraryImages = [];
-  }
-
-  let currentLibraryTarget = null;
-
-  function getAllLibraryImages() {
-    return [...customLibraryImages, ...DEFAULT_LIBRARY_IMAGES];
-  }
-
-  function renderLibraryGrid(searchFilter = '') {
-    const grid = document.getElementById('library-images-grid');
-    const countEl = document.getElementById('library-images-count');
-    if (!grid) return;
-
-    const allImages = getAllLibraryImages();
-    const query = (searchFilter || '').toLowerCase().trim();
-
-    const filtered = allImages.filter(img => {
-      if (!query) return true;
-      return (img.name && img.name.toLowerCase().includes(query)) ||
-             (img.category && img.category.toLowerCase().includes(query)) ||
-             (img.path && img.path.toLowerCase().includes(query));
-    });
-
-    if (countEl) {
-      countEl.textContent = filtered.length;
-    }
-
-    if (filtered.length === 0) {
-      grid.innerHTML = `
-        <div class="col-span-full py-8 text-center text-slate-500">
-          <p class="text-sm">No se encontraron imágenes que coincidan con la búsqueda.</p>
-        </div>
-      `;
-      return;
-    }
-
-    grid.innerHTML = filtered.map(img => `
-      <div class="group relative flex flex-col overflow-hidden rounded-xl border border-[#232733] bg-[#0d1017] hover:border-amber-400/50 hover:shadow-lg hover:shadow-amber-500/5 transition-all p-2.5 text-left cursor-pointer" data-library-img-path="${img.path}" data-library-img-name="${img.name || ''}">
-        <div class="relative aspect-video w-full overflow-hidden rounded-lg bg-[#141822] mb-2 border border-white/5">
-          <img src="${img.path}" alt="${img.name || 'Imagen'}" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" onerror="this.src='./assets/images/ely/my-avatar.png'" />
-          <span class="absolute top-1 left-1 rounded bg-black/80 px-1.5 py-0.5 text-[9px] font-mono text-amber-400 border border-amber-400/20 backdrop-blur-sm">
-            ${img.category || 'Asset'}
-          </span>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="truncate text-xs font-semibold text-slate-200 group-hover:text-amber-400 font-display" title="${img.name}">
-            ${img.name || 'Imagen'}
-          </div>
-          <div class="truncate text-[10px] text-slate-500 font-mono mt-0.5" title="${img.path}">
-            ${img.path}
-          </div>
-        </div>
-        <button type="button" class="mt-2 w-full rounded-md bg-amber-400 hover:bg-amber-300 py-1 text-[11px] font-bold text-black transition-colors select-image-btn">
-          Seleccionar
-        </button>
-      </div>
-    `).join('');
-
-    grid.querySelectorAll('[data-library-img-path]').forEach(card => {
-      card.addEventListener('click', function () {
-        const path = this.getAttribute('data-library-img-path');
-        const name = this.getAttribute('data-library-img-name');
-        selectImageFromLibrary(path, name);
-      });
-    });
-  }
-
-  function openImageLibraryModal() {
-    const modal = document.getElementById('image-library-modal');
-    if (modal) {
-      modal.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-      const searchInput = document.getElementById('library-search-input');
-      if (searchInput) searchInput.value = '';
-      renderLibraryGrid();
-    }
-  }
-
-  function closeImageLibraryModal() {
-    const modal = document.getElementById('image-library-modal');
-    if (modal) {
-      modal.classList.add('hidden');
-      document.body.style.overflow = '';
-      currentLibraryTarget = null;
-    }
-  }
-
-  function openImageLibraryForInput(inputId, previewId) {
-    currentLibraryTarget = {
-      type: 'input',
-      inputId: inputId,
-      previewId: previewId
-    };
-    openImageLibraryModal();
-  }
-
-  function openImageLibraryForGallery(thumbsContainerId, hiddenInputId) {
-    currentLibraryTarget = {
-      type: 'gallery',
-      thumbsContainerId: thumbsContainerId,
-      hiddenInputId: hiddenInputId
-    };
-    openImageLibraryModal();
-  }
-
-  function selectImageFromLibrary(imagePath, imageName) {
-    if (!currentLibraryTarget) {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(imagePath);
-      }
-      showStatusNotification({
-        title: 'Ruta Copiada',
-        message: `Ruta copiada al portapapeles: ${imagePath}`,
-        type: 'info',
-        icon: '📋'
-      });
-      closeImageLibraryModal();
-      return;
-    }
-
-    if (currentLibraryTarget.type === 'input') {
-      const inputEl = document.getElementById(currentLibraryTarget.inputId);
-      if (inputEl) {
-        inputEl.value = imagePath;
-      }
-      if (currentLibraryTarget.previewId) {
-        const previewEl = document.getElementById(currentLibraryTarget.previewId);
-        if (previewEl) {
-          previewEl.src = imagePath;
-        }
-      }
-      showStatusNotification({
-        title: 'Imagen Asignada',
-        message: `Se asignó "${imageName || imagePath}" correctamente.`,
-        type: 'success',
-        icon: '🖼️'
-      });
-    } else if (currentLibraryTarget.type === 'gallery') {
-      const inputEl = document.getElementById(currentLibraryTarget.hiddenInputId);
-      if (inputEl) {
-        const currentItems = inputEl.value ? inputEl.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
-        if (!currentItems.includes(imagePath)) {
-          currentItems.push(imagePath);
-          inputEl.value = currentItems.join('\n');
-        }
-        renderGalleryThumbnails(currentLibraryTarget.thumbsContainerId, currentLibraryTarget.hiddenInputId);
-      }
-      showStatusNotification({
-        title: 'Agregada a Galería',
-        message: `Se añadió "${imageName || imagePath}" a las capturas.`,
-        type: 'success',
-        icon: '📸'
-      });
-    }
-
-    closeImageLibraryModal();
-  }
-
-  function renderGalleryThumbnails(containerId, inputId) {
-    const container = document.getElementById(containerId);
-    const input = document.getElementById(inputId);
-    if (!container || !input) return;
-
-    const items = input.value ? input.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
-    container.innerHTML = '';
-
-    if (items.length === 0) {
-      container.innerHTML = '<span class="text-[11px] text-slate-500 italic py-1">Sin imágenes secundarias aún.</span>';
-      return;
-    }
-
-    items.forEach((src, idx) => {
-      const thumb = document.createElement('div');
-      thumb.className = 'relative group w-14 h-14 rounded-lg overflow-hidden border border-[#2c3345] bg-[#0c0e14] shrink-0';
-      thumb.innerHTML = `
-        <img src="${src}" alt="Screenshot ${idx + 1}" class="w-full h-full object-cover" onerror="this.src='./assets/images/ely/my-avatar.png'" />
-        <button type="button" title="Eliminar de galería" class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center text-red-400 font-bold text-xs transition-opacity cursor-pointer">
-          ✕
-        </button>
-      `;
-      thumb.querySelector('button').addEventListener('click', (e) => {
-        e.stopPropagation();
-        items.splice(idx, 1);
-        input.value = items.join('\n');
-        renderGalleryThumbnails(containerId, inputId);
-      });
-      container.appendChild(thumb);
-    });
-  }
-
-  function addCustomImageToLibrary(name, dataUrl) {
-    const newImg = {
-      id: 'custom-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
-      name: name || 'Imagen Subida',
-      category: 'Subido',
-      path: dataUrl
-    };
-    customLibraryImages.unshift(newImg);
-    try {
-      localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages.slice(0, 30)));
-    } catch (e) {}
-    renderLibraryGrid();
-    return newImg;
-  }
-
-  function setupImageDropzones() {
-    // 1. Search in library
-    const searchInput = document.getElementById('library-search-input');
-    if (searchInput) {
-      searchInput.addEventListener('input', function (e) {
-        renderLibraryGrid(e.target.value);
-      });
-    }
-
-    // 2. Library modal upload dropzone
-    const libDropzone = document.getElementById('library-upload-dropzone');
-    const libFileInput = document.getElementById('library-upload-file-input');
-
-    if (libDropzone && libFileInput) {
-      libDropzone.addEventListener('click', () => libFileInput.click());
-      libDropzone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        libDropzone.classList.add('border-amber-400', 'bg-amber-400/10');
-      });
-      libDropzone.addEventListener('dragleave', () => {
-        libDropzone.classList.remove('border-amber-400', 'bg-amber-400/10');
-      });
-      libDropzone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        libDropzone.classList.remove('border-amber-400', 'bg-amber-400/10');
-        if (e.dataTransfer && e.dataTransfer.files) {
-          handleMultipleFilesUpload(e.dataTransfer.files);
-        }
-      });
-      libFileInput.addEventListener('change', (e) => {
-        if (e.target.files) {
-          handleMultipleFilesUpload(e.target.files);
-          e.target.value = '';
-        }
-      });
-    }
-
-    function handleMultipleFilesUpload(fileList) {
-      const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
-      if (files.length === 0) return;
-
-      let processed = 0;
-      let firstAdded = null;
-      files.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const dataUrl = event.target.result;
-          const added = addCustomImageToLibrary(file.name, dataUrl);
-          if (!firstAdded) firstAdded = added;
-          processed++;
-          if (processed === files.length) {
-            showStatusNotification({
-              title: 'Imágenes Guardadas',
-              message: `Se agregaron ${files.length} imágenes a tu biblioteca local.`,
-              type: 'success',
-              icon: '☁️'
-            });
-            if (currentLibraryTarget && firstAdded) {
-              selectImageFromLibrary(firstAdded.path, firstAdded.name);
-            }
-          }
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    // Helper for single image dropzones
-    function bindSingleDropzone(dropzoneId, fileInputId, inputId, previewId) {
-      const dz = document.getElementById(dropzoneId);
-      const fi = document.getElementById(fileInputId);
-      const inp = document.getElementById(inputId);
-      const prev = document.getElementById(previewId);
-
-      if (!dz) return;
-      if (fi) {
-        dz.addEventListener('click', () => fi.click());
-        fi.addEventListener('change', (e) => {
-          if (e.target.files && e.target.files[0]) {
-            processSingleFile(e.target.files[0]);
-            e.target.value = '';
-          }
-        });
-      }
-      dz.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dz.classList.add('border-amber-400', 'bg-amber-400/10');
-      });
-      dz.addEventListener('dragleave', () => {
-        dz.classList.remove('border-amber-400', 'bg-amber-400/10');
-      });
-      dz.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dz.classList.remove('border-amber-400', 'bg-amber-400/10');
-        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
-          processSingleFile(e.dataTransfer.files[0]);
-        }
-      });
-
-      function processSingleFile(file) {
-        if (!file.type.startsWith('image/')) return;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const dataUrl = event.target.result;
-          if (inp) inp.value = dataUrl;
-          if (prev) prev.src = dataUrl;
-          addCustomImageToLibrary(file.name, dataUrl);
-          showStatusNotification({
-            title: 'Imagen Cargada',
-            message: `"${file.name}" cargada correctamente.`,
-            type: 'success',
-            icon: '🖼️'
-          });
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-
-    // Helper for gallery dropzones
-    function bindGalleryDropzone(dropzoneId, fileInputId, containerId, hiddenInputId) {
-      const dz = document.getElementById(dropzoneId);
-      const fi = document.getElementById(fileInputId);
-      const hiddenInput = document.getElementById(hiddenInputId);
-
-      if (!dz) return;
-      if (fi) {
-        dz.addEventListener('click', () => fi.click());
-        fi.addEventListener('change', (e) => {
-          if (e.target.files) {
-            processGalleryFiles(e.target.files);
-            e.target.value = '';
-          }
-        });
-      }
-      dz.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dz.classList.add('border-amber-400', 'bg-amber-400/10');
-      });
-      dz.addEventListener('dragleave', () => {
-        dz.classList.remove('border-amber-400', 'bg-amber-400/10');
-      });
-      dz.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dz.classList.remove('border-amber-400', 'bg-amber-400/10');
-        if (e.dataTransfer && e.dataTransfer.files) {
-          processGalleryFiles(e.dataTransfer.files);
-        }
-      });
-
-      function processGalleryFiles(fileList) {
-        const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
-        if (files.length === 0) return;
-        files.forEach(file => {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            const dataUrl = event.target.result;
-            addCustomImageToLibrary(file.name, dataUrl);
-            if (hiddenInput) {
-              const current = hiddenInput.value ? hiddenInput.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
-              current.push(dataUrl);
-              hiddenInput.value = current.join('\n');
-              renderGalleryThumbnails(containerId, hiddenInputId);
-            }
-          };
-          reader.readAsDataURL(file);
-        });
-        showStatusNotification({
-          title: 'Galería Actualizada',
-          message: `Se agregaron ${files.length} capturas a la galería.`,
-          type: 'success',
-          icon: '📸'
-        });
-      }
-    }
-
-    bindSingleDropzone('edit-proj-icon-dropzone', 'edit-proj-icon-file', 'edit-proj-icon', 'edit-proj-icon-preview');
-    bindSingleDropzone('edit-proj-cover-dropzone', 'edit-proj-cover-file', 'edit-proj-cover', 'edit-proj-cover-preview');
-    bindGalleryDropzone('edit-proj-gallery-dropzone', 'edit-proj-gallery-files', 'edit-proj-gallery-thumbs', 'edit-proj-gallery');
-
-    bindSingleDropzone('new-proj-icon-dropzone', 'new-proj-icon-file', 'new-proj-icon', 'new-proj-icon-preview');
-    bindSingleDropzone('new-proj-cover-dropzone', 'new-proj-cover-file', 'new-proj-cover', 'new-proj-cover-preview');
-    bindGalleryDropzone('new-proj-gallery-dropzone', 'new-proj-gallery-files', 'new-proj-gallery-thumbs', 'new-proj-gallery');
-
-    bindSingleDropzone('test-form-avatar-dropzone', 'test-form-avatar-file', 'test-form-avatar', 'test-form-avatar-preview');
   }
 
   // 17. Event Listeners y arranque
   document.addEventListener('DOMContentLoaded', function () {
     applyTheme(currentTheme);
-    setupImageDropzones();
-    loadAllDataFromBackend();
-
-    // Confirm Modal Action Button
-    const confirmActionBtn = document.getElementById('confirm-modal-action-btn');
-    if (confirmActionBtn) {
-      confirmActionBtn.addEventListener('click', function () {
-        if (typeof activeConfirmCallback === 'function') {
-          activeConfirmCallback();
-        }
-        closeConfirmModal();
-      });
-    }
-
-    // Helper reactivo para fechas de experiencia laboral
-    const expCurrentCheck = document.getElementById('exp-form-current');
-    const expEndInput = document.getElementById('exp-form-end-date');
-    const expPeriodInput = document.getElementById('exp-form-period');
-    const expStartInput = document.getElementById('exp-form-start-date');
-
-    const updateExpPeriodText = () => {
-      if (!expPeriodInput) return;
-      const isCur = expCurrentCheck ? expCurrentCheck.checked : false;
-      const startVal = expStartInput ? expStartInput.value : '';
-      const endVal = expEndInput ? expEndInput.value : '';
-      
-      const formatMonthYear = (dateStr) => {
-        if (!dateStr) return '';
-        try {
-          const parts = dateStr.split('-');
-          if (parts.length < 2) return dateStr;
-          const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-          const idx = parseInt(parts[1], 10) - 1;
-          return (months[idx] || '') + ' ' + parts[0];
-        } catch (e) {
-          return dateStr;
-        }
-      };
-
-      if (isCur) {
-        expPeriodInput.value = startVal ? `${formatMonthYear(startVal)} — Presente` : 'Presente';
-      } else if (startVal && endVal) {
-        expPeriodInput.value = `${formatMonthYear(startVal)} — ${formatMonthYear(endVal)}`;
-      }
-    };
-
-    if (expCurrentCheck) {
-      expCurrentCheck.addEventListener('change', function () {
-        if (expEndInput) {
-          expEndInput.disabled = this.checked;
-          expEndInput.style.opacity = this.checked ? '0.4' : '1';
-          if (this.checked) expEndInput.value = '';
-        }
-        updateExpPeriodText();
-      });
-    }
-
-    if (expStartInput) expStartInput.addEventListener('change', updateExpPeriodText);
-    if (expEndInput) expEndInput.addEventListener('change', updateExpPeriodText);
 
     // Theme toggle button
     const themeBtn = document.getElementById('theme-toggle-btn');
@@ -4373,9 +3474,6 @@
         closeTestimonialModal();
         closeFeedbackModal();
         closeFeedbackCodesModal();
-        closeImageLibraryModal();
-        closeConfirmModal();
-        closeSyncFilesModal();
       } else if (e.key === 'ArrowLeft') {
         navigateProjectModal(-1);
       } else if (e.key === 'ArrowRight') {
@@ -4392,19 +3490,6 @@
 
   // Exponer API global para interactividad
   window.ElyPortfolio = {
-    // Confirmación In-App
-    showConfirmModal: showConfirmModal,
-    closeConfirmModal: closeConfirmModal,
-    // Gestión y Sincronización de Archivos
-    openSyncFilesModal: openSyncFilesModal,
-    closeSyncFilesModal: closeSyncFilesModal,
-    saveAllDataToBackend: saveAllDataToBackend,
-    downloadDataJson: downloadDataJson,
-    copyAllDataJson: copyAllDataJson,
-    syncProjectsWithBackend: syncProjectsWithBackend,
-    syncExperiencesWithBackend: syncExperiencesWithBackend,
-    syncTestimonialsWithBackend: syncTestimonialsWithBackend,
-    loadAllDataFromBackend: loadAllDataFromBackend,
     // Proyectos
     openProjectModal: openProjectModal,
     closeProjectModal: closeProjectModal,
@@ -4458,12 +3543,6 @@
     openAuthModal: openAuthModal,
     closeAuthModal: closeAuthModal,
     resetSampleData: resetSampleData,
-    toggleTheme: toggleTheme,
-    // Biblioteca de Imágenes & Multimedia (Drag and Drop & Assets)
-    openImageLibraryModal: openImageLibraryModal,
-    closeImageLibraryModal: closeImageLibraryModal,
-    openImageLibraryForInput: openImageLibraryForInput,
-    openImageLibraryForGallery: openImageLibraryForGallery,
-    renderGalleryThumbnails: renderGalleryThumbnails
+    toggleTheme: toggleTheme
   };
 })();
