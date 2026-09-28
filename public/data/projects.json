@@ -1,7 +1,7 @@
 [
   {
     "id": "overdrivers",
-    "title": "OverDrivers",
+    "title": "OverDrivers xxxx",
     "tagline": "Juego de carreras y velocidad de alta adrenalina con banda sonora original",
     "description": "Proyecto de carreras en 3D desarrollado por ElyDev, con físicas dinámicas de derrape, personalización de vehículos y colaboración musical con artistas urbanos en el soundtrack oficial.",
     "fullStory": "OverDrivers representa mi proyecto insignia de carreras y acción. Diseñado con modelos de alta fidelidad, sistema de cámaras dinámicas de seguimiento y un pipeline de audio integrado que incluye colaboraciones oficiales con artistas musicales (canción \"Quieren Quitarme\" de Cifra Slimk). Cuenta con teasers oficiales en YouTube y optimización continua de rendimiento.",
@@ -10,7 +10,7 @@
     "year": "2024 - 2025",
     "role": "Lead Game Designer & Programador Principal",
     "featured": true,
-    "coverImage": "https://raw.githubusercontent.com/EliezerYT/portfolio2026/main/assets/images/moderator/22684bc35b53a844b33621864079a024dc0c1ae9b54cbc9b915f602dd1638fb2.png",
+    "coverImage": "./assets/images/ely/overdrivers-teaser.jpg",
     "galleryImages": [
       "./assets/images/ely/overdrivers-teaser.jpg"
     ],
