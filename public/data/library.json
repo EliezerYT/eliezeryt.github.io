@@ -1,1 +1,44 @@
-[]
+[
+  {
+    "id": "custom-1790621912877-i3a1",
+    "name": "MotoLocoLogo.png",
+    "category": "MotoLoco",
+    "folder": "MotoLoco",
+    "path": "./assets/images/ely/MotoLoco/MotoLocoLogo.png"
+  },
+  {
+    "id": "custom-1790623387298-5fqi",
+    "name": "MotoLoco  En Una Goma.png",
+    "category": "MotoLoco",
+    "folder": "MotoLoco",
+    "path": "./assets/images/ely/MotoLoco/MotoLoco-En-Una-Goma.png"
+  },
+  {
+    "id": "custom-1790611924382-ecsh",
+    "name": "telesancrilogo.jpg",
+    "category": "Profile",
+    "folder": "Profile",
+    "path": "./assets/images/ely/Profile/telesancrilogo.jpg"
+  },
+  {
+    "id": "custom-1790609981945-pwkf",
+    "name": "Captura de pantalla 2025-08-07 211620.png",
+    "category": "Subido",
+    "folder": "Subido",
+    "path": "./assets/images/ely/Captura-de-pantalla-2025-08-07-211620.png"
+  },
+  {
+    "id": "custom-1790609981840-03mj",
+    "name": "vlcsnap-2025-02-10-12h53m54s498.png",
+    "category": "Subido",
+    "folder": "Subido",
+    "path": "./assets/images/ely/vlcsnap-2025-02-10-12h53m54s498.png"
+  },
+  {
+    "id": "custom-1790609981822-6k0k",
+    "name": "Imagen_de_WhatsApp_2025-03-01_a_las_21.29.15_ff053395.jpg",
+    "category": "Subido",
+    "folder": "Subido",
+    "path": "./assets/images/ely/Imagen_de_WhatsApp_2025-03-01_a_las_21.29.15_ff053395.jpg"
+  }
+]
