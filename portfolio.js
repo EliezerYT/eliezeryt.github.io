@@ -4366,43 +4366,40 @@
     if (githubElyFolderLoading) return;
     githubElyFolderLoading = true;
 
-    const headers = { Accept: 'application/vnd.github+json' };
-    const token = getGithubToken();
-    if (token) headers.Authorization = 'Bearer ' + token;
     const imageExtensions = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'avif', 'bmp', 'svg'];
-    const foundImages = [];
-
-    async function scanFolder(folderPath) {
-      const endpoint = GITHUB_API_BASE + '/repos/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/contents/' + folderPath.split('/').map(encodeURIComponent).join('/') + '?ref=' + encodeURIComponent(GITHUB_BRANCH);
-      const response = await fetch(endpoint, { headers: headers, cache: 'no-store' });
-      if (!response.ok) throw new Error('GitHub API: ' + response.status);
-      const entries = await response.json();
-      if (!Array.isArray(entries)) return;
-
-      for (const entry of entries) {
-        if (!entry || !entry.name) continue;
-        if (entry.type === 'dir') {
-          await scanFolder(entry.path);
-          continue;
-        }
-        if (entry.type !== 'file') continue;
-        const extension = entry.name.split('.').pop().toLowerCase();
-        if (!imageExtensions.includes(extension)) continue;
-
-        const relativePath = entry.path.replace(/^assets\/images\/ely\//i, '');
-        const folder = relativePath.includes('/') ? relativePath.substring(0, relativePath.lastIndexOf('/')) : 'Ely';
-        foundImages.push({
-          id: 'ely-folder-' + entry.sha,
-          name: entry.name.replace(/\.[^.]+$/, ''),
-          category: folder,
-          folder: folder,
-          path: './' + entry.path
-        });
-      }
-    }
 
     try {
-      await scanFolder('assets/images/ely');
+      const response = await fetch('./assets/images/ely/manifest.json?cache=' + Date.now(), {
+        cache: 'no-store'
+      });
+      if (!response.ok) throw new Error('Manifest: ' + response.status);
+
+      const manifest = await response.json();
+      const imagePaths = Array.isArray(manifest)
+        ? manifest
+        : (Array.isArray(manifest.images) ? manifest.images : []);
+
+      const foundImages = imagePaths
+        .filter(function (item) {
+          return typeof item === 'string' && imageExtensions.includes(item.split('.').pop().toLowerCase());
+        })
+        .map(function (relativePath) {
+          const cleanPath = relativePath.replace(/^\/+/, '').replace(/\\/g, '/');
+          const fullPath = './assets/images/ely/' + cleanPath;
+          const fileName = cleanPath.split('/').pop();
+          const folder = cleanPath.includes('/')
+            ? cleanPath.substring(0, cleanPath.lastIndexOf('/'))
+            : 'Ely';
+
+          return {
+            id: 'ely-folder-' + cleanPath,
+            name: fileName.replace(/\.[^.]+$/, ''),
+            category: folder,
+            folder: folder,
+            path: fullPath
+          };
+        });
+
       githubElyFolderImages = foundImages;
       renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
 
@@ -4415,11 +4412,11 @@
         });
       }
     } catch (error) {
-      console.warn('[LIBRARY] No se pudieron cargar las imágenes de ely:', error);
+      console.warn('[LIBRARY] No se pudo cargar el manifiesto de imágenes de ely:', error);
       if (showNotification) {
         showStatusNotification({
           title: 'Error al recargar',
-          message: 'No se pudo leer la carpeta assets/images/ely en GitHub.',
+          message: 'No se pudo cargar el manifiesto de imágenes de ely.',
           type: 'error',
           icon: '⚠️'
         });
