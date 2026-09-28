@@ -1514,7 +1514,10 @@
         : '';
 
       const hasVideo = !!project.youtubeVideo;
-      const playStoreBadge = project.playStoreUrl ? '<a href="' + project.playStoreUrl + '" target="_blank" rel="noopener noreferrer" class="shrink-0 hover:scale-105 transition-transform" title="Ver en Google Play" onclick="event.stopPropagation()"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" class="w-[92px] h-auto max-h-[28px] object-contain" loading="lazy"></a>' : '';
+      const playStoreBadge = project.playStoreUrl ? '<a href="' + project.playStoreUrl + '" target="_blank" rel="noopener noreferrer" class="shrink-0 hover:scale-105 transition-transform" title="Ver en Google Play" onclick="event.stopPropagation()"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" class="w-[112px] h-auto max-h-[34px] object-contain" loading="lazy"></a>' : '';
+      const itchStoreBadge = project.itchUrl ? '<a href="' + project.itchUrl + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-[#fa5c5c] text-white text-[11px] font-bold shadow-sm hover:bg-[#ff6b6b] hover:scale-105 transition-transform" title="Ver en itch.io" onclick="event.stopPropagation()">itch.io ↗</a>' : '';
+      const steamStoreBadge = project.steamUrl ? '<a href="' + project.steamUrl + '" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg bg-[#1b2838] text-white text-[11px] font-bold border border-white/10 shadow-sm hover:bg-[#243447] hover:scale-105 transition-transform" title="Ver en Steam" onclick="event.stopPropagation()">Steam ↗</a>' : '';
+      const storeBadges = playStoreBadge || itchStoreBadge || steamStoreBadge ? '<div class="flex flex-wrap items-center justify-end gap-2 pt-2">' + itchStoreBadge + steamStoreBadge + playStoreBadge + '</div>' : '';
       const mediaBadge = hasVideo
         ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-red-600/80 text-white backdrop-blur-sm shadow">▶ Video YouTube</span>'
         : '';
@@ -1663,30 +1666,26 @@
                 ${techBadges}
               </div>
 
-              <div class="flex items-end justify-between gap-3 pt-1">
-                <div class="flex items-center gap-2">
-                <button
-                  type="button"
-                  onclick="window.ElyPortfolio.openProjectModal('${project.id}')"
-                  class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors"
-                >
-                  <span>Ver Ficha Completa</span>
-                  <span>→</span>
-                </button>
-
-                ${project.links && project.links.length > 0 ? `
-                  <a
-                    href="${project.links[0].url}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-xs text-slate-400 hover:text-white transition-colors"
-                    title="${project.links[0].label}"
+              <div class="space-y-1.5 pt-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onclick="window.ElyPortfolio.openProjectModal('${project.id}')"
+                    class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors"
                   >
-                    ↗ ${project.links[0].label || (project.links[0].type === 'canva' ? 'Canva' : project.links[0].type === 'video' ? 'YouTube' : 'Enlace')}
-                  </a>
-                ` : ''}
-                  ${playStoreBadge}
+                    <span>Ver Ficha Completa</span>
+                    <span>→</span>
+                  </button>
+
+                  ${project.links && project.links.length > 0 ? `
+                    <div class="flex flex-wrap items-center gap-2">
+                      ${project.links.map(function (link) {
+                        return '<a href="' + link.url + '" target="_blank" rel="noopener noreferrer" class="text-xs text-slate-400 hover:text-white transition-colors" title="' + (link.label || 'Enlace') + '" onclick="event.stopPropagation()">↗ ' + (link.label || 'Enlace') + '</a>';
+                      }).join('')}
+                    </div>
+                  ` : ''}
                 </div>
+                ${storeBadges}
               </div>
             </div>
           </div>
@@ -3110,8 +3109,16 @@
     document.getElementById('edit-proj-cover').value = project.coverImage || '';
     const editPlayCheck = document.getElementById('edit-proj-play-check');
     const editPlayUrl = document.getElementById('edit-proj-play-url');
+    const editItchCheck = document.getElementById('edit-proj-itch-check');
+    const editItchUrl = document.getElementById('edit-proj-itch-url');
+    const editSteamCheck = document.getElementById('edit-proj-steam-check');
+    const editSteamUrl = document.getElementById('edit-proj-steam-url');
     if (editPlayCheck) editPlayCheck.checked = !!project.playStoreUrl;
     if (editPlayUrl) editPlayUrl.value = project.playStoreUrl || '';
+    if (editItchCheck) editItchCheck.checked = !!project.itchUrl;
+    if (editItchUrl) editItchUrl.value = project.itchUrl || '';
+    if (editSteamCheck) editSteamCheck.checked = !!project.steamUrl;
+    if (editSteamUrl) editSteamUrl.value = project.steamUrl || '';
     
     // Múltiples imágenes (galería) separadas por salto de línea
     const galleryImgs = Array.isArray(project.galleryImages) ? project.galleryImages.join('\n') : (project.coverImage || '');
@@ -3164,7 +3171,13 @@
     project.coverImage = document.getElementById('edit-proj-cover').value.trim() || './assets/images/ely/my-avatar.png';
     const editPlayCheck = document.getElementById('edit-proj-play-check');
     const editPlayUrl = document.getElementById('edit-proj-play-url');
+    const editItchCheck = document.getElementById('edit-proj-itch-check');
+    const editItchUrl = document.getElementById('edit-proj-itch-url');
+    const editSteamCheck = document.getElementById('edit-proj-steam-check');
+    const editSteamUrl = document.getElementById('edit-proj-steam-url');
     project.playStoreUrl = editPlayCheck && editPlayCheck.checked && editPlayUrl ? editPlayUrl.value.trim() : '';
+    project.itchUrl = editItchCheck && editItchCheck.checked && editItchUrl ? editItchUrl.value.trim() : '';
+    project.steamUrl = editSteamCheck && editSteamCheck.checked && editSteamUrl ? editSteamUrl.value.trim() : '';
 
     // Parsear galería de imágenes (una por línea o por coma)
     const galleryRaw = document.getElementById('edit-proj-gallery').value;
@@ -3228,8 +3241,16 @@
       if (linksInp) linksInp.value = '';
       const playCheck = document.getElementById('new-proj-play-check');
       const playUrl = document.getElementById('new-proj-play-url');
+      const itchCheck = document.getElementById('new-proj-itch-check');
+      const itchUrl = document.getElementById('new-proj-itch-url');
+      const steamCheck = document.getElementById('new-proj-steam-check');
+      const steamUrl = document.getElementById('new-proj-steam-url');
       if (playCheck) playCheck.checked = false;
       if (playUrl) playUrl.value = '';
+      if (itchCheck) itchCheck.checked = false;
+      if (itchUrl) itchUrl.value = '';
+      if (steamCheck) steamCheck.checked = false;
+      if (steamUrl) steamUrl.value = '';
       renderGalleryThumbnails('new-proj-gallery-thumbs', 'new-proj-gallery');
 
       modal.classList.remove('hidden');
@@ -3257,7 +3278,13 @@
     const videoUrl = document.getElementById('new-proj-video').value.trim();
     const playCheck = document.getElementById('new-proj-play-check');
     const playUrl = document.getElementById('new-proj-play-url');
+    const itchCheck = document.getElementById('new-proj-itch-check');
+    const itchUrl = document.getElementById('new-proj-itch-url');
+    const steamCheck = document.getElementById('new-proj-steam-check');
+    const steamUrl = document.getElementById('new-proj-steam-url');
     const playStoreUrl = playCheck && playCheck.checked && playUrl ? playUrl.value.trim() : '';
+    const itchStoreUrl = itchCheck && itchCheck.checked && itchUrl ? itchUrl.value.trim() : '';
+    const steamStoreUrl = steamCheck && steamCheck.checked && steamUrl ? steamUrl.value.trim() : '';
     const linksRaw = document.getElementById('new-proj-links') ? document.getElementById('new-proj-links').value : '';
     const links = linksRaw.split('\n').map(line => { const parts = line.split('|'); const url = parts.slice(1).join('|').trim(); return { label: (parts[0] || '').trim(), url: url, type: /canva\.com/i.test(url) ? 'canva' : 'external' }; }).filter(link => link.label && link.url);
     const desc = document.getElementById('new-proj-desc').value.trim();
@@ -3278,6 +3305,8 @@
       galleryImages: parsedGallery.length > 0 ? parsedGallery : [coverImage],
       youtubeVideo: videoUrl || '',
       playStoreUrl: playStoreUrl,
+      itchUrl: itchStoreUrl,
+      steamUrl: steamStoreUrl,
       links: links,
       technologies: techs.length > 0 ? techs : ['Unity', 'C#'],
       role: 'Desarrollador'
