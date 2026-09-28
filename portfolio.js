@@ -4063,9 +4063,11 @@
         if (!response.ok) continue;
         const data = await response.json();
         if (Array.isArray(data)) {
-          customLibraryImages = data;
-          persistCustomLibraryImages();
-          renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
+          if (data.length > 0 || customLibraryImages.length === 0) {
+            customLibraryImages = data;
+            persistCustomLibraryImages();
+            renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
+          }
           return true;
         }
       } catch (e) {}
