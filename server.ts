@@ -12,54 +12,66 @@ const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json({ limit: '20mb' }));
 
-const SRC_PROJECTS_PATH = path.resolve(__dirname, 'src/data/projects.json');
-const PUBLIC_PROJECTS_PATH = path.resolve(__dirname, 'public/data/projects.json');
+// Target paths for each dataset across src, public, docs, and dist
+const DATA_DIRECTORIES = [
+  path.resolve(__dirname, 'src/data'),
+  path.resolve(__dirname, 'public/data'),
+  path.resolve(__dirname, 'docs/data'),
+  path.resolve(__dirname, 'dist/data'),
+];
 
-// Ensure directories exist
-const ensureDirectoryExists = (filePath: string) => {
-  const dir = path.dirname(filePath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+// Helper to ensure directory exists
+const ensureDirectoryExists = (dirPath: string) => {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
   }
 };
 
-// Helper to read projects from disk
-const getProjectsFromFile = (): any[] => {
-  try {
-    if (fs.existsSync(SRC_PROJECTS_PATH)) {
-      const data = fs.readFileSync(SRC_PROJECTS_PATH, 'utf-8');
-      return JSON.parse(data);
+// Generic reader
+const readDataFile = (filename: string): any[] => {
+  for (const dir of DATA_DIRECTORIES) {
+    const filePath = path.join(dir, filename);
+    if (fs.existsSync(filePath)) {
+      try {
+        const raw = fs.readFileSync(filePath, 'utf-8');
+        return JSON.parse(raw);
+      } catch (e) {
+        console.error(`Error reading ${filePath}:`, e);
+      }
     }
-    if (fs.existsSync(PUBLIC_PROJECTS_PATH)) {
-      const data = fs.readFileSync(PUBLIC_PROJECTS_PATH, 'utf-8');
-      return JSON.parse(data);
-    }
-  } catch (err) {
-    console.error('Error reading projects.json:', err);
   }
   return [];
 };
 
-// Helper to write projects to disk
-const saveProjectsToFile = (projects: any[]) => {
-  ensureDirectoryExists(SRC_PROJECTS_PATH);
-  ensureDirectoryExists(PUBLIC_PROJECTS_PATH);
-  const jsonContent = JSON.stringify(projects, null, 2);
-  fs.writeFileSync(SRC_PROJECTS_PATH, jsonContent, 'utf-8');
-  fs.writeFileSync(PUBLIC_PROJECTS_PATH, jsonContent, 'utf-8');
+// Generic writer that writes to ALL configured directories
+const writeDataFile = (filename: string, data: any[]): string[] => {
+  const jsonContent = JSON.stringify(data, null, 2);
+  const updatedPaths: string[] = [];
+
+  for (const dir of DATA_DIRECTORIES) {
+    try {
+      ensureDirectoryExists(dir);
+      const targetPath = path.join(dir, filename);
+      fs.writeFileSync(targetPath, jsonContent, 'utf-8');
+      updatedPaths.push(targetPath);
+    } catch (err) {
+      console.error(`Could not write to ${dir}/${filename}:`, err);
+    }
+  }
+
+  return updatedPaths;
 };
 
-// GET /api/projects
+// Endpoints for Projects
 app.get('/api/projects', (_req, res) => {
   try {
-    const projects = getProjectsFromFile();
-    res.json({ success: true, projects, count: projects.length, file: 'src/data/projects.json' });
+    const projects = readDataFile('projects.json');
+    res.json({ success: true, projects, count: projects.length });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// POST /api/projects - saves projects to file
 app.post('/api/projects', (req, res) => {
   try {
     const payload = req.body;
@@ -69,19 +81,132 @@ app.post('/api/projects', (req, res) => {
       return res.status(400).json({ success: false, error: 'Expected an array of projects or { projects: [...] }' });
     }
 
-    saveProjectsToFile(projects);
-    console.log(`[FILE SYNC] Guardados ${projects.length} proyectos exitosamente en src/data/projects.json`);
+    const writtenPaths = writeDataFile('projects.json', projects);
+    console.log(`[FILE SYNC] Guardados ${projects.length} proyectos en: ${writtenPaths.join(', ')}`);
     res.json({
       success: true,
-      message: 'Proyectos guardados exitosamente en src/data/projects.json y public/data/projects.json',
+      message: 'Proyectos guardados exitosamente en archivos locales y listos para producción/GitHub.',
       count: projects.length,
       timestamp: new Date().toISOString(),
-      filePath: 'src/data/projects.json',
+      updatedPaths: writtenPaths,
     });
   } catch (err: any) {
-    console.error('[FILE SYNC ERROR]:', err);
+    console.error('[PROJECTS SYNC ERROR]:', err);
     res.status(500).json({ success: false, error: err.message });
   }
+});
+
+// Endpoints for Experiences
+app.get('/api/experiences', (_req, res) => {
+  try {
+    const experiences = readDataFile('experiences.json');
+    res.json({ success: true, experiences, count: experiences.length });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/experiences', (req, res) => {
+  try {
+    const payload = req.body;
+    const experiences = Array.isArray(payload) ? payload : payload.experiences;
+
+    if (!Array.isArray(experiences)) {
+      return res.status(400).json({ success: false, error: 'Expected an array of experiences or { experiences: [...] }' });
+    }
+
+    const writtenPaths = writeDataFile('experiences.json', experiences);
+    console.log(`[FILE SYNC] Guardadas ${experiences.length} experiencias en: ${writtenPaths.join(', ')}`);
+    res.json({
+      success: true,
+      message: 'Experiencias guardadas exitosamente en archivos de datos (src/data, public/data, docs/data).',
+      count: experiences.length,
+      timestamp: new Date().toISOString(),
+      updatedPaths: writtenPaths,
+    });
+  } catch (err: any) {
+    console.error('[EXPERIENCES SYNC ERROR]:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Endpoints for Testimonials / Clients
+app.get('/api/testimonials', (_req, res) => {
+  try {
+    const testimonials = readDataFile('testimonials.json');
+    res.json({ success: true, testimonials, count: testimonials.length });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/testimonials', (req, res) => {
+  try {
+    const payload = req.body;
+    const testimonials = Array.isArray(payload) ? payload : payload.testimonials;
+
+    if (!Array.isArray(testimonials)) {
+      return res.status(400).json({ success: false, error: 'Expected an array of testimonials or { testimonials: [...] }' });
+    }
+
+    const writtenPaths = writeDataFile('testimonials.json', testimonials);
+    console.log(`[FILE SYNC] Guardados ${testimonials.length} testimonios en: ${writtenPaths.join(', ')}`);
+    res.json({
+      success: true,
+      message: 'Testimonios guardados exitosamente en archivos de datos.',
+      count: testimonials.length,
+      timestamp: new Date().toISOString(),
+      updatedPaths: writtenPaths,
+    });
+  } catch (err: any) {
+    console.error('[TESTIMONIALS SYNC ERROR]:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Master Sync Endpoint: Saves all collections at once
+app.post('/api/sync-all', (req, res) => {
+  try {
+    const { projects, experiences, testimonials } = req.body || {};
+    const results: Record<string, any> = {};
+
+    if (Array.isArray(projects)) {
+      const paths = writeDataFile('projects.json', projects);
+      results.projects = { count: projects.length, paths };
+    }
+    if (Array.isArray(experiences)) {
+      const paths = writeDataFile('experiences.json', experiences);
+      results.experiences = { count: experiences.length, paths };
+    }
+    if (Array.isArray(testimonials)) {
+      const paths = writeDataFile('testimonials.json', testimonials);
+      results.testimonials = { count: testimonials.length, paths };
+    }
+
+    res.json({
+      success: true,
+      message: 'Todos los datos han sido sincronizados y guardados en los archivos del sistema.',
+      timestamp: new Date().toISOString(),
+      results,
+    });
+  } catch (err: any) {
+    console.error('[SYNC-ALL ERROR]:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Status check endpoint
+app.get('/api/status', (_req, res) => {
+  res.json({
+    status: 'online',
+    timestamp: new Date().toISOString(),
+    directories: DATA_DIRECTORIES,
+    counts: {
+      projects: readDataFile('projects.json').length,
+      experiences: readDataFile('experiences.json').length,
+      testimonials: readDataFile('testimonials.json').length,
+    }
+  });
 });
 
 // Vite Middleware for Dev / Static serving for production
