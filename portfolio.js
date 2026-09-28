@@ -1500,7 +1500,7 @@
       const cardEffectClass = cardEffects.map(function(effect) {
         return ' card-effect-' + effect;
       }).join('');
-      const cardEffectStyle = project.cardEffectColor ? ' style="--card-effect-color:' + project.cardEffectColor + ';--card-effect-soft:' + project.cardEffectColor + 'aa;--card-effect-light:' + project.cardEffectColor + ';"' : '';
+      const cardEffectStyle = project.cardEffectColor ? ' style="--card-effect-color:' + project.cardEffectColor + ';--card-effect-soft:' + project.cardEffectColor + 'aa;--card-effect-light:' + project.cardEffectColor + ';--glow-a:' + project.cardEffectColor + ';--glow-b:#ffffff;--glow-bg:#060c21;"' : '';
       const originBadge = isServ
         ? '<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Servicio Técnico</span>'
         : isClas
@@ -3150,11 +3150,15 @@
     document.getElementById('edit-proj-client').value = project.clientOrTeam || '';
     document.getElementById('edit-proj-year').value = project.year || '';
     const editEffectElectrify = document.getElementById('edit-proj-effect-electrify');
-    const editEffectShake = document.getElementById('edit-proj-effect-shake');\nconst editEffectRainbow = document.getElementById('edit-proj-effect-rainbow');\nconst editEffectRainbow = document.getElementById('edit-proj-effect-rainbow');
+    const editEffectRainbow = document.getElementById('edit-proj-effect-rainbow');
+    const editEffectGlow = document.getElementById('edit-proj-effect-glow');
+    const editEffectShake = document.getElementById('edit-proj-effect-shake');
     const editEffectColor = document.getElementById('edit-proj-effect-color');
     const storedEffects = Array.isArray(project.cardEffects) ? project.cardEffects : (project.cardEffect && project.cardEffect !== 'none' ? [project.cardEffect] : []);
     if (editEffectElectrify) editEffectElectrify.checked = storedEffects.includes('electrify') || storedEffects.includes('red') || storedEffects.includes('gold') || storedEffects.includes('blue');
-    if (editEffectShake) editEffectShake.checked = storedEffects.includes('shake');\nif (editEffectRainbow) editEffectRainbow.checked = storedEffects.includes('rainbow');
+    if (editEffectShake) editEffectShake.checked = storedEffects.includes('shake');
+    if (editEffectRainbow) editEffectRainbow.checked = storedEffects.includes('rainbow');
+    if (editEffectGlow) editEffectGlow.checked = storedEffects.includes('glow');
     if (editEffectColor) editEffectColor.value = /^#[0-9a-fA-F]{6}$/.test(project.cardEffectColor || '') ? project.cardEffectColor : '#fbbf24';
     document.getElementById('edit-proj-cover').value = project.coverImage || '';
     const editPlayCheck = document.getElementById('edit-proj-play-check');
@@ -3221,10 +3225,14 @@
     project.year = document.getElementById('edit-proj-year').value.trim();
     const effectList = [];
     const editEffectElectrify = document.getElementById('edit-proj-effect-electrify');
+    const editEffectRainbow = document.getElementById('edit-proj-effect-rainbow');
+    const editEffectGlow = document.getElementById('edit-proj-effect-glow');
     const editEffectShake = document.getElementById('edit-proj-effect-shake');
     const editEffectColor = document.getElementById('edit-proj-effect-color');
     if (editEffectElectrify && editEffectElectrify.checked) effectList.push('electrify');
-    if (editEffectShake && editEffectShake.checked) effectList.push('shake');\nif (editEffectRainbow && editEffectRainbow.checked) effectList.push('rainbow');
+    if (editEffectRainbow && editEffectRainbow.checked) effectList.push('rainbow');
+    if (editEffectGlow && editEffectGlow.checked) effectList.push('glow');
+    if (editEffectShake && editEffectShake.checked) effectList.push('shake');
     project.cardEffects = effectList;
     project.cardEffect = effectList.length ? effectList[0] : 'none';
     project.cardEffectColor = editEffectColor ? editEffectColor.value : '#fbbf24';
