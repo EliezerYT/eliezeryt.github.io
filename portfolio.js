@@ -999,6 +999,8 @@
   let activeMediaMode = 'image'; // 'image' o 'video'
   let filteredProjects = [];
   let isModerator = false;
+  let visitorPreviewMode = false;
+  const SYNC_FINGERPRINT_KEY = 'portfolio_github_sync_fingerprint_v1';
 
   try {
     const authSaved = localStorage.getItem(AUTH_STORAGE_KEY);
@@ -1159,6 +1161,13 @@
     }
 
     toast.dismiss = dismissToast;
+    toast.update = function (next) {
+      next = next || {};
+      const titleEl = toast.querySelector('.toast-title');
+      const descEl = toast.querySelector('.toast-desc');
+      if (titleEl && next.title) titleEl.textContent = next.title;
+      if (descEl && typeof next.message === 'string') descEl.textContent = next.message;
+    };
 
     function startTimer(time) {
       startTime = Date.now();
@@ -1193,6 +1202,71 @@
     }
 
     return toast;
+  }
+
+  function animateCounterElement(element, target, formatter) {
+    if (!element) return;
+    const numericTarget = Math.max(0, Number(target) || 0);
+    const previous = Number(element.getAttribute('data-counter-value') || 0);
+    if (previous === numericTarget) {
+      element.textContent = formatter ? formatter(numericTarget) : String(numericTarget);
+      return;
+    }
+    element.setAttribute('data-counter-value', String(numericTarget));
+    const start = previous;
+    const duration = 650;
+    const startTime = performance.now();
+    function tick(now) {
+      const progress = Math.min(1, (now - startTime) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const value = Math.round(start + (numericTarget - start) * eased);
+      element.textContent = formatter ? formatter(value) : String(value);
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function renderFeedbackStats() {
+    const averageEl = document.getElementById('feedback-average-value');
+    const countEl = document.getElementById('feedback-average-count');
+    const distributionEl = document.getElementById('feedback-star-distribution');
+    const ratings = satisfiedClients.map(c => Math.max(1, Math.min(5, Number(c.rating) || 5)));
+    const total = ratings.length;
+    const average = total ? ratings.reduce((sum, value) => sum + value, 0) / total : 0;
+
+    if (averageEl) animateCounterElement(averageEl, Math.round(average * 10), value => (value / 10).toFixed(1));
+    if (countEl) countEl.textContent = '(' + total + ')';
+    if (distributionEl) {
+      distributionEl.innerHTML = [5,4,3,2,1].map(function (star) {
+        const count = ratings.filter(r => r === star).length;
+        const percentage = total ? Math.round((count / total) * 100) : 0;
+        return '<div class="flex items-center gap-2 text-[10px]">' +
+          '<span class="w-10 text-amber-400 font-mono">' + '★★★★★'.slice(0, star) + '</span>' +
+          '<div class="h-1.5 flex-1 rounded-full bg-white/5 overflow-hidden"><div class="h-full bg-amber-400 transition-all duration-500" style="width:' + percentage + '%"></div></div>' +
+          '<span class="w-7 text-right text-slate-400 font-mono">' + count + '</span>' +
+        '</div>';
+      }).join('');
+    }
+  }
+
+  function setVisitorPreviewMode(enabled) {
+    if (!isModerator) return;
+    visitorPreviewMode = !!enabled;
+    updateModeratorUI();
+    renderProjectsGrid();
+    renderExperiences();
+    renderTestimonialsPreview();
+    renderSatisfiedClientsModalList();
+    showStatusNotification({
+      title: visitorPreviewMode ? 'Preview visitante' : 'Modo moderador',
+      message: visitorPreviewMode ? 'Estás viendo el portafolio como un visitante.' : 'Herramientas de moderación activadas.',
+      type: 'info',
+      icon: visitorPreviewMode ? '👁' : '🛠️'
+    });
+  }
+
+  function toggleVisitorPreview() {
+    setVisitorPreviewMode(!visitorPreviewMode);
   }
 
   // Helper para extraer ID de video de YouTube
@@ -1299,16 +1373,16 @@
     const workedCountEl = document.getElementById('metric-count-trabajado');
     const servicesCountEl = document.getElementById('metric-count-servicios');
     const classesCountEl = document.getElementById('metric-count-clases');
-    if (ownCountEl) ownCountEl.textContent = projects.filter(p => p.origin === 'propio').length;
-    if (workedCountEl) workedCountEl.textContent = projects.filter(p => p.origin === 'trabajado').length;
+    animateCounterElement(ownCountEl, projects.filter(p => p.origin === 'propio').length);
+    animateCounterElement(workedCountEl, projects.filter(p => p.origin === 'trabajado').length);
     const servicesWorkCount = projects.filter(p => p.origin === 'servicios').reduce((sum, p) => sum + Math.max(0, Number(p.workedCount) || 0), 0);
     const classesWorkCount = projects.filter(p => p.origin === 'clases').reduce((sum, p) => sum + Math.max(0, Number(p.workedCount) || 0), 0);
     const servicesCountPublicEl = document.getElementById('metric-count-servicios-public');
     const classesCountPublicEl = document.getElementById('metric-count-clases-public');
     if (servicesCountEl) servicesCountEl.value = servicesWorkCount;
     if (classesCountEl) classesCountEl.value = classesWorkCount;
-    if (servicesCountPublicEl) servicesCountPublicEl.textContent = servicesWorkCount;
-    if (classesCountPublicEl) classesCountPublicEl.textContent = classesWorkCount;
+    animateCounterElement(servicesCountPublicEl, servicesWorkCount);
+    animateCounterElement(classesCountPublicEl, classesWorkCount);
   }
 
   function setCategoryWorkCount(origin, value) {
@@ -1444,8 +1518,25 @@
         ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-red-600/80 text-white backdrop-blur-sm shadow">▶ Video YouTube</span>'
         : '';
 
+      const techIcons = {
+        'Unity': '🎮', 'Unity 3D': '🎮', 'Unity 2D': '🎮', 'C#': '♯',
+        'Photon Network': '🌐', 'Photon PUN 2': '🌐', 'PHP': '🐘', 'MySQL': '🗄️',
+        'JavaScript': 'JS', 'HTML5': 'HTML', 'CSS3': 'CSS', 'Git': '🔀',
+        'GitHub': '🐙', 'FMOD Audio': '🔊', 'Cinemachine': '🎥', 'REST API Integration': '🔗',
+        'HLS Video Streaming': '▶', 'Android Deployment': '📱', 'Mobile UI': '📱',
+        'Vehicle Physics': '🏎️', 'Custom Shaders': '✨', 'UI/UX Design': '🎨'
+      };
       const techBadges = (project.technologies || []).slice(0, 4).map(function (t) {
-        return '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300 border border-white/10">' + t + '</span>';
+        const label = String(t || '');
+        let icon = '⚙️';
+        Object.keys(techIcons).some(function (key) {
+          if (label.toLowerCase().includes(key.toLowerCase())) {
+            icon = techIcons[key];
+            return true;
+          }
+          return false;
+        });
+        return '<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300 border border-white/10"><span class="text-xs leading-none">' + icon + '</span><span>' + label + '</span></span>';
       }).join('');
 
       const clientSubtitle = project.clientOrTeam
@@ -1453,7 +1544,7 @@
         : '';
 
       // Barra de controles de moderador (Ajustar Orden, Editar, Eliminar)
-      const moderatorBar = isModerator ? `
+      const moderatorBar = (isModerator && !visitorPreviewMode) ? `
         <div class="flex items-center justify-between p-2.5 bg-amber-400/10 border-b border-amber-400/20 text-xs">
           <div class="flex items-center gap-1">
             <button
@@ -1553,7 +1644,7 @@
                       <div class="text-[9px] text-slate-500 mt-0.5">${isClas ? 'Horas de clases impartidas' : 'Trabajos realizados'}</div>
                     </div>
                     <div class="flex items-center gap-1.5">
-                      ${isModerator ? `
+                      ${(isModerator && !visitorPreviewMode) ? `
                         <button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.changeProjectWorkCount('${project.id}', -1)" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-red-500/30 text-white font-black text-lg leading-none">−</button>
                         <input type="number" min="0" step="1" value="${Math.max(0, Number(project.workedCount) || 0)}" onchange="window.ElyPortfolio.setProjectWorkCount('${project.id}', this.value)" onclick="event.stopPropagation()" class="w-14 h-8 rounded-lg bg-[#0b0d11] border border-amber-400/30 text-center text-sm font-black text-amber-300 outline-none focus:border-amber-400" />
                         <button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.changeProjectWorkCount('${project.id}', 1)" class="w-7 h-7 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-black text-lg leading-none">+</button>
@@ -1912,7 +2003,10 @@
       badge.textContent = satisfiedClients.length + ' Feedbacks';
     }
     const heroFeedbackCount = document.getElementById('hero-feedback-count');
-    if (heroFeedbackCount) heroFeedbackCount.textContent = satisfiedClients.length + ' Feedbacks';
+    animateCounterElement(heroFeedbackCount, satisfiedClients.length, function (value) {
+      return value + ' Feedbacks';
+    });
+    renderFeedbackStats();
     if (!container) return;
 
     // Mostrar los primeros feedbacks en la página principal
@@ -2818,6 +2912,7 @@
 
   function handleLogout() {
     isModerator = false;
+    visitorPreviewMode = false;
     try {
       localStorage.removeItem(AUTH_STORAGE_KEY);
     } catch (err) {}
@@ -2832,21 +2927,27 @@
   }
 
   function updateModeratorUI() {
+    const showModeratorControls = isModerator && !visitorPreviewMode;
     const modElements = document.querySelectorAll('.moderator-only');
     modElements.forEach(function (el) {
-      if (isModerator) {
+      if (showModeratorControls) {
         el.classList.remove('hidden');
       } else {
         el.classList.add('hidden');
       }
     });
     document.querySelectorAll('.category-public-counter').forEach(function (el) {
-      if (isModerator) {
+      if (showModeratorControls) {
         el.classList.add('hidden');
       } else {
         el.classList.remove('hidden');
       }
     });
+    const previewBtn = document.getElementById('visitor-preview-btn');
+    if (previewBtn) {
+      previewBtn.classList.toggle('hidden', !isModerator);
+      previewBtn.textContent = visitorPreviewMode ? '🛠️ Volver a moderador' : '👁 Preview visitante';
+    }
     const authBtn = document.getElementById('nav-auth-btn');
     if (authBtn) {
       authBtn.textContent = isModerator ? 'Cerrar Moderador' : 'Acceso Moderador';
@@ -3854,7 +3955,30 @@
     return putGithubFile(path, base64, 'Sync portfolio data');
   }
 
+  function getGithubSyncFingerprint() {
+    try {
+      return JSON.stringify({ projects: projects, experiences: experiences, testimonials: satisfiedClients, library: customLibraryImages });
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function hasGithubSyncChanges() {
+    let saved = '';
+    try { saved = localStorage.getItem(SYNC_FINGERPRINT_KEY) || ''; } catch (e) {}
+    return !saved || saved !== getGithubSyncFingerprint();
+  }
+
+  function markGithubSyncComplete() {
+    try { localStorage.setItem(SYNC_FINGERPRINT_KEY, getGithubSyncFingerprint()); } catch (e) {}
+  }
+
   async function syncAllToGithub() {
+    if (!hasGithubSyncChanges()) {
+      showStatusNotification({ title: 'Todo sincronizado', message: 'No hay cambios pendientes para enviar a GitHub.', type: 'info', icon: '✓' });
+      return;
+    }
+
     let syncNotification = null;
     syncNotification = showStatusNotification({
       title: 'Sincronizando',
@@ -3907,7 +4031,12 @@
       for (const [path, data] of files) {
         await syncGithubJson(path, data);
         commits++;
+        if (syncNotification && typeof syncNotification.update === 'function') {
+          syncNotification.update({ title: 'Sincronizando', message: 'Archivos: ' + commits + '/' + files.length + ' • ' + path.split('/').pop() });
+        }
       }
+
+      markGithubSyncComplete();
 
       const lastSavedEl = document.getElementById('sync-last-saved');
       if (lastSavedEl) lastSavedEl.textContent = new Date().toLocaleTimeString();
@@ -4914,6 +5043,8 @@
     closeAuthModal: closeAuthModal,
     resetSampleData: resetSampleData,
     toggleTheme: toggleTheme,
+    toggleVisitorPreview: toggleVisitorPreview,
+    setVisitorPreviewMode: setVisitorPreviewMode,
     // Biblioteca de Imágenes & Multimedia (Drag and Drop & Assets)
     openImageLibraryModal: openImageLibraryModal,
     closeImageLibraryModal: closeImageLibraryModal,
