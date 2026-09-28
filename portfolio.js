@@ -4413,7 +4413,8 @@
               <select class="library-folder-move-select w-full rounded-md bg-[#0b0d11] border border-[#262c3b] px-2 py-1.5 text-[10px] text-white focus:border-amber-400 focus:outline-none">
                 <option value="Profile" ${getLibraryImageFolder(img) === 'Profile' ? 'selected' : ''}>Profile</option>
                 <option value="Screenshot" ${getLibraryImageFolder(img) === 'Screenshot' ? 'selected' : ''}>Screenshot</option>
-                <option value="Custom" ${!['Profile','Screenshot'].includes(getLibraryImageFolder(img)) ? 'selected' : ''}>Custom</option>
+                <option value="AppLogo" ${getLibraryImageFolder(img) === 'AppLogo' ? 'selected' : ''}>AppLogo</option>
+                <option value="Custom" ${!['Profile','Screenshot','AppLogo'].includes(getLibraryImageFolder(img)) ? 'selected' : ''}>Custom</option>
               </select>
               <input type="text" value="${!['Profile','Screenshot'].includes(getLibraryImageFolder(img)) ? getLibraryImageFolder(img) : ''}" placeholder="Carpeta personalizada" class="library-folder-move-custom ${!['Profile','Screenshot'].includes(getLibraryImageFolder(img)) ? '' : 'hidden'} w-full rounded-md bg-[#0b0d11] border border-[#262c3b] px-2 py-1.5 text-[10px] text-white placeholder-slate-600 focus:border-amber-400 focus:outline-none" />
               <button type="button" class="library-move-folder-btn w-full rounded-md bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/20 py-1 text-[10px] font-bold text-cyan-300 transition-colors">📁 Mover carpeta</button>
