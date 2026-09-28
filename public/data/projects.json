@@ -360,11 +360,11 @@
   {
     "id": "dominoes-republic",
     "title": "Dominoes Republic",
-    "tagline": "Soporte técnico, reglas internacionales y corrección de geolocalización",
+    "tagline": "Se soluciono un error con la Geolocalizacion",
     "description": "Intervención especializada para resolver errores críticos en las reglas de juego y solucionar interferencias con separadores de geolocalización en partidas competitivas.",
     "fullStory": "Contratado por SHL para un diagnóstico urgente de errores y estabilización del juego Dominoes Republic. Identifiqué y corregí la interferencia en la lógica de geolocalización que afectaba el emparejamiento entre regiones y pulí las reglas de puntuación.",
     "category": "juegos",
-    "origin": "trabajado",
+    "origin": "servicios",
     "clientOrTeam": "SHL (Cliente Comercial)",
     "year": "2022",
     "role": "Freelance Game Developer (Bug Fixer & Optimization)",
@@ -397,11 +397,12 @@
     ],
     "links": [
       {
-        "label": "Ver Ficha en Canva",
-        "url": "https://www.canva.com/design/DAG0NBKnGd8/vFlbYTjjWVnj48E-iLjBiA/view",
+        "label": "Play Store",
+        "url": "https://play.google.com/store/apps/details?id=com.SLH.DominoRepublic",
         "type": "external"
       }
-    ]
+    ],
+    "requirements": []
   },
   {
     "id": "adventure-world",
