@@ -1299,8 +1299,33 @@
     const classesCountEl = document.getElementById('metric-count-clases');
     if (ownCountEl) ownCountEl.textContent = projects.filter(p => p.origin === 'propio').length;
     if (workedCountEl) workedCountEl.textContent = projects.filter(p => p.origin === 'trabajado').length;
-    if (servicesCountEl) servicesCountEl.textContent = projects.filter(p => p.origin === 'servicios').length;
-    if (classesCountEl) classesCountEl.textContent = projects.filter(p => p.origin === 'clases').length;
+    const servicesWorkCount = projects.filter(p => p.origin === 'servicios').reduce((sum, p) => sum + Math.max(0, Number(p.workedCount) || 0), 0);
+    const classesWorkCount = projects.filter(p => p.origin === 'clases').reduce((sum, p) => sum + Math.max(0, Number(p.workedCount) || 0), 0);
+    const servicesCountPublicEl = document.getElementById('metric-count-servicios-public');
+    const classesCountPublicEl = document.getElementById('metric-count-clases-public');
+    if (servicesCountEl) servicesCountEl.value = servicesWorkCount;
+    if (classesCountEl) classesCountEl.value = classesWorkCount;
+    if (servicesCountPublicEl) servicesCountPublicEl.textContent = servicesWorkCount;
+    if (classesCountPublicEl) classesCountPublicEl.textContent = classesWorkCount;
+  }
+
+  function setCategoryWorkCount(origin, value) {
+    if (origin !== 'servicios' && origin !== 'clases') return;
+    const categoryProjects = projects.filter(p => p.origin === origin);
+    if (!categoryProjects.length) return;
+    const target = Math.max(0, Math.floor(Number(value) || 0));
+    const otherCount = categoryProjects.slice(1).reduce((sum, p) => sum + Math.max(0, Number(p.workedCount) || 0), 0);
+    categoryProjects[0].workedCount = Math.max(0, target - otherCount);
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (e) {}
+    renderProjectsGrid();
+    updateCatalogHeaders();
+    syncProjectsWithBackend(projects);
+  }
+
+  function changeCategoryWorkCount(origin, delta) {
+    if (origin !== 'servicios' && origin !== 'clases') return;
+    const total = projects.filter(p => p.origin === origin).reduce((sum, p) => sum + Math.max(0, Number(p.workedCount) || 0), 0);
+    setCategoryWorkCount(origin, total + delta);
   }
 
   function setProjectWorkCount(projectId, value) {
