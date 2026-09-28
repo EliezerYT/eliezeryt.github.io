@@ -107,8 +107,8 @@
     ],
     "links": [
       {
-        "label": "Ver Ficha en Canva",
-        "url": "https://www.canva.com/design/DAHCkhIcWiA/6wdEoS2nzQ9AS30-C88Rqw/view",
+        "label": "Play Store",
+        "url": "https://play.google.com/store/apps/details?id=com.CapricornioGames.enunagoma",
         "type": "external"
       }
     ],
@@ -770,7 +770,8 @@
         "url": "https://www.canva.com/design/DAG0NrslxiM/YHdVdLQOt2poFI0yOj-qCQ/view",
         "type": "canva"
       }
-    ]
+    ],
+    "workedCount": 3
   },
   {
     "id": "service-in-app-purchases",
@@ -1005,6 +1006,7 @@
         "url": "https://www.canva.com/design/DAG0NrslxiM/YHdVdLQOt2poFI0yOj-qCQ/view",
         "type": "canva"
       }
-    ]
+    ],
+    "workedCount": 1
   }
 ]
