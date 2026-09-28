@@ -1775,11 +1775,16 @@
         </div>
 
         <!-- Footer -->
-        <div class="flex items-center justify-between pt-3 border-t border-[#1e2330]">
-          <span class="text-[11px] text-slate-500">Haz clic en "Seleccionar" en cualquier imagen para asignarla directamente a tu proyecto o formulario.</span>
-          <button type="button" onclick="window.ElyPortfolio.closeImageLibraryModal()" class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white font-semibold">
-            Cerrar Biblioteca
-          </button>
+        <div class="flex items-center justify-between gap-3 pt-3 border-t border-[#1e2330]">
+          <span class="text-[11px] text-slate-500">Para una galería puedes seleccionar varias imágenes y luego agregarlas todas juntas. Para campos únicos, "Seleccionar" se aplica inmediatamente.</span>
+          <div class="flex items-center gap-2 shrink-0">
+            <button id="library-gallery-apply-btn" type="button" onclick="window.ElyPortfolio.applySelectedGalleryLibraryImages()" class="hidden px-4 py-2 rounded-lg bg-emerald-400 hover:bg-emerald-300 text-xs text-black font-bold">
+              Agregar seleccionadas (0)
+            </button>
+            <button type="button" onclick="window.ElyPortfolio.closeImageLibraryModal()" class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white font-semibold">
+              Cerrar Biblioteca
+            </button>
+          </div>
         </div>
       </div>
     </div>
