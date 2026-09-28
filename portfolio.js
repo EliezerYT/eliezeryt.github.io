@@ -4300,6 +4300,59 @@
     if (customWrap) customWrap.classList.toggle('hidden', !styleEl || styleEl.value !== 'Custom');
   }
 
+  function normalizeLibraryFolder(folder) {
+    return String(folder || 'Profile').trim().replace(/\\/g, '/').replace(/^\/+|\/+$/g, '') || 'Profile';
+  }
+
+  function getLibraryImageFolder(image) {
+    if (image && image.folder) return normalizeLibraryFolder(image.folder);
+    if (image && image.category) return normalizeLibraryFolder(image.category);
+    if (image && typeof image.path === 'string') {
+      const match = image.path.match(/^\.\/assets\/images\/ely\/(.+)\/[^/]+$/i);
+      if (match) return normalizeLibraryFolder(match[1]);
+    }
+    return 'Profile';
+  }
+
+  function getLibraryMoveConfig(card) {
+    const select = card ? card.querySelector('.library-folder-move-select') : null;
+    const custom = card ? card.querySelector('.library-folder-move-custom') : null;
+    return select && select.value === 'Custom' ? normalizeLibraryFolder(custom ? custom.value : 'Custom') : normalizeLibraryFolder(select ? select.value : 'Profile');
+  }
+
+  async function moveCustomLibraryImageFolder(imageId, card) {
+    const image = customLibraryImages.find(item => item.id === imageId);
+    if (!image) return;
+    const newFolder = getLibraryMoveConfig(card);
+    if (newFolder === getLibraryImageFolder(image)) return;
+    const oldPath = typeof image.path === 'string' && image.path.startsWith('./assets/images/ely/') ? image.path.substring(2) : '';
+    if (oldPath && !getGithubToken()) {
+      showStatusNotification({ title: 'GitHub requerido', message: 'Configura tu token de GitHub para mover una imagen ya sincronizada.', type: 'error', icon: '⚠️' });
+      return;
+    }
+    try {
+      const extension = image.path && image.path.startsWith('data:image/') ? imageExtension(image.path) : ((image.name || '').match(/\.([a-z0-9]{2,5})$/i) || [, 'png'])[1];
+      const filename = sanitizeGithubImageName(image.name, extension);
+      const newPath = 'assets/images/ely/' + newFolder + '/' + filename;
+      if (oldPath) {
+        const existing = await getGithubFile(oldPath);
+        if (!existing || !existing.content) throw new Error('No se encontró la imagen actual en GitHub.');
+        await putGithubFile(newPath, existing.content.replace(/\s/g, ''), 'Move library image to ' + newFolder);
+        await deleteGithubImageFile(oldPath);
+      } else if (typeof image.path === 'string' && image.path.startsWith('data:image/')) {
+        await putGithubFile(newPath, dataUrlToBase64(image.path), 'Move library image to ' + newFolder);
+      }
+      image.folder = newFolder;
+      image.category = newFolder;
+      image.path = './' + newPath;
+      try { localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages.slice(0, 30))); } catch (e) {}
+      renderLibraryGrid();
+      showStatusNotification({ title: 'Carpeta actualizada', message: '"' + (image.name || 'Imagen') + '" movida a ' + newFolder + '.', type: 'success', icon: '📁' });
+    } catch (error) {
+      showStatusNotification({ title: 'No se pudo mover', message: error.message || 'Error moviendo la imagen.', type: 'error', icon: '⚠️' });
+    }
+  }
+
   function renderLibraryGrid(searchFilter = '') {
     const grid = document.getElementById('library-images-grid');
     const countEl = document.getElementById('library-images-count');
@@ -4332,8 +4385,8 @@
       const isCustom = String(img.id || '').startsWith('custom-');
       return `
         <div class="group relative flex flex-col overflow-hidden rounded-xl border border-[#232733] bg-[#0d1017] hover:border-amber-400/50 hover:shadow-lg hover:shadow-amber-500/5 transition-all p-2.5 text-left" data-library-img-path="${img.path}" data-library-img-name="${img.name || ''}">
-          <div class="relative aspect-video w-full overflow-hidden rounded-lg bg-[#141822] mb-2 border border-white/5 cursor-zoom-in library-preview-btn">
-            <img src="${img.path}" alt="${img.name || 'Imagen'}" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" onerror="this.src='./assets/images/ely/my-avatar.png'" />
+          <div class="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-[#141822] mb-2 border border-white/5 cursor-zoom-in library-preview-btn">
+            <img src="${img.path}" alt="${img.name || 'Imagen'}" class="h-full w-full object-contain p-1 transition-transform duration-300 group-hover:scale-105" onerror="this.src='./assets/images/ely/my-avatar.png'" />
             <span class="absolute top-1 left-1 rounded bg-black/80 px-1.5 py-0.5 text-[9px] font-mono text-amber-400 border border-amber-400/20 backdrop-blur-sm">
               ${img.category || 'Asset'}
             </span>
@@ -4376,6 +4429,23 @@
         e.stopPropagation();
         const card = this.closest('[data-library-img-path]');
         openLibraryImagePreview(card.getAttribute('data-library-img-path'), card.getAttribute('data-library-img-name'));
+      });
+    });
+
+    grid.querySelectorAll('.library-folder-move-select').forEach(select => {
+      select.addEventListener('change', function () {
+        const card = this.closest('[data-library-img-path]');
+        const custom = card ? card.querySelector('.library-folder-move-custom') : null;
+        if (custom) custom.classList.toggle('hidden', this.value !== 'Custom');
+      });
+    });
+
+    grid.querySelectorAll('.library-move-folder-btn').forEach(button => {
+      button.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const card = this.closest('[data-library-img-path]');
+        const imageId = filtered.find(img => img.path === card.getAttribute('data-library-img-path'))?.id;
+        if (imageId) moveCustomLibraryImageFolder(imageId, card);
       });
     });
 
