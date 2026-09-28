@@ -67,13 +67,14 @@
     "fullStory": "Desarrollé el juego \"En una goma\" de principio a fin, creando tanto la experiencia interactiva como su portal web promocional. Gestioné el frontend y backend en PHP junto a una base de datos personalizada para rankings y estadísticas de jugadores. El proyecto fusionó creatividad con rigor técnico para una comunidad masiva de seguidores.",
     "category": "juegos",
     "origin": "trabajado",
-    "clientOrTeam": "Capricornio Games & CapricornioTV",
+    "clientOrTeam": "CapricornioTV",
     "year": "2024 - 2025",
     "role": "Full Develop",
     "featured": true,
     "coverImage": "./assets/images/ely/icon-enunagoma.png",
     "galleryImages": [
-      "./assets/images/ely/icon-enunagoma.png"
+      "./assets/images/ely/icon-enunagoma.png",
+      "./assets/images/ely/MotoLoco/MotoLoco-En-Una-Goma.png"
     ],
     "youtubeVideo": "https://www.youtube.com/watch?v=F7P-RS2P1i0",
     "technologies": [
@@ -107,7 +108,8 @@
     "requirements": [],
     "playStoreUrl": "https://play.google.com/store/apps/details?id=com.CapricornioGames.enunagoma",
     "itchUrl": "",
-    "steamUrl": "https://store.steampowered.com/app/3137780/En_Una_Goma/?l=latam&curator_clanid=4777282"
+    "steamUrl": "https://store.steampowered.com/app/3137780/En_Una_Goma/?l=latam&curator_clanid=4777282",
+    "icon": "./assets/images/ely/AppLogo/MotoLocoLogo.png"
   },
   {
     "id": "dominican-power",
