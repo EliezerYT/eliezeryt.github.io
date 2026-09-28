@@ -1,5 +1,7 @@
 import { Project, ExperienceItem, SkillCategory, UserProfile, Testimonial, DeveloperService } from '../types/portfolio';
 import projectsData from './projects.json';
+import experiencesData from './experiences.json';
+import testimonialsData from './testimonials.json';
 
 export const initialProfile: UserProfile = {
   name: 'Eliezer Terrero',
@@ -23,99 +25,7 @@ export const initialProfile: UserProfile = {
 
 export const initialProjects: Project[] = (projectsData as unknown as Project[]) || [];
 
-export const experienceData: ExperienceItem[] = [
-  {
-    period: 'Feb 2025 — Presente',
-    role: 'Freelance Game Developer',
-    company: 'MoneyFight & Cesar',
-    location: 'Remoto',
-    description: 'Desarrollo en producción activa de un nuevo título confidencial de alto impacto para plataformas interactivas.',
-    highlights: [
-      'Diseño de mecánicas de juego principales y arquitectura de código modular.',
-      'Integración de sistemas de juego avanzados con Unity y C#.'
-    ],
-    technologies: ['Unity', 'C#', 'Game Architecture', 'Physics']
-  },
-  {
-    period: 'Ago 2024 — Ene 2025',
-    role: 'Freelance Game & Web Developer',
-    company: 'Capricornio Games (CapricornioTV)',
-    location: 'República Dominicana / Remoto',
-    description: 'Desarrollé íntegramente el juego "MotoLoco: En una goma" y creé su plataforma web promocional completa, gestionando frontend y backend con PHP y base de datos a medida.',
-    highlights: [
-      'Creación completa del videojuego de motocicletas y acrobacias para el influencer CapricornioTV.',
-      'Desarrollo del sitio web promocional con backend PHP y base de datos para seguimiento y descargas.',
-      'Proyecto que fusionó desarrollo de juegos y diseño web de alto impacto mediático.'
-    ],
-    technologies: ['Unity', 'C#', 'PHP', 'MySQL', 'Frontend Web', 'Game Tuning']
-  },
-  {
-    period: 'Ene 2022 — Ene 2024',
-    role: 'Freelance Game Developer',
-    company: 'CaribeAtomic',
-    location: 'Remoto',
-    description: 'Contribución en diversas áreas críticas de desarrollo de videojuegos, incluyendo beta testing, mejoras de demos y diseño de niveles.',
-    highlights: [
-      'Optimización de demos jugables y retroalimentación técnica en etapas beta.',
-      'Diseño y estructuración de niveles interactivos.',
-      'Integración de elementos de voz para potenciar la inmersión del jugador.'
-    ],
-    technologies: ['Unity', 'C#', 'Level Design', 'Voice Integration', 'Beta Testing']
-  },
-  {
-    period: 'Nov 2022 — Jul 2023',
-    role: 'Freelance Lead Game Developer',
-    company: 'MoneyFight',
-    location: 'Remoto',
-    description: 'Desarrollo integral de "MoneyFight Game", abarcando configuración de servidor, multijugador online, base de datos PHP y arte 2D.',
-    highlights: [
-      'Desarrollo de juego completo de punta a punta (gameplay, red, backend y arte).',
-      'Configuración de infraestructura de servidores y sincronización multijugador en tiempo real.',
-      'Gestión de base de datos PHP para cuentas de usuario y perfiles.'
-    ],
-    technologies: ['Unity', 'C#', 'Multiplayer Network', 'PHP', 'MySQL', '2D Art']
-  },
-  {
-    period: 'Nov 2022',
-    role: 'Game Developer (Bug Fixer & Optimization)',
-    company: 'SHL · Dominoes Republic',
-    location: 'Remoto',
-    description: 'Resolución de problemas críticos de rendimiento e interferencias de geolocalización en el juego de dominó competitivo.',
-    highlights: [
-      'Diagnóstico y resolución de bugs en el emparejamiento por geolocalización.',
-      'Estabilización de las reglas de juego y optimización de la experiencia de usuario.'
-    ],
-    technologies: ['Unity', 'C#', 'Geolocation Services', 'Profiling']
-  },
-  {
-    period: 'Nov 2021 — Feb 2022',
-    role: 'Freelance Game Developer (UI & Multijugador)',
-    company: 'DoGame · Dominican Power',
-    location: 'Remoto',
-    description: 'Renovación técnica integral: corrección de errores, cambio de orientación de juego, rediseño completo de UI e integración de Photon Multiplayer.',
-    highlights: [
-      'Implementación de Photon Multiplayer para partidas en línea de alta estabilidad.',
-      'Desarrollo del sistema completo de personalización de personajes y economía virtual.',
-      'Remake visual total de la interfaz de usuario para una experiencia moderna.'
-    ],
-    technologies: ['Unity', 'C#', 'Photon Network / PUN 2', 'UI Remake', 'Game Economy']
-  },
-  {
-    period: 'Oct 2019 — Dic 2021',
-    role: 'Freelance Game Developer',
-    company: 'Jobs Laru',
-    location: 'Remoto',
-    description: 'Desarrollo y mantenimiento de múltiples proyectos de videojuegos comerciales y herramientas:',
-    highlights: [
-      'Desarrollo completo del videojuego Simón (diseño e implementación 100%).',
-      'LEVA 3D: Sistema de construcción, tienda in-game, selector multijugador y subida a Google Play Store.',
-      'Fireball: Integración de jugabilidad, sistemas de anuncios publicitarios y mejoras continuas.',
-      'Dark Castle: Animaciones de combos, oleadas y sistemas de ataque.',
-      'GUGO & Xphera: Mejoras de animaciones, cajas de recompensa (loot boxes) y tienda.'
-    ],
-    technologies: ['Unity 2D & 3D', 'C#', 'Photon Multiplayer', 'AdMob', 'Google Play Store']
-  }
-];
+export const experienceData: ExperienceItem[] = (experiencesData as unknown as ExperienceItem[]) || [];
 
 export const skillCategories: SkillCategory[] = [
   {
@@ -181,15 +91,4 @@ export const developerServices: DeveloperService[] = [
   }
 ];
 
-export const clientTestimonials: Testimonial[] = [
-  {
-    name: 'Joselmin Carmona',
-    roleOrProject: 'Cliente de Aplicación',
-    content: 'Me siento sumamente satisfecho de haber trabajado mi aplicación con Eliezer; los resultados fueron mucho mejores de lo que esperaba y con un trato muy profesional.'
-  },
-  {
-    name: 'Jobs Laru',
-    roleOrProject: 'Estudio de Videojuegos / Colaborador Frecuente',
-    content: 'Al principio deposité toda mi confianza en el trabajo de Eliezer y no pudo haber mejor persona. Tuve excelentes resultados de desarrollo en todos los proyectos. Rápido, accesible y con gran nivel técnico.'
-  }
-];
+export const clientTestimonials: Testimonial[] = (testimonialsData as unknown as Testimonial[]) || [];

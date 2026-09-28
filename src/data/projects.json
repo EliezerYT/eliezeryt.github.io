@@ -11,11 +11,27 @@
     "role": "Lead Game Designer & Programador Principal",
     "featured": true,
     "coverImage": "/src/assets/images/ely/overdrivers-teaser.jpg",
-    "technologies": ["Unity 3D", "C#", "Vehicle Physics", "FMOD Audio", "Cinemachine", "Custom Shaders"],
+    "technologies": [
+      "Unity 3D",
+      "C#",
+      "Vehicle Physics",
+      "FMOD Audio",
+      "Cinemachine",
+      "Custom Shaders"
+    ],
     "metrics": [
-      { "label": "Estado", "value": "En Desarrollo Activo" },
-      { "label": "Teasers Oficiales", "value": "#1 y #2 en YouTube" },
-      { "label": "Colaboración", "value": "Soundtrack Original" }
+      {
+        "label": "Estado",
+        "value": "En Desarrollo Activo"
+      },
+      {
+        "label": "Teasers Oficiales",
+        "value": "#1 y #2 en YouTube"
+      },
+      {
+        "label": "Colaboración",
+        "value": "Soundtrack Original"
+      }
     ],
     "keyContributions": [
       "Implementación del modelo de físicas de vehículos con tracción en las cuatro ruedas y derrape asistido.",
@@ -24,9 +40,80 @@
       "Diseño de circuitos urbanos nocturnos con iluminación optimizada para tasas de cuadros estables."
     ],
     "links": [
-      { "label": "Ver Teaser #2 en YouTube", "url": "https://www.youtube.com/watch?v=PH6cK45nkto", "type": "video" },
-      { "label": "Colaboración Musical Cifra Slimk", "url": "https://www.youtube.com/watch?v=jA9kxcgnPmw", "type": "video" }
-    ]
+      {
+        "label": "Ver Teaser #2 en YouTube",
+        "url": "https://www.youtube.com/watch?v=PH6cK45nkto",
+        "type": "video"
+      },
+      {
+        "label": "Colaboración Musical Cifra Slimk",
+        "url": "https://www.youtube.com/watch?v=jA9kxcgnPmw",
+        "type": "video"
+      }
+    ],
+    "galleryImages": [
+      "/src/assets/images/ely/overdrivers-teaser.jpg"
+    ],
+    "youtubeVideo": "",
+    "requirements": []
+  },
+  {
+    "id": "proj-1790598970376",
+    "title": "[Copia] OverDrivers: Racing Game",
+    "tagline": "Juego de carreras y velocidad de alta adrenalina con banda sonora original",
+    "description": "Proyecto de carreras en 3D desarrollado por ElyDev, con físicas dinámicas de derrape, personalización de vehículos y colaboración musical con artistas urbanos en el soundtrack oficial.",
+    "fullStory": "OverDrivers representa mi proyecto insignia de carreras y acción. Diseñado con modelos de alta fidelidad, sistema de cámaras dinámicas de seguimiento y un pipeline de audio integrado que incluye colaboraciones oficiales con artistas musicales (canción \"Quieren Quitarme\" de Cifra Slimk). Cuenta con teasers oficiales en YouTube y optimización continua de rendimiento.",
+    "category": "juegos",
+    "origin": "propio",
+    "year": "2024 - 2025",
+    "role": "Lead Game Designer & Programador Principal",
+    "featured": true,
+    "coverImage": "/src/assets/images/ely/overdrivers-teaser.jpg",
+    "technologies": [
+      "Unity 3D",
+      "C#",
+      "Vehicle Physics",
+      "FMOD Audio",
+      "Cinemachine",
+      "Custom Shaders"
+    ],
+    "metrics": [
+      {
+        "label": "Estado",
+        "value": "En Desarrollo Activo"
+      },
+      {
+        "label": "Teasers Oficiales",
+        "value": "#1 y #2 en YouTube"
+      },
+      {
+        "label": "Colaboración",
+        "value": "Soundtrack Original"
+      }
+    ],
+    "keyContributions": [
+      "Implementación del modelo de físicas de vehículos con tracción en las cuatro ruedas y derrape asistido.",
+      "Sistema de sonido adaptativo con motores reactivos a RPM y cambios de marcha.",
+      "Dirección y edición de los teasers cinematográficos oficiales publicados en el canal de YouTube.",
+      "Diseño de circuitos urbanos nocturnos con iluminación optimizada para tasas de cuadros estables."
+    ],
+    "links": [
+      {
+        "label": "Ver Teaser #2 en YouTube",
+        "url": "https://www.youtube.com/watch?v=PH6cK45nkto",
+        "type": "video"
+      },
+      {
+        "label": "Colaboración Musical Cifra Slimk",
+        "url": "https://www.youtube.com/watch?v=jA9kxcgnPmw",
+        "type": "video"
+      }
+    ],
+    "galleryImages": [
+      "/src/assets/images/ely/overdrivers-teaser.jpg"
+    ],
+    "youtubeVideo": "",
+    "requirements": []
   },
   {
     "id": "en-una-goma",
@@ -41,11 +128,27 @@
     "role": "Freelance Lead Game Developer & Web Full-Stack",
     "featured": true,
     "coverImage": "/src/assets/images/ely/icon-enunagoma.png",
-    "technologies": ["Unity", "C#", "PHP", "MySQL", "Web Development", "Physics Tuning"],
+    "technologies": [
+      "Unity",
+      "C#",
+      "PHP",
+      "MySQL",
+      "Web Development",
+      "Physics Tuning"
+    ],
     "metrics": [
-      { "label": "Cliente", "value": "CapricornioTV" },
-      { "label": "Alcance", "value": "Audiencia Masiva" },
-      { "label": "Sistemas", "value": "Juego + Web + Backend" }
+      {
+        "label": "Cliente",
+        "value": "CapricornioTV"
+      },
+      {
+        "label": "Alcance",
+        "value": "Audiencia Masiva"
+      },
+      {
+        "label": "Sistemas",
+        "value": "Juego + Web + Backend"
+      }
     ],
     "keyContributions": [
       "Diseño y programación de las mecánicas de balance, caballitos (\"en una goma\") y control de aceleración.",
@@ -54,7 +157,11 @@
       "Optimización de texturas y consumo de memoria para compatibilidad en dispositivos Android gama media y baja."
     ],
     "links": [
-      { "label": "Ver Ficha en Canva", "url": "https://www.canva.com/design/DAHCkhIcWiA/6wdEoS2nzQ9AS30-C88Rqw/view", "type": "external" }
+      {
+        "label": "Ver Ficha en Canva",
+        "url": "https://www.canva.com/design/DAHCkhIcWiA/6wdEoS2nzQ9AS30-C88Rqw/view",
+        "type": "external"
+      }
     ]
   },
   {
@@ -70,11 +177,27 @@
     "role": "Freelance Game Developer (UI, Red & Gameplay)",
     "featured": true,
     "coverImage": "/src/assets/images/ely/icon-dominicanpower.png",
-    "technologies": ["Unity", "C#", "Photon Network", "Photon PUN 2", "UI/UX Redesign", "In-Game Economy"],
+    "technologies": [
+      "Unity",
+      "C#",
+      "Photon Network",
+      "Photon PUN 2",
+      "UI/UX Redesign",
+      "In-Game Economy"
+    ],
     "metrics": [
-      { "label": "Multijugador", "value": "Photon Online" },
-      { "label": "Rediseño UI", "value": "100% Remake" },
-      { "label": "Personalización", "value": "Inventario & Tienda" }
+      {
+        "label": "Multijugador",
+        "value": "Photon Online"
+      },
+      {
+        "label": "Rediseño UI",
+        "value": "100% Remake"
+      },
+      {
+        "label": "Personalización",
+        "value": "Inventario & Tienda"
+      }
     ],
     "keyContributions": [
       "Reemplazo y modernización de todo el pipeline de interfaz de usuario con flujo optimizado de navegación.",
@@ -83,7 +206,11 @@
       "Desarrollo del catálogo de customización de personajes y balance de economía virtual."
     ],
     "links": [
-      { "label": "Ver Ficha en Canva", "url": "https://www.canva.com/design/DAHCk6iQVwY/FlPYVFA3lew686sjP3Cyvw/view", "type": "external" }
+      {
+        "label": "Ver Ficha en Canva",
+        "url": "https://www.canva.com/design/DAHCk6iQVwY/FlPYVFA3lew686sjP3Cyvw/view",
+        "type": "external"
+      }
     ]
   },
   {
@@ -99,11 +226,25 @@
     "role": "Desarrollador de Aplicación Móvil",
     "featured": true,
     "coverImage": "/src/assets/images/ely/icon-telesancris.png",
-    "technologies": ["C# / Unity Mobile Tools", "HLS Video Streaming", "UI/UX Design", "Android Deployment"],
+    "technologies": [
+      "C# / Unity Mobile Tools",
+      "HLS Video Streaming",
+      "UI/UX Design",
+      "Android Deployment"
+    ],
     "metrics": [
-      { "label": "Plataforma", "value": "Mobile Android" },
-      { "label": "Streaming", "value": "Transmisión en Vivo" },
-      { "label": "Desarrollo", "value": "Proyecto Completo" }
+      {
+        "label": "Plataforma",
+        "value": "Mobile Android"
+      },
+      {
+        "label": "Streaming",
+        "value": "Transmisión en Vivo"
+      },
+      {
+        "label": "Desarrollo",
+        "value": "Proyecto Completo"
+      }
     ],
     "keyContributions": [
       "Integración del reproductor de vídeo HLS con auto-reconexión ante pérdidas de señal.",
@@ -111,7 +252,11 @@
       "Optimización de consumo de datos móviles y batería durante reproducciones prolongadas."
     ],
     "links": [
-      { "label": "Ver Ficha en Canva", "url": "https://www.canva.com/design/DAG0MVzjW94/j7VFCuqrg5BSzVhgUEqyTA/view", "type": "external" }
+      {
+        "label": "Ver Ficha en Canva",
+        "url": "https://www.canva.com/design/DAG0MVzjW94/j7VFCuqrg5BSzVhgUEqyTA/view",
+        "type": "external"
+      }
     ]
   },
   {
@@ -127,10 +272,22 @@
     "role": "Programador de Juego & Reskin",
     "featured": false,
     "coverImage": "/src/assets/images/ely/icon-yunonline.png",
-    "technologies": ["Unity", "C#", "Photon Network", "Sprite Pipeline", "Mobile Controls"],
+    "technologies": [
+      "Unity",
+      "C#",
+      "Photon Network",
+      "Sprite Pipeline",
+      "Mobile Controls"
+    ],
     "metrics": [
-      { "label": "Tipo", "value": "Colaboración / Spin-off" },
-      { "label": "Modo", "value": "Multijugador Rápido" }
+      {
+        "label": "Tipo",
+        "value": "Colaboración / Spin-off"
+      },
+      {
+        "label": "Modo",
+        "value": "Multijugador Rápido"
+      }
     ],
     "keyContributions": [
       "Desacople del minijuego como aplicación autónoma con arquitectura limpia.",
@@ -138,7 +295,11 @@
       "Sincronización de eventos de red y detección de ganador en partidas multijugador."
     ],
     "links": [
-      { "label": "Ver Ficha en Canva", "url": "https://www.canva.com/design/DAG0NNsRCC0/gjlQJP0_Fy8q-d42zMkRZA/view", "type": "external" }
+      {
+        "label": "Ver Ficha en Canva",
+        "url": "https://www.canva.com/design/DAG0NNsRCC0/gjlQJP0_Fy8q-d42zMkRZA/view",
+        "type": "external"
+      }
     ]
   },
   {
@@ -154,10 +315,22 @@
     "role": "Desarrollador Integral de Juego",
     "featured": false,
     "coverImage": "/src/assets/images/ely/icon-retopolis.jpg",
-    "technologies": ["Unity", "C#", "Modular Gameplay Architecture", "Mobile UI", "Audio Manager"],
+    "technologies": [
+      "Unity",
+      "C#",
+      "Modular Gameplay Architecture",
+      "Mobile UI",
+      "Audio Manager"
+    ],
     "metrics": [
-      { "label": "Estructura", "value": "Hub Multi-Juego" },
-      { "label": "Desarrollo", "value": "Integral (100%)" }
+      {
+        "label": "Estructura",
+        "value": "Hub Multi-Juego"
+      },
+      {
+        "label": "Desarrollo",
+        "value": "Integral (100%)"
+      }
     ],
     "keyContributions": [
       "Diseño modular de minijuegos para carga dinámica sin saturar la memoria RAM.",
@@ -165,7 +338,11 @@
       "Efectos visuales y respuesta táctil para maximizar la satisfacción del jugador."
     ],
     "links": [
-      { "label": "Ver Ficha en Canva", "url": "https://www.canva.com/design/DAHCkkao1s4/zyVN3YLet4Bukyi6TTFucg/view", "type": "external" }
+      {
+        "label": "Ver Ficha en Canva",
+        "url": "https://www.canva.com/design/DAHCkkao1s4/zyVN3YLet4Bukyi6TTFucg/view",
+        "type": "external"
+      }
     ]
   },
   {
@@ -180,10 +357,21 @@
     "role": "Creador & Desarrollador Principal",
     "featured": false,
     "coverImage": "/src/assets/images/ely/icon-helptuber.jpg",
-    "technologies": ["Unity UI / C#", "REST API Integration", "Data Serialization", "Productivity UX"],
+    "technologies": [
+      "Unity UI / C#",
+      "REST API Integration",
+      "Data Serialization",
+      "Productivity UX"
+    ],
     "metrics": [
-      { "label": "Objetivo", "value": "Asistente para YouTubers" },
-      { "label": "Tipo", "value": "Proyecto Propio" }
+      {
+        "label": "Objetivo",
+        "value": "Asistente para YouTubers"
+      },
+      {
+        "label": "Tipo",
+        "value": "Proyecto Propio"
+      }
     ],
     "keyContributions": [
       "Algoritmos de puntuación de títulos basados en longitud, palabras gancho y mayúsculas.",
@@ -191,7 +379,11 @@
       "Interfaz oscura y limpia diseñada para sesiones prolongadas de planificación."
     ],
     "links": [
-      { "label": "Ver Ficha en Canva", "url": "https://www.canva.com/design/DAHCk7lYFWk/tiI_f0hndpYcUp3XCdBKVg/view", "type": "external" }
+      {
+        "label": "Ver Ficha en Canva",
+        "url": "https://www.canva.com/design/DAHCk7lYFWk/tiI_f0hndpYcUp3XCdBKVg/view",
+        "type": "external"
+      }
     ]
   },
   {
@@ -207,17 +399,33 @@
     "role": "Freelance Game Developer (Bug Fixer & Optimization)",
     "featured": false,
     "coverImage": "/src/assets/images/ely/icon-dominoesrepublic.png",
-    "technologies": ["Unity", "C#", "Geolocation Services", "Board Game Logic", "Profiling"],
+    "technologies": [
+      "Unity",
+      "C#",
+      "Geolocation Services",
+      "Board Game Logic",
+      "Profiling"
+    ],
     "metrics": [
-      { "label": "Resolución", "value": "Bugs Críticos Solucionados" },
-      { "label": "Área", "value": "Geolocalización & Reglas" }
+      {
+        "label": "Resolución",
+        "value": "Bugs Críticos Solucionados"
+      },
+      {
+        "label": "Área",
+        "value": "Geolocalización & Reglas"
+      }
     ],
     "keyContributions": [
       "Depuración a fondo de la capa de geolocalización eliminando conflictos de red.",
       "Refactorización del cálculo de puntos y validación de fichas jugables en tiempo real."
     ],
     "links": [
-      { "label": "Ver Ficha en Canva", "url": "https://www.canva.com/design/DAG0NBKnGd8/vFlbYTjjWVnj48E-iLjBiA/view", "type": "external" }
+      {
+        "label": "Ver Ficha en Canva",
+        "url": "https://www.canva.com/design/DAG0NBKnGd8/vFlbYTjjWVnj48E-iLjBiA/view",
+        "type": "external"
+      }
     ]
   },
   {
@@ -232,17 +440,33 @@
     "role": "Desarrollador & Diseñador de Niveles",
     "featured": false,
     "coverImage": "/src/assets/images/ely/picon-aworld.png",
-    "technologies": ["Unity 2D", "C#", "2D Tilemaps", "Player Controller", "Sound Effects"],
+    "technologies": [
+      "Unity 2D",
+      "C#",
+      "2D Tilemaps",
+      "Player Controller",
+      "Sound Effects"
+    ],
     "metrics": [
-      { "label": "Género", "value": "Plataformas 2D" },
-      { "label": "Control", "value": "Físicas Ajustadas al Milímetro" }
+      {
+        "label": "Género",
+        "value": "Plataformas 2D"
+      },
+      {
+        "label": "Control",
+        "value": "Físicas Ajustadas al Milímetro"
+      }
     ],
     "keyContributions": [
       "Controlador de personaje 2D con coyote time, jump buffering y aceleración variable.",
       "Implementación de cámaras Cinemachine con zonas de confinamiento por nivel."
     ],
     "links": [
-      { "label": "Ver Ficha en Canva", "url": "https://www.canva.com/design/DAG0MF1rMQw/2JTfqiurWyJgWguk06b7UA/view", "type": "external" }
+      {
+        "label": "Ver Ficha en Canva",
+        "url": "https://www.canva.com/design/DAG0MF1rMQw/2JTfqiurWyJgWguk06b7UA/view",
+        "type": "external"
+      }
     ]
   },
   {
@@ -257,17 +481,33 @@
     "role": "Creador & Programador de Jugabilidad",
     "featured": false,
     "coverImage": "/src/assets/images/ely/picon-hellishF.png",
-    "technologies": ["Unity", "C#", "Particle Systems", "Score Management", "Arcade Loop"],
+    "technologies": [
+      "Unity",
+      "C#",
+      "Particle Systems",
+      "Score Management",
+      "Arcade Loop"
+    ],
     "metrics": [
-      { "label": "Estilo", "value": "Arcade de Reflejos" },
-      { "label": "Velocidad", "value": "Ritmo Dinámico Creciente" }
+      {
+        "label": "Estilo",
+        "value": "Arcade de Reflejos"
+      },
+      {
+        "label": "Velocidad",
+        "value": "Ritmo Dinámico Creciente"
+      }
     ],
     "keyContributions": [
       "Generador procedural de oleadas de proyectiles con patrones geométricos.",
       "Efectos de pantalla (screen shake, destellos) para un impacto sensorial contundente."
     ],
     "links": [
-      { "label": "Ver Ficha en Canva", "url": "https://www.canva.com/design/DAG0MBfNzv0/V_wjWT_qnxDu_W-t39kSHg/view", "type": "external" }
+      {
+        "label": "Ver Ficha en Canva",
+        "url": "https://www.canva.com/design/DAG0MBfNzv0/V_wjWT_qnxDu_W-t39kSHg/view",
+        "type": "external"
+      }
     ]
   },
   {
@@ -283,17 +523,33 @@
     "role": "Creador & Desarrollador de Red",
     "featured": false,
     "coverImage": "/src/assets/images/ely/picon-thespider.png",
-    "technologies": ["Unity", "Photon PUN 2", "C#", "Multiplayer Sync", "Lobby System"],
+    "technologies": [
+      "Unity",
+      "Photon PUN 2",
+      "C#",
+      "Multiplayer Sync",
+      "Lobby System"
+    ],
     "metrics": [
-      { "label": "Modo", "value": "Multijugador en Línea" },
-      { "label": "Red", "value": "Photon Network" }
+      {
+        "label": "Modo",
+        "value": "Multijugador en Línea"
+      },
+      {
+        "label": "Red",
+        "value": "Photon Network"
+      }
     ],
     "keyContributions": [
       "Sistema de creación de salas y emparejamiento automático por código.",
       "Sincronización suave de posiciones con interpolación y predicción de retardo."
     ],
     "links": [
-      { "label": "Ver Ficha en Canva", "url": "https://www.canva.com/design/DAG0MCJd1U0/qY3RQ3ugWYEIVYuZOHauJg/view", "type": "external" }
+      {
+        "label": "Ver Ficha en Canva",
+        "url": "https://www.canva.com/design/DAG0MCJd1U0/qY3RQ3ugWYEIVYuZOHauJg/view",
+        "type": "external"
+      }
     ]
   },
   {
@@ -308,17 +564,32 @@
     "role": "Diseñador de Físicas & Programador",
     "featured": false,
     "coverImage": "/src/assets/images/ely/picon-Rball.png",
-    "technologies": ["Unity 3D", "C#", "Rigidbody & Physics Materials", "Dynamic Camera"],
+    "technologies": [
+      "Unity 3D",
+      "C#",
+      "Rigidbody & Physics Materials",
+      "Dynamic Camera"
+    ],
     "metrics": [
-      { "label": "Motor de Físicas", "value": "Unity 3D PhysX" },
-      { "label": "Reto", "value": "Precisión & Equilibrio" }
+      {
+        "label": "Motor de Físicas",
+        "value": "Unity 3D PhysX"
+      },
+      {
+        "label": "Reto",
+        "value": "Precisión & Equilibrio"
+      }
     ],
     "keyContributions": [
       "Ajuste fino de aceleración, inercia angular y fricción para un control satisfactorio.",
       "Cámara orbital que acompaña fluidamente giros y caídas."
     ],
     "links": [
-      { "label": "Ver Ficha en Canva", "url": "https://www.canva.com/design/DAG0MKEi_ZM/xu3nXL1jueAwZXqBjPZQ-Q/view", "type": "external" }
+      {
+        "label": "Ver Ficha en Canva",
+        "url": "https://www.canva.com/design/DAG0MKEi_ZM/xu3nXL1jueAwZXqBjPZQ-Q/view",
+        "type": "external"
+      }
     ]
   },
   {
@@ -333,17 +604,32 @@
     "role": "Desarrollador Integral",
     "featured": false,
     "coverImage": "/src/assets/images/ely/picon-maddys.png",
-    "technologies": ["Unity 2D", "C#", "Animation Controllers", "Tilemap Design"],
+    "technologies": [
+      "Unity 2D",
+      "C#",
+      "Animation Controllers",
+      "Tilemap Design"
+    ],
     "metrics": [
-      { "label": "Tipo", "value": "Aventura 2D" },
-      { "label": "Arte", "value": "Animación Tradicional Integrada" }
+      {
+        "label": "Tipo",
+        "value": "Aventura 2D"
+      },
+      {
+        "label": "Arte",
+        "value": "Animación Tradicional Integrada"
+      }
     ],
     "keyContributions": [
       "Implementación del sistema de vida, daño y checkpoints.",
       "Diseño de mecánicas interactivas con el entorno (llaves, puertas, resortes)."
     ],
     "links": [
-      { "label": "Ver Ficha en Canva", "url": "https://www.canva.com/design/DAG0IFpYdNI/nNmvLL1L61rDTfBl8RWKuQ/view", "type": "external" }
+      {
+        "label": "Ver Ficha en Canva",
+        "url": "https://www.canva.com/design/DAG0IFpYdNI/nNmvLL1L61rDTfBl8RWKuQ/view",
+        "type": "external"
+      }
     ]
   },
   {
@@ -358,17 +644,33 @@
     "role": "Programador & Diseñador",
     "featured": false,
     "coverImage": "/src/assets/images/ely/picon-snakes.png",
-    "technologies": ["Unity", "C#", "Grid Logic", "AI Pathfinding", "Power-ups"],
+    "technologies": [
+      "Unity",
+      "C#",
+      "Grid Logic",
+      "AI Pathfinding",
+      "Power-ups"
+    ],
     "metrics": [
-      { "label": "IA", "value": "Enemigos Autónomos" },
-      { "label": "Estilo", "value": "Snake Battle Arena" }
+      {
+        "label": "IA",
+        "value": "Enemigos Autónomos"
+      },
+      {
+        "label": "Estilo",
+        "value": "Snake Battle Arena"
+      }
     ],
     "keyContributions": [
       "Lógica de detección de colisiones corporales por segmentos sin fallos de precisión.",
       "Sistema de IA que calcula rutas de intercepción hacia los alimentos más cercanos."
     ],
     "links": [
-      { "label": "Ver Ficha en Canva", "url": "https://www.canva.com/design/DAG0IadlXmc/HB7dfaGUkaMH-D7-kC5fDA/view", "type": "external" }
+      {
+        "label": "Ver Ficha en Canva",
+        "url": "https://www.canva.com/design/DAG0IadlXmc/HB7dfaGUkaMH-D7-kC5fDA/view",
+        "type": "external"
+      }
     ]
   },
   {
@@ -383,16 +685,28 @@
     "role": "Desarrollador",
     "featured": false,
     "coverImage": "/src/assets/images/ely/picon-peace.png",
-    "technologies": ["Unity", "C#", "Atmospheric Lighting", "Touch Controls"],
+    "technologies": [
+      "Unity",
+      "C#",
+      "Atmospheric Lighting",
+      "Touch Controls"
+    ],
     "metrics": [
-      { "label": "Enfoque", "value": "Casual & Relax" }
+      {
+        "label": "Enfoque",
+        "value": "Casual & Relax"
+      }
     ],
     "keyContributions": [
       "Optimización de draw calls para ejecución ultrarrápida.",
       "Sistemas de sonido ambiental estéreo inmersivo."
     ],
     "links": [
-      { "label": "Ver Ficha en Canva", "url": "https://www.canva.com/design/DAG0MJdu2og/XTAwznoKYCso9oa_41NnHg/view", "type": "external" }
+      {
+        "label": "Ver Ficha en Canva",
+        "url": "https://www.canva.com/design/DAG0MJdu2og/XTAwznoKYCso9oa_41NnHg/view",
+        "type": "external"
+      }
     ]
   },
   {
@@ -415,11 +729,26 @@
       "/src/assets/images/ely/icon-inapppurchase.png",
       "/src/assets/images/ely/icon-soundsystempng.png"
     ],
-    "technologies": ["Google AdMob", "Unity Ads", "Mediation SDKs", "C# Event Callbacks", "Google Play Policy"],
+    "technologies": [
+      "Google AdMob",
+      "Unity Ads",
+      "Mediation SDKs",
+      "C# Event Callbacks",
+      "Google Play Policy"
+    ],
     "metrics": [
-      { "label": "Precio Fijo", "value": "$80 USD" },
-      { "label": "Formatos", "value": "Banner, Interstitial & Rewarded" },
-      { "label": "Plataformas", "value": "Android / iOS / Unity" }
+      {
+        "label": "Precio Fijo",
+        "value": "$80 USD"
+      },
+      {
+        "label": "Formatos",
+        "value": "Banner, Interstitial & Rewarded"
+      },
+      {
+        "label": "Plataformas",
+        "value": "Android / iOS / Unity"
+      }
     ],
     "keyContributions": [
       "Configuración completa de IDs de anuncios y modo de pruebas (Test Ads) para evitar sanciones de Google.",
@@ -434,7 +763,11 @@
       "Acceso al proyecto vía repositorio de GitHub o paquete .unitypackage."
     ],
     "links": [
-      { "label": "Ver Presentación en Canva (Slides)", "url": "https://www.canva.com/design/DAG0NrslxiM/YHdVdLQOt2poFI0yOj-qCQ/view", "type": "canva" }
+      {
+        "label": "Ver Presentación en Canva (Slides)",
+        "url": "https://www.canva.com/design/DAG0NrslxiM/YHdVdLQOt2poFI0yOj-qCQ/view",
+        "type": "canva"
+      }
     ]
   },
   {
@@ -456,11 +789,26 @@
       "/src/assets/images/ely/icon-inapppurchase.png",
       "/src/assets/images/ely/icon-appads.png"
     ],
-    "technologies": ["Unity IAP", "Google Play Billing", "Apple StoreKit", "C# State Manager", "Data Encryption"],
+    "technologies": [
+      "Unity IAP",
+      "Google Play Billing",
+      "Apple StoreKit",
+      "C# State Manager",
+      "Data Encryption"
+    ],
     "metrics": [
-      { "label": "Precio Fijo", "value": "$80 USD" },
-      { "label": "Seguridad", "value": "Receipt Validation" },
-      { "label": "Compatibilidad", "value": "Google Play & App Store" }
+      {
+        "label": "Precio Fijo",
+        "value": "$80 USD"
+      },
+      {
+        "label": "Seguridad",
+        "value": "Receipt Validation"
+      },
+      {
+        "label": "Compatibilidad",
+        "value": "Google Play & App Store"
+      }
     ],
     "keyContributions": [
       "Configuración de catálogo de productos en Google Play Console / App Store Connect.",
@@ -475,7 +823,11 @@
       "Keystore de producción (en caso de que el juego ya esté publicado en la tienda)."
     ],
     "links": [
-      { "label": "Ver Presentación en Canva (Slides)", "url": "https://www.canva.com/design/DAHCkjRi0ls/YmC7BlfJ8XV_C34xoBTw3g/view", "type": "canva" }
+      {
+        "label": "Ver Presentación en Canva (Slides)",
+        "url": "https://www.canva.com/design/DAHCkjRi0ls/YmC7BlfJ8XV_C34xoBTw3g/view",
+        "type": "canva"
+      }
     ]
   },
   {
@@ -497,11 +849,26 @@
       "/src/assets/images/ely/icon-soundsystempng.png",
       "/src/assets/images/ely/overdrivers-teaser.jpg"
     ],
-    "technologies": ["Unity AudioSource", "AudioMixer", "FMOD Integration", "PlayerPrefs Sound Persistence", "C#"],
+    "technologies": [
+      "Unity AudioSource",
+      "AudioMixer",
+      "FMOD Integration",
+      "PlayerPrefs Sound Persistence",
+      "C#"
+    ],
     "metrics": [
-      { "label": "Precio Fijo", "value": "$50 USD" },
-      { "label": "Entrega Rápida", "value": "24 a 48 Horas" },
-      { "label": "Canales", "value": "Master, Music & SFX" }
+      {
+        "label": "Precio Fijo",
+        "value": "$50 USD"
+      },
+      {
+        "label": "Entrega Rápida",
+        "value": "24 a 48 Horas"
+      },
+      {
+        "label": "Canales",
+        "value": "Master, Music & SFX"
+      }
     ],
     "keyContributions": [
       "Sound Manager Singleton con métodos PlaySFX(clip) y PlayMusic(clip, fadeDuration).",
@@ -515,7 +882,11 @@
       "Proyecto de Unity donde se importará y configurará el Sound Manager."
     ],
     "links": [
-      { "label": "Ver Presentación en Canva (Slides)", "url": "https://www.canva.com/design/DAG0eNukPlg/6Rbu0zCNNBiQZp2IjRZzyQ/view", "type": "canva" }
+      {
+        "label": "Ver Presentación en Canva (Slides)",
+        "url": "https://www.canva.com/design/DAG0eNukPlg/6Rbu0zCNNBiQZp2IjRZzyQ/view",
+        "type": "canva"
+      }
     ]
   },
   {
@@ -538,11 +909,26 @@
       "/src/assets/images/ely/icon-yunonline.png",
       "/src/assets/images/ely/picon-thespider.png"
     ],
-    "technologies": ["Photon PUN 2", "Photon Voice", "C# Network Streams", "Multiplayer Interpolation", "Lobby System"],
+    "technologies": [
+      "Photon PUN 2",
+      "Photon Voice",
+      "C# Network Streams",
+      "Multiplayer Interpolation",
+      "Lobby System"
+    ],
     "metrics": [
-      { "label": "Precio", "value": "$120 USD" },
-      { "label": "Capacidad", "value": "Salas & Matchmaking" },
-      { "label": "Latencia", "value": "Interpolación Suave" }
+      {
+        "label": "Precio",
+        "value": "$120 USD"
+      },
+      {
+        "label": "Capacidad",
+        "value": "Salas & Matchmaking"
+      },
+      {
+        "label": "Latencia",
+        "value": "Interpolación Suave"
+      }
     ],
     "keyContributions": [
       "Sistema de creación y unión a salas públicas o privadas por código.",
@@ -556,7 +942,11 @@
       "Mecánicas centrales del juego definidas (ej. disparos, movimiento en arena, carreras)."
     ],
     "links": [
-      { "label": "Ver Ficha en Canva", "url": "https://www.canva.com/design/DAHCk6iQVwY/FlPYVFA3lew686sjP3Cyvw/view", "type": "canva" }
+      {
+        "label": "Ver Ficha en Canva",
+        "url": "https://www.canva.com/design/DAHCk6iQVwY/FlPYVFA3lew686sjP3Cyvw/view",
+        "type": "canva"
+      }
     ]
   },
   {
@@ -579,11 +969,26 @@
       "/src/assets/images/ely/picon-aworld.png",
       "/src/assets/images/ely/picon-Rball.png"
     ],
-    "technologies": ["Unity 2D & 3D", "C# Programming", "Game Architecture", "Debugging", "Live Screen Share"],
+    "technologies": [
+      "Unity 2D & 3D",
+      "C# Programming",
+      "Game Architecture",
+      "Debugging",
+      "Live Screen Share"
+    ],
     "metrics": [
-      { "label": "Tarifa", "value": "$20 USD / hora" },
-      { "label": "Modalidad", "value": "1 a 1 en Vivo" },
-      { "label": "Nivel", "value": "Principiante a Intermedio" }
+      {
+        "label": "Tarifa",
+        "value": "$20 USD / hora"
+      },
+      {
+        "label": "Modalidad",
+        "value": "1 a 1 en Vivo"
+      },
+      {
+        "label": "Nivel",
+        "value": "Principiante a Intermedio"
+      }
     ],
     "keyContributions": [
       "Clases prácticas con código real y resolución de dudas en vivo.",
@@ -598,7 +1003,11 @@
       "Lista de dudas o proyecto personal sobre el cual quieras avanzar en clase."
     ],
     "links": [
-      { "label": "Ver Información en Canva", "url": "https://www.canva.com/design/DAG0NrslxiM/YHdVdLQOt2poFI0yOj-qCQ/view", "type": "canva" }
+      {
+        "label": "Ver Información en Canva",
+        "url": "https://www.canva.com/design/DAG0NrslxiM/YHdVdLQOt2poFI0yOj-qCQ/view",
+        "type": "canva"
+      }
     ]
   },
   {
@@ -620,11 +1029,26 @@
       "/src/assets/images/ely/icon-appads.png",
       "/src/assets/images/ely/icon-inapppurchase.png"
     ],
-    "technologies": ["Google Play Console", "Unity IAP", "Google AdMob", "Android App Bundles (.aab)", "Keystore Security"],
+    "technologies": [
+      "Google Play Console",
+      "Unity IAP",
+      "Google AdMob",
+      "Android App Bundles (.aab)",
+      "Keystore Security"
+    ],
     "metrics": [
-      { "label": "Tarifa", "value": "$25 USD / hora" },
-      { "label": "Enfoque", "value": "Lanzamiento Comercial" },
-      { "label": "Resultado", "value": "Juego Publicado" }
+      {
+        "label": "Tarifa",
+        "value": "$25 USD / hora"
+      },
+      {
+        "label": "Enfoque",
+        "value": "Lanzamiento Comercial"
+      },
+      {
+        "label": "Resultado",
+        "value": "Juego Publicado"
+      }
     ],
     "keyContributions": [
       "Paso a paso para crear y firmar tu aplicación para Google Play Store.",
@@ -638,7 +1062,11 @@
       "Conexión estable a internet para sesión por Discord / Google Meet."
     ],
     "links": [
-      { "label": "Ver Información en Canva", "url": "https://www.canva.com/design/DAG0NrslxiM/YHdVdLQOt2poFI0yOj-qCQ/view", "type": "canva" }
+      {
+        "label": "Ver Información en Canva",
+        "url": "https://www.canva.com/design/DAG0NrslxiM/YHdVdLQOt2poFI0yOj-qCQ/view",
+        "type": "canva"
+      }
     ]
   },
   {
@@ -660,11 +1088,26 @@
       "/src/assets/images/ely/icon-dominicanpower.png",
       "/src/assets/images/ely/picon-thespider.png"
     ],
-    "technologies": ["Photon PUN 2", "Unity C#", "Network RPCs", "Lobby & Room Management", "Smooth Interpolation"],
+    "technologies": [
+      "Photon PUN 2",
+      "Unity C#",
+      "Network RPCs",
+      "Lobby & Room Management",
+      "Smooth Interpolation"
+    ],
     "metrics": [
-      { "label": "Tarifa", "value": "$25 USD / hora" },
-      { "label": "Enfoque", "value": "Arquitectura Online" },
-      { "label": "Tecnología", "value": "Photon Network" }
+      {
+        "label": "Tarifa",
+        "value": "$25 USD / hora"
+      },
+      {
+        "label": "Enfoque",
+        "value": "Arquitectura Online"
+      },
+      {
+        "label": "Tecnología",
+        "value": "Photon Network"
+      }
     ],
     "keyContributions": [
       "Entendimiento profundo de RPCs y Custom Properties de Photon.",
@@ -678,7 +1121,11 @@
       "Discord para llamada en vivo y visualización compartida de código."
     ],
     "links": [
-      { "label": "Ver Ficha en Canva", "url": "https://www.canva.com/design/DAHCk6iQVwY/FlPYVFA3lew686sjP3Cyvw/view", "type": "canva" }
+      {
+        "label": "Ver Ficha en Canva",
+        "url": "https://www.canva.com/design/DAHCk6iQVwY/FlPYVFA3lew686sjP3Cyvw/view",
+        "type": "canva"
+      }
     ]
   }
 ]

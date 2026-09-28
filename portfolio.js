@@ -2097,14 +2097,28 @@
   function deleteTestimonial(testimonialId) {
     const target = satisfiedClients.find(c => c.id === testimonialId);
     if (!target) return;
-    if (confirm('¿Eliminar el testimonio de "' + target.name + '"?')) {
-      satisfiedClients = satisfiedClients.filter(c => c.id !== testimonialId);
-      try {
-        localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients));
-      } catch (e) {}
-      renderTestimonialsPreview();
-      renderSatisfiedClientsModalList();
-    }
+    showConfirmModal({
+      title: '¿Eliminar Testimonio?',
+      message: `¿Estás seguro de eliminar el testimonio de "${target.name}"? Los cambios se guardarán automáticamente en los archivos (src/data/testimonials.json).`,
+      icon: '💬',
+      confirmText: 'Sí, Eliminar Testimonio',
+      danger: true,
+      onConfirm: function () {
+        satisfiedClients = satisfiedClients.filter(c => c.id !== testimonialId);
+        try {
+          localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients));
+        } catch (e) {}
+        renderTestimonialsPreview();
+        renderSatisfiedClientsModalList();
+        syncTestimonialsWithBackend(satisfiedClients);
+        showStatusNotification({
+          title: 'Testimonio Eliminado',
+          message: `El testimonio de "${target.name}" ha sido eliminado y guardado.`,
+          type: 'info',
+          icon: '🗑️'
+        });
+      }
+    });
   }
 
   let editingTestimonialId = null;
@@ -2217,6 +2231,7 @@
     closeTestimonialModal();
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
+    syncTestimonialsWithBackend(satisfiedClients);
     showStatusNotification({
       title: editingTestimonialId ? 'Testimonio Actualizado' : 'Testimonio Guardado',
       message: `El testimonio de "${name}" se guardó exitosamente.`,
@@ -2500,19 +2515,26 @@
   }
 
   function deleteFeedbackCode(codeStr) {
-    if (confirm('¿Eliminar el código ' + codeStr + '?')) {
-      feedbackCodes = feedbackCodes.filter(c => c.code.toUpperCase() !== codeStr.toUpperCase());
-      try {
-        localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes));
-      } catch (err) {}
-      renderFeedbackCodesList();
-      showStatusNotification({
-        title: 'Código Eliminado',
-        message: `El código "${codeStr}" ha sido eliminado del sistema.`,
-        type: 'warning',
-        icon: '🗑️'
-      });
-    }
+    showConfirmModal({
+      title: '¿Eliminar Código de Feedback?',
+      message: `¿Estás seguro de eliminar el código "${codeStr}"? No se podrá reutilizar.`,
+      icon: '🔑',
+      confirmText: 'Sí, Eliminar Código',
+      danger: true,
+      onConfirm: function () {
+        feedbackCodes = feedbackCodes.filter(c => c.code.toUpperCase() !== codeStr.toUpperCase());
+        try {
+          localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes));
+        } catch (err) {}
+        renderFeedbackCodesList();
+        showStatusNotification({
+          title: 'Código Eliminado',
+          message: `El código "${codeStr}" ha sido eliminado del sistema.`,
+          type: 'warning',
+          icon: '🗑️'
+        });
+      }
+    });
   }
 
   function copyFeedbackLink(codeStr) {
@@ -2811,18 +2833,71 @@
     });
   }
 
+  // Modal de Confirmación Moderno (Reemplaza confirm nativo bloqueado en iframes)
+  let activeConfirmCallback = null;
+
+  function showConfirmModal(options) {
+    const { title, message, icon = '🗑️', confirmText = 'Sí, Eliminar', danger = true, onConfirm } = options || {};
+    activeConfirmCallback = onConfirm;
+
+    const modal = document.getElementById('confirm-action-modal');
+    if (!modal) {
+      if (typeof onConfirm === 'function') onConfirm();
+      return;
+    }
+
+    const titleEl = document.getElementById('confirm-modal-title');
+    const msgEl = document.getElementById('confirm-modal-message');
+    const iconEl = document.getElementById('confirm-modal-icon');
+    const actionBtn = document.getElementById('confirm-modal-action-btn');
+
+    if (titleEl) titleEl.textContent = title || 'Confirmar Acción';
+    if (msgEl) msgEl.textContent = message || '¿Estás seguro de realizar esta acción?';
+    if (iconEl) iconEl.textContent = icon;
+    if (actionBtn) {
+      actionBtn.textContent = confirmText;
+      actionBtn.className = danger
+        ? 'px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-xs text-white font-bold transition-colors shadow-lg shadow-red-600/30 cursor-pointer'
+        : 'px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-xs text-black font-bold transition-colors shadow-lg shadow-amber-400/30 cursor-pointer';
+    }
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeConfirmModal() {
+    const modal = document.getElementById('confirm-action-modal');
+    if (modal) modal.classList.add('hidden');
+    document.body.style.overflow = '';
+    activeConfirmCallback = null;
+  }
+
   // 13. Eliminar Proyecto
   function deleteProject(projectId) {
     const target = projects.find(p => p.id === projectId);
     if (!target) return;
-    if (confirm('¿Estás seguro de eliminar el cuadro de información "' + target.title + '"?')) {
-      projects = projects.filter(p => p.id !== projectId);
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-      } catch (err) {}
-      renderProjectsGrid();
-      syncProjectsWithBackend(projects);
-    }
+
+    showConfirmModal({
+      title: '¿Eliminar Proyecto / Ficha?',
+      message: `¿Estás seguro de eliminar el cuadro de información "${target.title}"? Los cambios se guardarán automáticamente en los archivos (src/data/projects.json).`,
+      icon: '🗑️',
+      confirmText: 'Sí, Eliminar Proyecto',
+      danger: true,
+      onConfirm: function () {
+        projects = projects.filter(p => p.id !== projectId);
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+        } catch (err) {}
+        renderProjectsGrid();
+        syncProjectsWithBackend(projects);
+        showStatusNotification({
+          title: 'Proyecto Eliminado',
+          message: `"${target.title}" ha sido eliminado y los archivos fueron actualizados.`,
+          type: 'info',
+          icon: '🗑️'
+        });
+      }
+    });
   }
 
   // 14. Modal para Editar Proyecto Existente (Solo moderador)
@@ -3155,6 +3230,7 @@
     } catch (e) {}
 
     renderExperiences();
+    syncExperiencesWithBackend(experiences);
     showStatusNotification({
       title: 'Posición Actualizada',
       message: `Se reordenó la experiencia "${experiences[newIndex].title}".`,
@@ -3183,6 +3259,7 @@
     } catch (e) {}
 
     renderExperiences();
+    syncExperiencesWithBackend(experiences);
     showStatusNotification({
       title: 'Experiencia Duplicada',
       message: `Se ha duplicado la experiencia "${exp.title}".`,
@@ -3194,13 +3271,28 @@
   function deleteExperience(expId) {
     const exp = experiences.find(e => e.id === expId);
     if (!exp) return;
-    if (confirm('¿Eliminar la experiencia "' + exp.title + '" en ' + exp.company + '?')) {
-      experiences = experiences.filter(e => e.id !== expId);
-      try {
-        localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences));
-      } catch (e) {}
-      renderExperiences();
-    }
+
+    showConfirmModal({
+      title: '¿Eliminar Experiencia Laboral?',
+      message: `¿Estás seguro de eliminar la trayectoria "${exp.title}" en "${exp.company}"? Los cambios se guardarán automáticamente en src/data/experiences.json.`,
+      icon: '💼',
+      confirmText: 'Sí, Eliminar Experiencia',
+      danger: true,
+      onConfirm: function () {
+        experiences = experiences.filter(e => e.id !== expId);
+        try {
+          localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences));
+        } catch (e) {}
+        renderExperiences();
+        syncExperiencesWithBackend(experiences);
+        showStatusNotification({
+          title: 'Experiencia Eliminada',
+          message: `"${exp.title}" ha sido eliminada y guardada en el archivo.`,
+          type: 'info',
+          icon: '🗑️'
+        });
+      }
+    });
   }
 
   let editingExpId = null;
@@ -3215,15 +3307,32 @@
     const titleEl = document.getElementById('experience-modal-title');
     if (titleEl) titleEl.textContent = '+ Agregar Experiencia Laboral & Contrato';
 
-    document.getElementById('exp-form-id').value = '';
-    document.getElementById('exp-form-title').value = '';
-    document.getElementById('exp-form-company').value = '';
-    document.getElementById('exp-form-location').value = 'Remoto';
-    document.getElementById('exp-form-period').value = '';
-    document.getElementById('exp-form-date').value = new Date().toISOString().split('T')[0];
-    document.getElementById('exp-form-color').value = 'text-amber-400';
-    document.getElementById('exp-form-desc').value = '';
-    document.getElementById('exp-form-techs').value = 'Unity, C#';
+    const setVal = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    };
+
+    setVal('exp-form-id', '');
+    setVal('exp-form-title', '');
+    setVal('exp-form-company', '');
+    setVal('exp-form-location', 'Remoto / Rep. Dominicana');
+    const today = new Date().toISOString().split('T')[0];
+    setVal('exp-form-start-date', today);
+    setVal('exp-form-end-date', '');
+    setVal('exp-form-period', 'Presente');
+    setVal('exp-form-color', 'text-amber-400');
+    setVal('exp-form-desc', '');
+    setVal('exp-form-techs', 'Unity, C#');
+
+    const currentCheck = document.getElementById('exp-form-current');
+    const endInput = document.getElementById('exp-form-end-date');
+    if (currentCheck) {
+      currentCheck.checked = true;
+    }
+    if (endInput) {
+      endInput.disabled = true;
+      endInput.style.opacity = '0.4';
+    }
 
     if (modal) {
       modal.classList.remove('hidden');
@@ -3244,15 +3353,32 @@
     const titleEl = document.getElementById('experience-modal-title');
     if (titleEl) titleEl.textContent = '✏️ Editar Experiencia Laboral & Contrato';
 
-    document.getElementById('exp-form-id').value = exp.id;
-    document.getElementById('exp-form-title').value = exp.title || '';
-    document.getElementById('exp-form-company').value = exp.company || '';
-    document.getElementById('exp-form-location').value = exp.location || '';
-    document.getElementById('exp-form-period').value = exp.period || '';
-    document.getElementById('exp-form-date').value = exp.startDate || '';
-    document.getElementById('exp-form-color').value = exp.color || 'text-amber-400';
-    document.getElementById('exp-form-desc').value = exp.description || '';
-    document.getElementById('exp-form-techs').value = (exp.technologies || []).join(', ');
+    const setVal = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    };
+
+    setVal('exp-form-id', exp.id || '');
+    setVal('exp-form-title', exp.title || '');
+    setVal('exp-form-company', exp.company || '');
+    setVal('exp-form-location', exp.location || '');
+    setVal('exp-form-start-date', exp.startDate || '');
+    setVal('exp-form-end-date', exp.endDate || '');
+    setVal('exp-form-period', exp.period || '');
+    setVal('exp-form-color', exp.color || 'text-amber-400');
+    setVal('exp-form-desc', exp.description || '');
+    setVal('exp-form-techs', (exp.technologies || []).join(', '));
+
+    const currentCheck = document.getElementById('exp-form-current');
+    const endInput = document.getElementById('exp-form-end-date');
+    const isCurrent = !exp.endDate || (exp.period && exp.period.toLowerCase().includes('presente'));
+    if (currentCheck) {
+      currentCheck.checked = !!isCurrent;
+    }
+    if (endInput) {
+      endInput.disabled = !!isCurrent;
+      endInput.style.opacity = isCurrent ? '0.4' : '1';
+    }
 
     if (modal) {
       modal.classList.remove('hidden');
@@ -3268,16 +3394,28 @@
   }
 
   function handleExperienceSubmit(e) {
-    e.preventDefault();
-    const title = document.getElementById('exp-form-title').value.trim();
-    const company = document.getElementById('exp-form-company').value.trim();
-    const location = document.getElementById('exp-form-location').value.trim();
-    const period = document.getElementById('exp-form-period').value.trim();
-    const startDate = document.getElementById('exp-form-date').value;
-    const color = document.getElementById('exp-form-color').value;
-    const desc = document.getElementById('exp-form-desc').value.trim();
-    const techsRaw = document.getElementById('exp-form-techs').value;
+    if (e && e.preventDefault) e.preventDefault();
+
+    const getVal = (id) => {
+      const el = document.getElementById(id);
+      return el ? el.value.trim() : '';
+    };
+
+    const title = getVal('exp-form-title');
+    const company = getVal('exp-form-company');
+    const location = getVal('exp-form-location');
+    const startDate = getVal('exp-form-start-date');
+    const endDate = getVal('exp-form-end-date');
+    const isCurrent = document.getElementById('exp-form-current')?.checked || false;
+    let period = getVal('exp-form-period');
+    const color = getVal('exp-form-color') || 'text-amber-400';
+    const desc = getVal('exp-form-desc');
+    const techsRaw = getVal('exp-form-techs');
     const techs = techsRaw.split(',').map(s => s.trim()).filter(Boolean);
+
+    if (!period) {
+      period = isCurrent ? 'Presente' : (startDate ? startDate : '');
+    }
 
     if (editingExpId) {
       const exp = experiences.find(e => e.id === editingExpId);
@@ -3285,8 +3423,9 @@
         exp.title = title;
         exp.company = company;
         exp.location = location;
+        exp.startDate = startDate;
+        exp.endDate = isCurrent ? '' : endDate;
         exp.period = period;
-        exp.startDate = startDate || exp.startDate;
         exp.color = color;
         exp.description = desc;
         exp.technologies = techs;
@@ -3297,8 +3436,9 @@
         title: title,
         company: company,
         location: location,
+        startDate: startDate,
+        endDate: isCurrent ? '' : endDate,
         period: period,
-        startDate: startDate || new Date().toISOString().split('T')[0],
         color: color,
         description: desc,
         technologies: techs
@@ -3312,9 +3452,10 @@
 
     closeExperienceModal();
     renderExperiences();
+    syncExperiencesWithBackend(experiences);
     showStatusNotification({
       title: editingExpId ? 'Experiencia Editada' : 'Experiencia Guardada',
-      message: `"${title}" en ${company} se guardó exitosamente en la trayectoria.`,
+      message: `"${title}" en ${company} guardada y sincronizada en src/data/experiences.json.`,
       type: 'success',
       icon: '💼'
     });
@@ -3322,40 +3463,266 @@
 
   // 16. Restablecer datos originales
   function resetSampleData() {
-    if (confirm('¿Restablecer los proyectos y servicios originales de muestra?')) {
-      projects = JSON.parse(JSON.stringify(initialProjects));
-      try {
-        localStorage.removeItem(STORAGE_KEY);
-      } catch (err) {}
-      renderProjectsGrid();
-      syncProjectsWithBackend(projects);
-      alert('Proyectos restablecidos.');
-    }
+    showConfirmModal({
+      title: '¿Restablecer Proyectos Originales?',
+      message: 'Esta acción restablecerá el catálogo a la muestra inicial y sincronizará el archivo src/data/projects.json.',
+      icon: '🔄',
+      confirmText: 'Sí, Restablecer',
+      danger: false,
+      onConfirm: function () {
+        projects = JSON.parse(JSON.stringify(initialProjects));
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch (err) {}
+        renderProjectsGrid();
+        syncProjectsWithBackend(projects);
+        showStatusNotification({
+          title: 'Datos Restablecidos',
+          message: 'Los proyectos han sido restablecidos a los valores predeterminados y guardados en el archivo.',
+          type: 'info',
+          icon: '🔄'
+        });
+      }
+    });
   }
 
-  // Sincronización automática de proyectos con el backend (src/data/projects.json)
+  // Sincronización completa con el backend y almacenamiento en disco
   function syncProjectsWithBackend(list) {
     if (typeof fetch === 'function') {
       fetch('/api/projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projects: list })
-      }).catch(function () {});
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.success) {
+          updateSyncModalCounters();
+          console.log('[PROYECTOS GUARDADOS]', data.message);
+        }
+      })
+      .catch(function () {});
     }
   }
 
-  function loadProjectsFromBackend() {
+  function syncExperiencesWithBackend(list) {
     if (typeof fetch === 'function') {
-      fetch('/api/projects')
-        .then(function (res) { return res.json(); })
-        .then(function (data) {
-          if (data && data.success && Array.isArray(data.projects) && data.projects.length > 0) {
-            projects = data.projects;
-            renderProjectsGrid();
-          }
-        })
-        .catch(function () {});
+      fetch('/api/experiences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ experiences: list })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.success) {
+          updateSyncModalCounters();
+          console.log('[EXPERIENCIAS GUARDADAS]', data.message);
+        }
+      })
+      .catch(function () {});
     }
+  }
+
+  function syncTestimonialsWithBackend(list) {
+    if (typeof fetch === 'function') {
+      fetch('/api/testimonials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ testimonials: list })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.success) {
+          updateSyncModalCounters();
+          console.log('[TESTIMONIOS GUARDADOS]', data.message);
+        }
+      })
+      .catch(function () {});
+    }
+  }
+
+  function saveAllDataToBackend() {
+    if (typeof fetch === 'function') {
+      fetch('/api/sync-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projects: projects,
+          experiences: experiences,
+          testimonials: satisfiedClients
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        updateSyncModalCounters();
+        const lastSavedEl = document.getElementById('sync-last-saved');
+        if (lastSavedEl) lastSavedEl.textContent = new Date().toLocaleTimeString();
+        showStatusNotification({
+          title: 'Archivos Guardados',
+          message: 'Todos los datos (proyectos, experiencias, testimonios) han sido guardados en src/data, public/data y docs/data.',
+          type: 'success',
+          icon: '💾'
+        });
+      })
+      .catch(() => {
+        // Si el backend no está disponible, ofrecer descarga directa
+        downloadDataJson('all');
+      });
+    } else {
+      downloadDataJson('all');
+    }
+  }
+
+  function updateSyncModalCounters() {
+    const projCount = document.getElementById('sync-projects-count');
+    const expCount = document.getElementById('sync-experiences-count');
+    const testCount = document.getElementById('sync-testimonials-count');
+
+    if (projCount) projCount.textContent = String(projects.length);
+    if (expCount) expCount.textContent = String(experiences.length);
+    if (testCount) testCount.textContent = String(satisfiedClients.length);
+  }
+
+  function openSyncFilesModal() {
+    const modal = document.getElementById('sync-files-modal');
+    if (!modal) return;
+    updateSyncModalCounters();
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSyncFilesModal() {
+    const modal = document.getElementById('sync-files-modal');
+    if (modal) modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  function downloadDataJson(type) {
+    let filename = 'projects.json';
+    let content = '';
+
+    if (type === 'projects') {
+      filename = 'projects.json';
+      content = JSON.stringify(projects, null, 2);
+    } else if (type === 'experiences') {
+      filename = 'experiences.json';
+      content = JSON.stringify(experiences, null, 2);
+    } else if (type === 'testimonials') {
+      filename = 'testimonials.json';
+      content = JSON.stringify(satisfiedClients, null, 2);
+    } else {
+      filename = 'portfolio-full-data.json';
+      content = JSON.stringify({ projects, experiences, testimonials: satisfiedClients }, null, 2);
+    }
+
+    const blob = new Blob([content], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showStatusNotification({
+      title: 'Archivo Descargado',
+      message: `Se descargó "${filename}". Puedes colocarlo en tu carpeta src/data o en tu repositorio de GitHub.`,
+      type: 'success',
+      icon: '⬇️'
+    });
+  }
+
+  function copyAllDataJson() {
+    const fullData = {
+      projects: projects,
+      experiences: experiences,
+      testimonials: satisfiedClients
+    };
+    const str = JSON.stringify(fullData, null, 2);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(str).then(() => {
+        showStatusNotification({
+          title: 'JSON Copiado',
+          message: 'Todo el contenido de proyectos, experiencias y testimonios ha sido copiado al portapapeles.',
+          type: 'success',
+          icon: '📋'
+        });
+      });
+    }
+  }
+
+  function loadAllDataFromBackend() {
+    if (typeof fetch !== 'function') return;
+
+    // 1. Proyectos
+    fetch('/api/projects')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.success && Array.isArray(data.projects) && data.projects.length > 0) {
+          projects = data.projects;
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (e) {}
+          renderProjectsGrid();
+        }
+      })
+      .catch(() => {
+        // Fallback a archivo estático relativo
+        fetch('./data/projects.json')
+          .then(res => res.json())
+          .then(list => {
+            if (Array.isArray(list) && list.length > 0) {
+              projects = list;
+              renderProjectsGrid();
+            }
+          })
+          .catch(() => {});
+      });
+
+    // 2. Experiencias
+    fetch('/api/experiences')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.success && Array.isArray(data.experiences) && data.experiences.length > 0) {
+          experiences = data.experiences;
+          try { localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences)); } catch (e) {}
+          renderExperiences();
+        }
+      })
+      .catch(() => {
+        fetch('./data/experiences.json')
+          .then(res => res.json())
+          .then(list => {
+            if (Array.isArray(list) && list.length > 0) {
+              experiences = list;
+              renderExperiences();
+            }
+          })
+          .catch(() => {});
+      });
+
+    // 3. Testimonios
+    fetch('/api/testimonials')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.success && Array.isArray(data.testimonials) && data.testimonials.length > 0) {
+          satisfiedClients = data.testimonials;
+          try { localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients)); } catch (e) {}
+          renderTestimonialsPreview();
+          renderSatisfiedClientsModalList();
+        }
+      })
+      .catch(() => {
+        fetch('./data/testimonials.json')
+          .then(res => res.json())
+          .then(list => {
+            if (Array.isArray(list) && list.length > 0) {
+              satisfiedClients = list;
+              renderTestimonialsPreview();
+              renderSatisfiedClientsModalList();
+            }
+          })
+          .catch(() => {});
+      });
   }
 
   // 16.1 Biblioteca de Imágenes & Drag and Drop Multimedia
@@ -3785,7 +4152,64 @@
   document.addEventListener('DOMContentLoaded', function () {
     applyTheme(currentTheme);
     setupImageDropzones();
-    loadProjectsFromBackend();
+    loadAllDataFromBackend();
+
+    // Confirm Modal Action Button
+    const confirmActionBtn = document.getElementById('confirm-modal-action-btn');
+    if (confirmActionBtn) {
+      confirmActionBtn.addEventListener('click', function () {
+        if (typeof activeConfirmCallback === 'function') {
+          activeConfirmCallback();
+        }
+        closeConfirmModal();
+      });
+    }
+
+    // Helper reactivo para fechas de experiencia laboral
+    const expCurrentCheck = document.getElementById('exp-form-current');
+    const expEndInput = document.getElementById('exp-form-end-date');
+    const expPeriodInput = document.getElementById('exp-form-period');
+    const expStartInput = document.getElementById('exp-form-start-date');
+
+    const updateExpPeriodText = () => {
+      if (!expPeriodInput) return;
+      const isCur = expCurrentCheck ? expCurrentCheck.checked : false;
+      const startVal = expStartInput ? expStartInput.value : '';
+      const endVal = expEndInput ? expEndInput.value : '';
+      
+      const formatMonthYear = (dateStr) => {
+        if (!dateStr) return '';
+        try {
+          const parts = dateStr.split('-');
+          if (parts.length < 2) return dateStr;
+          const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+          const idx = parseInt(parts[1], 10) - 1;
+          return (months[idx] || '') + ' ' + parts[0];
+        } catch (e) {
+          return dateStr;
+        }
+      };
+
+      if (isCur) {
+        expPeriodInput.value = startVal ? `${formatMonthYear(startVal)} — Presente` : 'Presente';
+      } else if (startVal && endVal) {
+        expPeriodInput.value = `${formatMonthYear(startVal)} — ${formatMonthYear(endVal)}`;
+      }
+    };
+
+    if (expCurrentCheck) {
+      expCurrentCheck.addEventListener('change', function () {
+        if (expEndInput) {
+          expEndInput.disabled = this.checked;
+          expEndInput.style.opacity = this.checked ? '0.4' : '1';
+          if (this.checked) expEndInput.value = '';
+        }
+        updateExpPeriodText();
+      });
+    }
+
+    if (expStartInput) expStartInput.addEventListener('change', updateExpPeriodText);
+    if (expEndInput) expEndInput.addEventListener('change', updateExpPeriodText);
 
     // Theme toggle button
     const themeBtn = document.getElementById('theme-toggle-btn');
@@ -3950,6 +4374,8 @@
         closeFeedbackModal();
         closeFeedbackCodesModal();
         closeImageLibraryModal();
+        closeConfirmModal();
+        closeSyncFilesModal();
       } else if (e.key === 'ArrowLeft') {
         navigateProjectModal(-1);
       } else if (e.key === 'ArrowRight') {
@@ -3966,6 +4392,19 @@
 
   // Exponer API global para interactividad
   window.ElyPortfolio = {
+    // Confirmación In-App
+    showConfirmModal: showConfirmModal,
+    closeConfirmModal: closeConfirmModal,
+    // Gestión y Sincronización de Archivos
+    openSyncFilesModal: openSyncFilesModal,
+    closeSyncFilesModal: closeSyncFilesModal,
+    saveAllDataToBackend: saveAllDataToBackend,
+    downloadDataJson: downloadDataJson,
+    copyAllDataJson: copyAllDataJson,
+    syncProjectsWithBackend: syncProjectsWithBackend,
+    syncExperiencesWithBackend: syncExperiencesWithBackend,
+    syncTestimonialsWithBackend: syncTestimonialsWithBackend,
+    loadAllDataFromBackend: loadAllDataFromBackend,
     // Proyectos
     openProjectModal: openProjectModal,
     closeProjectModal: closeProjectModal,
