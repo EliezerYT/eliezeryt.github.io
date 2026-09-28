@@ -2838,6 +2838,13 @@
         el.classList.add('hidden');
       }
     });
+    document.querySelectorAll('.category-public-counter').forEach(function (el) {
+      if (isModerator) {
+        el.classList.add('hidden');
+      } else {
+        el.classList.remove('hidden');
+      }
+    });
     const authBtn = document.getElementById('nav-auth-btn');
     if (authBtn) {
       authBtn.textContent = isModerator ? 'Cerrar Moderador' : 'Acceso Moderador';
