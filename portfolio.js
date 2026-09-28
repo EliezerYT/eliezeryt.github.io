@@ -2021,7 +2021,7 @@
         return `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400 border border-white/10">${t}</span>`;
       }).join('');
 
-      const moderatorBar = isModerator ? `
+      const moderatorBar = (isModerator && !visitorPreviewMode) ? `
         <div class="flex items-center justify-between p-2 mb-2 bg-[#171c26] rounded-xl border border-amber-400/30 text-xs">
           <div class="flex items-center gap-1">
             <button
@@ -2114,7 +2114,7 @@
         return `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300 border border-white/10">${t}</span>`;
       }).join('');
 
-      const moderatorBar = isModerator ? `
+      const moderatorBar = (isModerator && !visitorPreviewMode) ? `
         <div class="flex items-center justify-between p-2 mb-2 bg-[#171c26] rounded-xl border border-amber-400/30 text-xs">
           <div class="flex items-center gap-1">
             <button
@@ -3355,7 +3355,7 @@
         return `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400">${t}</span>`;
       }).join('');
 
-      const moderatorBar = isModerator ? `
+      const moderatorBar = (isModerator && !visitorPreviewMode) ? `
         <div class="flex items-center justify-between p-2 mb-2 bg-[#171c26] rounded-xl border border-amber-400/30 text-xs">
           <div class="flex items-center gap-1">
             <button
