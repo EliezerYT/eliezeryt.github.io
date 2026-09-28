@@ -1710,7 +1710,17 @@
     const modal = document.getElementById('project-detail-modal');
     if (!modal) return;
 
-    // Actualizar campos de texto
+    // Actualizar campos de texto e icono del proyecto
+    const modalProjectIcon = document.getElementById('modal-project-icon');
+    if (modalProjectIcon) {
+      modalProjectIcon.src = project.icon || project.coverImage || '';
+      modalProjectIcon.alt = 'Icono del Proyecto';
+      modalProjectIcon.onerror = function () {
+        this.onerror = null;
+        this.src = project.coverImage || '';
+      };
+    }
+
     document.getElementById('modal-project-title').textContent = project.title;
     document.getElementById('modal-project-tagline').textContent = project.tagline;
     document.getElementById('modal-project-desc').textContent = project.fullStory || project.description;
