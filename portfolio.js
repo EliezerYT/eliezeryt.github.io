@@ -1514,6 +1514,7 @@
         : '';
 
       const hasVideo = !!project.youtubeVideo;
+      const playStoreBadge = project.playStoreUrl ? '<a href="' + project.playStoreUrl + '" target="_blank" rel="noopener noreferrer" class="shrink-0 hover:scale-105 transition-transform" title="Ver en Google Play" onclick="event.stopPropagation()"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" class="w-[92px] h-auto max-h-[28px] object-contain" loading="lazy"></a>' : '';
       const mediaBadge = hasVideo
         ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-red-600/80 text-white backdrop-blur-sm shadow">▶ Video YouTube</span>'
         : '';
@@ -1662,7 +1663,8 @@
                 ${techBadges}
               </div>
 
-              <div class="flex items-center justify-between pt-1">
+              <div class="flex items-end justify-between gap-3 pt-1">
+                <div class="flex items-center gap-2">
                 <button
                   type="button"
                   onclick="window.ElyPortfolio.openProjectModal('${project.id}')"
@@ -1683,6 +1685,8 @@
                     ↗ ${project.links[0].label || (project.links[0].type === 'canva' ? 'Canva' : project.links[0].type === 'video' ? 'YouTube' : 'Enlace')}
                   </a>
                 ` : ''}
+                  ${playStoreBadge}
+                </div>
               </div>
             </div>
           </div>
@@ -3104,6 +3108,10 @@
     document.getElementById('edit-proj-client').value = project.clientOrTeam || '';
     document.getElementById('edit-proj-year').value = project.year || '';
     document.getElementById('edit-proj-cover').value = project.coverImage || '';
+    const editPlayCheck = document.getElementById('edit-proj-play-check');
+    const editPlayUrl = document.getElementById('edit-proj-play-url');
+    if (editPlayCheck) editPlayCheck.checked = !!project.playStoreUrl;
+    if (editPlayUrl) editPlayUrl.value = project.playStoreUrl || '';
     
     // Múltiples imágenes (galería) separadas por salto de línea
     const galleryImgs = Array.isArray(project.galleryImages) ? project.galleryImages.join('\n') : (project.coverImage || '');
@@ -3154,6 +3162,9 @@
     project.clientOrTeam = document.getElementById('edit-proj-client').value.trim() || undefined;
     project.year = document.getElementById('edit-proj-year').value.trim();
     project.coverImage = document.getElementById('edit-proj-cover').value.trim() || './assets/images/ely/my-avatar.png';
+    const editPlayCheck = document.getElementById('edit-proj-play-check');
+    const editPlayUrl = document.getElementById('edit-proj-play-url');
+    project.playStoreUrl = editPlayCheck && editPlayCheck.checked && editPlayUrl ? editPlayUrl.value.trim() : '';
 
     // Parsear galería de imágenes (una por línea o por coma)
     const galleryRaw = document.getElementById('edit-proj-gallery').value;
@@ -3215,6 +3226,10 @@
       if (galleryInp) galleryInp.value = '';
       const linksInp = document.getElementById('new-proj-links');
       if (linksInp) linksInp.value = '';
+      const playCheck = document.getElementById('new-proj-play-check');
+      const playUrl = document.getElementById('new-proj-play-url');
+      if (playCheck) playCheck.checked = false;
+      if (playUrl) playUrl.value = '';
       renderGalleryThumbnails('new-proj-gallery-thumbs', 'new-proj-gallery');
 
       modal.classList.remove('hidden');
@@ -3240,6 +3255,9 @@
     const coverImage = document.getElementById('new-proj-cover').value.trim() || './assets/images/ely/my-avatar.png';
     const galleryRaw = document.getElementById('new-proj-gallery').value;
     const videoUrl = document.getElementById('new-proj-video').value.trim();
+    const playCheck = document.getElementById('new-proj-play-check');
+    const playUrl = document.getElementById('new-proj-play-url');
+    const playStoreUrl = playCheck && playCheck.checked && playUrl ? playUrl.value.trim() : '';
     const linksRaw = document.getElementById('new-proj-links') ? document.getElementById('new-proj-links').value : '';
     const links = linksRaw.split('\n').map(line => { const parts = line.split('|'); const url = parts.slice(1).join('|').trim(); return { label: (parts[0] || '').trim(), url: url, type: /canva\.com/i.test(url) ? 'canva' : 'external' }; }).filter(link => link.label && link.url);
     const desc = document.getElementById('new-proj-desc').value.trim();
@@ -3259,6 +3277,7 @@
       coverImage: coverImage,
       galleryImages: parsedGallery.length > 0 ? parsedGallery : [coverImage],
       youtubeVideo: videoUrl || '',
+      playStoreUrl: playStoreUrl,
       links: links,
       technologies: techs.length > 0 ? techs : ['Unity', 'C#'],
       role: 'Desarrollador'
