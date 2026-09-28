@@ -4373,7 +4373,7 @@
     const foundImages = [];
 
     async function scanFolder(folderPath) {
-      const endpoint = GITHUB_API_BASE + '/repos/' + GITHUB_REPOSITORY + '/contents/' + folderPath + '?ref=' + GITHUB_BRANCH;
+      const endpoint = GITHUB_API_BASE + '/repos/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/contents/' + folderPath.split('/').map(encodeURIComponent).join('/') + '?ref=' + encodeURIComponent(GITHUB_BRANCH);
       const response = await fetch(endpoint, { headers: headers, cache: 'no-store' });
       if (!response.ok) throw new Error('GitHub API: ' + response.status);
       const entries = await response.json();
