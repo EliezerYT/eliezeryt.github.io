@@ -4339,12 +4339,13 @@
         if (!existing || !existing.content) throw new Error('No se encontró la imagen actual en GitHub.');
         await putGithubFile(newPath, existing.content.replace(/\s/g, ''), 'Move library image to ' + newFolder);
         await deleteGithubImageFile(oldPath);
-      } else if (typeof image.path === 'string' && image.path.startsWith('data:image/')) {
+        image.path = './' + newPath;
+      } else if (typeof image.path === 'string' && image.path.startsWith('data:image/') && getGithubToken()) {
         await putGithubFile(newPath, dataUrlToBase64(image.path), 'Move library image to ' + newFolder);
+        image.path = './' + newPath;
       }
       image.folder = newFolder;
       image.category = newFolder;
-      image.path = './' + newPath;
       try { localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages.slice(0, 30))); } catch (e) {}
       renderLibraryGrid();
       showStatusNotification({ title: 'Carpeta actualizada', message: '"' + (image.name || 'Imagen') + '" movida a ' + newFolder + '.', type: 'success', icon: '📁' });
