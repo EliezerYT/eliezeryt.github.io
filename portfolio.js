@@ -3693,6 +3693,45 @@
     return type.replace(/[^a-z0-9]/g, '') || 'png';
   }
 
+  function sanitizeGithubImageName(name, fallbackExtension) {
+    let clean = String(name || '').trim().replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/^-+|-+$/g, '');
+    if (!clean) clean = 'image-' + Date.now() + '.' + fallbackExtension;
+    if (!/\.[a-z0-9]{2,5}$/i.test(clean)) clean += '.' + fallbackExtension;
+    return clean;
+  }
+
+  async function prepareLibraryImagesForGithub(uploadedImages) {
+    let changed = false;
+
+    for (const image of customLibraryImages) {
+      if (!image || typeof image.path !== 'string' || !image.path.startsWith('data:image/')) continue;
+      if (uploadedImages.has(image.path)) {
+        const saved = uploadedImages.get(image.path);
+        image.path = saved.url;
+        changed = true;
+        continue;
+      }
+
+      const dataUrl = image.path;
+      const extension = imageExtension(dataUrl);
+      const filename = sanitizeGithubImageName(image.name, extension);
+      const path = 'assets/images/ely/' + filename;
+      const url = 'https://raw.githubusercontent.com/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/' + GITHUB_BRANCH + '/' + path;
+
+      await putGithubFile(path, dataUrlToBase64(dataUrl), 'Upload library image ' + filename);
+      uploadedImages.set(dataUrl, { path, url });
+      image.path = url;
+      changed = true;
+    }
+
+    if (changed) {
+      try {
+        localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages.slice(0, 30)));
+      } catch (e) {}
+      renderLibraryGrid();
+    }
+  }
+
   async function prepareGithubData(value, uploadedImages) {
     if (typeof value === 'string' && value.startsWith('data:image/')) {
       if (uploadedImages.has(value)) return uploadedImages.get(value).url;
@@ -3740,6 +3779,8 @@
 
     try {
       const uploadedImages = new Map();
+
+      await prepareLibraryImagesForGithub(uploadedImages);
 
       const syncedProjects = await prepareGithubData(projects, uploadedImages);
       const syncedExperiences = await prepareGithubData(experiences, uploadedImages);
