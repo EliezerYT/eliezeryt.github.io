@@ -4909,3 +4909,12 @@
       container.appendChild(thumb);
     });
   }
+
+
+  // Exponer controles de galería y biblioteca para la interfaz.
+  window.ElyPortfolio = window.ElyPortfolio || {};
+  Object.assign(window.ElyPortfolio, {
+    applySelectedGalleryLibraryImages: applySelectedGalleryLibraryImages,
+    selectImageFromLibrary: selectImageFromLibrary,
+    renderGalleryThumbnails: renderGalleryThumbnails
+  });
