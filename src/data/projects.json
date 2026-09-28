@@ -10,7 +10,7 @@
     "year": "2024 - 2025",
     "role": "Lead Game Designer & Programador Principal",
     "featured": true,
-    "coverImage": "https://raw.githubusercontent.com/EliezerYT/portfolio2026/main/assets/images/ely/odd.png",
+    "coverImage": "./assets/images/ely/odd.png",
     "galleryImages": [
       "./assets/images/ely/overdrivers-teaser.jpg"
     ],
