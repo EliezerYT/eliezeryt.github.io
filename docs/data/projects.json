@@ -621,9 +621,14 @@
       {
         "label": "Ver Ficha en Canva",
         "url": "https://www.canva.com/design/DAG0IFpYdNI/nNmvLL1L61rDTfBl8RWKuQ/view",
-        "type": "external"
+        "type": "canva"
       }
-    ]
+    ],
+    "icon": "./assets/images/ely/maddys/icon.png",
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.EliezerYT.MaddyAdventure",
+    "itchUrl": "https://elydev.itch.io/maddys-adventures",
+    "steamUrl": "",
+    "requirements": []
   },
   {
     "id": "snakes-battles",
