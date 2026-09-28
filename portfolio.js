@@ -4362,7 +4362,7 @@
     return [...customLibraryImages, ...automaticImages, ...DEFAULT_LIBRARY_IMAGES];
   }
 
-  async async function loadImagesFromMainElyFolder(showNotification = false) {
+  async function loadImagesFromMainElyFolder(showNotification = false) {
     if (githubElyFolderLoading) return;
     githubElyFolderLoading = true;
 
