@@ -4385,7 +4385,7 @@
     grid.innerHTML = filtered.map(img => {
       const isCustom = String(img.id || '').startsWith('custom-');
       return `
-        <div class="group relative flex h-auto min-h-0 flex-col overflow-visible rounded-xl border border-[#232733] bg-[#0d1017] hover:border-amber-400/50 hover:shadow-lg hover:shadow-amber-500/5 transition-all p-2.5 text-left self-start" data-library-img-path="${img.path}" data-library-img-name="${img.name || ''}">
+        <div class="group relative flex h-max min-h-0 flex-col overflow-visible rounded-xl border border-[#232733] bg-[#0d1017] hover:border-amber-400/50 hover:shadow-lg hover:shadow-amber-500/5 transition-all p-2.5 text-left self-start" data-library-img-path="${img.path}" data-library-img-name="${img.name || ''}">
           <div class="relative h-32 sm:h-36 w-full shrink-0 overflow-hidden rounded-lg bg-[#141822] mb-2 border border-white/5 cursor-zoom-in library-preview-btn">
             <img src="${img.path}" alt="${img.name || 'Imagen'}" class="h-full w-full object-contain p-1 transition-transform duration-300 group-hover:scale-105" onerror="this.src='./assets/images/ely/my-avatar.png'" />
             <span class="absolute top-1 left-1 rounded bg-black/80 px-1.5 py-0.5 text-[9px] font-mono text-amber-400 border border-amber-400/20 backdrop-blur-sm">
