@@ -594,7 +594,8 @@
     "featured": false,
     "coverImage": "./assets/images/ely/picon-maddys.png",
     "galleryImages": [
-      "./assets/images/ely/picon-maddys.png"
+      "./assets/images/ely/picon-maddys.png",
+      "./assets/images/ely/maddys/4.png"
     ],
     "youtubeVideo": "",
     "technologies": [
