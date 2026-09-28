@@ -3634,21 +3634,31 @@
   }
 
   async function putGithubFile(path, base64Content, message) {
-    const existing = await getGithubFile(path);
-    const body = {
-      message: message,
-      content: base64Content,
-      branch: GITHUB_BRANCH
-    };
-    if (existing && existing.sha) body.sha = existing.sha;
+    const endpoint = '/repos/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/contents/' + path.split('/').map(encodeURIComponent).join('/');
 
-    return githubApiRequest(
-      '/repos/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/contents/' + path.split('/').map(encodeURIComponent).join('/'),
-      {
-        method: 'PUT',
-        body: JSON.stringify(body)
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const existing = await getGithubFile(path);
+      const body = {
+        message: message,
+        content: base64Content,
+        branch: GITHUB_BRANCH
+      };
+
+      if (existing && existing.sha) body.sha = existing.sha;
+
+      try {
+        return await githubApiRequest(endpoint, {
+          method: 'PUT',
+          body: JSON.stringify(body)
+        });
+      } catch (error) {
+        const conflict = /does not match|sha|409|422/i.test(error.message || '');
+        if (!conflict || attempt === 2) throw error;
+        await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
       }
-    );
+    }
+
+    throw new Error('No se pudo actualizar ' + path);
   }
 
   function dataUrlToBase64(dataUrl) {
