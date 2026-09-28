@@ -5115,7 +5115,15 @@
           const reader = new FileReader();
           reader.onload = (event) => {
             const dataUrl = event.target.result;
-            const added = addCustomImageToLibrary(file.name, dataUrl);
+            const added = addCustomImageToLibrary(file.name, dataUrl, function(uploadedImage) {
+              if (hiddenInput && uploadedImage.path && uploadedImage.path !== dataUrl) {
+                const current = hiddenInput.value ? hiddenInput.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
+                const index = current.indexOf(dataUrl);
+                if (index >= 0) current[index] = uploadedImage.path;
+                hiddenInput.value = current.join('\n');
+                renderGalleryThumbnails(containerId, hiddenInputId);
+              }
+            });
             if (hiddenInput) {
               const current = hiddenInput.value ? hiddenInput.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
               if (!current.includes(dataUrl)) current.push(dataUrl);
