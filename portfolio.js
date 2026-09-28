@@ -13,6 +13,12 @@
   const FEEDBACK_CODES_STORAGE_KEY = 'portfolio_feedback_codes_v2';
   const AUTH_STORAGE_KEY = 'portfolio_auth_user_v2';
   const THEME_STORAGE_KEY = 'portfolio_theme_elydev';
+  const GITHUB_OWNER = 'EliezerYT';
+  const GITHUB_REPOSITORY = 'portfolio2026';
+  const GITHUB_BRANCH = 'main';
+  const GITHUB_API_BASE = 'https://api.github.com';
+  const GITHUB_IMAGE_PATH = 'assets/images/moderator';
+  const GITHUB_TOKEN_STORAGE_KEY = 'elydev_github_token';
 
   // 1. Datos iniciales del perfil y proyectos
   const initialProfile = {
@@ -3573,6 +3579,205 @@
     }
   }
 
+  function getGithubToken() {
+    let token = '';
+    try { token = localStorage.getItem(GITHUB_TOKEN_STORAGE_KEY) || ''; } catch (e) {}
+    if (!token && window.ELY_GITHUB_TOKEN) token = window.ELY_GITHUB_TOKEN;
+    if (!token) token = prompt('GitHub API Token:');
+    if (token) {
+      try { localStorage.setItem(GITHUB_TOKEN_STORAGE_KEY, token.trim()); } catch (e) {}
+      return token.trim();
+    }
+    return '';
+  }
+
+  async function githubApiRequest(path, options) {
+    const token = getGithubToken();
+    if (!token) throw new Error('No se configuró el GitHub API Token.');
+
+    const response = await fetch(GITHUB_API_BASE + path, {
+      ...options,
+      headers: {
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2026-03-10',
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json',
+        ...(options && options.headers ? options.headers : {})
+      }
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.message || ('GitHub API error ' + response.status));
+    return data;
+  }
+
+  async function getGithubFile(path) {
+    const encodedPath = path.split('/').map(encodeURIComponent).join('/');
+    const token = getGithubToken();
+    if (!token) throw new Error('No se configuró el GitHub API Token.');
+
+    const response = await fetch(
+      GITHUB_API_BASE + '/repos/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/contents/' + encodedPath + '?ref=' + encodeURIComponent(GITHUB_BRANCH),
+      {
+        headers: {
+          Accept: 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2026-03-10',
+          Authorization: 'Bearer ' + token
+        }
+      }
+    );
+
+    if (response.status === 404) return null;
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || ('GitHub API error ' + response.status));
+    return data;
+  }
+
+  async function putGithubFile(path, base64Content, message) {
+    const existing = await getGithubFile(path);
+    const body = {
+      message: message,
+      content: base64Content,
+      branch: GITHUB_BRANCH
+    };
+    if (existing && existing.sha) body.sha = existing.sha;
+
+    return githubApiRequest(
+      '/repos/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/contents/' + path.split('/').map(encodeURIComponent).join('/'),
+      {
+        method: 'PUT',
+        body: JSON.stringify(body)
+      }
+    );
+  }
+
+  function dataUrlToBase64(dataUrl) {
+    const comma = dataUrl.indexOf(',');
+    if (comma < 0) throw new Error('Imagen inválida.');
+    return dataUrl.slice(comma + 1);
+  }
+
+  function dataUrlToBytes(dataUrl) {
+    const binary = atob(dataUrlToBase64(dataUrl));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+  }
+
+  async function sha256Hex(bytes) {
+    if (window.crypto && window.crypto.subtle) {
+      const hash = await window.crypto.subtle.digest('SHA-256', bytes);
+      return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    return Date.now().toString(36) + Math.random().toString(36).slice(2);
+  }
+
+  function imageExtension(dataUrl) {
+    const match = dataUrl.match(/^data:image\/([^;]+);base64,/i);
+    if (!match) return 'png';
+    const type = match[1].toLowerCase();
+    if (type === 'jpeg') return 'jpg';
+    if (type === 'svg+xml') return 'svg';
+    if (type === 'webp') return 'webp';
+    if (type === 'gif') return 'gif';
+    return type.replace(/[^a-z0-9]/g, '') || 'png';
+  }
+
+  async function prepareGithubData(value, uploadedImages) {
+    if (typeof value === 'string' && value.startsWith('data:image/')) {
+      if (uploadedImages.has(value)) return uploadedImages.get(value).url;
+
+      const bytes = dataUrlToBytes(value);
+      const hash = await sha256Hex(bytes);
+      const path = GITHUB_IMAGE_PATH + '/' + hash + '.' + imageExtension(value);
+      const url = 'https://raw.githubusercontent.com/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/' + GITHUB_BRANCH + '/' + path;
+
+      await putGithubFile(path, dataUrlToBase64(value), 'Update portfolio image ' + hash.slice(0, 8));
+      uploadedImages.set(value, { path, url });
+      return url;
+    }
+
+    if (Array.isArray(value)) {
+      const result = [];
+      for (const item of value) result.push(await prepareGithubData(item, uploadedImages));
+      return result;
+    }
+
+    if (value && typeof value === 'object') {
+      const result = {};
+      for (const key of Object.keys(value)) result[key] = await prepareGithubData(value[key], uploadedImages);
+      return result;
+    }
+
+    return value;
+  }
+
+  async function syncGithubJson(path, data) {
+    const content = JSON.stringify(data, null, 2);
+    const base64 = btoa(unescape(encodeURIComponent(content)));
+    return putGithubFile(path, base64, 'Sync portfolio data');
+  }
+
+  async function syncAllToGithub() {
+    const token = getGithubToken();
+    if (!token) return;
+
+    const syncButton = document.getElementById('github-native-sync-btn');
+    if (syncButton) {
+      syncButton.disabled = true;
+      syncButton.innerHTML = '<span>⏳ Sincronizando...</span>';
+    }
+
+    try {
+      const uploadedImages = new Map();
+
+      const syncedProjects = await prepareGithubData(projects, uploadedImages);
+      const syncedExperiences = await prepareGithubData(experiences, uploadedImages);
+      const syncedTestimonials = await prepareGithubData(satisfiedClients, uploadedImages);
+
+      const files = [
+        ['src/data/projects.json', syncedProjects],
+        ['public/data/projects.json', syncedProjects],
+        ['docs/data/projects.json', syncedProjects],
+        ['src/data/experiences.json', syncedExperiences],
+        ['public/data/experiences.json', syncedExperiences],
+        ['docs/data/experiences.json', syncedExperiences],
+        ['src/data/testimonials.json', syncedTestimonials],
+        ['public/data/testimonials.json', syncedTestimonials],
+        ['docs/data/testimonials.json', syncedTestimonials]
+      ];
+
+      let commits = 0;
+      for (const [path, data] of files) {
+        await syncGithubJson(path, data);
+        commits++;
+      }
+
+      const lastSavedEl = document.getElementById('sync-last-saved');
+      if (lastSavedEl) lastSavedEl.textContent = new Date().toLocaleTimeString();
+
+      showStatusNotification({
+        title: 'GitHub Sincronizado',
+        message: 'Datos e imágenes enviados directamente al repositorio. Archivos actualizados: ' + commits + '. Imágenes nuevas: ' + uploadedImages.size + '.',
+        type: 'success',
+        icon: '🚀'
+      });
+    } catch (error) {
+      console.error('[GITHUB SYNC ERROR]', error);
+      showStatusNotification({
+        title: 'Error de GitHub',
+        message: error.message || 'No se pudo sincronizar el repositorio.',
+        type: 'error',
+        icon: '⚠️'
+      });
+    } finally {
+      if (syncButton) {
+        syncButton.disabled = false;
+        syncButton.innerHTML = '<span>🚀 Sincronizar directamente con GitHub</span>';
+      }
+    }
+  }
+
   function updateSyncModalCounters() {
     const projCount = document.getElementById('sync-projects-count');
     const expCount = document.getElementById('sync-experiences-count');
@@ -4399,11 +4604,8 @@
     openSyncFilesModal: openSyncFilesModal,
     closeSyncFilesModal: closeSyncFilesModal,
     saveAllDataToBackend: saveAllDataToBackend,
-    downloadDataJson: downloadDataJson,
-    copyAllDataJson: copyAllDataJson,
-    syncProjectsWithBackend: syncProjectsWithBackend,
-    syncExperiencesWithBackend: syncExperiencesWithBackend,
-    syncTestimonialsWithBackend: syncTestimonialsWithBackend,
+    syncAllToGithub: syncAllToGithub,
+    saveAllDataToBackend: saveAllDataToBackend,
     loadAllDataFromBackend: loadAllDataFromBackend,
     // Proyectos
     openProjectModal: openProjectModal,
