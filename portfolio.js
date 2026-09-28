@@ -4347,6 +4347,7 @@
   }
 
   let currentLibraryTarget = null;
+  let selectedGalleryLibraryImages = new Set();
 
   function getAllLibraryImages() {
     return [...customLibraryImages, ...DEFAULT_LIBRARY_IMAGES];
@@ -4726,6 +4727,8 @@
       modal.classList.add('hidden');
       document.body.style.overflow = '';
       currentLibraryTarget = null;
+      selectedGalleryLibraryImages.clear();
+      updateLibraryGallerySelectionUI();
     }
   }
 
@@ -4739,92 +4742,125 @@
   }
 
   function openImageLibraryForGallery(thumbsContainerId, hiddenInputId) {
+    selectedGalleryLibraryImages.clear();
     currentLibraryTarget = {
       type: 'gallery',
       thumbsContainerId: thumbsContainerId,
       hiddenInputId: hiddenInputId
     };
     openImageLibraryModal();
+    updateLibraryGallerySelectionUI();
+  }
+
+  function updateLibraryGallerySelectionUI() {
+    const applyBtn = document.getElementById('library-gallery-apply-btn');
+    const help = document.getElementById('library-selection-help');
+    const count = selectedGalleryLibraryImages.size;
+    if (applyBtn) {
+      applyBtn.classList.toggle('hidden', !(currentLibraryTarget && currentLibraryTarget.type === 'gallery'));
+      applyBtn.textContent = 'Agregar seleccionadas (' + count + ')';
+      applyBtn.disabled = count === 0;
+      applyBtn.classList.toggle('opacity-50', count === 0);
+    }
+    if (help) help.textContent = currentLibraryTarget && currentLibraryTarget.type === 'gallery' ? 'Selecciona varias imágenes y luego pulsa "Agregar seleccionadas".' : 'Haz clic en "Seleccionar" para asignar una imagen.';
+    document.querySelectorAll('#library-images-grid [data-library-img-path]').forEach(card => {
+      const selected = selectedGalleryLibraryImages.has(card.getAttribute('data-library-img-path'));
+      card.classList.toggle('ring-2', selected);
+      card.classList.toggle('ring-amber-400', selected);
+      const button = card.querySelector('.select-image-btn');
+      if (button && currentLibraryTarget && currentLibraryTarget.type === 'gallery') button.textContent = selected ? '✓ Seleccionada' : 'Seleccionar';
+    });
+  }
+
+  function applySelectedGalleryLibraryImages() {
+    if (!currentLibraryTarget || currentLibraryTarget.type !== 'gallery' || selectedGalleryLibraryImages.size === 0) return;
+    const inputEl = document.getElementById(currentLibraryTarget.hiddenInputId);
+    if (!inputEl) return;
+    const items = inputEl.value ? inputEl.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
+    selectedGalleryLibraryImages.forEach(path => { if (!items.includes(path)) items.push(path); });
+    inputEl.value = items.join('\n');
+    renderGalleryThumbnails(currentLibraryTarget.thumbsContainerId, currentLibraryTarget.hiddenInputId);
+    const count = selectedGalleryLibraryImages.size;
+    selectedGalleryLibraryImages.clear();
+    showStatusNotification({ title: 'Galería actualizada', message: 'Se agregaron ' + count + ' imágenes.', type: 'success', icon: '📸' });
+    closeImageLibraryModal();
   }
 
   function selectImageFromLibrary(imagePath, imageName) {
     if (!currentLibraryTarget) {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(imagePath);
-      }
-      showStatusNotification({
-        title: 'Ruta Copiada',
-        message: `Ruta copiada al portapapeles: ${imagePath}`,
-        type: 'info',
-        icon: '📋'
-      });
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(imagePath);
+      showStatusNotification({ title: 'Ruta Copiada', message: 'Ruta copiada al portapapeles: ' + imagePath, type: 'info', icon: '📋' });
       closeImageLibraryModal();
       return;
     }
-
     if (currentLibraryTarget.type === 'input') {
       const inputEl = document.getElementById(currentLibraryTarget.inputId);
-      if (inputEl) {
-        inputEl.value = imagePath;
-      }
+      if (inputEl) inputEl.value = imagePath;
       if (currentLibraryTarget.previewId) {
         const previewEl = document.getElementById(currentLibraryTarget.previewId);
-        if (previewEl) {
-          previewEl.src = imagePath;
-        }
+        if (previewEl) previewEl.src = imagePath;
       }
-      showStatusNotification({
-        title: 'Imagen Asignada',
-        message: `Se asignó "${imageName || imagePath}" correctamente.`,
-        type: 'success',
-        icon: '🖼️'
-      });
-    } else if (currentLibraryTarget.type === 'gallery') {
-      const inputEl = document.getElementById(currentLibraryTarget.hiddenInputId);
-      if (inputEl) {
-        const currentItems = inputEl.value ? inputEl.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
-        if (!currentItems.includes(imagePath)) {
-          currentItems.push(imagePath);
-          inputEl.value = currentItems.join('\n');
-        }
-        renderGalleryThumbnails(currentLibraryTarget.thumbsContainerId, currentLibraryTarget.hiddenInputId);
-      }
-      showStatusNotification({
-        title: 'Agregada a Galería',
-        message: `Se añadió "${imageName || imagePath}" a las capturas.`,
-        type: 'success',
-        icon: '📸'
-      });
+      showStatusNotification({ title: 'Imagen Asignada', message: 'Se asignó "' + (imageName || imagePath) + '" correctamente.', type: 'success', icon: '🖼️' });
+      closeImageLibraryModal();
+      return;
     }
-
-    closeImageLibraryModal();
+    if (currentLibraryTarget.type === 'gallery') {
+      if (selectedGalleryLibraryImages.has(imagePath)) selectedGalleryLibraryImages.delete(imagePath);
+      else selectedGalleryLibraryImages.add(imagePath);
+      updateLibraryGallerySelectionUI();
+    }
   }
 
   function renderGalleryThumbnails(containerId, inputId) {
     const container = document.getElementById(containerId);
     const input = document.getElementById(inputId);
     if (!container || !input) return;
-
     const items = input.value ? input.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
     container.innerHTML = '';
-
+    const parent = container.parentElement;
+    const slider = parent ? parent.querySelector('.gallery-size-slider') : null;
+    const valueLabel = parent ? parent.querySelector('.gallery-size-value') : null;
+    const savedSize = Math.max(48, Math.min(180, parseInt(container.dataset.thumbSize || '72', 10) || 72));
+    container.dataset.thumbSize = String(savedSize);
+    if (slider) {
+      slider.value = String(savedSize);
+      if (valueLabel) valueLabel.textContent = savedSize + 'px';
+      slider.oninput = function () {
+        const size = parseInt(this.value, 10) || 72;
+        container.dataset.thumbSize = String(size);
+        if (valueLabel) valueLabel.textContent = size + 'px';
+        container.querySelectorAll('.gallery-thumb').forEach(el => { el.style.width = size + 'px'; el.style.height = size + 'px'; });
+      };
+    }
     if (items.length === 0) {
       container.innerHTML = '<span class="text-[11px] text-slate-500 italic py-1">Sin imágenes secundarias aún.</span>';
       return;
     }
-
     items.forEach((src, idx) => {
       const thumb = document.createElement('div');
-      thumb.className = 'relative group w-14 h-14 rounded-lg overflow-hidden border border-[#2c3345] bg-[#0c0e14] shrink-0';
-      thumb.innerHTML = `
-        <img src="${src}" alt="Screenshot ${idx + 1}" class="w-full h-full object-cover" onerror="this.src='./assets/images/ely/my-avatar.png'" />
-        <button type="button" title="Eliminar de galería" class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center text-red-400 font-bold text-xs transition-opacity cursor-pointer">
-          ✕
-        </button>
-      `;
-      thumb.querySelector('button').addEventListener('click', (e) => {
+      const size = savedSize;
+      thumb.className = 'relative group rounded-lg overflow-hidden border border-[#2c3345] bg-[#0c0e14] shrink-0 gallery-thumb cursor-grab';
+      thumb.draggable = true;
+      thumb.style.width = size + 'px';
+      thumb.style.height = size + 'px';
+      thumb.innerHTML = '<img src="' + src + '" alt="Screenshot ' + (idx + 1) + '" class="w-full h-full object-cover" onerror="this.src=\'./assets/images/ely/my-avatar.png\'" /><span class="absolute top-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[9px] text-white font-mono">' + (idx + 1) + '</span><button type="button" title="Eliminar de galería" class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center text-red-400 font-bold text-xs transition-opacity cursor-pointer">✕</button>';
+      thumb.querySelector('button').addEventListener('click', function(e) {
         e.stopPropagation();
         items.splice(idx, 1);
+        input.value = items.join('\n');
+        renderGalleryThumbnails(containerId, inputId);
+      });
+      thumb.addEventListener('dragstart', function(e) { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(idx)); thumb.classList.add('opacity-50'); });
+      thumb.addEventListener('dragend', function() { thumb.classList.remove('opacity-50'); });
+      thumb.addEventListener('dragover', function(e) { e.preventDefault(); thumb.classList.add('border-amber-400'); });
+      thumb.addEventListener('dragleave', function() { thumb.classList.remove('border-amber-400'); });
+      thumb.addEventListener('drop', function(e) {
+        e.preventDefault();
+        thumb.classList.remove('border-amber-400');
+        const from = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        if (Number.isNaN(from) || from === idx) return;
+        const moved = items.splice(from, 1)[0];
+        items.splice(idx, 0, moved);
         input.value = items.join('\n');
         renderGalleryThumbnails(containerId, inputId);
       });
@@ -4909,8 +4945,9 @@
               type: 'success',
               icon: '☁️'
             });
-            if (currentLibraryTarget && firstAdded) {
-              selectImageFromLibrary(firstAdded.path, firstAdded.name);
+            if (currentLibraryTarget && currentLibraryTarget.type === 'gallery') {
+              renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
+              updateLibraryGallerySelectionUI();
             }
           }
         };
@@ -5010,7 +5047,7 @@
             addCustomImageToLibrary(file.name, dataUrl);
             if (hiddenInput) {
               const current = hiddenInput.value ? hiddenInput.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
-              current.push(dataUrl);
+              if (!current.includes(dataUrl)) current.push(dataUrl);
               hiddenInput.value = current.join('\n');
               renderGalleryThumbnails(containerId, hiddenInputId);
             }
