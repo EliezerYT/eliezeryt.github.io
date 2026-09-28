@@ -3733,6 +3733,12 @@
   }
 
   async function prepareGithubData(value, uploadedImages) {
+    if (typeof value === 'string' && value.startsWith('https://raw.githubusercontent.com/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/' + GITHUB_BRANCH + '/')) {
+      const rawPrefix = 'https://raw.githubusercontent.com/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/' + GITHUB_BRANCH + '/';
+      const repoPath = value.substring(rawPrefix.length);
+      if (repoPath.startsWith('assets/images/')) return './' + repoPath;
+    }
+
     if (typeof value === 'string' && value.startsWith('data:image/')) {
       if (uploadedImages.has(value)) return uploadedImages.get(value).url;
 
