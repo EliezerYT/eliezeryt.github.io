@@ -960,7 +960,7 @@
     experiences = JSON.parse(JSON.stringify(initialExperiences));
   }
 
-  // Clientes Satisfechos / Testimonios
+  // Clientes Satisfechos / Feedback
   let satisfiedClients = [];
   try {
     const clientsSaved = localStorage.getItem(TESTIMONIALS_STORAGE_KEY);
@@ -1877,7 +1877,7 @@
     }
   }
 
-  // 8. Testimonios & Clientes Satisfechos
+  // 8. Feedback & Clientes Satisfechos
   function renderTestimonialsPreview() {
     const container = document.getElementById('testimonials-preview-grid');
     const badge = document.getElementById('testimonials-count-badge');
@@ -1886,7 +1886,7 @@
     }
     if (!container) return;
 
-    // Mostrar los primeros testimonios en la página principal
+    // Mostrar los primeros feedbacks en la página principal
     const previewList = satisfiedClients.slice(0, 4);
 
     container.innerHTML = previewList.map(function (c) {
@@ -1920,7 +1920,7 @@
               type="button"
               onclick="window.ElyPortfolio.duplicateTestimonial('${c.id}')"
               class="px-2 py-0.5 rounded bg-[#202738] text-amber-300 hover:bg-amber-400 hover:text-black font-bold cursor-pointer"
-              title="Duplicar testimonio"
+              title="Duplicar feedback"
             >
               📋 Duplicar
             </button>
@@ -1928,7 +1928,7 @@
               type="button"
               onclick="window.ElyPortfolio.openEditTestimonialModal('${c.id}')"
               class="px-2.5 py-0.5 rounded bg-amber-400 text-black font-bold hover:bg-amber-300 cursor-pointer"
-              title="Editar testimonio"
+              title="Editar feedback"
             >
               ✏️ Editar
             </button>
@@ -1936,7 +1936,7 @@
               type="button"
               onclick="window.ElyPortfolio.deleteTestimonial('${c.id}')"
               class="px-2.5 py-0.5 rounded bg-red-600 text-white font-bold hover:bg-red-500 cursor-pointer"
-              title="Eliminar testimonio"
+              title="Eliminar feedback"
             >
               🗑️ Eliminar
             </button>
@@ -2013,7 +2013,7 @@
               type="button"
               onclick="window.ElyPortfolio.duplicateTestimonial('${c.id}')"
               class="px-2 py-0.5 rounded bg-[#202738] text-amber-300 hover:bg-amber-400 hover:text-black font-bold cursor-pointer"
-              title="Duplicar testimonio"
+              title="Duplicar feedback"
             >
               📋 Duplicar
             </button>
@@ -2021,7 +2021,7 @@
               type="button"
               onclick="window.ElyPortfolio.openEditTestimonialModal('${c.id}')"
               class="px-2.5 py-0.5 rounded bg-amber-400 text-black font-bold hover:bg-amber-300 cursor-pointer"
-              title="Editar testimonio"
+              title="Editar feedback"
             >
               ✏️ Editar
             </button>
@@ -2029,7 +2029,7 @@
               type="button"
               onclick="window.ElyPortfolio.deleteTestimonial('${c.id}')"
               class="px-2.5 py-0.5 rounded bg-red-600 text-white font-bold hover:bg-red-500 cursor-pointer"
-              title="Eliminar testimonio"
+              title="Eliminar feedback"
             >
               🗑️ Eliminar
             </button>
@@ -2101,7 +2101,7 @@
     renderSatisfiedClientsModalList();
     showStatusNotification({
       title: 'Posición Actualizada',
-      message: `Se reordenó la posición del testimonio de "${satisfiedClients[newIndex].name}".`,
+      message: `Se reordenó la posición del feedback de "${satisfiedClients[newIndex].name}".`,
       type: 'info',
       icon: '⇅'
     });
@@ -2129,8 +2129,8 @@
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
     showStatusNotification({
-      title: 'Testimonio Duplicado',
-      message: `Se ha creado una copia del testimonio de "${target.name}".`,
+      title: 'Feedback Duplicado',
+      message: `Se ha creado una copia del feedback de "${target.name}".`,
       type: 'success',
       icon: '📋'
     });
@@ -2140,10 +2140,10 @@
     const target = satisfiedClients.find(c => c.id === testimonialId);
     if (!target) return;
     showConfirmModal({
-      title: '¿Eliminar Testimonio?',
-      message: `¿Estás seguro de eliminar el testimonio de "${target.name}"? Los cambios se guardarán automáticamente en los archivos (src/data/testimonials.json).`,
+      title: '¿Eliminar Feedback?',
+      message: `¿Estás seguro de eliminar el feedback de "${target.name}"? Los cambios se guardarán automáticamente en los archivos (src/data/testimonials.json).`,
       icon: '💬',
-      confirmText: 'Sí, Eliminar Testimonio',
+      confirmText: 'Sí, Eliminar Feedback',
       danger: true,
       onConfirm: function () {
         satisfiedClients = satisfiedClients.filter(c => c.id !== testimonialId);
@@ -2154,8 +2154,8 @@
         renderSatisfiedClientsModalList();
         syncTestimonialsWithBackend(satisfiedClients);
         showStatusNotification({
-          title: 'Testimonio Eliminado',
-          message: `El testimonio de "${target.name}" ha sido eliminado y guardado.`,
+          title: 'Feedback Eliminado',
+          message: `El feedback de "${target.name}" ha sido eliminado y guardado.`,
           type: 'info',
           icon: '🗑️'
         });
@@ -2173,7 +2173,7 @@
     editingTestimonialId = null;
     const modal = document.getElementById('testimonial-modal');
     const titleEl = document.getElementById('testimonial-modal-title');
-    if (titleEl) titleEl.textContent = '+ Agregar Testimonio de Cliente';
+    if (titleEl) titleEl.textContent = '+ Agregar Feedback de Cliente';
 
     document.getElementById('test-form-id').value = '';
     document.getElementById('test-form-name').value = '';
@@ -2202,7 +2202,7 @@
 
     const modal = document.getElementById('testimonial-modal');
     const titleEl = document.getElementById('testimonial-modal-title');
-    if (titleEl) titleEl.textContent = '✏️ Editar Testimonio de Cliente';
+    if (titleEl) titleEl.textContent = '✏️ Editar Feedback de Cliente';
 
     document.getElementById('test-form-id').value = target.id;
     document.getElementById('test-form-name').value = target.name || '';
@@ -2275,8 +2275,8 @@
     renderSatisfiedClientsModalList();
     syncTestimonialsWithBackend(satisfiedClients);
     showStatusNotification({
-      title: editingTestimonialId ? 'Testimonio Actualizado' : 'Testimonio Guardado',
-      message: `El testimonio de "${name}" se guardó exitosamente.`,
+      title: editingTestimonialId ? 'Feedback Actualizado' : 'Feedback Guardado',
+      message: `El feedback de "${name}" se guardó exitosamente.`,
       type: 'success',
       icon: '⭐'
     });
@@ -2388,7 +2388,7 @@
 
     if (statusMsg) {
       statusMsg.className = 'p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs leading-relaxed';
-      statusMsg.innerHTML = '✓ <strong>¡Muchas gracias!</strong> Tu feedback ha sido verificado con éxito y ya aparece publicado en los testimonios de Eliezer Terrero.';
+      statusMsg.innerHTML = '✓ <strong>¡Muchas gracias!</strong> Tu feedback ha sido verificado con éxito y ya aparece publicado en el feedback de Eliezer Terrero.';
       statusMsg.classList.remove('hidden');
     }
 
@@ -4816,7 +4816,7 @@
     openAddExperienceModal: openAddExperienceModal,
     openEditExperienceModal: openEditExperienceModal,
     closeExperienceModal: closeExperienceModal,
-    // Testimonios & Clientes Satisfechos
+    // Feedback & Clientes Satisfechos
     renderTestimonialsPreview: renderTestimonialsPreview,
     renderSatisfiedClientsModalList: renderSatisfiedClientsModalList,
     openSatisfiedClientsModal: openSatisfiedClientsModal,
