@@ -4347,6 +4347,7 @@
   }
 
   let currentLibraryTarget = null;
+  let selectedGalleryLibraryImages = new Set();
 
   function getAllLibraryImages() {
     return [...customLibraryImages, ...DEFAULT_LIBRARY_IMAGES];
@@ -4717,6 +4718,7 @@
       if (customEl) customEl.value = '';
       setLibraryFolderUI();
       renderLibraryGrid();
+      updateLibraryGallerySelectionUI();
     }
   }
 
@@ -4739,6 +4741,7 @@
   }
 
   function openImageLibraryForGallery(thumbsContainerId, hiddenInputId) {
+    selectedGalleryLibraryImages.clear();
     currentLibraryTarget = {
       type: 'gallery',
       thumbsContainerId: thumbsContainerId,
@@ -4780,23 +4783,56 @@
         icon: '🖼️'
       });
     } else if (currentLibraryTarget.type === 'gallery') {
-      const inputEl = document.getElementById(currentLibraryTarget.hiddenInputId);
-      if (inputEl) {
-        const currentItems = inputEl.value ? inputEl.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
-        if (!currentItems.includes(imagePath)) {
-          currentItems.push(imagePath);
-          inputEl.value = currentItems.join('\n');
-        }
-        renderGalleryThumbnails(currentLibraryTarget.thumbsContainerId, currentLibraryTarget.hiddenInputId);
+      if (selectedGalleryLibraryImages.has(imagePath)) {
+        selectedGalleryLibraryImages.delete(imagePath);
+      } else {
+        selectedGalleryLibraryImages.add(imagePath);
       }
-      showStatusNotification({
-        title: 'Agregada a Galería',
-        message: `Se añadió "${imageName || imagePath}" a las capturas.`,
-        type: 'success',
-        icon: '📸'
-      });
+      updateLibraryGallerySelectionUI();
+      return;
     }
 
+    closeImageLibraryModal();
+  }
+
+  function updateLibraryGallerySelectionUI() {
+    const cards = document.querySelectorAll('#library-images-grid [data-library-img-path]');
+    cards.forEach(card => {
+      const path = card.getAttribute('data-library-img-path');
+      const selected = selectedGalleryLibraryImages.has(path);
+      card.classList.toggle('ring-2', selected);
+      card.classList.toggle('ring-amber-400', selected);
+      const btn = card.querySelector('.select-image-btn');
+      if (btn) {
+        btn.textContent = selected ? '✓ Seleccionada' : 'Seleccionar';
+        btn.classList.toggle('bg-emerald-400', selected);
+        btn.classList.toggle('text-black', selected);
+      }
+    });
+    const footerBtn = document.getElementById('library-gallery-apply-btn');
+    if (footerBtn) {
+      footerBtn.classList.toggle('hidden', !currentLibraryTarget || currentLibraryTarget.type !== 'gallery');
+      footerBtn.textContent = 'Agregar seleccionadas (' + selectedGalleryLibraryImages.size + ')';
+    }
+  }
+
+  function applySelectedGalleryLibraryImages() {
+    if (!currentLibraryTarget || currentLibraryTarget.type !== 'gallery') return;
+    const inputEl = document.getElementById(currentLibraryTarget.hiddenInputId);
+    if (!inputEl) return;
+    const currentItems = inputEl.value ? inputEl.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
+    selectedGalleryLibraryImages.forEach(path => {
+      if (!currentItems.includes(path)) currentItems.push(path);
+    });
+    inputEl.value = currentItems.join('\n');
+    renderGalleryThumbnails(currentLibraryTarget.thumbsContainerId, currentLibraryTarget.hiddenInputId);
+    showStatusNotification({
+      title: 'Galería actualizada',
+      message: 'Se agregaron ' + selectedGalleryLibraryImages.size + ' imágenes.',
+      type: 'success',
+      icon: '📸'
+    });
+    selectedGalleryLibraryImages.clear();
     closeImageLibraryModal();
   }
 
@@ -4808,6 +4844,23 @@
     const items = input.value ? input.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
     container.innerHTML = '';
 
+    const slider = container.parentElement ? container.parentElement.querySelector('.gallery-size-slider') : null;
+    const valueLabel = container.parentElement ? container.parentElement.querySelector('.gallery-size-value') : null;
+    const savedSize = parseInt(container.dataset.thumbSize || '96', 10);
+    if (slider) {
+      slider.value = String(savedSize);
+      if (valueLabel) valueLabel.textContent = savedSize + 'px';
+      slider.oninput = function () {
+        const size = parseInt(this.value, 10);
+        container.dataset.thumbSize = String(size);
+        if (valueLabel) valueLabel.textContent = size + 'px';
+        container.querySelectorAll('.gallery-thumb').forEach(el => {
+          el.style.width = size + 'px';
+          el.style.height = size + 'px';
+        });
+      };
+    }
+
     if (items.length === 0) {
       container.innerHTML = '<span class="text-[11px] text-slate-500 italic py-1">Sin imágenes secundarias aún.</span>';
       return;
@@ -4815,12 +4868,16 @@
 
     items.forEach((src, idx) => {
       const thumb = document.createElement('div');
-      thumb.className = 'relative group w-14 h-14 rounded-lg overflow-hidden border border-[#2c3345] bg-[#0c0e14] shrink-0';
+      const size = parseInt(container.dataset.thumbSize || '96', 10);
+      thumb.className = 'relative group rounded-lg overflow-hidden border border-[#2c3345] bg-[#0c0e14] shrink-0 gallery-thumb cursor-grab';
+      thumb.draggable = true;
+      thumb.dataset.galleryIndex = String(idx);
+      thumb.style.width = size + 'px';
+      thumb.style.height = size + 'px';
       thumb.innerHTML = `
         <img src="${src}" alt="Screenshot ${idx + 1}" class="w-full h-full object-cover" onerror="this.src='./assets/images/ely/my-avatar.png'" />
-        <button type="button" title="Eliminar de galería" class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center text-red-400 font-bold text-xs transition-opacity cursor-pointer">
-          ✕
-        </button>
+        <span class="absolute top-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[9px] text-white font-mono">${idx + 1}</span>
+        <button type="button" title="Eliminar de galería" class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center text-red-400 font-bold text-xs transition-opacity cursor-pointer">✕</button>
       `;
       thumb.querySelector('button').addEventListener('click', (e) => {
         e.stopPropagation();
@@ -4828,540 +4885,27 @@
         input.value = items.join('\n');
         renderGalleryThumbnails(containerId, inputId);
       });
+      thumb.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', String(idx));
+        e.dataTransfer.effectAllowed = 'move';
+        thumb.classList.add('opacity-50');
+      });
+      thumb.addEventListener('dragend', () => thumb.classList.remove('opacity-50'));
+      thumb.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        thumb.classList.add('border-amber-400');
+      });
+      thumb.addEventListener('dragleave', () => thumb.classList.remove('border-amber-400'));
+      thumb.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const from = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        const to = idx;
+        if (Number.isNaN(from) || from === to) return;
+        const moved = items.splice(from, 1)[0];
+        items.splice(to, 0, moved);
+        input.value = items.join('\n');
+        renderGalleryThumbnails(containerId, inputId);
+      });
       container.appendChild(thumb);
     });
   }
-
-  function addCustomImageToLibrary(name, dataUrl) {
-    const newImg = {
-      id: 'custom-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
-      name: name || 'Imagen Subida',
-      category: getLibraryFolderConfig(),
-      folder: getLibraryFolderConfig(),
-      path: dataUrl
-    };
-    customLibraryImages.unshift(newImg);
-    try {
-      localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages));
-    } catch (e) {}
-    renderLibraryGrid();
-    return newImg;
-  }
-
-  function setupImageDropzones() {
-    const folderStyle = document.getElementById('library-folder-style');
-    if (folderStyle) folderStyle.addEventListener('change', setLibraryFolderUI);
-    setLibraryFolderUI();
-
-    // 1. Search in library
-    const searchInput = document.getElementById('library-search-input');
-    if (searchInput) {
-      searchInput.addEventListener('input', function (e) {
-        renderLibraryGrid(e.target.value);
-      });
-    }
-
-    // 2. Library modal upload dropzone
-    const libDropzone = document.getElementById('library-upload-dropzone');
-    const libFileInput = document.getElementById('library-upload-file-input');
-
-    if (libDropzone && libFileInput) {
-      libDropzone.addEventListener('click', () => libFileInput.click());
-      libDropzone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        libDropzone.classList.add('border-amber-400', 'bg-amber-400/10');
-      });
-      libDropzone.addEventListener('dragleave', () => {
-        libDropzone.classList.remove('border-amber-400', 'bg-amber-400/10');
-      });
-      libDropzone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        libDropzone.classList.remove('border-amber-400', 'bg-amber-400/10');
-        if (e.dataTransfer && e.dataTransfer.files) {
-          handleMultipleFilesUpload(e.dataTransfer.files);
-        }
-      });
-      libFileInput.addEventListener('change', (e) => {
-        if (e.target.files) {
-          handleMultipleFilesUpload(e.target.files);
-          e.target.value = '';
-        }
-      });
-    }
-
-    function handleMultipleFilesUpload(fileList) {
-      const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
-      if (files.length === 0) return;
-
-      let processed = 0;
-      let firstAdded = null;
-      files.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const dataUrl = event.target.result;
-          const added = addCustomImageToLibrary(file.name, dataUrl);
-          if (!firstAdded) firstAdded = added;
-          processed++;
-          if (processed === files.length) {
-            showStatusNotification({
-              title: 'Imágenes Guardadas',
-              message: `Se agregaron ${files.length} imágenes a tu biblioteca local.`,
-              type: 'success',
-              icon: '☁️'
-            });
-            if (currentLibraryTarget && firstAdded) {
-              selectImageFromLibrary(firstAdded.path, firstAdded.name);
-            }
-          }
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    // Helper for single image dropzones
-    function bindSingleDropzone(dropzoneId, fileInputId, inputId, previewId) {
-      const dz = document.getElementById(dropzoneId);
-      const fi = document.getElementById(fileInputId);
-      const inp = document.getElementById(inputId);
-      const prev = document.getElementById(previewId);
-
-      if (!dz) return;
-      if (fi) {
-        dz.addEventListener('click', () => fi.click());
-        fi.addEventListener('change', (e) => {
-          if (e.target.files && e.target.files[0]) {
-            processSingleFile(e.target.files[0]);
-            e.target.value = '';
-          }
-        });
-      }
-      dz.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dz.classList.add('border-amber-400', 'bg-amber-400/10');
-      });
-      dz.addEventListener('dragleave', () => {
-        dz.classList.remove('border-amber-400', 'bg-amber-400/10');
-      });
-      dz.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dz.classList.remove('border-amber-400', 'bg-amber-400/10');
-        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
-          processSingleFile(e.dataTransfer.files[0]);
-        }
-      });
-
-      function processSingleFile(file) {
-        if (!file.type.startsWith('image/')) return;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const dataUrl = event.target.result;
-          if (inp) inp.value = dataUrl;
-          if (prev) prev.src = dataUrl;
-          addCustomImageToLibrary(file.name, dataUrl);
-          showStatusNotification({
-            title: 'Imagen Cargada',
-            message: `"${file.name}" cargada correctamente.`,
-            type: 'success',
-            icon: '🖼️'
-          });
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-
-    // Helper for gallery dropzones
-    function bindGalleryDropzone(dropzoneId, fileInputId, containerId, hiddenInputId) {
-      const dz = document.getElementById(dropzoneId);
-      const fi = document.getElementById(fileInputId);
-      const hiddenInput = document.getElementById(hiddenInputId);
-
-      if (!dz) return;
-      if (fi) {
-        dz.addEventListener('click', () => fi.click());
-        fi.addEventListener('change', (e) => {
-          if (e.target.files) {
-            processGalleryFiles(e.target.files);
-            e.target.value = '';
-          }
-        });
-      }
-      dz.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dz.classList.add('border-amber-400', 'bg-amber-400/10');
-      });
-      dz.addEventListener('dragleave', () => {
-        dz.classList.remove('border-amber-400', 'bg-amber-400/10');
-      });
-      dz.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dz.classList.remove('border-amber-400', 'bg-amber-400/10');
-        if (e.dataTransfer && e.dataTransfer.files) {
-          processGalleryFiles(e.dataTransfer.files);
-        }
-      });
-
-      function processGalleryFiles(fileList) {
-        const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
-        if (files.length === 0) return;
-        files.forEach(file => {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            const dataUrl = event.target.result;
-            addCustomImageToLibrary(file.name, dataUrl);
-            if (hiddenInput) {
-              const current = hiddenInput.value ? hiddenInput.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
-              current.push(dataUrl);
-              hiddenInput.value = current.join('\n');
-              renderGalleryThumbnails(containerId, hiddenInputId);
-            }
-          };
-          reader.readAsDataURL(file);
-        });
-        showStatusNotification({
-          title: 'Galería Actualizada',
-          message: `Se agregaron ${files.length} capturas a la galería.`,
-          type: 'success',
-          icon: '📸'
-        });
-      }
-    }
-
-    bindSingleDropzone('edit-proj-icon-dropzone', 'edit-proj-icon-file', 'edit-proj-icon', 'edit-proj-icon-preview');
-    bindSingleDropzone('edit-proj-cover-dropzone', 'edit-proj-cover-file', 'edit-proj-cover', 'edit-proj-cover-preview');
-    bindGalleryDropzone('edit-proj-gallery-dropzone', 'edit-proj-gallery-files', 'edit-proj-gallery-thumbs', 'edit-proj-gallery');
-
-    bindSingleDropzone('new-proj-icon-dropzone', 'new-proj-icon-file', 'new-proj-icon', 'new-proj-icon-preview');
-    bindSingleDropzone('new-proj-cover-dropzone', 'new-proj-cover-file', 'new-proj-cover', 'new-proj-cover-preview');
-    bindGalleryDropzone('new-proj-gallery-dropzone', 'new-proj-gallery-files', 'new-proj-gallery-thumbs', 'new-proj-gallery');
-
-    bindSingleDropzone('test-form-avatar-dropzone', 'test-form-avatar-file', 'test-form-avatar', 'test-form-avatar-preview');
-  }
-
-  // 17. Event Listeners y arranque
-  document.addEventListener('DOMContentLoaded', function () {
-    applyTheme(currentTheme);
-    setupImageDropzones();
-    loadAllDataFromBackend();
-    loadLibraryManifestFromGithub();
-
-    // Confirm Modal Action Button
-    const confirmActionBtn = document.getElementById('confirm-modal-action-btn');
-    if (confirmActionBtn) {
-      confirmActionBtn.addEventListener('click', function () {
-        if (typeof activeConfirmCallback === 'function') {
-          activeConfirmCallback();
-        }
-        closeConfirmModal();
-      });
-    }
-
-    // Helper reactivo para fechas de experiencia laboral
-    const expCurrentCheck = document.getElementById('exp-form-current');
-    const expEndInput = document.getElementById('exp-form-end-date');
-    const expPeriodInput = document.getElementById('exp-form-period');
-    const expStartInput = document.getElementById('exp-form-start-date');
-
-    const updateExpPeriodText = () => {
-      if (!expPeriodInput) return;
-      const isCur = expCurrentCheck ? expCurrentCheck.checked : false;
-      const startVal = expStartInput ? expStartInput.value : '';
-      const endVal = expEndInput ? expEndInput.value : '';
-      
-      const formatMonthYear = (dateStr) => {
-        if (!dateStr) return '';
-        try {
-          const parts = dateStr.split('-');
-          if (parts.length < 2) return dateStr;
-          const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-          const idx = parseInt(parts[1], 10) - 1;
-          return (months[idx] || '') + ' ' + parts[0];
-        } catch (e) {
-          return dateStr;
-        }
-      };
-
-      if (isCur) {
-        expPeriodInput.value = startVal ? `${formatMonthYear(startVal)} — Presente` : 'Presente';
-      } else if (startVal && endVal) {
-        expPeriodInput.value = `${formatMonthYear(startVal)} — ${formatMonthYear(endVal)}`;
-      }
-    };
-
-    if (expCurrentCheck) {
-      expCurrentCheck.addEventListener('change', function () {
-        if (expEndInput) {
-          expEndInput.disabled = this.checked;
-          expEndInput.style.opacity = this.checked ? '0.4' : '1';
-          if (this.checked) expEndInput.value = '';
-        }
-        updateExpPeriodText();
-      });
-    }
-
-    if (expStartInput) expStartInput.addEventListener('change', updateExpPeriodText);
-    if (expEndInput) expEndInput.addEventListener('change', updateExpPeriodText);
-
-    // Theme toggle button
-    const themeBtn = document.getElementById('theme-toggle-btn');
-    if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
-
-    // Auth nav button
-    const authNavBtn = document.getElementById('nav-auth-btn');
-    if (authNavBtn) {
-      authNavBtn.addEventListener('click', function () {
-        if (isModerator) {
-          handleLogout();
-        } else {
-          openAuthModal();
-        }
-      });
-    }
-
-    // Filter Buttons (Origen)
-    const originButtons = document.querySelectorAll('[data-origin-filter]');
-    originButtons.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        originButtons.forEach(b => {
-          b.classList.remove('bg-amber-400', 'text-black', 'font-bold');
-          b.classList.add('bg-[#141822]', 'text-slate-300');
-        });
-        btn.classList.add('bg-amber-400', 'text-black', 'font-bold');
-        btn.classList.remove('bg-[#141822]', 'text-slate-300');
-
-        selectedOrigin = btn.getAttribute('data-origin-filter');
-        renderProjectsGrid(true);
-      });
-    });
-
-    // Category Buttons (Pills)
-    const categoryButtons = document.querySelectorAll('[data-category-filter]');
-    categoryButtons.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        categoryButtons.forEach(b => {
-          b.classList.remove('bg-white/20', 'text-white', 'border-amber-400');
-          b.classList.add('bg-white/5', 'text-slate-400');
-        });
-        btn.classList.add('bg-white/20', 'text-white', 'border-amber-400');
-        btn.classList.remove('bg-white/5', 'text-slate-400');
-
-        selectedCategory = btn.getAttribute('data-category-filter');
-        renderProjectsGrid(true);
-      });
-    });
-
-    // Search Input
-    const searchInput = document.getElementById('projects-search-input');
-    if (searchInput) {
-      searchInput.addEventListener('input', function (e) {
-        searchQuery = e.target.value;
-        renderProjectsGrid(true);
-      });
-    }
-
-    const searchClear = document.getElementById('projects-search-clear');
-    if (searchClear && searchInput) {
-      searchClear.addEventListener('click', function () {
-        searchInput.value = '';
-        searchQuery = '';
-        renderProjectsGrid(true);
-      });
-    }
-
-    // Reset filters button
-    const resetFiltersBtn = document.getElementById('reset-filters-btn');
-    if (resetFiltersBtn) {
-      resetFiltersBtn.addEventListener('click', function () {
-        selectedOrigin = 'todos';
-        selectedCategory = 'todos';
-        searchQuery = '';
-        if (searchInput) searchInput.value = '';
-
-        // Reset UI active states
-        originButtons.forEach(b => {
-          if (b.getAttribute('data-origin-filter') === 'todos') {
-            b.classList.add('bg-amber-400', 'text-black', 'font-bold');
-            b.classList.remove('bg-[#141822]', 'text-slate-300');
-          } else {
-            b.classList.remove('bg-amber-400', 'text-black', 'font-bold');
-            b.classList.add('bg-[#141822]', 'text-slate-300');
-          }
-        });
-
-        categoryButtons.forEach(b => {
-          if (b.getAttribute('data-category-filter') === 'todos') {
-            b.classList.add('bg-white/20', 'text-white', 'border-amber-400');
-            b.classList.remove('bg-white/5', 'text-slate-400');
-          } else {
-            b.classList.remove('bg-white/20', 'text-white', 'border-amber-400');
-            b.classList.add('bg-white/5', 'text-slate-400');
-          }
-        });
-
-        renderProjectsGrid(true);
-      });
-    }
-
-    // Quick metric cards in Hero
-    const metricCards = document.querySelectorAll('[data-hero-metric]');
-    metricCards.forEach(function (card) {
-      card.addEventListener('click', function () {
-        const origin = card.getAttribute('data-hero-metric');
-        selectedOrigin = origin;
-        originButtons.forEach(b => {
-          if (b.getAttribute('data-origin-filter') === origin) {
-            b.classList.add('bg-amber-400', 'text-black', 'font-bold');
-            b.classList.remove('bg-[#141822]', 'text-slate-300');
-          } else {
-            b.classList.remove('bg-amber-400', 'text-black', 'font-bold');
-            b.classList.add('bg-[#141822]', 'text-slate-300');
-          }
-        });
-        renderProjectsGrid(true);
-        const projSection = document.getElementById('proyectos');
-        if (projSection) {
-          projSection.scrollIntoView({ behavior: 'smooth' });
-        }
-      });
-    });
-
-    // Form submits
-    const contactForm = document.getElementById('contact-form');
-    if (contactForm) contactForm.addEventListener('submit', handleContactSubmit);
-
-    const authForm = document.getElementById('auth-form');
-    if (authForm) authForm.addEventListener('submit', handleAuthSubmit);
-
-    const addProjForm = document.getElementById('add-project-form');
-    if (addProjForm) addProjForm.addEventListener('submit', handleAddProjectSubmit);
-
-    const editProjForm = document.getElementById('edit-project-form');
-    if (editProjForm) editProjForm.addEventListener('submit', handleEditProjectSubmit);
-
-    const expForm = document.getElementById('experience-form');
-    if (expForm) expForm.addEventListener('submit', handleExperienceSubmit);
-
-    const testForm = document.getElementById('testimonial-form');
-    if (testForm) testForm.addEventListener('submit', handleTestimonialSubmit);
-
-    const feedbackForm = document.getElementById('feedback-submission-form');
-    if (feedbackForm) feedbackForm.addEventListener('submit', handleFeedbackSubmit);
-
-    const createCodeForm = document.getElementById('create-code-form');
-    if (createCodeForm) createCodeForm.addEventListener('submit', handleCreateCodeSubmit);
-
-    // Keyboard navigation (Escape, ArrowLeft, ArrowRight)
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') {
-        closeProjectModal();
-        closeContactModal();
-        closeResumeModal();
-        closeAuthModal();
-        closeAddProjectModal();
-        closeEditProjectModal();
-        closeSatisfiedClientsModal();
-        closeExperienceModal();
-        closeTestimonialModal();
-        closeFeedbackModal();
-        closeFeedbackCodesModal();
-        closeImageLibraryModal();
-        closeConfirmModal();
-        closeSyncFilesModal();
-      } else if (e.key === 'ArrowLeft') {
-        navigateProjectModal(-1);
-      } else if (e.key === 'ArrowRight') {
-        navigateProjectModal(1);
-      }
-    });
-
-    updateModeratorUI();
-    renderProjectsGrid();
-    renderExperiences();
-    renderTestimonialsPreview();
-    checkFeedbackUrlParam();
-  });
-
-  // Exponer API global para interactividad
-  window.ElyPortfolio = {
-    // Confirmación In-App
-    showConfirmModal: showConfirmModal,
-    closeConfirmModal: closeConfirmModal,
-    // Gestión y Sincronización de Archivos
-    openSyncFilesModal: openSyncFilesModal,
-    closeSyncFilesModal: closeSyncFilesModal,
-    saveAllDataToBackend: saveAllDataToBackend,
-    syncAllToGithub: syncAllToGithub,
-    saveAllDataToBackend: saveAllDataToBackend,
-    loadAllDataFromBackend: loadAllDataFromBackend,
-    // Proyectos
-    openProjectModal: openProjectModal,
-    closeProjectModal: closeProjectModal,
-    navigateProjectModal: navigateProjectModal,
-    setModalMediaMode: setModalMediaMode,
-    selectModalImage: selectModalImage,
-    cycleModalImage: cycleModalImage,
-    openAddProjectModal: openAddProjectModal,
-    closeAddProjectModal: closeAddProjectModal,
-    openEditProjectModal: openEditProjectModal,
-    closeEditProjectModal: closeEditProjectModal,
-    moveProjectOrder: moveProjectOrder,
-    duplicateProject: duplicateProject,
-    setProjectWorkCount: setProjectWorkCount,
-    changeProjectWorkCount: changeProjectWorkCount,
-    setCategoryWorkCount: setCategoryWorkCount,
-    changeCategoryWorkCount: changeCategoryWorkCount,
-    deleteProject: deleteProject,
-    // Experiencias Laborales & Contratos
-    renderExperiences: renderExperiences,
-    toggleSortExperiencesByDate: toggleSortExperiencesByDate,
-    moveExperienceOrder: moveExperienceOrder,
-    duplicateExperience: duplicateExperience,
-    deleteExperience: deleteExperience,
-    openAddExperienceModal: openAddExperienceModal,
-    openEditExperienceModal: openEditExperienceModal,
-    closeExperienceModal: closeExperienceModal,
-    // Feedback & Clientes Satisfechos
-    renderTestimonialsPreview: renderTestimonialsPreview,
-    renderSatisfiedClientsModalList: renderSatisfiedClientsModalList,
-    openSatisfiedClientsModal: openSatisfiedClientsModal,
-    closeSatisfiedClientsModal: closeSatisfiedClientsModal,
-    moveTestimonialOrder: moveTestimonialOrder,
-    duplicateTestimonial: duplicateTestimonial,
-    deleteTestimonial: deleteTestimonial,
-    openAddTestimonialModal: openAddTestimonialModal,
-    openEditTestimonialModal: openEditTestimonialModal,
-    closeTestimonialModal: closeTestimonialModal,
-    // Feedback con Código Especial (Clientes)
-    openFeedbackModal: openFeedbackModal,
-    closeFeedbackModal: closeFeedbackModal,
-    // Gestión de Códigos de Feedback (Moderador)
-    openFeedbackCodesModal: openFeedbackCodesModal,
-    closeFeedbackCodesModal: closeFeedbackCodesModal,
-    generateRandomCodeInput: generateRandomCodeInput,
-    toggleDisableCode: toggleDisableCode,
-    deleteFeedbackCode: deleteFeedbackCode,
-    copyFeedbackLink: copyFeedbackLink,
-    // Modales de contacto, auth, CV y utilidades
-    showStatusNotification: showStatusNotification,
-    openContactModal: openContactModal,
-    closeContactModal: closeContactModal,
-    openResumeModal: openResumeModal,
-    closeResumeModal: closeResumeModal,
-    openAuthModal: openAuthModal,
-    closeAuthModal: closeAuthModal,
-    resetSampleData: resetSampleData,
-    toggleTheme: toggleTheme,
-    toggleVisitorPreview: toggleVisitorPreview,
-    setVisitorPreviewMode: setVisitorPreviewMode,
-    // Biblioteca de Imágenes & Multimedia (Drag and Drop & Assets)
-    openImageLibraryModal: openImageLibraryModal,
-    closeImageLibraryModal: closeImageLibraryModal,
-    openLibraryImagePreview: openLibraryImagePreview,
-    closeLibraryImagePreview: closeLibraryImagePreview,
-    deleteCustomLibraryImage: deleteCustomLibraryImage,
-    moveCustomLibraryImageOrder: moveCustomLibraryImageOrder,
-    moveCustomLibraryImageTo: moveCustomLibraryImageTo,
-    openImageLibraryForInput: openImageLibraryForInput,
-    openImageLibraryForGallery: openImageLibraryForGallery,
-    renderGalleryThumbnails: renderGalleryThumbnails
-  };
-})();
