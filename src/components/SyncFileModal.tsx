@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { Project } from '../types/portfolio';
 import {
-  FileJson,
   Download,
   Upload,
   Copy,
   Check,
-  Save,
   Github,
   X,
   FileCode,
   HardDrive,
-  Info
+  Info,
+  Loader2,
+  RefreshCw,
+  Cloud,
+  AlertTriangle
 } from 'lucide-react';
 
 interface SyncFileModalProps {
@@ -31,11 +33,17 @@ export const SyncFileModal: React.FC<SyncFileModalProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const jsonString = JSON.stringify(projects, null, 2);
+
+  const showStatus = (type: 'success' | 'error' | 'info', message: string, autoClear = true) => {
+    setSaveStatus({ type, message });
+    if (autoClear) setTimeout(() => setSaveStatus(null), 5000);
+  };
 
   const handleCopyJson = () => {
     navigator.clipboard.writeText(jsonString);
@@ -84,34 +92,34 @@ export const exportedProjects: Project[] = ${jsonString};
         const list = Array.isArray(parsed) ? parsed : parsed.projects;
         if (Array.isArray(list) && list.length > 0) {
           onImportProjects(list);
-          setSaveStatus(`✓ ${list.length} proyectos importados exitosamente`);
-          setTimeout(() => setSaveStatus(null), 3500);
+          showStatus('success', `✓ ${list.length} proyectos importados exitosamente`);
         } else {
-          setSaveStatus('⚠ El archivo no contiene un arreglo válido de proyectos');
+          showStatus('error', '⚠ El archivo no contiene un arreglo válido de proyectos');
         }
       } catch (err: any) {
-        setSaveStatus('⚠ Error al leer archivo JSON: ' + err.message);
+        showStatus('error', '⚠ Error al leer archivo JSON: ' + err.message);
       }
     };
     reader.readAsText(file);
     e.target.value = '';
   };
 
-  const handleManualSave = async () => {
+  const handleApplyChanges = async () => {
     setIsSaving(true);
     setSaveStatus(null);
     try {
       const ok = await onSaveToFile();
       if (ok) {
-        setSaveStatus('✓ Guardado en archivo (src/data/projects.json) en disco exitosamente');
+        const now = new Date().toLocaleString('es-ES');
+        setLastSavedAt(now);
+        showStatus('success', `✓ Cambios aplicados exitosamente. ${projects.length} elementos guardados en src/data/projects.json, public/data y docs/data. Listo para git push.`, false);
       } else {
-        setSaveStatus('⚠ No se pudo escribir en el servidor local. Puedes descargar el archivo projects.json.');
+        showStatus('error', '⚠ No se pudo escribir en el servidor. Puedes descargar el archivo projects.json y colocarlo manualmente en tu repositorio.', false);
       }
     } catch (err: any) {
-      setSaveStatus('⚠ Error: ' + err.message);
+      showStatus('error', '⚠ Error: ' + err.message, false);
     } finally {
       setIsSaving(false);
-      setTimeout(() => setSaveStatus(null), 4000);
     }
   };
 
@@ -126,10 +134,10 @@ export const exportedProjects: Project[] = ${jsonString};
             </div>
             <div>
               <h2 className="text-lg font-bold text-white font-display">
-                Sincronización de Archivo para GitHub
+                Sincronización de Archivos para GitHub
               </h2>
               <p className="text-xs text-slate-400">
-                Guarda, descarga o importa los proyectos en el archivo <code className="text-amber-400 font-mono">src/data/projects.json</code>
+                Guarda, descarga o importa los proyectos en el archivo <code className="text-amber-400 font-mono">projects.json</code>
               </p>
             </div>
           </div>
@@ -142,50 +150,86 @@ export const exportedProjects: Project[] = ${jsonString};
           </button>
         </div>
 
+        {/* Apply Changes Button - Prominent */}
+        <div className="mb-5">
+          <button
+            type="button"
+            onClick={handleApplyChanges}
+            disabled={isSaving}
+            className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-xl bg-amber-400 text-black font-bold text-sm hover:bg-amber-300 transition-all shadow-lg hover:shadow-amber-400/20 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Aplicando cambios...</span>
+              </>
+            ) : (
+              <>
+                <Cloud className="w-5 h-5" />
+                <span>Aplicar Cambios y Guardar en Archivos</span>
+              </>
+            )}
+          </button>
+          {lastSavedAt && !saveStatus && (
+            <p className="text-[11px] text-slate-500 mt-1.5 text-center">
+              Última sincronización: {lastSavedAt}
+            </p>
+          )}
+        </div>
+
+        {/* Status notification */}
+        {saveStatus && (
+          <div
+            className={`mb-4 p-3 rounded-lg border text-xs font-semibold animate-in fade-in duration-200 ${
+              saveStatus.type === 'success'
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                : saveStatus.type === 'error'
+                ? 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+                : 'bg-[#18202d] border-amber-400/30 text-amber-300'
+            }`}
+          >
+            {saveStatus.message}
+          </div>
+        )}
+
         {/* Info Callout */}
         <div className="mb-5 rounded-xl border border-amber-400/20 bg-amber-400/5 p-3.5 text-xs text-amber-200/90 flex items-start gap-2.5">
           <Info className="w-4 h-4 shrink-0 text-amber-400 mt-0.5" />
           <div className="space-y-1">
             <p className="font-semibold text-amber-300">
-              ¡Guardado automático activo en el archivo del proyecto!
+              Cómo funciona la sincronización
             </p>
             <p className="text-slate-300">
-              Cada vez que agregas, editas o eliminas un proyecto o servicio, se guarda automáticamente en <code className="px-1 py-0.5 rounded bg-black/40 text-amber-400 font-mono">src/data/projects.json</code> en el disco.
+              Al hacer clic en <strong>"Aplicar Cambios"</strong>, los datos se guardan automáticamente en <code className="px-1 py-0.5 rounded bg-black/40 text-amber-400 font-mono">src/data/projects.json</code>, <code className="px-1 py-0.5 rounded bg-black/40 text-amber-400 font-mono">public/data/projects.json</code> y <code className="px-1 py-0.5 rounded bg-black/40 text-amber-400 font-mono">docs/data/projects.json</code> en el disco del proyecto.
             </p>
             <p className="text-slate-400 text-[11px]">
-              Al hacer <code className="text-slate-200">git status</code>, <code className="text-slate-200">git add .</code>, <code className="text-slate-200">git commit</code> y <code className="text-slate-200">git push</code>, tus cambios quedarán inmediatamente sincronizados con tu repositorio de GitHub.
+              Las imágenes subidas se guardan en <code className="text-slate-200">public/images/</code>, <code className="text-slate-200">docs/images/</code> y <code className="text-slate-200">src/assets/images/</code>.
+              Luego ejecuta <code className="text-slate-200">git add .</code>, <code className="text-slate-200">git commit -m "update"</code> y <code className="text-slate-200">git push</code> para sincronizar con GitHub.
             </p>
           </div>
         </div>
-
-        {/* Status notification */}
-        {saveStatus && (
-          <div className="mb-4 p-3 rounded-lg bg-[#18202d] border border-amber-400/30 text-xs font-semibold text-amber-300 animate-in fade-in duration-200">
-            {saveStatus}
-          </div>
-        )}
 
         {/* Actions Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
           {/* Action 1: Save to file in disk */}
           <button
             type="button"
-            onClick={handleManualSave}
+            onClick={handleApplyChanges}
             disabled={isSaving}
-            className="flex items-center gap-3 p-3.5 rounded-xl border border-[#232733] bg-[#171b26] hover:bg-[#1d2230] hover:border-amber-400/40 text-left transition-all group"
+            className="flex items-center gap-3 p-3.5 rounded-xl border border-[#232733] bg-[#171b26] hover:bg-[#1d2230] hover:border-amber-400/40 text-left transition-all group disabled:opacity-50"
           >
             <div className="p-2.5 rounded-lg bg-amber-400 text-black group-hover:scale-105 transition-transform">
-              <HardDrive className="w-4 h-4" />
+              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <HardDrive className="w-4 h-4" />}
             </div>
             <div>
               <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                <span>Guardar archivo en disco</span>
+                <span>Guardar en disco</span>
                 <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-400/20 text-amber-300 font-mono">
                   {projects.length} items
                 </span>
               </div>
               <div className="text-[11px] text-slate-400 mt-0.5">
-                Escribe en src/data/projects.json
+                Escribe en todos los projects.json
               </div>
             </div>
           </button>
@@ -246,11 +290,11 @@ export const exportedProjects: Project[] = ${jsonString};
           </label>
         </div>
 
-        {/* JSON Preview preview collapsible */}
+        {/* JSON Preview */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span className="font-mono text-[11px] text-slate-300">
-              Vista previa: src/data/projects.json ({projects.length} elementos)
+              Vista previa: projects.json ({projects.length} elementos)
             </span>
             <button
               type="button"
@@ -271,13 +315,21 @@ export const exportedProjects: Project[] = ${jsonString};
           <span className="text-[11px] text-slate-500">
             Total en catálogo: <strong className="text-slate-300">{projects.length}</strong> items
           </span>
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-semibold transition-colors"
-          >
-            Cerrar
-          </button>
+          <div className="flex items-center gap-2">
+            {saveStatus?.type === 'success' && (
+              <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400">
+                <Check className="w-3 h-3" />
+                Sincronizado
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-semibold transition-colors"
+            >
+              Cerrar
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
+import multer from 'multer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -194,6 +195,69 @@ app.post('/api/sync-all', (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+// Image upload directories — images are saved to all these locations
+const IMAGE_DIRECTORIES = [
+  path.resolve(__dirname, 'public/images'),
+  path.resolve(__dirname, 'docs/images'),
+  path.resolve(__dirname, 'src/assets/images'),
+];
+
+// Multer storage: save to a temp memory buffer, we write to all dirs manually
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max
+  fileFilter: (_req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Tipo de archivo no soportado. Usa JPG, PNG, GIF, WebP o SVG.'));
+    }
+  },
+});
+
+// Image upload endpoint
+app.post('/api/upload-image', upload.single('image'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No se envió ningún archivo.' });
+    }
+
+    const ext = path.extname(req.file.originalname) || `.${req.file.mimetype.split('/')[1]}`;
+    const filename = `img_${Date.now()}${ext}`;
+    const savedPaths: string[] = [];
+
+    for (const dir of IMAGE_DIRECTORIES) {
+      try {
+        ensureDirectoryExists(dir);
+        const targetPath = path.join(dir, filename);
+        fs.writeFileSync(targetPath, req.file.buffer);
+        savedPaths.push(targetPath);
+      } catch (err) {
+        console.error(`Could not write image to ${dir}/${filename}:`, err);
+      }
+    }
+
+    // The URL path that the frontend should use for the image
+    const imageUrl = `./images/${filename}`;
+
+    console.log(`[IMAGE UPLOAD] Imagen guardada: ${filename} en ${savedPaths.length} directorios`);
+    res.json({
+      success: true,
+      message: 'Imagen guardada exitosamente en el proyecto.',
+      filename,
+      imageUrl,
+      savedPaths,
+    });
+  } catch (err: any) {
+    console.error('[IMAGE UPLOAD ERROR]:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Serve uploaded images statically
+app.use('/images', express.static(path.resolve(__dirname, 'public/images')));
 
 // Status check endpoint
 app.get('/api/status', (_req, res) => {
