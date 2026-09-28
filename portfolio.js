@@ -4842,6 +4842,8 @@
     duplicateProject: duplicateProject,
     setProjectWorkCount: setProjectWorkCount,
     changeProjectWorkCount: changeProjectWorkCount,
+    setCategoryWorkCount: setCategoryWorkCount,
+    changeCategoryWorkCount: changeCategoryWorkCount,
     deleteProject: deleteProject,
     // Experiencias Laborales & Contratos
     renderExperiences: renderExperiences,
