@@ -49,15 +49,25 @@
       {
         "label": "Ver Teaser #2 en YouTube",
         "url": "https://www.youtube.com/watch?v=PH6cK45nkto",
-        "type": "video"
+        "type": "external"
       },
       {
         "label": "Colaboración Musical Cifra Slimk",
         "url": "https://www.youtube.com/watch?v=jA9kxcgnPmw",
-        "type": "video"
+        "type": "external"
       }
     ],
-    "requirements": []
+    "requirements": [],
+    "cardEffects": [
+      "electrify",
+      "shake"
+    ],
+    "cardEffect": "electrify",
+    "cardEffectColor": "#ff0000",
+    "icon": "./assets/images/ely/odd.png",
+    "playStoreUrl": "",
+    "itchUrl": "",
+    "steamUrl": ""
   },
   {
     "id": "en-una-goma",
