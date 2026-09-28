@@ -1303,6 +1303,22 @@
     if (classesCountEl) classesCountEl.textContent = projects.filter(p => p.origin === 'clases').length;
   }
 
+  function setProjectWorkCount(projectId, value) {
+    const project = projects.find(p => p.id === projectId);
+    if (!project || (project.origin !== 'servicios' && project.origin !== 'clases')) return;
+    const count = Math.max(0, Math.floor(Number(value) || 0));
+    project.workedCount = count;
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (e) {}
+    renderProjectsGrid();
+    syncProjectsWithBackend(projects);
+  }
+
+  function changeProjectWorkCount(projectId, delta) {
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+    setProjectWorkCount(projectId, Math.max(0, (Number(project.workedCount) || 0) + delta));
+  }
+
   function renderProjectsGrid(forceFilterTransition) {
     filteredProjects = getFilteredProjects();
     updateCatalogHeaders();
@@ -1501,6 +1517,26 @@
               <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">
                 ${project.description}
               </p>
+
+              ${(isServ || isClas) ? `
+                <div class="mt-3 rounded-xl bg-gradient-to-r from-amber-400/10 via-amber-400/5 to-transparent border border-amber-400/20 p-3" onclick="event.stopPropagation()">
+                  <div class="flex items-center justify-between gap-2">
+                    <div>
+                      <div class="text-[10px] uppercase tracking-wider font-bold text-amber-400">Veces trabajado</div>
+                      <div class="text-[9px] text-slate-500 mt-0.5">Trabajos realizados</div>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      ${isModerator ? `
+                        <button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.changeProjectWorkCount('${project.id}', -1)" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-red-500/30 text-white font-black text-lg leading-none">−</button>
+                        <input type="number" min="0" step="1" value="${Math.max(0, Number(project.workedCount) || 0)}" onchange="window.ElyPortfolio.setProjectWorkCount('${project.id}', this.value)" onclick="event.stopPropagation()" class="w-14 h-8 rounded-lg bg-[#0b0d11] border border-amber-400/30 text-center text-sm font-black text-amber-300 outline-none focus:border-amber-400" />
+                        <button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.changeProjectWorkCount('${project.id}', 1)" class="w-7 h-7 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-black text-lg leading-none">+</button>
+                      ` : `
+                        <span class="text-3xl font-black text-amber-400 leading-none drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]">${Math.max(0, Number(project.workedCount) || 0)}</span>
+                      `}
+                    </div>
+                  </div>
+                </div>
+              ` : ''}
             </div>
 
             <div class="space-y-3 pt-2 border-t border-[#1e2330]">
@@ -4768,6 +4804,8 @@
     closeEditProjectModal: closeEditProjectModal,
     moveProjectOrder: moveProjectOrder,
     duplicateProject: duplicateProject,
+    setProjectWorkCount: setProjectWorkCount,
+    changeProjectWorkCount: changeProjectWorkCount,
     deleteProject: deleteProject,
     // Experiencias Laborales & Contratos
     renderExperiences: renderExperiences,
