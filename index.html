@@ -37,7 +37,7 @@
     <!-- Estilos Nativos -->
     <link rel="stylesheet" href="./style.css">
   <style>
-.card-effect-red,.card-effect-gold,.card-effect-blue,.card-effect-electrify,.card-effect-shake{position:relative;isolation:isolate;}
+.card-effect-red,.card-effect-gold,.card-effect-blue,.card-effect-electrify,.card-effect-rainbow,.card-effect-shake{position:relative;isolation:isolate;}
 .card-effect-red,.card-effect-gold,.card-effect-blue,.card-effect-electrify{overflow:visible!important;z-index:1;}
 .card-effect-red{--card-effect-color:#ef4444;--card-effect-soft:rgba(239,68,68,.65);--card-effect-light:#fca5a5;}
 .card-effect-gold{--card-effect-color:#fbbf24;--card-effect-soft:rgba(251,191,36,.65);--card-effect-light:#fde68a;}
@@ -46,9 +46,9 @@
 .card-effect-red,.card-effect-gold,.card-effect-blue,.card-effect-electrify{box-shadow:0 0 0 1px color-mix(in srgb,var(--card-effect-color) 55%,transparent),0 0 14px color-mix(in srgb,var(--card-effect-color) 18%,transparent);}
 .card-effect-red::before,.card-effect-gold::before,.card-effect-blue::before,.card-effect-electrify::before{content:"";position:absolute;inset:-4px;border:2px solid var(--card-effect-color);border-radius:inherit;pointer-events:none;box-sizing:border-box;z-index:100;filter:url(#ely-electric-border);box-shadow:0 0 4px var(--card-effect-color),0 0 12px var(--card-effect-soft),0 0 22px color-mix(in srgb,var(--card-effect-color) 30%,transparent),inset 0 0 5px color-mix(in srgb,var(--card-effect-color) 35%,transparent);mix-blend-mode:screen;}
 .card-effect-red::after,.card-effect-gold::after,.card-effect-blue::after,.card-effect-electrify::after{content:"";position:absolute;inset:-2px;border:2px solid var(--card-effect-light);border-radius:inherit;pointer-events:none;box-sizing:border-box;z-index:99;opacity:.72;filter:blur(3px);box-shadow:0 0 8px var(--card-effect-color),0 0 20px var(--card-effect-soft),inset 0 0 8px color-mix(in srgb,var(--card-effect-color) 42%,transparent);mix-blend-mode:screen;}
-.card-effect-shake{animation:card-shake .8s ease-in-out infinite;}
+.card-effect-rainbow{position:relative;isolation:isolate;overflow:visible!important;z-index:1;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 0 18px rgba(124,58,237,.18);}\n.card-effect-rainbow::before{content:"";position:absolute;inset:-4px;padding:2px;border-radius:inherit;pointer-events:none;box-sizing:border-box;z-index:100;background:conic-gradient(from 0deg,#ff004c,#ff7a00,#ffe600,#19ff7c,#00d9ff,#4169ff,#b000ff,#ff004c);animation:rainbow-border-spin 2.8s linear infinite;filter:drop-shadow(0 0 5px rgba(255,0,150,.65)) drop-shadow(0 0 12px rgba(0,210,255,.35));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;}\n.card-effect-rainbow::after{content:"";position:absolute;inset:-7px;border-radius:inherit;pointer-events:none;z-index:99;background:conic-gradient(from 0deg,#ff004c,#ff7a00,#ffe600,#19ff7c,#00d9ff,#4169ff,#b000ff,#ff004c);animation:rainbow-border-spin 2.8s linear infinite;filter:blur(8px);opacity:.42;mix-blend-mode:screen;}\n@keyframes rainbow-border-spin{to{transform:rotate(360deg)}}\n.card-effect-shake{animation:card-shake .8s ease-in-out infinite;}
 @keyframes card-shake{0%,100%{transform:translate(0,0) rotate(0)}20%{transform:translate(-1px,.5px) rotate(-.12deg)}40%{transform:translate(1px,-.5px) rotate(.12deg)}60%{transform:translate(-.7px,-.4px) rotate(-.08deg)}80%{transform:translate(.7px,.4px) rotate(.08deg)}}
-@media (prefers-reduced-motion:reduce){.card-effect-red::before,.card-effect-gold::before,.card-effect-blue::before{filter:none;}.card-effect-shake{animation:none;}}
+@media (prefers-reduced-motion:reduce){.card-effect-red::before,.card-effect-gold::before,.card-effect-blue::before,.card-effect-rainbow::before,.card-effect-rainbow::after{filter:none;animation:none;}.card-effect-shake{animation:none;}}
 </style></head>
   <body class="bg-[#0b0d11] text-[#ededef] antialiased selection:bg-amber-400 selection:text-black">
     <svg aria-hidden="true" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none"><defs>
