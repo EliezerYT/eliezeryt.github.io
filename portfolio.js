@@ -6313,7 +6313,7 @@
   function initElyDevMotionEnhancements() {
     const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const grid = document.getElementById('projects-grid');
-    const revealTargets = document.querySelectorAll('#projects-grid > article, section > div.grid > article, section > div.grid > div, .group.cursor-pointer');
+    const revealTargets = document.querySelectorAll('#projects-grid > article:not([data-asset-id]), section > div.grid > article, section > div.grid > div, .group.cursor-pointer');
     
     document.querySelectorAll('button, a').forEach(function (el) {
       if (!el.classList.contains('ely-magnetic')) el.classList.add('ely-magnetic');
@@ -6332,7 +6332,7 @@
       }
     });
     
-    document.querySelectorAll('#projects-grid > article').forEach(function (card) {
+    document.querySelectorAll('#projects-grid > article:not([data-asset-id])').forEach(function (card) {
       card.classList.add('ely-interactive-card');
       if (!card.querySelector('.ely-spotlight')) {
         const spotlight = document.createElement('span');
@@ -6359,7 +6359,7 @@
       });
     }
     
-    document.querySelectorAll('#projects-grid > article').forEach(function (card) {
+    document.querySelectorAll('#projects-grid > article:not([data-asset-id])').forEach(function (card) {
       if (card.dataset.elyMotionBound !== '1') {
         card.dataset.elyMotionBound = '1';
         card.addEventListener('pointermove', function (e) {
