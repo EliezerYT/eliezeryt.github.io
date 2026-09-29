@@ -1605,6 +1605,9 @@
     const sortSelect = document.getElementById('asset-sort-select');
     if (sortSelect) sortSelect.value = selectedAssetSort;
     const favoritesBtn = document.getElementById('asset-favorites-filter');
+    const viewBtn = document.getElementById('asset-view-toggle');
+    if (viewBtn) viewBtn.textContent = assetViewMode === 'cards' ? '☷ Lista' : '▦ Cards';
+    container.classList.toggle('assets-list-view', assetViewMode === 'list');
     if (favoritesBtn) {
       favoritesBtn.classList.toggle('bg-amber-400', showOnlyFavoriteAssets);
       favoritesBtn.classList.toggle('text-black', showOnlyFavoriteAssets);
