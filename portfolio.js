@@ -6354,7 +6354,7 @@
     });
     
     if (!reduceMotion) {
-      document.querySelectorAll('.ely-motion-item').forEach(function (el) {
+      document.querySelectorAll('.ely-motion-item:not(.ely-revealed)').forEach(function (el) {
         el.classList.add('ely-reveal-pending');
       });
     }
@@ -6425,7 +6425,7 @@
     }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
     
     if (!reduceMotion) {
-      document.querySelectorAll('.ely-reveal-pending').forEach(function (el) { observer.observe(el); });
+      document.querySelectorAll('.ely-reveal-pending:not(.ely-revealed)').forEach(function (el) { observer.observe(el); });
     } else {
       document.querySelectorAll('.ely-motion-item').forEach(function (el) { el.classList.add('ely-revealed'); });
     }
