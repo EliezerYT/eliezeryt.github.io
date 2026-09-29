@@ -5231,60 +5231,151 @@
     }
   }
 
-  function loadAllDataFromBackend() {
+  async function loadAllDataFromBackend() {
     if (typeof fetch !== 'function') return;
 
-    const cacheBust = Date.now();
-    const githubDataBase = 'https://github.com/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/raw/refs/heads/' + GITHUB_BRANCH + '/public/data';
-
-    const loadJson = async (name, onData) => {
-      const urls = [
-        githubDataBase + '/' + name + '.json?v=' + cacheBust,
-        './data/' + name + '.json?v=' + cacheBust,
-        './public/data/' + name + '.json?v=' + cacheBust,
-        './docs/data/' + name + '.json?v=' + cacheBust
-      ];
-
-      for (const url of urls) {
-        try {
-          const response = await fetch(url, { cache: 'no-store' });
-          if (!response.ok) continue;
-          const data = await response.json();
-          if (Array.isArray(data) && data.length > 0) {
-            onData(data);
-            return true;
-          }
-        } catch (e) {}
+    const loadFromGoogleSheets = async () => {
+      const url = GLOBAL_COUNTER_URL + '?action=loadSheetData&cacheBust=' + Date.now();
+      const response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) throw new Error('Google Sheets HTTP ' + response.status);
+      const result = await response.json();
+      if (!result || !result.success) {
+        throw new Error(result && result.error ? result.error : 'Google Sheets no devolvió datos.');
       }
 
-      return false;
+      const cards = Array.isArray(result.cards) ? result.cards : [];
+      const feedbacks = Array.isArray(result.feedbacks) ? result.feedbacks : [];
+
+      const cardMap = {};
+      cards.forEach(function(record) {
+        if (record && record.id) cardMap[String(record.id)] = record;
+      });
+
+      const projectsFromSheet = cards
+        .filter(function(record) { return record && record.type === 'project' && record.data; })
+        .map(function(record) { return record.data; });
+
+      const experiencesFromSheet = cards
+        .filter(function(record) { return record && record.type === 'experience' && record.data; })
+        .map(function(record) { return record.data; });
+
+      const assetsFromSheet = cards
+        .filter(function(record) { return record && record.type === 'asset' && record.data; })
+        .map(function(record) { return record.data; });
+
+      const codesFromSheet = cards
+        .filter(function(record) { return record && record.type === 'feedback_code' && record.data; })
+        .map(function(record) { return record.data; });
+
+      const profileRecord = cardMap.profile;
+      if (profileRecord && profileRecord.data && typeof profileRecord.data === 'object') {
+        Object.assign(initialProfile, profileRecord.data);
+      }
+
+      const feedbacksFromSheet = feedbacks
+        .filter(function(record) { return record && record.data; })
+        .map(function(record) { return record.data; });
+
+      if (projectsFromSheet.length > 0) {
+        projects = projectsFromSheet;
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (e) {}
+        renderProjectsGrid();
+      }
+
+      if (experiencesFromSheet.length > 0) {
+        experiences = experiencesFromSheet;
+        try { localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences)); } catch (e) {}
+        renderExperiences();
+      }
+
+      if (feedbacksFromSheet.length > 0) {
+        satisfiedClients = feedbacksFromSheet;
+        try { localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients)); } catch (e) {}
+        renderTestimonialsPreview();
+        renderSatisfiedClientsModalList();
+      }
+
+      if (assetsFromSheet.length > 0) {
+        assets = assetsFromSheet;
+        try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
+        if (selectedOrigin === 'assets') renderAssetsGrid();
+        checkAssetHashParam();
+      }
+
+      if (codesFromSheet.length > 0) {
+        feedbackCodes = codesFromSheet;
+        try { localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes)); } catch (e) {}
+      }
+
+      return {
+        projects: projectsFromSheet.length,
+        experiences: experiencesFromSheet.length,
+        feedbacks: feedbacksFromSheet.length,
+        assets: assetsFromSheet.length,
+        feedbackCodes: codesFromSheet.length
+      };
     };
 
-    loadJson('projects', (list) => {
-      projects = list;
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (e) {}
-      renderProjectsGrid();
-    });
+    const loadGithubFallback = async () => {
+      const cacheBust = Date.now();
+      const githubDataBase = 'https://github.com/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/raw/refs/heads/' + GITHUB_BRANCH + '/public/data';
 
-    loadJson('experiences', (list) => {
-      experiences = list;
-      try { localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences)); } catch (e) {}
-      renderExperiences();
-    });
+      const loadJson = async (name, onData) => {
+        const urls = [
+          githubDataBase + '/' + name + '.json?v=' + cacheBust,
+          './data/' + name + '.json?v=' + cacheBust,
+          './public/data/' + name + '.json?v=' + cacheBust,
+          './docs/data/' + name + '.json?v=' + cacheBust
+        ];
 
-    loadJson('testimonials', (list) => {
-      satisfiedClients = list;
-      try { localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients)); } catch (e) {}
-      renderTestimonialsPreview();
-      renderSatisfiedClientsModalList();
-    });
+        for (const url of urls) {
+          try {
+            const response = await fetch(url, { cache: 'no-store' });
+            if (!response.ok) continue;
+            const data = await response.json();
+            if (Array.isArray(data) && data.length > 0) {
+              onData(data);
+              return true;
+            }
+          } catch (e) {}
+        }
 
-    loadJson('assets', (list) => {
-      assets = list;
-      try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
-      if (selectedOrigin === 'assets') renderAssetsGrid();
-      checkAssetHashParam();
-    });
+        return false;
+      };
+
+      await loadJson('projects', (list) => {
+        projects = list;
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (e) {}
+        renderProjectsGrid();
+      });
+
+      await loadJson('experiences', (list) => {
+        experiences = list;
+        try { localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences)); } catch (e) {}
+        renderExperiences();
+      });
+
+      await loadJson('testimonials', (list) => {
+        satisfiedClients = list;
+        try { localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients)); } catch (e) {}
+        renderTestimonialsPreview();
+        renderSatisfiedClientsModalList();
+      });
+
+      await loadJson('assets', (list) => {
+        assets = list;
+        try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
+        if (selectedOrigin === 'assets') renderAssetsGrid();
+        checkAssetHashParam();
+      });
+    };
+
+    try {
+      await loadFromGoogleSheets();
+    } catch (error) {
+      console.warn('[GOOGLE SHEETS LOAD ERROR]', error);
+      await loadGithubFallback();
+    }
   }
 
   // 16.1 Biblioteca de Imágenes & Drag and Drop Multimedia
