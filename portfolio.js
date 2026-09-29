@@ -1479,7 +1479,7 @@
     const container = document.getElementById('projects-grid');
     const emptyState = document.getElementById('projects-empty-state');
     if (!container) return;
-    const list = getFilteredAssets();
+    const list = getFilteredAssets().sort(function(a,b){ return (b.pinned === true ? 1 : 0) - (a.pinned === true ? 1 : 0); });
     filteredProjects = [];
     if (emptyState) emptyState.classList.toggle('hidden', list.length > 0);
     container.classList.toggle('hidden', list.length === 0);
@@ -1493,20 +1493,53 @@
       const tags = (asset.tags || []).slice(0, 5).map(function (tag) {
         return '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300 border border-white/10">' + tag + '</span>';
       }).join('');
+      const effects = Array.isArray(asset.cardEffects) ? asset.cardEffects : [];
+      const effectClasses = effects.map(function(effect){ return ' card-effect-' + effect; }).join('');
+      const effectStyle = asset.cardEffectColor ? ' style="--card-effect-color:' + asset.cardEffectColor + ';--card-effect-soft:' + asset.cardEffectColor + 'aa;--card-effect-light:' + asset.cardEffectColor + ';"' : '';
+      const pinnedBadge = asset.pinned === true ? '<span class="card-pinned-badge">📌 Fijado</span>' : '';
       const image = asset.image ? '<div class="h-40 overflow-hidden bg-black/20 border-b border-white/5"><img src="' + asset.image + '" alt="' + asset.name + '" class="w-full h-full object-cover" onerror="this.style.display=\'none\'"></div>' : '';
-      return '<article data-asset-id="' + asset.id + '" onclick="window.ElyPortfolio.openAssetModal(\'' + asset.id.replace(/'/g, "\\'") + '\')" class="group cursor-pointer rounded-2xl bg-[#12151d] border border-[#232733] overflow-hidden hover:border-cyan-400/50 transition-all hover:-translate-y-0.5 shadow-lg">' +
-        image +
-        '<div class="p-4 space-y-3">' +
-          '<div class="flex items-center justify-between gap-2"><span class="px-2 py-0.5 rounded-md border text-[10px] font-bold ' + typeClass + '">' + typeLabel + '</span><span class="text-[10px] text-slate-500 font-mono">v' + (asset.version || '1.0.0') + '</span></div>' +
+      return '<article data-asset-id="' + asset.id + '" onclick="window.ElyPortfolio.openAssetModal(\'' + asset.id.replace(/'/g, "\\'") + '\')" class="group cursor-pointer relative rounded-2xl bg-[#12151d] border border-[#232733] overflow-visible hover:border-cyan-400/50 transition-all hover:-translate-y-0.5 shadow-lg' + effectClasses + '"' + effectStyle + '>' +
+        pinnedBadge + image +
+        '<div class="p-4 space-y-3 text-center">' +
+          '<div class="flex items-center justify-center gap-2"><span class="px-2 py-0.5 rounded-md border text-[10px] font-bold ' + typeClass + '">' + typeLabel + '</span><span class="text-[10px] text-slate-500 font-mono">v' + (asset.version || '1.0.0') + '</span></div>' +
           '<h3 class="text-base font-bold text-white font-display">' + asset.name + '</h3>' +
           '<p class="text-xs text-slate-400 line-clamp-2">' + (asset.utility || asset.description || '') + '</p>' +
-          '<div class="flex flex-wrap gap-1">' + tags + '</div>' +
-          '<div class="flex items-center justify-between gap-2 pt-2 border-t border-[#1e2330]">' +
+          '<div class="flex flex-wrap justify-center gap-1">' + tags + '</div>' +
+          '<div class="flex items-center justify-center gap-3 pt-2 border-t border-[#1e2330]">' +
             '<span class="text-[10px] text-slate-500 font-mono">↓ ' + (Number(asset.downloads) || 0) + ' descargas</span>' +
             '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.openAssetModal(\'' + asset.id.replace(/'/g, "\\'") + '\')" class="px-3 py-1.5 rounded-lg bg-cyan-400 text-black text-[11px] font-bold hover:bg-cyan-300">Ver recurso →</button>' +
           '</div>' +
         '</div></article>';
     }).join('');
+  }
+
+  function openAssetImagePicker() {
+    if (!isModerator) return;
+    const modal = document.getElementById('asset-image-picker-modal');
+    const grid = document.getElementById('asset-image-picker-grid');
+    if (!modal || !grid) return;
+    grid.innerHTML = customLibraryImages.map(function(image) {
+      const path = image.path || '';
+      return '<button type="button" onclick="window.ElyPortfolio.selectAssetImage(\'' + path.replace(/'/g, "\\'") + '\')" class="group rounded-xl overflow-hidden border border-white/10 bg-[#0b0d11] hover:border-cyan-400/60 text-left">' +
+        '<img src="' + path + '" alt="' + (image.name || '') + '" class="w-full h-28 object-cover">' +
+        '<span class="block px-2 py-1.5 text-[10px] text-slate-300 truncate">' + (image.name || path) + '</span></button>';
+    }).join('');
+    modal.classList.remove('hidden');
+  }
+
+  function closeAssetImagePicker() {
+    const modal = document.getElementById('asset-image-picker-modal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  function selectAssetImage(path) {
+    const input = document.getElementById('asset-form-image');
+    const preview = document.getElementById('asset-form-image-preview');
+    const previewImg = document.getElementById('asset-form-image-preview-img');
+    if (input) input.value = path;
+    if (previewImg) previewImg.src = path;
+    if (preview) preview.classList.remove('hidden');
+    closeAssetImagePicker();
   }
 
   function openAssetModal(assetId, updateHash) {
@@ -1631,6 +1664,13 @@
     const version = document.getElementById('asset-form-version').value.trim() || '1.0.0';
     const downloadUrl = document.getElementById('asset-form-download').value.trim();
     const image = document.getElementById('asset-form-image').value.trim();
+    const pinned = !!document.getElementById('asset-form-pinned')?.checked;
+    const effectList = [];
+    if (document.getElementById('asset-form-effect-electrify')?.checked) effectList.push('electrify');
+    if (document.getElementById('asset-form-effect-rainbow')?.checked) effectList.push('rainbow');
+    if (document.getElementById('asset-form-effect-glow')?.checked) effectList.push('glow');
+    if (document.getElementById('asset-form-effect-shake')?.checked) effectList.push('shake');
+    const cardEffectColor = document.getElementById('asset-form-effect-color')?.value || '#fbbf24';
     if (!name || !utility || !downloadUrl) return;
     let id = slugifyAssetId(name);
     let suffix = 2;
@@ -1646,7 +1686,11 @@
       image: image,
       version: version,
       downloads: 0,
-      published: true
+      published: true,
+      pinned: pinned,
+      cardEffects: effectList,
+      cardEffect: effectList.length ? effectList[0] : 'none',
+      cardEffectColor: cardEffectColor
     });
     try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (err) {}
     renderAssetsManagerList();
@@ -1654,6 +1698,8 @@
     showStatusNotification({ title: 'Recurso Creado', message: 'Enlace: ' + assetDirectLink(assets[0]), type: 'success', icon: '📦' });
     e.target.reset();
     document.getElementById('asset-form-version').value = '1.0.0';
+    const assetPreview = document.getElementById('asset-form-image-preview');
+    if (assetPreview) assetPreview.classList.add('hidden');
   }
 
   function deleteAsset(assetId) {
@@ -5936,6 +5982,9 @@
     openAssetsManagerModal: openAssetsManagerModal,
     closeAssetsManagerModal: closeAssetsManagerModal,
     deleteAsset: deleteAsset,
+    openAssetImagePicker: openAssetImagePicker,
+    closeAssetImagePicker: closeAssetImagePicker,
+    selectAssetImage: selectAssetImage,
     toggleDisableCode: toggleDisableCode,
     deleteFeedbackCode: deleteFeedbackCode,
     copyFeedbackLink: copyFeedbackLink,
