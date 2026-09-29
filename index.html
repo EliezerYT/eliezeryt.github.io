@@ -910,7 +910,7 @@
               <span id="asset-modal-type" class="px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-400/20 text-[10px] font-bold uppercase">Asset</span>
               <span id="asset-modal-version" class="text-[10px] text-slate-500 font-mono"></span>
             </div>
-            <h3 id="asset-modal-title" class="text-lg font-bold text-white font-display mt-1 truncate">Recurso</h3>
+            <h3 id="asset-modal-title" class="text-lg font-bold text-white font-display mt-1 text-center">Recurso</h3>
           </div>
           <button type="button" onclick="window.ElyPortfolio.closeAssetModal()" class="text-slate-400 hover:text-white text-base">✕</button>
         </div>
@@ -919,7 +919,7 @@
             <img id="asset-modal-image" src="" alt="Asset" class="w-full max-h-64 object-contain" />
           </div>
           <div>
-            <p id="asset-modal-description" class="text-xs text-slate-300 leading-relaxed whitespace-pre-line"></p>
+            <p id="asset-modal-description" class="text-xs text-slate-300 leading-relaxed whitespace-pre-line text-center"></p>
           </div>
           <div class="rounded-xl bg-[#0b0d11] border border-[#232733] p-3">
             <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Utilidad</div>
@@ -935,6 +935,10 @@
               <div id="asset-modal-downloads" class="text-lg font-black text-white font-mono">0</div>
             </div>
             <button id="asset-modal-download-btn" type="button" class="px-5 py-2.5 rounded-lg bg-cyan-400 text-black font-bold text-xs hover:bg-cyan-300 transition-colors">↓ Descargar</button>
+          </div>
+          <div id="asset-modal-moderator-actions" class="hidden pt-2 border-t border-amber-400/20 flex flex-wrap justify-center gap-2">
+            <button type="button" onclick="window.ElyPortfolio.editAsset(window.ElyPortfolio.getSelectedAssetId ? window.ElyPortfolio.getSelectedAssetId() : '')" class="px-3 py-1.5 rounded-lg bg-amber-400 text-black text-xs font-bold hover:bg-amber-300">✏️ Editar</button>
+            <button type="button" onclick="window.ElyPortfolio.deleteAsset(window.ElyPortfolio.getSelectedAssetId ? window.ElyPortfolio.getSelectedAssetId() : '')" class="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-bold hover:bg-red-500">🗑️ Eliminar</button>
           </div>
           <div class="pt-2 border-t border-[#1e2330] flex flex-wrap gap-2">
             <button type="button" onclick="window.ElyPortfolio.copyAssetLink()" class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-slate-300 hover:text-white">🔗 Copiar enlace</button>
