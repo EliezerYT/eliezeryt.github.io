@@ -891,6 +891,16 @@
       </div>
     </div>
 
+    <div id="asset-image-picker-modal" class="hidden fixed inset-0 z-[65] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
+      <div class="relative w-full max-w-4xl rounded-2xl bg-[#12151d] border border-cyan-400/20 shadow-2xl p-5 max-h-[88vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-[#1e2330] pb-3 mb-4">
+          <h3 class="text-base font-bold text-white font-display">🖼️ Seleccionar imagen de la biblioteca</h3>
+          <button type="button" onclick="window.ElyPortfolio.closeAssetImagePicker()" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+        <div id="asset-image-picker-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3"></div>
+      </div>
+    </div>
+
     <!-- SUBVENTANA: DETALLE DE SCRIPT / ASSET -->
     <div id="asset-detail-modal" class="hidden fixed inset-0 z-[55] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
       <div class="relative w-full max-w-xl rounded-2xl bg-[#12151d] border border-cyan-400/20 shadow-2xl overflow-hidden">
@@ -982,7 +992,39 @@
           </div>
           <div>
             <label class="block text-slate-300 mb-1">Imagen (opcional):</label>
-            <input id="asset-form-image" type="text" placeholder="./assets/images/ely/..." class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input id="asset-form-image" type="text" readonly placeholder="Selecciona una imagen de la biblioteca" class="flex-1 rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+              <button type="button" onclick="window.ElyPortfolio.openAssetImagePicker()" class="px-3 py-2 rounded-xl bg-white/10 border border-white/10 text-white hover:bg-white/15">🖼️ Biblioteca</button>
+            </div>
+            <div id="asset-form-image-preview" class="hidden mt-2 rounded-xl overflow-hidden border border-white/10 bg-black/20">
+              <img id="asset-form-image-preview-img" src="" alt="Vista previa" class="w-full h-28 object-cover" />
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <label class="inline-flex items-center gap-2 text-xs text-white cursor-pointer">
+              <input id="asset-form-pinned" type="checkbox" class="accent-amber-400">
+              <span>📌 Fijar Card</span>
+            </label>
+            <label class="inline-flex items-center gap-2 text-xs text-white cursor-pointer">
+              <input id="asset-form-effect-electrify" type="checkbox" class="accent-amber-400">
+              <span>⚡ Electrify</span>
+            </label>
+            <label class="inline-flex items-center gap-2 text-xs text-white cursor-pointer">
+              <input id="asset-form-effect-rainbow" type="checkbox" class="accent-pink-400">
+              <span>🌈 Rainbow</span>
+            </label>
+            <label class="inline-flex items-center gap-2 text-xs text-white cursor-pointer">
+              <input id="asset-form-effect-glow" type="checkbox" class="accent-cyan-400">
+              <span>✨ Glowing Border</span>
+            </label>
+            <label class="inline-flex items-center gap-2 text-xs text-white cursor-pointer">
+              <input id="asset-form-effect-shake" type="checkbox" class="accent-amber-400">
+              <span>〰 Shake</span>
+            </label>
+            <label class="inline-flex items-center gap-2 text-xs text-slate-300">
+              <span>Color:</span>
+              <input id="asset-form-effect-color" type="color" value="#fbbf24" class="h-8 w-10 rounded-lg bg-transparent border border-white/10 cursor-pointer">
+            </label>
           </div>
           <div class="flex justify-end gap-2 pt-2">
             <button type="button" onclick="window.ElyPortfolio.closeAssetsManagerModal()" class="px-4 py-2 rounded-lg bg-white/10 text-white">Cerrar</button>
