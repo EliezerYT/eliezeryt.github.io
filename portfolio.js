@@ -1645,7 +1645,6 @@
           '<div class="flex items-center justify-center gap-2"><span class="px-2 py-0.5 rounded-md border text-[10px] font-bold ' + typeClass + '">' + typeLabel + '</span><span class="text-[10px] text-slate-500 font-mono">v' + (asset.version || '1.0.0') + '</span></div>' +
           '<h3 class="text-base font-bold text-white font-display">' + asset.name + '</h3>' +
           '<p class="text-xs text-slate-400 line-clamp-2">' + (asset.utility || asset.description || '') + '</p>' +
-          '<div class="flex flex-wrap justify-center gap-1">' + tags + '</div>' +
           '<div class="flex items-center justify-center gap-3 pt-2 border-t border-[#1e2330]">' +
             '<span class="text-[10px] ' + ((Number(asset.downloads) || 0) >= 10 ? 'text-amber-300 font-bold' : 'text-slate-500') + ' font-mono">↓ ' + (Number(asset.downloads) || 0) + ' descargas</span>' +
             '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.openAssetModal(\'' + safeId + '\')" class="px-3 py-1.5 rounded-lg bg-cyan-400 text-black text-[11px] font-bold hover:bg-cyan-300">Ver recurso →</button>' +
