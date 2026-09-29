@@ -6556,6 +6556,7 @@
     openImageLibraryForInput: openImageLibraryForInput,
     openImageLibraryForGallery: openImageLibraryForGallery,
     applySelectedGalleryLibraryImages: applySelectedGalleryLibraryImages,
-    renderGalleryThumbnails: renderGalleryThumbnails
+    renderGalleryThumbnails: renderGalleryThumbnails,
+    initElyDevMotionEnhancements: initElyDevMotionEnhancements
   };
 })();
