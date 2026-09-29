@@ -1294,6 +1294,8 @@
     visitorPreviewMode = !!enabled;
     updateModeratorUI();
     renderProjectsGrid();
+    addElyDevBackgroundMotion();
+    initElyDevMotionEnhancements();
     renderExperiences();
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
@@ -6302,6 +6304,119 @@
     checkFeedbackUrlParam();
     checkAssetHashParam();
   });
+
+
+  // ELYDEV_MOTION_ENHANCEMENTS_V1
+  function initElyDevMotionEnhancements() {
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const grid = document.getElementById('projects-grid');
+    const revealTargets = document.querySelectorAll('#projects-grid > article, section > div.grid > article, section > div.grid > div, .group.cursor-pointer');
+    
+    document.querySelectorAll('button, a').forEach(function (el) {
+      if (!el.classList.contains('ely-magnetic')) el.classList.add('ely-magnetic');
+    });
+    
+    document.querySelectorAll('#projects-grid > article').forEach(function (card) {
+      card.classList.add('ely-interactive-card');
+      if (!card.querySelector('.ely-spotlight')) {
+        const spotlight = document.createElement('span');
+        spotlight.className = 'ely-spotlight';
+        card.appendChild(spotlight);
+      }
+    });
+    
+    revealTargets.forEach(function (el, index) {
+      if (!el.classList.contains('ely-motion-item')) {
+        el.classList.add('ely-motion-item');
+        el.style.setProperty('--ely-stagger', Math.min(index, 10) * 55 + 'ms');
+      }
+    });
+    
+    if (!reduceMotion) {
+      requestAnimationFrame(function () {
+        document.querySelectorAll('.ely-motion-item').forEach(function (el) {
+          if (el.dataset.elyRevealReady) return;
+          el.dataset.elyRevealReady = '1';
+          el.classList.add('ely-reveal-pending');
+        });
+      });
+    }
+    
+    document.querySelectorAll('#projects-grid > article').forEach(function (card) {
+      card.addEventListener('pointermove', function (e) {
+        if (reduceMotion) return;
+        const rect = card.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        card.style.setProperty('--ely-mx', x + '%');
+        card.style.setProperty('--ely-my', y + '%');
+      }, { passive: true });
+      card.addEventListener('pointerleave', function () {
+        card.style.removeProperty('--ely-mx');
+        card.style.removeProperty('--ely-my');
+      });
+    });
+    
+    document.addEventListener('click', function (e) {
+      const button = e.target.closest('button, a');
+      if (!button || button.dataset.elyRipple === '1') return;
+      button.dataset.elyRipple = '1';
+      button.classList.add('ely-ripple-host');
+      button.addEventListener('click', function (event) {
+        if (reduceMotion) return;
+        const rect = button.getBoundingClientRect();
+        const ripple = document.createElement('span');
+        ripple.className = 'ely-ripple';
+        const size = Math.max(rect.width, rect.height) * 1.35;
+        ripple.style.width = size + 'px';
+        ripple.style.height = size + 'px';
+        ripple.style.left = (event.clientX - rect.left - size / 2) + 'px';
+        ripple.style.top = (event.clientY - rect.top - size / 2) + 'px';
+        button.appendChild(ripple);
+        setTimeout(function () { ripple.remove(); }, 520);
+      }, true);
+    }, true);
+    
+    document.addEventListener('click', function (e) {
+      const el = e.target.closest('#asset-modal-like-btn, #asset-modal-favorite-btn, #asset-modal-download-btn, [title*="favoritos"], [title*="Favorito"]');
+      if (!el || reduceMotion) return;
+      const isLike = el.id === 'asset-modal-like-btn';
+      el.classList.remove('ely-pop-like', 'ely-pop-favorite', 'ely-pop-download', 'ely-pop-share');
+      void el.offsetWidth;
+      el.classList.add(isLike ? 'ely-pop-like' : el.id === 'asset-modal-download-btn' ? 'ely-pop-download' : 'ely-pop-favorite');
+    }, true);
+    
+    const observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('ely-revealed');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+    
+    if (!reduceMotion) {
+      document.querySelectorAll('.ely-reveal-pending').forEach(function (el) { observer.observe(el); });
+    } else {
+      document.querySelectorAll('.ely-motion-item').forEach(function (el) { el.classList.add('ely-revealed'); });
+    }
+    
+    if (grid && !grid.dataset.elyObserver) {
+      grid.dataset.elyObserver = '1';
+      const mo = new MutationObserver(function () {
+        setTimeout(initElyDevMotionEnhancements, 0);
+      });
+      mo.observe(grid, { childList: true });
+    }
+  }
+
+  function addElyDevBackgroundMotion() {
+    if (document.querySelector('.ely-ambient-bg')) return;
+    const bg = document.createElement('div');
+    bg.className = 'ely-ambient-bg';
+    bg.setAttribute('aria-hidden', 'true');
+    document.body.prepend(bg);
+  }
 
   // Exponer API global para interactividad
   window.ElyPortfolio = {
