@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="es" class="scroll-smooth dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assets & Scripts | ElyDev</title>
+  <meta name="description" content="Scripts, herramientas y assets compartidos por ElyDev.">
+  <base href="../">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            display: ['"Syne"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .card-effect-red,.card-effect-gold,.card-effect-blue,.card-effect-electrify,.card-effect-rainbow,.card-effect-glow{position:relative;isolation:isolate;overflow:visible!important;z-index:1}
+    .card-effect-red,.card-effect-gold,.card-effect-blue,.card-effect-electrify{box-shadow:0 0 0 1px color-mix(in srgb,var(--card-effect-color) 55%,transparent),0 0 14px color-mix(in srgb,var(--card-effect-color) 18%,transparent)}
+    .card-effect-red{--card-effect-color:#ef4444;--card-effect-soft:rgba(239,68,68,.65);--card-effect-light:#fca5a5}
+    .card-effect-gold{--card-effect-color:#fbbf24;--card-effect-soft:rgba(251,191,36,.65);--card-effect-light:#fde68a}
+    .card-effect-blue{--card-effect-color:#38bdf8;--card-effect-soft:rgba(56,189,248,.65);--card-effect-light:#bae6fd}
+    .card-effect-electrify{--card-effect-soft:color-mix(in srgb,var(--card-effect-color) 65%,transparent);--card-effect-light:color-mix(in srgb,var(--card-effect-color) 70%,white)}
+    .card-effect-red::before,.card-effect-gold::before,.card-effect-blue::before,.card-effect-electrify::before{content:"";position:absolute;inset:-4px;border:2px solid var(--card-effect-color);border-radius:inherit;pointer-events:none;box-sizing:border-box;z-index:100;filter:url(#ely-electric-border);box-shadow:0 0 4px var(--card-effect-color),0 0 12px var(--card-effect-soft),0 0 22px color-mix(in srgb,var(--card-effect-color) 30%,transparent),inset 0 0 5px color-mix(in srgb,var(--card-effect-color) 35%,transparent);mix-blend-mode:screen}
+    .card-effect-red::after,.card-effect-gold::after,.card-effect-blue::after,.card-effect-electrify::after{content:"";position:absolute;inset:-2px;border:2px solid var(--card-effect-light);border-radius:inherit;pointer-events:none;box-sizing:border-box;z-index:99;opacity:.72;filter:blur(3px);box-shadow:0 0 8px var(--card-effect-color),0 0 20px var(--card-effect-soft),inset 0 0 8px color-mix(in srgb,var(--card-effect-color) 42%,transparent);mix-blend-mode:screen}
+    .card-effect-rainbow{box-shadow:0 0 0 1px rgba(255,255,255,.18),0 0 18px rgba(255,0,160,.25),0 0 30px rgba(0,210,255,.18)}
+    .card-effect-rainbow::before{content:"";position:absolute;inset:-6px;padding:3px;border-radius:inherit;pointer-events:none;box-sizing:border-box;z-index:100;background:conic-gradient(from 0deg,#ff003c,#ff7a00,#ffe600,#00ff66,#00d9ff,#3867ff,#b000ff,#ff003c);animation:rainbow-border-spin 2s linear infinite;filter:drop-shadow(0 0 5px rgba(255,0,80,.9)) drop-shadow(0 0 10px rgba(0,220,255,.8));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+    .card-effect-rainbow::after{content:"";position:absolute;inset:-10px;border-radius:inherit;pointer-events:none;z-index:99;background:conic-gradient(from 0deg,#ff003c,#ff7a00,#ffe600,#00ff66,#00d9ff,#3867ff,#b000ff,#ff003c);animation:rainbow-border-spin 2s linear infinite;filter:blur(9px);opacity:.8;mix-blend-mode:screen}
+    @keyframes rainbow-border-spin{to{transform:rotate(360deg)}}
+    .card-effect-glow{box-shadow:0 0 0 1px rgba(255,255,255,.22),0 0 22px rgba(0,180,255,.22)}
+    .card-effect-glow::before,.card-effect-glow::after{content:"";position:absolute;inset:-7px;border-radius:inherit;pointer-events:none;box-sizing:border-box;background:conic-gradient(from var(--card-glow-angle,53deg),#ff0000,#ff7a00,#ffff00,#00ff00,#00ffff,#0000ff,#8a2be2,#ff0000);animation:glowing-border 3.5s linear infinite;z-index:-2}
+    .card-effect-glow::after{inset:-13px;z-index:-3;filter:blur(18px);opacity:.9}
+    @property --card-glow-angle{syntax:"<angle>";initial-value:53deg;inherits:false}
+    @keyframes glowing-border{from{--card-glow-angle:53deg}to{--card-glow-angle:413deg}}
+    .card-effect-shake{animation:card-shake .8s ease-in-out infinite}
+    @keyframes card-shake{0%,100%{transform:translate(0,0) rotate(0)}20%{transform:translate(-1px,.5px) rotate(-.12deg)}40%{transform:translate(1px,-.5px) rotate(.12deg)}60%{transform:translate(-.7px,-.4px) rotate(-.08deg)}80%{transform:translate(.7px,.4px) rotate(.08deg)}}
+    .card-effect-electrify.card-effect-rainbow::before{content:"";position:absolute;inset:-4px;border:2px solid var(--card-effect-color);border-radius:inherit;pointer-events:none;box-sizing:border-box;z-index:100;filter:url(#ely-electric-border);box-shadow:0 0 4px var(--card-effect-color),0 0 12px var(--card-effect-soft);mix-blend-mode:screen}
+    .card-effect-electrify.card-effect-rainbow::after{content:"";position:absolute;inset:-10px;border-radius:inherit;pointer-events:none;z-index:99;background:conic-gradient(from 0deg,#ff003c,#ff7a00,#ffe600,#00ff66,#00d9ff,#3867ff,#b000ff,#ff003c);animation:rainbow-border-spin 2s linear infinite;filter:blur(9px);opacity:.8;mix-blend-mode:screen}
+    .card-pinned-badge{position:absolute;top:10px;right:10px;z-index:120;display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border-radius:8px;background:rgba(250,204,21,.95);color:#111827;font-size:10px;font-weight:800;box-shadow:0 4px 14px rgba(250,204,21,.3)}
+    .asset-compact-badge{display:inline-flex;align-items:center;padding:3px 6px;border-radius:7px;background:rgba(8,10,15,.75);border:1px solid rgba(255,255,255,.1);font-size:9px;line-height:1;color:#cbd5e1;backdrop-filter:blur(4px);transition:transform .2s ease,filter .2s ease}
+    .asset-new-badge{color:#67e8f9;border-color:rgba(34,211,238,.25);animation:ely-new-shimmer 2.8s ease-in-out infinite}
+    .asset-popular-badge{color:#fcd34d;border-color:rgba(245,158,11,.25);animation:ely-popular-pulse 2.4s ease-in-out infinite}
+    .asset-compact-badge:hover{transform:translateY(-1px) scale(1.03)}
+    @keyframes ely-new-shimmer{0%,72%,100%{filter:brightness(1);box-shadow:0 0 0 rgba(34,211,238,0)}82%{filter:brightness(1.35);box-shadow:0 0 12px rgba(34,211,238,.24)}}
+    @keyframes ely-popular-pulse{0%,70%,100%{transform:scale(1)}80%{transform:scale(1.06)}90%{transform:scale(1)}}
+    #projects-grid>article.ely-interactive-card{--ely-mx:50%;--ely-my:50%;--ely-rx:0deg;--ely-ry:0deg;transform:perspective(900px) rotateX(var(--ely-rx)) rotateY(var(--ely-ry)) translateZ(0);transform-style:preserve-3d;transition:transform .16s cubic-bezier(.2,.8,.2,1),box-shadow .28s ease,border-color .28s ease}
+    #projects-grid>article.ely-interactive-card:hover{box-shadow:0 18px 45px rgba(0,0,0,.28),0 0 24px rgba(34,211,238,.08)}
+    .ely-spotlight{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:2;opacity:0;background:radial-gradient(260px circle at var(--ely-mx,50%) var(--ely-my,50%),rgba(255,255,255,.105),transparent 62%);transition:opacity .25s ease;mix-blend-mode:screen}
+    #projects-grid>article:hover>.ely-spotlight{opacity:1}
+    .ely-border-light{position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;z-index:3;opacity:0;background:conic-gradient(from var(--ely-border-angle,0deg),transparent 0deg,transparent 290deg,rgba(34,211,238,.9) 325deg,rgba(251,191,36,.9) 350deg,transparent 360deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;padding:1px;animation:ely-border-sweep 2.6s linear infinite;animation-play-state:paused;transition:opacity .2s ease}
+    #projects-grid>article:hover>.ely-border-light{opacity:1;animation-play-state:running}
+    @property --ely-border-angle{syntax:"<angle>";initial-value:0deg;inherits:false}
+    @keyframes ely-border-sweep{to{--ely-border-angle:360deg}}
+    @media (prefers-reduced-motion:reduce){.card-effect-glow::before,.card-effect-glow::after,.card-effect-rainbow::before,.card-effect-rainbow::after,.card-effect-red::before,.card-effect-gold::before,.card-effect-blue::before,.card-effect-electrify::before,.card-effect-shake{animation:none}}
+  </style>
+</head>
+<body class="bg-[#0b0d11] text-slate-200 font-sans min-h-screen">
+  <svg width="0" height="0" class="absolute">
+    <filter id="ely-electric-border"><feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="7"/></filter>
+  </svg>
+
+  <header class="sticky top-0 z-40 border-b border-[#1c212c] bg-[#0b0d11]/90 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between gap-4">
+      <a href="../" class="font-display font-extrabold text-white text-xl hover:text-amber-400 transition-colors">ElyDev</a>
+      <div class="flex items-center gap-2">
+        <span class="hidden sm:inline text-[10px] uppercase tracking-[.2em] text-slate-500">Assets & Scripts</span>
+        <a href="../" class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-slate-300 hover:text-white hover:border-amber-400/40 transition-colors">← Portfolio</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-5 py-10">
+    <section class="space-y-5">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
+        <div>
+          <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400 mb-1"><span>📦</span><span>ElyDev Community</span></div>
+          <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-display">Assets & Scripts</h1>
+          <p class="text-sm text-slate-400 mt-2 max-w-2xl">Recursos, herramientas y scripts compartidos por ElyDev para proyectos de Unity y desarrollo de videojuegos.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <a href="../" class="px-3.5 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-slate-300 hover:text-white">Ver Portfolio</a>
+          <button id="assets-manager-open" type="button" onclick="window.ElyPortfolio.openAssetsManagerModal()" class="hidden px-3.5 py-2 rounded-lg bg-cyan-400 text-black text-xs font-bold hover:bg-cyan-300">📦 Gestionar Assets</button>
+        </div>
+      </div>
+
+      <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-4 space-y-3">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-1.5 text-xs">
+            <button type="button" data-category-filter="todos" class="px-2.5 py-1 rounded-full bg-white/20 text-white border border-amber-400 font-medium">Todos</button>
+            <button type="button" data-category-filter="script" class="px-2.5 py-1 rounded-full bg-white/5 text-slate-400 hover:text-white text-[11px]">📜 Scripts</button>
+            <button type="button" data-category-filter="asset" class="px-2.5 py-1 rounded-full bg-white/5 text-slate-400 hover:text-white text-[11px]">📦 Assets</button>
+          </div>
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:max-w-xl">
+            <div class="relative flex-1">
+              <input id="projects-search-input" type="text" placeholder="Buscar assets, scripts, Unity, C#..." class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3.5 py-2 pl-8 text-xs text-white placeholder-slate-500 focus:border-amber-400 focus:outline-none">
+              <span class="absolute left-2.5 top-2.5 text-slate-500 text-xs">🔍</span>
+              <button id="projects-search-clear" type="button" class="absolute right-2.5 top-2.5 text-slate-500 hover:text-white text-xs">✕</button>
+            </div>
+            <div id="asset-tools" class="flex items-center gap-1.5">
+              <select id="asset-sort-select" class="rounded-xl bg-[#0b0d11] border border-[#262c3b] px-2.5 py-2 text-[11px] text-slate-300 focus:outline-none focus:border-cyan-400">
+                <option value="newest">Más nuevos</option>
+                <option value="downloads">Más descargados</option>
+                <option value="name">A-Z</option>
+                <option value="oldest">Más antiguos</option>
+                <option value="manual">Orden manual</option>
+              </select>
+              <button id="asset-favorites-filter" type="button" class="px-2.5 py-2 rounded-xl bg-white/5 border border-[#262c3b] text-[11px] text-slate-300 hover:text-white" title="Mostrar favoritos">☆</button>
+              <button id="asset-view-toggle" type="button" class="px-2.5 py-2 rounded-xl bg-white/5 border border-[#262c3b] text-[11px] text-slate-300 hover:text-white" title="Cambiar vista">☷ Lista</button>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-[11px] text-slate-500">
+          <span id="projects-count-display">Cargando assets...</span>
+          <button id="reset-filters-btn" type="button" class="text-amber-400 hover:underline">Restablecer filtros</button>
+        </div>
+      </div>
+
+      <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-1"></div>
+      <div id="projects-empty-state" class="hidden rounded-2xl border border-dashed border-[#282f40] bg-[#10131b] p-10 text-center space-y-3">
+        <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-slate-400">📂</div>
+        <h3 class="text-base font-bold text-white font-display">No hay recursos con estos filtros</h3>
+        <p class="text-xs text-slate-400">Prueba otra búsqueda o restablece los filtros.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="asset-detail-modal" class="hidden fixed inset-0 z-[55] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
+    <div class="relative w-full max-w-xl rounded-2xl bg-[#12151d] border border-cyan-400/20 shadow-2xl overflow-hidden">
+      <div class="flex items-center justify-between gap-3 p-5 border-b border-[#1e2330]">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <button id="asset-modal-favorite-btn" type="button" onclick="window.ElyPortfolio.toggleAssetFavorite(window.ElyPortfolio.getSelectedAssetId())" class="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[10px] text-slate-300">☆ Favorito</button>
+            <span id="asset-modal-type" class="px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-400/20 text-[10px] font-bold uppercase">Asset</span>
+            <span id="asset-modal-version" class="text-[10px] text-slate-500 font-mono"></span>
+          </div>
+          <h3 id="asset-modal-title" class="text-lg font-bold text-white font-display mt-1">Recurso</h3>
+        </div>
+        <button type="button" onclick="window.ElyPortfolio.closeAssetModal()" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+      <div class="p-5 space-y-4 max-h-[78vh] overflow-y-auto">
+        <div id="asset-modal-image-wrap" class="hidden rounded-xl overflow-hidden border border-[#232733] bg-black/30"><img id="asset-modal-image" src="" alt="Asset" class="w-full max-h-64 object-contain"></div>
+        <p id="asset-modal-description" class="text-xs text-slate-300 leading-relaxed whitespace-pre-line"></p>
+        <div class="rounded-xl bg-[#0b0d11] border border-[#232733] p-3"><div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Utilidad</div><p id="asset-modal-utility" class="text-xs text-slate-200 leading-relaxed"></p></div>
+        <div id="asset-modal-code-wrap" class="hidden rounded-xl bg-[#080a0f] border border-[#232733] overflow-hidden">
+          <div class="flex items-center justify-between px-3 py-2 border-b border-[#232733]"><div class="text-[10px] uppercase tracking-wider text-slate-500">Ejemplo de código</div><button type="button" onclick="window.ElyPortfolio.copyAssetCode()" class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-slate-300">📋 Copiar</button></div>
+          <pre id="asset-modal-code" class="p-3 text-[11px] text-slate-200 overflow-x-auto whitespace-pre-wrap font-mono"></pre>
+        </div>
+        <div><div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Etiquetas</div><div id="asset-modal-tags" class="flex flex-wrap gap-1.5"></div></div>
+        <div class="grid grid-cols-3 gap-2 rounded-xl bg-[#0b0d11] border border-[#232733] p-3">
+          <div class="text-center"><div class="text-[10px] uppercase tracking-wider text-slate-500">Descargas</div><div id="asset-modal-downloads" class="text-lg font-black text-white font-mono">0</div></div>
+          <div class="text-center border-x border-[#232733]"><div class="text-[10px] uppercase tracking-wider text-slate-500">Hoy</div><div id="asset-modal-downloads-today" class="text-lg font-black text-cyan-300 font-mono">0</div></div>
+          <div class="text-center"><div class="text-[10px] uppercase tracking-wider text-slate-500">Likes</div><div id="asset-modal-likes" class="text-lg font-black text-rose-300 font-mono">0</div></div>
+        </div>
+        <button type="button" onclick="window.ElyPortfolio.toggleAssetLike(window.ElyPortfolio.getSelectedAssetId())" class="w-full px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-slate-200">♥ Me gusta</button>
+        <button id="asset-modal-download-btn" type="button" class="w-full px-5 py-2.5 rounded-lg bg-cyan-400 text-black font-bold text-xs hover:bg-cyan-300">↓ Descargar</button>
+        <div class="rounded-xl bg-[#0b0d11] border border-[#232733] p-3 space-y-2">
+          <div class="text-[10px] uppercase tracking-wider text-slate-500">Comentarios</div>
+          <div id="asset-modal-comments-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
+          <div class="flex gap-2"><input id="asset-modal-comment-input" type="text" maxlength="240" placeholder="Escribe un comentario..." class="flex-1 rounded-lg bg-[#141822] border border-[#262c3b] px-3 py-2 text-[11px] text-white focus:outline-none focus:border-cyan-400"><button type="button" onclick="window.ElyPortfolio.addAssetComment()" class="px-3 py-2 rounded-lg bg-cyan-400 text-black text-[11px] font-bold">Enviar</button></div>
+        </div>
+        <div class="rounded-xl bg-[#0b0d11] border border-[#232733] p-3"><div class="text-[10px] uppercase tracking-wider text-slate-500 mb-2">Relacionados</div><div id="asset-modal-related-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div></div>
+        <div id="asset-modal-moderator-actions" class="hidden pt-2 border-t border-amber-400/20 flex flex-wrap justify-center gap-2"><button type="button" onclick="window.ElyPortfolio.editAsset(window.ElyPortfolio.getSelectedAssetId())" class="px-3 py-1.5 rounded-lg bg-amber-400 text-black text-xs font-bold">✏️ Editar</button><button type="button" onclick="window.ElyPortfolio.deleteAsset(window.ElyPortfolio.getSelectedAssetId())" class="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs">🗑️ Eliminar</button></div>
+        <div class="pt-2 border-t border-[#1e2330] flex flex-wrap gap-2"><button type="button" onclick="window.ElyPortfolio.copyAssetLink()" class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-slate-300">🔗 Copiar enlace</button><span id="asset-modal-link" class="text-[10px] text-slate-500 font-mono break-all self-center"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="assets-manager-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
+    <div class="relative w-full max-w-2xl rounded-2xl bg-[#12151d] border border-cyan-400/20 shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-[#1e2330] pb-3"><div><h3 class="text-base font-bold text-white font-display">📦 ElyDev Community</h3><p class="text-xs text-slate-400">Gestiona los recursos publicados.</p></div><button type="button" onclick="window.ElyPortfolio.closeAssetsManagerModal()" class="text-slate-400 hover:text-white">✕</button></div>
+      <form id="asset-form" class="space-y-3 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <input id="asset-form-name" type="text" required placeholder="Nombre" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white">
+          <select id="asset-form-type" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white"><option value="script">Script</option><option value="asset">Asset</option></select>
+        </div>
+        <input id="asset-form-utility" type="text" required placeholder="Utilidad" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white">
+        <textarea id="asset-form-description" rows="3" placeholder="Descripción" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white"></textarea>
+        <input id="asset-form-tags" type="text" placeholder="Unity, C#, Vehicles" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><input id="asset-form-version" type="text" value="1.0.0" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white"><input id="asset-form-download" type="url" required placeholder="Link de descarga" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white"></div>
+        <textarea id="asset-form-code" rows="5" placeholder="Ejemplo de código (opcional)" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white font-mono text-[11px]"></textarea>
+        <label class="inline-flex items-center gap-2 text-xs text-white"><input id="asset-form-published" type="checkbox" checked class="accent-emerald-400"> Publicar inmediatamente</label>
+        <div><input id="asset-form-image" type="text" readonly placeholder="Ruta de imagen" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white"></div>
+        <div class="flex flex-wrap gap-3">
+          <label class="inline-flex items-center gap-2 text-xs text-white"><input id="asset-form-pinned" type="checkbox" class="accent-amber-400"> 📌 Fijar</label>
+          <label class="inline-flex items-center gap-2 text-xs text-white"><input id="asset-form-effect-electrify" type="checkbox" class="accent-amber-400"> ⚡ Electrify</label>
+          <label class="inline-flex items-center gap-2 text-xs text-white"><input id="asset-form-effect-rainbow" type="checkbox" class="accent-pink-400"> 🌈 Rainbow</label>
+          <label class="inline-flex items-center gap-2 text-xs text-white"><input id="asset-form-effect-glow" type="checkbox" class="accent-cyan-400"> ✨ Glow</label>
+          <label class="inline-flex items-center gap-2 text-xs text-white"><input id="asset-form-effect-shake" type="checkbox" class="accent-amber-400"> 〰 Shake</label>
+          <input id="asset-form-effect-color" type="color" value="#fbbf24" class="h-8 w-10 rounded-lg bg-transparent border border-white/10">
+        </div>
+        <div class="flex justify-end gap-2"><button type="button" onclick="window.ElyPortfolio.closeAssetsManagerModal()" class="px-4 py-2 rounded-lg bg-white/10 text-white">Cerrar</button><button type="submit" class="px-5 py-2 rounded-lg bg-cyan-400 text-black font-bold">📦 Guardar</button></div>
+      </form>
+      <div class="border-t border-[#1e2330] pt-4 space-y-2"><div class="flex items-center justify-between"><h4 class="text-xs font-bold text-white">Recursos registrados</h4><span id="assets-total-count" class="text-[10px] text-slate-500 font-mono">0</span></div><div id="assets-manager-list" class="space-y-2"></div></div>
+    </div>
+  </div>
+
+  <script src="portfolio.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.ElyPortfolio && window.ElyPortfolio.renderAssetsGrid) {
+        window.ElyPortfolio.renderAssetsGrid();
+      }
+      var managerButton = document.getElementById('assets-manager-open');
+      if (managerButton && localStorage.getItem('portfolio_auth_user_v2')) managerButton.classList.remove('hidden');
+    });
+  </script>
+</body>
+</html>
