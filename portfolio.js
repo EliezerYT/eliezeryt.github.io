@@ -1503,14 +1503,78 @@
     renderAssetsGrid();
   }
 
+  const GLOBAL_COUNTER_URL = '/downloadcounter/counter.php';
+  let globalAssetCounters = {};
+
   function assetTodayKey() { return new Date().toISOString().slice(0,10); }
-  function getAssetLikes(assetId) { return Number(assetLikes[assetId]) || 0; }
-  function toggleAssetLike(assetId) {
-    assetLikes[assetId] = getAssetLikes(assetId) + 1;
+  function getAssetLikes(assetId) { return Number(globalAssetCounters[assetId]?.likes) || Number(assetLikes[assetId]) || 0; }
+
+  async function requestGlobalAssetCounter(assetId, type, action) {
+    try {
+      const url = GLOBAL_COUNTER_URL + '?id=' + encodeURIComponent(assetId) + '&type=' + encodeURIComponent(type) + '&action=' + encodeURIComponent(action);
+      const response = await fetch(url, {
+        method: action === 'increment' ? 'POST' : 'GET',
+        cache: 'no-store',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      });
+      if (!response.ok) return null;
+      const data = await response.json();
+      if (!data || !data.success) return null;
+      if (!globalAssetCounters[assetId]) globalAssetCounters[assetId] = {};
+      globalAssetCounters[assetId][type] = Number(data.count) || 0;
+      return globalAssetCounters[assetId][type];
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function refreshGlobalAssetCounter(assetId, type) {
+    return requestGlobalAssetCounter(assetId, type, 'get');
+  }
+
+  async function refreshAllGlobalAssetCounters() {
+    const visibleAssets = assets.filter(function(asset) {
+      return asset && (isModerator || asset.published !== false);
+    });
+    await Promise.all(visibleAssets.map(function(asset) {
+      return Promise.all([
+        refreshGlobalAssetCounter(asset.id, 'likes'),
+        refreshGlobalAssetCounter(asset.id, 'downloads')
+      ]);
+    }));
+    updateGlobalAssetCounterUI();
+  }
+
+  function updateGlobalAssetCounterUI() {
+    document.querySelectorAll('[data-global-likes-id]').forEach(function(el) {
+      const id = el.getAttribute('data-global-likes-id');
+      el.textContent = String(getAssetLikes(id));
+    });
+    document.querySelectorAll('[data-global-downloads-id]').forEach(function(el) {
+      const id = el.getAttribute('data-global-downloads-id');
+      const count = Number(globalAssetCounters[id]?.downloads);
+      if (Number.isFinite(count)) el.textContent = '↓ ' + count;
+    });
+    if (selectedAsset) {
+      const likesEl = document.getElementById('asset-modal-likes');
+      const downloadsEl = document.getElementById('asset-modal-downloads');
+      const likes = Number(globalAssetCounters[selectedAsset.id]?.likes);
+      const downloads = Number(globalAssetCounters[selectedAsset.id]?.downloads);
+      if (likesEl && Number.isFinite(likes)) likesEl.textContent = String(likes);
+      if (downloadsEl && Number.isFinite(downloads)) downloadsEl.textContent = String(downloads);
+    }
+  }
+
+  async function toggleAssetLike(assetId) {
+    const count = await requestGlobalAssetCounter(assetId, 'likes', 'increment');
+    if (count === null) return;
+    assetLikes[assetId] = count;
     try { localStorage.setItem(ASSET_LIKES_KEY, JSON.stringify(assetLikes)); } catch(e) {}
     if (selectedAsset && selectedAsset.id === assetId) {
-      const el=document.getElementById('asset-modal-likes'); if(el) el.textContent=String(getAssetLikes(assetId));
+      const el = document.getElementById('asset-modal-likes');
+      if (el) el.textContent = String(count);
     }
+    updateGlobalAssetCounterUI();
     renderAssetsGrid();
   }
   function getAssetComments(assetId) { return Array.isArray(assetComments[assetId]) ? assetComments[assetId] : []; }
@@ -1665,14 +1729,15 @@
           '<h3 class="text-base font-bold text-white font-display">' + asset.name + '</h3>' +
           '<p class="text-xs text-slate-400 line-clamp-2">' + (asset.utility || asset.description || '') + '</p>' +
           '<div class="flex items-center justify-center gap-3 pt-2 border-t border-[#1e2330]">' +
-            '<span class="text-[10px] text-slate-500 font-mono">↓ ' + (Number(asset.downloads) || 0) + '</span>' +
-            '<span class="text-[10px] text-rose-300">♥ ' + getAssetLikes(asset.id) + '</span>' +
+            '<span class="text-[10px] text-slate-500 font-mono" data-global-downloads-id="' + safeId + '">↓ ' + (Number(globalAssetCounters[asset.id]?.downloads) || Number(asset.downloads) || 0) + '</span>' +
+            '<span class="text-[10px] text-rose-300" data-global-likes-id="' + safeId + '">♥ ' + getAssetLikes(asset.id) + '</span>' +
             '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.openAssetModal(\'' + safeId + '\')" class="px-3 py-1.5 rounded-lg bg-cyan-400 text-black text-[11px] font-bold hover:bg-cyan-300">Ver recurso →</button>' +
           '</div>' +
         '</div></article>';
     }).join('');
     initElyDevMotionEnhancements();
     initAssetCardInteractions();
+    refreshAllGlobalAssetCounters();
   }
 
   function initAssetCardInteractions() {
@@ -1843,6 +1908,8 @@
     if (favoriteBtn) favoriteBtn.textContent = isAssetFavorite(asset.id) ? '★ Favorito' : '☆ Favorito';
     if (likesEl) likesEl.textContent = String(getAssetLikes(asset.id));
     if (dailyEl) dailyEl.textContent = String(getAssetDownloadsToday(asset.id));
+    refreshGlobalAssetCounter(asset.id, 'likes').then(updateGlobalAssetCounterUI);
+    refreshGlobalAssetCounter(asset.id, 'downloads').then(updateGlobalAssetCounterUI);
     renderAssetComments(asset.id);
     renderRelatedAssets(asset);
     const moderatorActions = document.getElementById('asset-modal-moderator-actions');
@@ -1869,13 +1936,16 @@
       downloadBtn.onclick = function () {
         const target = assets.find(function (a) { return a.id === asset.id; });
         if (!target) return;
-        target.downloads = (Number(target.downloads) || 0) + 1;
         trackAssetDownload(target);
-        try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
+        requestGlobalAssetCounter(target.id, 'downloads', 'increment').then(function(count) {
+          if (count === null) return;
+          target.downloads = count;
+          if (downloadsEl) downloadsEl.textContent = String(count);
+          updateGlobalAssetCounterUI();
+          renderAssetsGrid();
+        });
         if (dailyEl) dailyEl.textContent = String(getAssetDownloadsToday(target.id));
-        if (downloadsEl) downloadsEl.textContent = String(target.downloads);
         window.open(target.downloadUrl, '_blank', 'noopener,noreferrer');
-        renderAssetsGrid();
       };
     }
     modal.classList.remove('hidden');
@@ -6553,6 +6623,7 @@
     toggleAssetPublished: toggleAssetPublished,
     toggleAssetFavorite: toggleAssetFavorite,
     toggleAssetLike: toggleAssetLike,
+    refreshGlobalAssetCounters: refreshAllGlobalAssetCounters,
     addAssetComment: addAssetComment,
     copyAssetCode: copyAssetCode,
     toggleAssetViewMode: toggleAssetViewMode,
