@@ -6351,12 +6351,8 @@
     });
     
     if (!reduceMotion) {
-      requestAnimationFrame(function () {
-        document.querySelectorAll('.ely-motion-item').forEach(function (el) {
-          if (el.dataset.elyRevealReady) return;
-          el.dataset.elyRevealReady = '1';
-          el.classList.add('ely-reveal-pending');
-        });
+      document.querySelectorAll('.ely-motion-item').forEach(function (el) {
+        el.classList.add('ely-reveal-pending');
       });
     }
     
@@ -6368,12 +6364,18 @@
           const rect = card.getBoundingClientRect();
           const x = ((e.clientX - rect.left) / rect.width) * 100;
           const y = ((e.clientY - rect.top) / rect.height) * 100;
+          const rx = ((y - 50) / 50) * -4;
+          const ry = ((x - 50) / 50) * 4;
           card.style.setProperty('--ely-mx', x + '%');
           card.style.setProperty('--ely-my', y + '%');
+          card.style.setProperty('--ely-rx', rx + 'deg');
+          card.style.setProperty('--ely-ry', ry + 'deg');
         }, { passive: true });
         card.addEventListener('pointerleave', function () {
           card.style.removeProperty('--ely-mx');
           card.style.removeProperty('--ely-my');
+          card.style.removeProperty('--ely-rx');
+          card.style.removeProperty('--ely-ry');
         });
       }
     });
