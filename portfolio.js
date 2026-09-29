@@ -1775,6 +1775,15 @@
     const container = document.getElementById('assets-manager-list');
     const count = document.getElementById('assets-total-count');
     if (count) count.textContent = String(assets.length);
+    const mostDownloadedEl = document.getElementById('asset-most-downloaded');
+    const todayTotalEl = document.getElementById('asset-downloads-today-total');
+    if (mostDownloadedEl) {
+      const top = assets.slice().sort(function(a,b){return (Number(b.downloads)||0)-(Number(a.downloads)||0);})[0];
+      mostDownloadedEl.textContent = top ? top.name + ' · ' + (Number(top.downloads)||0) : '—';
+    }
+    if (todayTotalEl) {
+      todayTotalEl.textContent = String(assets.reduce(function(sum,a){return sum + getAssetDownloadsToday(a.id);},0));
+    }
     if (!container) return;
     if (!assets.length) {
       container.innerHTML = '<div class="p-4 rounded-xl bg-[#141822] text-center text-xs text-slate-400">No hay recursos registrados todavía.</div>';
@@ -6061,6 +6070,12 @@
         renderAssetsGrid();
       });
     }
+    const assetViewToggle = document.getElementById('asset-view-toggle');
+    if (assetViewToggle) {
+      assetViewToggle.addEventListener('click', function () {
+        toggleAssetViewMode();
+      });
+    }
 
     // Reset filters button
     const resetFiltersBtn = document.getElementById('reset-filters-btn');
@@ -6071,6 +6086,8 @@
         searchQuery = '';
         selectedAssetSort = 'newest';
         showOnlyFavoriteAssets = false;
+        assetViewMode = 'cards';
+        try { localStorage.setItem('portfolio_community_asset_view_v1', assetViewMode); } catch (e) {}
         if (searchInput) searchInput.value = '';
         const assetSortReset = document.getElementById('asset-sort-select');
         if (assetSortReset) assetSortReset.value = 'newest';
@@ -6260,6 +6277,10 @@
     moveAssetOrder: moveAssetOrder,
     toggleAssetPublished: toggleAssetPublished,
     toggleAssetFavorite: toggleAssetFavorite,
+    toggleAssetLike: toggleAssetLike,
+    addAssetComment: addAssetComment,
+    copyAssetCode: copyAssetCode,
+    toggleAssetViewMode: toggleAssetViewMode,
     filterAssetsByTag: filterAssetsByTag,
     openAssetFormPreview: openAssetFormPreview,
     closeAssetFormPreview: closeAssetFormPreview,
