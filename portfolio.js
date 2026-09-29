@@ -5706,6 +5706,11 @@
         btn.classList.remove('bg-[#141822]', 'text-slate-300');
 
         selectedOrigin = btn.getAttribute('data-origin-filter');
+        if (selectedOrigin === 'assets') {
+          if (selectedCategory !== 'script' && selectedCategory !== 'asset') selectedCategory = 'todos';
+        } else if (selectedCategory === 'script' || selectedCategory === 'asset') {
+          selectedCategory = 'todos';
+        }
         renderProjectsGrid(true);
       });
     });
