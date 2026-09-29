@@ -1294,6 +1294,7 @@
     visitorPreviewMode = !!enabled;
     updateModeratorUI();
     renderProjectsGrid();
+    if (selectedOrigin === 'assets') renderAssetsGrid();
     addElyDevBackgroundMotion();
     initElyDevMotionEnhancements();
     renderExperiences();
@@ -1605,7 +1606,7 @@
         ].join(' ').toLowerCase();
         if (!haystack.includes(q)) return false;
       }
-      return asset.published !== false;
+      return isModerator || asset.published !== false;
     });
   }
 
@@ -3637,6 +3638,7 @@
       closeAuthModal();
       updateModeratorUI();
       renderProjectsGrid();
+      if (selectedOrigin === 'assets') renderAssetsGrid();
       showStatusNotification({
         title: 'Acceso de Moderador Autorizado',
         message: 'Bienvenido ElyDev. Los controles de edición, reordenar y feedback están activos.',
@@ -3656,6 +3658,7 @@
     } catch (err) {}
     updateModeratorUI();
     renderProjectsGrid();
+    if (selectedOrigin === 'assets') renderAssetsGrid();
     showStatusNotification({
       title: 'Sesión Cerrada',
       message: 'Has salido del modo moderador de manera segura.',
