@@ -59,7 +59,18 @@
 @media (prefers-reduced-motion:reduce){.card-effect-glow::before,.card-effect-glow::after,.card-effect-rainbow::before,.card-effect-rainbow::after,.card-effect-red::before,.card-effect-gold::before,.card-effect-blue::before,.card-effect-electrify::before{filter:none;animation:none;}.card-effect-shake{animation:none;}}
 .card-effect-electrify.card-effect-rainbow::before{content:"";position:absolute;inset:-4px;border:2px solid var(--card-effect-color);border-radius:inherit;pointer-events:none;box-sizing:border-box;z-index:100;filter:url(#ely-electric-border);box-shadow:0 0 4px var(--card-effect-color),0 0 12px var(--card-effect-soft);mix-blend-mode:screen;}
 .card-effect-electrify.card-effect-rainbow::after{content:"";position:absolute;inset:-10px;border-radius:inherit;pointer-events:none;z-index:99;background:conic-gradient(from 0deg,#ff003c,#ff7a00,#ffe600,#00ff66,#00d9ff,#3867ff,#b000ff,#ff003c);animation:rainbow-border-spin 2s linear infinite;filter:blur(9px);opacity:.8;mix-blend-mode:screen;}
-.card-pinned-badge{position:absolute;top:10px;right:10px;z-index:120;display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border-radius:8px;background:rgba(250,204,21,.95);color:#111827;font-size:10px;font-weight:800;box-shadow:0 4px 14px rgba(250,204,21,.3);}</style></head>
+.card-pinned-badge{position:absolute;top:10px;right:10px;z-index:120;display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border-radius:8px;background:rgba(250,204,21,.95);color:#111827;font-size:10px;font-weight:800;box-shadow:0 4px 14px rgba(250,204,21,.3);}<style>
+.assets-list-view{display:flex!important;flex-direction:column!important;gap:10px!important}
+.assets-list-view>article{display:grid;grid-template-columns:120px 1fr;align-items:stretch;margin:0!important}
+.assets-list-view>article .asset-card-image{height:100%!important;min-height:105px;border-bottom:0;border-right:1px solid rgba(255,255,255,.05)}
+.assets-list-view>article .p-4{padding:12px!important;text-align:left!important}
+.assets-list-view>article .p-4>div{justify-content:flex-start!important}
+.assets-list-view>article .asset-card-badges{right:8px;top:8px}
+.asset-compact-badge{display:inline-flex;align-items:center;padding:3px 6px;border-radius:7px;background:rgba(8,10,15,.75);border:1px solid rgba(255,255,255,.1);font-size:9px;line-height:1;color:#cbd5e1;backdrop-filter:blur(4px)}
+.asset-new-badge{color:#67e8f9;border-color:rgba(34,211,238,.25)}
+.asset-popular-badge{color:#fcd34d;border-color:rgba(245,158,11,.25)}
+@media(max-width:640px){.assets-list-view>article{grid-template-columns:90px 1fr}.assets-list-view>article .asset-card-image{min-height:90px}}
+</style></style></head>
   <body class="bg-[#0b0d11] text-[#ededef] antialiased selection:bg-amber-400 selection:text-black">
     <svg aria-hidden="true" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none"><defs>
       <filter id="ely-electric-border" color-interpolation-filters="sRGB" x="-20%" y="-20%" width="140%" height="140%">
@@ -514,6 +525,7 @@
                   <option value="manual">Orden manual</option>
                 </select>
                 <button id="asset-favorites-filter" type="button" class="px-2.5 py-1.5 rounded-xl bg-white/5 border border-[#262c3b] text-[11px] text-slate-300 hover:text-white" title="Mostrar favoritos">☆</button>
+                <button id="asset-view-toggle" type="button" class="px-2.5 py-1.5 rounded-xl bg-white/5 border border-[#262c3b] text-[11px] text-slate-300 hover:text-white" title="Cambiar vista">☷ Lista</button>
               </div>
             </div>
           </div>
@@ -939,19 +951,43 @@
             <p id="asset-modal-utility" class="text-xs text-slate-200 leading-relaxed"></p>
           </div>
           <div id="asset-modal-code-wrap" class="hidden rounded-xl bg-[#080a0f] border border-[#232733] overflow-hidden">
-            <div class="px-3 py-2 border-b border-[#232733] text-[10px] uppercase tracking-wider text-slate-500">Ejemplo de código</div>
+            <div class="flex items-center justify-between px-3 py-2 border-b border-[#232733]">
+              <div class="text-[10px] uppercase tracking-wider text-slate-500">Ejemplo de código</div>
+              <button type="button" onclick="window.ElyPortfolio.copyAssetCode()" class="px-2 py-1 rounded-md bg-white/5 hover:bg-white/10 text-[10px] text-slate-300">📋 Copiar</button>
+            </div>
             <pre id="asset-modal-code" class="p-3 text-[11px] text-slate-200 overflow-x-auto whitespace-pre-wrap font-mono"></pre>
           </div>
           <div>
             <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Etiquetas</div>
             <div id="asset-modal-tags" class="flex flex-wrap gap-1.5"></div>
           </div>
-          <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[#0b0d11] border border-[#232733] p-3">
-            <div>
+          <div class="grid grid-cols-3 gap-2 rounded-xl bg-[#0b0d11] border border-[#232733] p-3">
+            <div class="text-center">
               <div class="text-[10px] uppercase tracking-wider text-slate-500">Descargas</div>
               <div id="asset-modal-downloads" class="text-lg font-black text-white font-mono">0</div>
             </div>
-            <button id="asset-modal-download-btn" type="button" class="px-5 py-2.5 rounded-lg bg-cyan-400 text-black font-bold text-xs hover:bg-cyan-300 transition-colors">↓ Descargar</button>
+            <div class="text-center border-x border-[#232733]">
+              <div class="text-[10px] uppercase tracking-wider text-slate-500">Hoy</div>
+              <div id="asset-modal-downloads-today" class="text-lg font-black text-cyan-300 font-mono">0</div>
+            </div>
+            <div class="text-center">
+              <div class="text-[10px] uppercase tracking-wider text-slate-500">Likes</div>
+              <div id="asset-modal-likes" class="text-lg font-black text-rose-300 font-mono">0</div>
+            </div>
+          </div>
+          <button type="button" onclick="window.ElyPortfolio.toggleAssetLike(window.ElyPortfolio.getSelectedAssetId())" class="w-full px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-slate-200">♥ Me gusta</button>
+          <button id="asset-modal-download-btn" type="button" class="w-full px-5 py-2.5 rounded-lg bg-cyan-400 text-black font-bold text-xs hover:bg-cyan-300 transition-colors">↓ Descargar</button>
+          <div class="rounded-xl bg-[#0b0d11] border border-[#232733] p-3 space-y-2">
+            <div class="text-[10px] uppercase tracking-wider text-slate-500">Comentarios</div>
+            <div id="asset-modal-comments-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
+            <div class="flex gap-2">
+              <input id="asset-modal-comment-input" type="text" maxlength="240" placeholder="Escribe un comentario..." class="flex-1 rounded-lg bg-[#141822] border border-[#262c3b] px-3 py-2 text-[11px] text-white focus:outline-none focus:border-cyan-400">
+              <button type="button" onclick="window.ElyPortfolio.addAssetComment()" class="px-3 py-2 rounded-lg bg-cyan-400 text-black text-[11px] font-bold">Enviar</button>
+            </div>
+          </div>
+          <div class="rounded-xl bg-[#0b0d11] border border-[#232733] p-3">
+            <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-2">Relacionados</div>
+            <div id="asset-modal-related-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
           </div>
           <div id="asset-modal-moderator-actions" class="hidden pt-2 border-t border-amber-400/20 flex flex-wrap justify-center gap-2">
             <button type="button" onclick="window.ElyPortfolio.editAsset(window.ElyPortfolio.getSelectedAssetId ? window.ElyPortfolio.getSelectedAssetId() : '')" class="px-3 py-1.5 rounded-lg bg-amber-400 text-black text-xs font-bold hover:bg-amber-300">✏️ Editar</button>
@@ -1067,6 +1103,10 @@
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-bold text-white">Recursos registrados</h4>
             <span id="assets-total-count" class="text-[10px] text-slate-500 font-mono">0</span>
+          </div>
+          <div id="asset-community-stats" class="grid grid-cols-2 gap-2 text-[10px]">
+            <div class="rounded-lg bg-white/[.03] border border-white/5 px-3 py-2"><span class="text-slate-500">Más descargado</span><div id="asset-most-downloaded" class="text-white font-bold truncate">—</div></div>
+            <div class="rounded-lg bg-white/[.03] border border-white/5 px-3 py-2"><span class="text-slate-500">Descargas hoy</span><div id="asset-downloads-today-total" class="text-cyan-300 font-bold">0</div></div>
           </div>
           <div id="assets-manager-list" class="space-y-2"></div>
         </div>
