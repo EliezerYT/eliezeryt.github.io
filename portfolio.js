@@ -1630,9 +1630,9 @@
       const effects = Array.isArray(asset.cardEffects) ? asset.cardEffects : [];
       const effectClasses = effects.map(function(effect){ return ' card-effect-' + effect; }).join('');
       const effectStyle = asset.cardEffectColor ? ' style="--card-effect-color:' + asset.cardEffectColor + ';--card-effect-soft:' + asset.cardEffectColor + 'aa;--card-effect-light:' + asset.cardEffectColor + ';"' : '';
-      const pinnedBadge = asset.pinned === true ? '<span class="card-pinned-badge">📌 Fijado</span>' : '';
-      const newBadge = isAssetNew(asset) ? '<span class="asset-status-badge asset-new-badge">Nuevo</span>' : '';
-      const popularBadge = (Number(asset.downloads) || 0) >= 10 ? '<span class="asset-status-badge asset-popular-badge">🔥 Popular</span>' : '';
+      const pinnedBadge = asset.pinned === true ? '<span class="asset-compact-badge">📌</span>' : '';
+      const newBadge = isAssetNew(asset) ? '<span class="asset-compact-badge asset-new-badge">Nuevo</span>' : '';
+      const popularBadge = (Number(asset.downloads) || 0) >= 10 ? '<span class="asset-compact-badge asset-popular-badge">🔥 Popular</span>' : '';
       const favorite = isAssetFavorite(asset.id);
       const favoriteButton = '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.toggleAssetFavorite(\'' + safeId + '\')" class="absolute left-3 top-3 z-[121] h-7 w-7 rounded-lg bg-black/55 border border-white/10 text-sm hover:border-amber-400/50" title="' + (favorite ? 'Quitar de favoritos' : 'Agregar a favoritos') + '">' + (favorite ? '★' : '☆') + '</button>';
       const image = asset.image ? '<div class="h-40 overflow-hidden bg-black/20 border-b border-white/5"><img src="' + asset.image + '" alt="' + asset.name + '" class="w-full h-full object-cover" onerror="this.style.display=\'none\'"></div>' : '';
