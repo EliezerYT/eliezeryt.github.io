@@ -267,7 +267,18 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><input id="asset-form-version" type="text" value="1.0.0" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white"><input id="asset-form-download" type="url" required placeholder="Link de descarga" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white"></div>
         <textarea id="asset-form-code" rows="5" placeholder="Ejemplo de código (opcional)" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white font-mono text-[11px]"></textarea>
         <label class="inline-flex items-center gap-2 text-xs text-white"><input id="asset-form-published" type="checkbox" checked class="accent-emerald-400"> Publicar inmediatamente</label>
-        <div><input id="asset-form-image" type="text" readonly placeholder="Ruta de imagen" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white"></div>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="text-[11px] text-slate-300 font-semibold">🖼️ Imagen del Asset</label>
+            <button type="button" onclick="window.ElyPortfolio.openImageLibraryForInput('asset-form-image','asset-form-image-preview-img')" class="text-[11px] text-amber-400 hover:underline">🖼️ Biblioteca</button>
+          </div>
+          <div class="flex items-center gap-3">
+            <div id="asset-form-image-preview" class="hidden h-16 w-28 rounded-lg overflow-hidden border border-[#262c3b] bg-[#0b0d11] shrink-0">
+              <img id="asset-form-image-preview-img" src="" alt="Preview" class="h-full w-full object-cover">
+            </div>
+            <input id="asset-form-image" type="text" readonly placeholder="Selecciona una imagen desde la Biblioteca" class="flex-1 w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white text-xs">
+          </div>
+        </div>
         <div class="flex flex-wrap gap-3">
           <label class="inline-flex items-center gap-2 text-xs text-white"><input id="asset-form-pinned" type="checkbox" class="accent-amber-400"> 📌 Fijar</label>
           <label class="inline-flex items-center gap-2 text-xs text-white"><input id="asset-form-effect-electrify" type="checkbox" class="accent-amber-400"> ⚡ Electrify</label>
