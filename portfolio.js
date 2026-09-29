@@ -1165,7 +1165,7 @@
               ${badgeText}
             </span>
           </div>
-          ${message ? `<p class="toast-desc text-[11px] text-slate-300 leading-snug mt-1">${message}</p>` : ''}
+          ${message ? `<p class="toast-desc ${opts.messageClass || 'text-[11px] text-slate-300'} leading-snug mt-1">${message}</p>` : ''}
         </div>
         <button
           type="button"
@@ -1939,6 +1939,16 @@
       downloadBtn.onclick = function () {
         const target = assets.find(function (a) { return a.id === asset.id; });
         if (!target) return;
+        downloadBtn.classList.remove('btn-101-active');
+        void downloadBtn.offsetWidth;
+        downloadBtn.classList.add('btn-101-active');
+        showStatusNotification({
+          title: 'Descargando',
+          message: target.name || target.id,
+          type: 'success',
+          icon: '↓',
+          messageClass: 'toast-download-name'
+        });
         trackAssetDownload(target);
         requestGlobalAssetCounter(target.id, 'downloads', 'increment').then(function(count) {
           if (count === null) return;
@@ -6706,6 +6716,22 @@
     }, true);
     
     document.addEventListener('click', function (e) {
+      const likeButton = e.target.closest('#asset-modal-like-btn');
+      if (likeButton && !reduceMotion) {
+        likeButton.classList.remove('ely-heart-pop');
+        void likeButton.offsetWidth;
+        likeButton.classList.add('ely-heart-pop');
+        for (let i = 0; i < 7; i++) {
+          const heart = document.createElement('span');
+          heart.className = 'ely-like-heart';
+          heart.textContent = i % 2 ? '♥' : '❤';
+          heart.style.setProperty('--heart-x', ((i - 3) * 14) + (Math.random() * 10 - 5) + 'px');
+          heart.style.setProperty('--heart-y', (-24 - Math.random() * 18) + 'px');
+          heart.style.setProperty('--heart-delay', (Math.random() * 80) + 'ms');
+          likeButton.appendChild(heart);
+          setTimeout(function () { heart.remove(); }, 900);
+        }
+      }
       const el = e.target.closest('#asset-modal-like-btn, #asset-modal-favorite-btn, #asset-modal-download-btn, [onclick*="toggleAssetLike"], [title*="favoritos"], [title*="Favorito"]');
       if (!el || reduceMotion) return;
       const isLike = el.id === 'asset-modal-like-btn';
