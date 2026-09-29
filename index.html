@@ -70,7 +70,49 @@
 .asset-new-badge{color:#67e8f9;border-color:rgba(34,211,238,.25)}
 .asset-popular-badge{color:#fcd34d;border-color:rgba(245,158,11,.25)}
 @media(max-width:640px){.assets-list-view>article{grid-template-columns:90px 1fr}.assets-list-view>article .asset-card-image{min-height:90px}}
-</style></style></head>
+
+<style id="ELYDEV_MOTION_STYLES_V1">
+@keyframes ely-reveal-up{from{opacity:0;transform:translate3d(0,22px,0) scale(.985);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+.ely-motion-item.ely-reveal-pending{opacity:0}
+.ely-motion-item.ely-revealed{animation:ely-reveal-up .62s cubic-bezier(.2,.75,.25,1) both;animation-delay:var(--ely-stagger,0ms)}
+#projects-grid>article.ely-interactive-card{--ely-mx:50%;--ely-my:50%;transform:translateZ(0);transition:transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s ease,border-color .28s ease}
+#projects-grid>article.ely-interactive-card:hover{transform:translateY(-4px) scale(1.006)}
+.ely-spotlight{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;opacity:0;background:radial-gradient(260px circle at var(--ely-mx,50%) var(--ely-my,50%),rgba(255,255,255,.105),transparent 62%);transition:opacity .25s ease;mix-blend-mode:screen}
+#projects-grid>article:hover>.ely-spotlight{opacity:1}
+.ely-border-light{position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;z-index:0;opacity:0;background:conic-gradient(from var(--ely-border-angle,0deg),transparent 0deg,transparent 290deg,rgba(34,211,238,.9) 325deg,rgba(251,191,36,.9) 350deg,transparent 360deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;padding:1px;animation:ely-border-sweep 2.6s linear infinite;animation-play-state:paused;transition:opacity .2s ease}
+#projects-grid>article:hover>.ely-border-light{opacity:1;animation-play-state:running}
+@property --ely-border-angle{syntax:"<angle>";initial-value:0deg;inherits:false}
+@keyframes ely-border-sweep{to{--ely-border-angle:360deg}}
+.ely-magnetic{transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s ease}
+.ely-magnetic:hover{transform:translateY(-1px)}
+.ely-ripple-host{position:relative;overflow:hidden!important}
+.ely-ripple{position:absolute;border-radius:999px;pointer-events:none;background:rgba(255,255,255,.28);transform:scale(0);animation:ely-ripple .5s ease-out forwards}
+@keyframes ely-ripple{to{transform:scale(1);opacity:0}}
+.ely-pop-like{animation:ely-like-pop .42s cubic-bezier(.2,1.5,.3,1)}
+.ely-pop-favorite{animation:ely-favorite-pop .45s cubic-bezier(.2,1.6,.3,1)}
+.ely-pop-download{animation:ely-download-pop .5s cubic-bezier(.2,1.4,.3,1)}
+@keyframes ely-like-pop{0%{transform:scale(1)}45%{transform:scale(1.18) rotate(-3deg)}100%{transform:scale(1)}}
+@keyframes ely-favorite-pop{0%{transform:scale(1) rotate(0)}45%{transform:scale(1.2) rotate(-8deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes ely-download-pop{0%{transform:scale(1)}35%{transform:translateY(2px) scale(.94)}65%{transform:translateY(-3px) scale(1.08)}100%{transform:none}}
+.asset-compact-badge{transition:transform .2s ease,filter .2s ease}
+.asset-new-badge{animation:ely-new-shimmer 2.8s ease-in-out infinite}
+.asset-popular-badge{animation:ely-popular-pulse 2.4s ease-in-out infinite}
+.asset-compact-badge:hover{transform:translateY(-1px) scale(1.03)}
+@keyframes ely-new-shimmer{0%,72%,100%{filter:brightness(1);box-shadow:0 0 0 rgba(34,211,238,0)}82%{filter:brightness(1.35);box-shadow:0 0 12px rgba(34,211,238,.24)}}
+@keyframes ely-popular-pulse{0%,70%,100%{transform:scale(1)}80%{transform:scale(1.06)}90%{transform:scale(1)}}
+#projects-grid>article img{transition:transform .6s cubic-bezier(.2,.75,.2,1),filter .35s ease}
+#projects-grid>article:hover img{transform:scale(1.045);filter:saturate(1.05)}
+#projects-grid>article [onclick*="filterAssetsByTag"]{transition:transform .18s ease,border-color .18s ease,background-color .18s ease}
+#projects-grid>article [onclick*="filterAssetsByTag"]:hover{transform:translateY(-1px) scale(1.04);box-shadow:0 0 12px rgba(34,211,238,.12)}
+.ely-ambient-bg{position:fixed;inset:-15%;z-index:-10;pointer-events:none;opacity:.42;background:radial-gradient(circle at 18% 22%,rgba(34,211,238,.11),transparent 25%),radial-gradient(circle at 78% 30%,rgba(168,85,247,.09),transparent 24%),radial-gradient(circle at 55% 82%,rgba(251,191,36,.055),transparent 26%);filter:blur(28px);animation:ely-ambient-drift 18s ease-in-out infinite alternate}
+@keyframes ely-ambient-drift{0%{transform:translate3d(-1.5%,-1%,0) scale(1)}50%{transform:translate3d(1.5%,1%,0) scale(1.035)}100%{transform:translate3d(-.5%,2%,0) scale(1.015)}}
+@media (prefers-reduced-motion:reduce){
+  .ely-motion-item.ely-revealed{animation:none;opacity:1}
+  .ely-ambient-bg,.asset-new-badge,.asset-popular-badge,.ely-border-light{animation:none}
+  #projects-grid>article.ely-interactive-card:hover{transform:none}
+  #projects-grid>article:hover img{transform:none}
+}
+</style></style></style></head>
   <body class="bg-[#0b0d11] text-[#ededef] antialiased selection:bg-amber-400 selection:text-black">
     <svg aria-hidden="true" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none"><defs>
       <filter id="ely-electric-border" color-interpolation-filters="sRGB" x="-20%" y="-20%" width="140%" height="140%">
