@@ -1782,10 +1782,15 @@
     const codeEl = document.getElementById('asset-modal-code');
     const codeWrap = document.getElementById('asset-modal-code-wrap');
     const favoriteBtn = document.getElementById('asset-modal-favorite-btn');
+    const likesEl = document.getElementById('asset-modal-likes');
+    const dailyEl = document.getElementById('asset-modal-downloads-today');
     if (codeWrap && codeEl) {
       if (asset.codeExample) { codeEl.textContent = asset.codeExample; codeWrap.classList.remove('hidden'); } else codeWrap.classList.add('hidden');
     }
     if (favoriteBtn) favoriteBtn.textContent = isAssetFavorite(asset.id) ? '★ Favorito' : '☆ Favorito';
+    if (likesEl) likesEl.textContent = String(getAssetLikes(asset.id));
+    if (dailyEl) dailyEl.textContent = String(getAssetDownloadsToday(asset.id));
+    renderAssetComments(asset.id);
     const moderatorActions = document.getElementById('asset-modal-moderator-actions');
     window.ElyPortfolio.getSelectedAssetId = function () { return selectedAsset ? selectedAsset.id : ''; };
     if (moderatorActions) moderatorActions.classList.toggle('hidden', !(isModerator && !visitorPreviewMode));
