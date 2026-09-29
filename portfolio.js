@@ -15,7 +15,7 @@
   const AUTH_STORAGE_KEY = 'portfolio_auth_user_v2';
   const THEME_STORAGE_KEY = 'portfolio_theme_elydev';
   const GITHUB_OWNER = 'EliezerYT';
-  const GITHUB_REPOSITORY = 'portfolio2026';
+  const GITHUB_REPOSITORY = 'eliezeryt.github.io';
   const GITHUB_BRANCH = 'main';
   const GITHUB_API_BASE = 'https://api.github.com';
   const GITHUB_IMAGE_PATH = 'assets/images/moderator';
@@ -1010,6 +1010,15 @@
   let selectedCategory = 'todos';
   let selectedAsset = null;
   let editingAssetId = null;
+  let selectedAssetSort = 'newest';
+  let showOnlyFavoriteAssets = false;
+  const ASSET_FAVORITES_KEY = 'portfolio_community_asset_favorites_v1';
+  let favoriteAssetIds = [];
+  try {
+    const savedFavorites = localStorage.getItem(ASSET_FAVORITES_KEY);
+    if (savedFavorites) favoriteAssetIds = JSON.parse(savedFavorites);
+  } catch (e) {}
+  if (!Array.isArray(favoriteAssetIds)) favoriteAssetIds = [];
   let searchQuery = '';
   let selectedProject = null;
   let activeMediaIndex = 0; // Para el carrusel de imágenes
@@ -1349,6 +1358,9 @@
     const headerSub = document.getElementById('catalog-header-sub');
     const badgeLabel = document.getElementById('catalog-badge-label');
     const secondaryFilters = document.getElementById('secondary-category-filters');
+    const assetTools = document.getElementById('asset-tools');
+    if (assetTools) assetTools.classList.toggle('hidden', selectedOrigin !== 'assets');
+    if (assetTools) assetTools.classList.toggle('flex', selectedOrigin === 'assets');
 
     // Ocultar categorías secundarias si se elige Servicios o Clases
     const assetCategoryLabel = document.getElementById('asset-category-label');
@@ -1387,7 +1399,7 @@
 
     if (headerTitle) {
       headerTitle.textContent =
-        selectedOrigin === 'assets' ? 'Scripts / Assets para la Comunidad' :
+        selectedOrigin === 'assets' ? 'ElyDev Community' :
         selectedOrigin === 'servicios' ? 'Servicios Técnicos Especializados' :
         selectedOrigin === 'clases' ? 'Clases & Asesorías Privadas' :
         'Proyectos Trabajados & Propios';
@@ -1395,7 +1407,7 @@
 
     if (headerSub) {
       headerSub.textContent =
-        selectedOrigin === 'assets' ? 'Recursos descargables, scripts y herramientas compartidas con la comunidad.' :
+        selectedOrigin === 'assets' ? 'Scripts, Assets y herramientas de la comunidad. Busca, guarda y descarga.' :
         selectedOrigin === 'servicios' ? 'Sistemas llave en mano de monetización publicitaria, compras in-app, audio y multiplayer.' :
         selectedOrigin === 'clases' ? 'Aprende Unity, programación C#, monetización y multijugador online con sesiones 1 a 1 en vivo.' :
         'Filtra por Propios, Trabajados o explora Servicios Comunes y Clases Privadas.';
@@ -1457,13 +1469,50 @@
     return String(value || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80) || 'asset-' + Date.now();
   }
 
+  function isAssetNew(asset) {
+    const createdAt = Number(asset.createdAt) || 0;
+    return createdAt > 0 && (Date.now() - createdAt) < 7 * 24 * 60 * 60 * 1000;
+  }
+
+  function isAssetFavorite(assetId) {
+    return favoriteAssetIds.includes(assetId);
+  }
+
+  function toggleAssetFavorite(assetId) {
+    const index = favoriteAssetIds.indexOf(assetId);
+    if (index >= 0) favoriteAssetIds.splice(index, 1);
+    else favoriteAssetIds.push(assetId);
+    try { localStorage.setItem(ASSET_FAVORITES_KEY, JSON.stringify(favoriteAssetIds)); } catch (e) {}
+    renderAssetsGrid();
+  }
+
+  function filterAssetsByTag(tag) {
+    searchQuery = tag;
+    const searchInput = document.getElementById('projects-search-input');
+    if (searchInput) searchInput.value = tag;
+    if (selectedOrigin !== 'assets') selectedOrigin = 'assets';
+    renderProjectsGrid(true);
+  }
+
+  function sortAssetsList(list) {
+    return list.sort(function (a, b) {
+      if (a.pinned !== b.pinned) return a.pinned === true ? -1 : 1;
+      if (selectedAssetSort === 'downloads') return (Number(b.downloads) || 0) - (Number(a.downloads) || 0);
+      if (selectedAssetSort === 'name') return String(a.name || '').localeCompare(String(b.name || ''), 'es', { sensitivity: 'base' });
+      if (selectedAssetSort === 'oldest') return (Number(a.createdAt) || 0) - (Number(b.createdAt) || 0);
+      if (selectedAssetSort === 'manual') return (Number(a.order) || 0) - (Number(b.order) || 0);
+      return (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0);
+    });
+  }
+
   function getFilteredAssets() {
     return assets.filter(function (asset) {
       if (selectedCategory !== 'todos' && asset.type !== selectedCategory) return false;
+      if (showOnlyFavoriteAssets && !isAssetFavorite(asset.id)) return false;
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const haystack = [
-          asset.name, asset.utility, asset.description, asset.version,
+          asset.name, asset.utility, asset.description, asset.version, asset.codeExample,
           (asset.tags || []).join(' ')
         ].join(' ').toLowerCase();
         if (!haystack.includes(q)) return false;
@@ -1480,8 +1529,18 @@
     const container = document.getElementById('projects-grid');
     const emptyState = document.getElementById('projects-empty-state');
     if (!container) return;
-    const list = getFilteredAssets().sort(function(a,b){ return (b.pinned === true ? 1 : 0) - (a.pinned === true ? 1 : 0); });
+    const list = sortAssetsList(getFilteredAssets().slice());
     filteredProjects = [];
+    updateCatalogHeaders();
+    const sortSelect = document.getElementById('asset-sort-select');
+    if (sortSelect) sortSelect.value = selectedAssetSort;
+    const favoritesBtn = document.getElementById('asset-favorites-filter');
+    if (favoritesBtn) {
+      favoritesBtn.classList.toggle('bg-amber-400', showOnlyFavoriteAssets);
+      favoritesBtn.classList.toggle('text-black', showOnlyFavoriteAssets);
+      favoritesBtn.classList.toggle('bg-white/5', !showOnlyFavoriteAssets);
+      favoritesBtn.classList.toggle('text-slate-300', !showOnlyFavoriteAssets);
+    }
     if (emptyState) emptyState.classList.toggle('hidden', list.length > 0);
     container.classList.toggle('hidden', list.length === 0);
     if (!list.length) {
@@ -1489,29 +1548,114 @@
       return;
     }
     container.innerHTML = list.map(function (asset) {
+      const safeId = asset.id.replace(/'/g, "\\'");
       const typeLabel = asset.type === 'script' ? 'SCRIPT' : 'ASSET';
       const typeClass = asset.type === 'script' ? 'text-cyan-300 bg-cyan-500/10 border-cyan-400/20' : 'text-amber-300 bg-amber-500/10 border-amber-400/20';
       const tags = (asset.tags || []).slice(0, 5).map(function (tag) {
-        return '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300 border border-white/10">' + tag + '</span>';
+        return '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.filterAssetsByTag(\'' + String(tag).replace(/'/g, "\\'") + '\')" class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300 border border-white/10 hover:border-cyan-400/50 hover:text-cyan-300">' + tag + '</button>';
       }).join('');
       const effects = Array.isArray(asset.cardEffects) ? asset.cardEffects : [];
       const effectClasses = effects.map(function(effect){ return ' card-effect-' + effect; }).join('');
       const effectStyle = asset.cardEffectColor ? ' style="--card-effect-color:' + asset.cardEffectColor + ';--card-effect-soft:' + asset.cardEffectColor + 'aa;--card-effect-light:' + asset.cardEffectColor + ';"' : '';
       const pinnedBadge = asset.pinned === true ? '<span class="card-pinned-badge">📌 Fijado</span>' : '';
+      const newBadge = isAssetNew(asset) ? '<span class="asset-status-badge asset-new-badge">Nuevo</span>' : '';
+      const popularBadge = (Number(asset.downloads) || 0) >= 10 ? '<span class="asset-status-badge asset-popular-badge">🔥 Popular</span>' : '';
+      const favorite = isAssetFavorite(asset.id);
+      const favoriteButton = '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.toggleAssetFavorite(\'' + safeId + '\')" class="absolute left-3 top-3 z-[121] h-7 w-7 rounded-lg bg-black/55 border border-white/10 text-sm hover:border-amber-400/50" title="' + (favorite ? 'Quitar de favoritos' : 'Agregar a favoritos') + '">' + (favorite ? '★' : '☆') + '</button>';
       const image = asset.image ? '<div class="h-40 overflow-hidden bg-black/20 border-b border-white/5"><img src="' + asset.image + '" alt="' + asset.name + '" class="w-full h-full object-cover" onerror="this.style.display=\'none\'"></div>' : '';
-      return '<article data-asset-id="' + asset.id + '" onclick="window.ElyPortfolio.openAssetModal(\'' + asset.id.replace(/'/g, "\\'") + '\')" class="group cursor-pointer relative rounded-2xl bg-[#12151d] border border-[#232733] overflow-visible hover:border-cyan-400/50 transition-all hover:-translate-y-0.5 shadow-lg' + effectClasses + '"' + effectStyle + '>' +
-        pinnedBadge + image +
+      const moderatorBar = (isModerator && !visitorPreviewMode) ? '<div class="flex items-center justify-between gap-2 p-2 bg-amber-400/10 border-b border-amber-400/20 text-[10px] relative z-[130]"><div class="flex items-center gap-1"><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.moveAssetOrder(\'' + safeId + '\',-1)" class="px-1.5 py-1 rounded bg-white/5 hover:bg-white/10">▲</button><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.moveAssetOrder(\'' + safeId + '\',1)" class="px-1.5 py-1 rounded bg-white/5 hover:bg-white/10">▼</button></div><div class="flex items-center gap-1"><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.duplicateAsset(\'' + safeId + '\')" class="px-2 py-1 rounded bg-white/5 hover:bg-white/10">📋</button><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.editAsset(\'' + safeId + '\')" class="px-2 py-1 rounded bg-amber-400 text-black font-bold">✏️</button><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.deleteAsset(\'' + safeId + '\')" class="px-2 py-1 rounded bg-red-600 text-white">🗑️</button></div></div>' : '';
+      return '<article data-asset-id="' + safeId + '" onclick="window.ElyPortfolio.openAssetModal(\'' + safeId + '\')" class="group cursor-pointer relative rounded-2xl bg-[#12151d] border border-[#232733] overflow-visible hover:border-cyan-400/50 transition-all hover:-translate-y-0.5 shadow-lg' + effectClasses + '"' + effectStyle + '>' +
+        moderatorBar + pinnedBadge + favoriteButton +
+        '<div class="absolute top-3 right-3 z-[121] flex gap-1">' + newBadge + popularBadge + '</div>' +
+        image +
         '<div class="p-4 space-y-3 text-center">' +
           '<div class="flex items-center justify-center gap-2"><span class="px-2 py-0.5 rounded-md border text-[10px] font-bold ' + typeClass + '">' + typeLabel + '</span><span class="text-[10px] text-slate-500 font-mono">v' + (asset.version || '1.0.0') + '</span></div>' +
           '<h3 class="text-base font-bold text-white font-display">' + asset.name + '</h3>' +
           '<p class="text-xs text-slate-400 line-clamp-2">' + (asset.utility || asset.description || '') + '</p>' +
           '<div class="flex flex-wrap justify-center gap-1">' + tags + '</div>' +
           '<div class="flex items-center justify-center gap-3 pt-2 border-t border-[#1e2330]">' +
-            '<span class="text-[10px] text-slate-500 font-mono">↓ ' + (Number(asset.downloads) || 0) + ' descargas</span>' +
-            '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.openAssetModal(\'' + asset.id.replace(/'/g, "\\'") + '\')" class="px-3 py-1.5 rounded-lg bg-cyan-400 text-black text-[11px] font-bold hover:bg-cyan-300">Ver recurso →</button>' +
+            '<span class="text-[10px] ' + ((Number(asset.downloads) || 0) >= 10 ? 'text-amber-300 font-bold' : 'text-slate-500') + ' font-mono">↓ ' + (Number(asset.downloads) || 0) + ' descargas</span>' +
+            '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.openAssetModal(\'' + safeId + '\')" class="px-3 py-1.5 rounded-lg bg-cyan-400 text-black text-[11px] font-bold hover:bg-cyan-300">Ver recurso →</button>' +
           '</div>' +
         '</div></article>';
     }).join('');
+  }
+
+  function moveAssetOrder(assetId, direction) {
+    if (!isModerator || visitorPreviewMode) return;
+    const index = assets.findIndex(function (a) { return a.id === assetId; });
+    if (index < 0) return;
+    const sorted = assets.slice().sort(function(a,b){ return (Number(a.order)||0) - (Number(b.order)||0); });
+    const sortedIndex = sorted.findIndex(function(a){ return a.id === assetId; });
+    const targetIndex = sortedIndex + direction;
+    if (targetIndex < 0 || targetIndex >= sorted.length) return;
+    const other = sorted[targetIndex];
+    const currentOrder = Number(sorted[sortedIndex].order) || sortedIndex;
+    const otherOrder = Number(other.order) || targetIndex;
+    sorted[sortedIndex].order = otherOrder;
+    other.order = currentOrder;
+    assets = sorted;
+    try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
+    renderAssetsManagerList();
+    if (selectedOrigin === 'assets') renderAssetsGrid();
+  }
+
+  function duplicateAsset(assetId) {
+    if (!isModerator || visitorPreviewMode) return;
+    const source = assets.find(function(a){ return a.id === assetId; });
+    if (!source) return;
+    let id = slugifyAssetId(source.name + '-copy');
+    let suffix = 2;
+    while (assets.some(function(a){ return a.id === id; })) id = slugifyAssetId(source.name + '-copy') + '-' + suffix++;
+    const copy = JSON.parse(JSON.stringify(source));
+    copy.id = id;
+    copy.name = source.name + ' Copy';
+    copy.downloads = 0;
+    copy.createdAt = Date.now();
+    copy.published = false;
+    copy.pinned = false;
+    copy.order = assets.length;
+    assets.unshift(copy);
+    try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
+    renderAssetsManagerList();
+    if (selectedOrigin === 'assets') renderAssetsGrid();
+    showStatusNotification({title:'Recurso Duplicado',message:'Se creó como borrador para que puedas revisarlo antes de publicarlo.',type:'success',icon:'📋'});
+  }
+
+  function openAssetFormPreview() {
+    if (!isModerator) return;
+    const name = document.getElementById('asset-form-name')?.value.trim() || 'Recurso sin nombre';
+    const type = document.getElementById('asset-form-type')?.value === 'asset' ? 'asset' : 'script';
+    const utility = document.getElementById('asset-form-utility')?.value.trim() || '';
+    const description = document.getElementById('asset-form-description')?.value.trim() || '';
+    const image = document.getElementById('asset-form-image')?.value.trim() || '';
+    const version = document.getElementById('asset-form-version')?.value.trim() || '1.0.0';
+    const tags = document.getElementById('asset-form-tags')?.value.split(',').map(function(s){return s.trim();}).filter(Boolean) || [];
+    const preview = document.getElementById('asset-preview-modal');
+    if (!preview) return;
+    const title = document.getElementById('asset-preview-title');
+    const desc = document.getElementById('asset-preview-description');
+    const util = document.getElementById('asset-preview-utility');
+    const typeEl = document.getElementById('asset-preview-type');
+    const versionEl = document.getElementById('asset-preview-version');
+    const imageEl = document.getElementById('asset-preview-image');
+    const imageWrap = document.getElementById('asset-preview-image-wrap');
+    const tagsEl = document.getElementById('asset-preview-tags');
+    if (title) title.textContent = name;
+    if (desc) desc.textContent = description;
+    if (util) util.textContent = utility;
+    if (typeEl) typeEl.textContent = type.toUpperCase();
+    if (versionEl) versionEl.textContent = 'v' + version;
+    if (tagsEl) tagsEl.innerHTML = tags.map(function(tag){return '<span class="px-2 py-0.5 rounded text-[10px] bg-white/5 border border-white/10">' + tag + '</span>';}).join('');
+    if (imageWrap && imageEl) {
+      if (image) { imageEl.src=image; imageWrap.classList.remove('hidden'); } else imageWrap.classList.add('hidden');
+    }
+    preview.classList.remove('hidden');
+  }
+
+  function closeAssetFormPreview() {
+    const preview = document.getElementById('asset-preview-modal');
+    if (preview) preview.classList.add('hidden');
   }
 
   function openAssetImagePicker() {
@@ -1545,7 +1689,7 @@
 
   function openAssetModal(assetId, updateHash) {
     const asset = assets.find(function (a) { return a.id === assetId; });
-    if (!asset) return;
+    if (!asset || (asset.published === false && (!isModerator || visitorPreviewMode))) return;
     selectedAsset = asset;
     if (updateHash !== false) {
       history.replaceState(null, '', '#asset-' + encodeURIComponent(asset.id));
@@ -1563,6 +1707,13 @@
     const imageWrap = document.getElementById('asset-modal-image-wrap');
     const imageEl = document.getElementById('asset-modal-image');
     const downloadBtn = document.getElementById('asset-modal-download-btn');
+    const codeEl = document.getElementById('asset-modal-code');
+    const codeWrap = document.getElementById('asset-modal-code-wrap');
+    const favoriteBtn = document.getElementById('asset-modal-favorite-btn');
+    if (codeWrap && codeEl) {
+      if (asset.codeExample) { codeEl.textContent = asset.codeExample; codeWrap.classList.remove('hidden'); } else codeWrap.classList.add('hidden');
+    }
+    if (favoriteBtn) favoriteBtn.textContent = isAssetFavorite(asset.id) ? '★ Favorito' : '☆ Favorito';
     const moderatorActions = document.getElementById('asset-modal-moderator-actions');
     window.ElyPortfolio.getSelectedAssetId = function () { return selectedAsset ? selectedAsset.id : ''; };
     if (moderatorActions) moderatorActions.classList.toggle('hidden', !(isModerator && !visitorPreviewMode));
@@ -1629,10 +1780,14 @@
       container.innerHTML = '<div class="p-4 rounded-xl bg-[#141822] text-center text-xs text-slate-400">No hay recursos registrados todavía.</div>';
       return;
     }
-    container.innerHTML = assets.map(function (asset) {
-      return '<div class="rounded-xl bg-[#141822] border border-[#232733] p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">' +
-        '<div class="min-w-0"><div class="flex items-center gap-2"><span class="text-[10px] uppercase font-bold text-cyan-300">' + (asset.type === 'script' ? 'SCRIPT' : 'ASSET') + '</span><span class="text-xs font-bold text-white truncate">' + asset.name + '</span></div><div class="text-[10px] text-slate-500 font-mono truncate">' + assetDirectLink(asset) + '</div></div>' +
-        '<div class="flex items-center gap-1.5 shrink-0"><button type="button" onclick="window.ElyPortfolio.copyAssetLinkById(\'' + asset.id.replace(/'/g, "\\'") + '\')" class="px-2.5 py-1 rounded bg-white/5 text-xs text-slate-300">📋 Link</button><button type="button" onclick="window.ElyPortfolio.deleteAsset(\'' + asset.id.replace(/'/g, "\\'") + '\')" class="px-2.5 py-1 rounded bg-red-600 text-white text-xs">🗑️</button></div></div>';
+    container.innerHTML = assets.slice().sort(function(a,b){return (Number(a.order)||0)-(Number(b.order)||0);}).map(function (asset) {
+      const safeId = asset.id.replace(/'/g, "\\'");
+      const status = asset.published === false ? '<span class="text-red-300 bg-red-500/10 border border-red-500/20 px-1.5 py-0.5 rounded">Borrador</span>' : '<span class="text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">Publicado</span>';
+      const isNew = isAssetNew(asset) ? '<span class="text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded">Nuevo</span>' : '';
+      return '<div class="rounded-xl bg-[#141822] border border-[#232733] p-3 flex flex-col gap-2">' +
+        '<div class="flex items-center justify-between gap-2"><div class="min-w-0"><div class="flex items-center gap-2 flex-wrap"><span class="text-[10px] uppercase font-bold text-cyan-300">' + (asset.type === 'script' ? 'SCRIPT' : 'ASSET') + '</span><span class="text-xs font-bold text-white truncate">' + asset.name + '</span>' + status + isNew + '</div><div class="text-[10px] text-slate-500 font-mono">↓ ' + (Number(asset.downloads)||0) + ' · v' + (asset.version||'1.0.0') + '</div></div></div>' +
+        '<div class="flex flex-wrap items-center gap-1.5"><button type="button" onclick="window.ElyPortfolio.moveAssetOrder(\''+safeId+'\',-1)" class="px-2 py-1 rounded-lg bg-white/5 text-[10px]">▲</button><button type="button" onclick="window.ElyPortfolio.moveAssetOrder(\''+safeId+'\',1)" class="px-2 py-1 rounded-lg bg-white/5 text-[10px]">▼</button><button type="button" onclick="window.ElyPortfolio.toggleAssetPublished(\''+safeId+'\')" class="px-2 py-1 rounded-lg bg-white/5 text-[10px]">'+(asset.published===false?'🚀 Publicar':'⏸ Ocultar')+'</button><button type="button" onclick="window.ElyPortfolio.duplicateAsset(\''+safeId+'\')" class="px-2 py-1 rounded-lg bg-white/5 text-[10px]">📋 Duplicar</button><button type="button" onclick="window.ElyPortfolio.editAsset(\''+safeId+'\')" class="px-2 py-1 rounded-lg bg-amber-400 text-black text-[10px] font-bold">✏️ Editar</button><button type="button" onclick="window.ElyPortfolio.deleteAsset(\''+safeId+'\')" class="px-2 py-1 rounded-lg bg-red-600 text-white text-[10px]">🗑️</button></div>' +
+      '</div>';
     }).join('');
   }
 
@@ -1652,6 +1807,10 @@
     document.getElementById('asset-form-version').value = asset.version || '1.0.0';
     document.getElementById('asset-form-download').value = asset.downloadUrl || '';
     document.getElementById('asset-form-image').value = asset.image || '';
+    const codeExample = document.getElementById('asset-form-code');
+    if (codeExample) codeExample.value = asset.codeExample || '';
+    const published = document.getElementById('asset-form-published');
+    if (published) published.checked = asset.published !== false;
     const pinned = document.getElementById('asset-form-pinned');
     if (pinned) pinned.checked = asset.pinned === true;
     const effects = Array.isArray(asset.cardEffects) ? asset.cardEffects : [];
@@ -1715,6 +1874,8 @@
     const version = document.getElementById('asset-form-version').value.trim() || '1.0.0';
     const downloadUrl = document.getElementById('asset-form-download').value.trim();
     const image = document.getElementById('asset-form-image').value.trim();
+    const codeExample = document.getElementById('asset-form-code')?.value || '';
+    const published = !!document.getElementById('asset-form-published')?.checked;
     const pinned = !!document.getElementById('asset-form-pinned')?.checked;
     const effectList = [];
     if (document.getElementById('asset-form-effect-electrify')?.checked) effectList.push('electrify');
@@ -1733,11 +1894,15 @@
       target.tags = tags;
       target.downloadUrl = downloadUrl;
       target.image = image;
+      target.codeExample = codeExample;
       target.version = version;
+      target.published = published;
       target.pinned = pinned;
       target.cardEffects = effectList;
       target.cardEffect = effectList.length ? effectList[0] : 'none';
       target.cardEffectColor = cardEffectColor;
+      if (!target.createdAt) target.createdAt = Date.now();
+      if (typeof target.order !== 'number') target.order = assets.length;
     } else {
       let id = slugifyAssetId(name);
       let suffix = 2;
@@ -1751,10 +1916,13 @@
         tags: tags,
         downloadUrl: downloadUrl,
         image: image,
+        codeExample: codeExample,
         version: version,
         downloads: 0,
-        published: true,
+        published: published,
         pinned: pinned,
+        createdAt: Date.now(),
+        order: assets.length,
         cardEffects: effectList,
         cardEffect: effectList.length ? effectList[0] : 'none',
         cardEffectColor: cardEffectColor
@@ -1763,7 +1931,8 @@
     try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (err) {}
     renderAssetsManagerList();
     if (selectedOrigin === 'assets') renderAssetsGrid();
-    showStatusNotification({ title: editingAssetId ? 'Recurso Actualizado' : 'Recurso Creado', message: editingAssetId ? 'Los cambios fueron guardados.' : 'Enlace: ' + assetDirectLink(assets[0]), type: 'success', icon: editingAssetId ? '✏️' : '📦' });
+    const savedAsset = editingAssetId ? assets.find(function(a){return a.id===editingAssetId;}) : assets.find(function(a){return a.id===slugifyAssetId(name) || a.name===name;});
+    showStatusNotification({ title: editingAssetId ? 'Recurso Actualizado' : 'Recurso Creado', message: editingAssetId ? 'Los cambios fueron guardados.' : (published ? 'Recurso publicado. Enlace: ' + assetDirectLink(savedAsset || assets[0]) : 'Guardado como borrador.'), type: 'success', icon: editingAssetId ? '✏️' : '📦' });
     editingAssetId = null;
     e.target.reset();
     document.getElementById('asset-form-version').value = '1.0.0';
@@ -1771,6 +1940,18 @@
     if (submitBtn) submitBtn.textContent = '📦 Publicar recurso';
     const assetPreview = document.getElementById('asset-form-image-preview');
     if (assetPreview) assetPreview.classList.add('hidden');
+    const title = document.querySelector('#assets-manager-modal h3');
+    if (title) title.textContent = '📦 Scripts / Assets de la Comunidad';
+  }
+
+  function toggleAssetPublished(assetId) {
+    if (!isModerator || visitorPreviewMode) return;
+    const target = assets.find(function(a){return a.id===assetId;});
+    if (!target) return;
+    target.published = target.published === false;
+    try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
+    renderAssetsManagerList();
+    if (selectedOrigin === 'assets') renderAssetsGrid();
   }
 
   function deleteAsset(assetId) {
@@ -5866,6 +6047,21 @@
       });
     }
 
+    const assetSortSelect = document.getElementById('asset-sort-select');
+    if (assetSortSelect) {
+      assetSortSelect.addEventListener('change', function () {
+        selectedAssetSort = this.value || 'newest';
+        renderAssetsGrid();
+      });
+    }
+    const assetFavoritesFilter = document.getElementById('asset-favorites-filter');
+    if (assetFavoritesFilter) {
+      assetFavoritesFilter.addEventListener('click', function () {
+        showOnlyFavoriteAssets = !showOnlyFavoriteAssets;
+        renderAssetsGrid();
+      });
+    }
+
     // Reset filters button
     const resetFiltersBtn = document.getElementById('reset-filters-btn');
     if (resetFiltersBtn) {
@@ -5873,7 +6069,11 @@
         selectedOrigin = 'todos';
         selectedCategory = 'todos';
         searchQuery = '';
+        selectedAssetSort = 'newest';
+        showOnlyFavoriteAssets = false;
         if (searchInput) searchInput.value = '';
+        const assetSortReset = document.getElementById('asset-sort-select');
+        if (assetSortReset) assetSortReset.value = 'newest';
 
         // Reset UI active states
         originButtons.forEach(b => {
@@ -6056,6 +6256,14 @@
     openAssetImagePicker: openAssetImagePicker,
     closeAssetImagePicker: closeAssetImagePicker,
     editAsset: editAsset,
+    duplicateAsset: duplicateAsset,
+    moveAssetOrder: moveAssetOrder,
+    toggleAssetPublished: toggleAssetPublished,
+    toggleAssetFavorite: toggleAssetFavorite,
+    filterAssetsByTag: filterAssetsByTag,
+    openAssetFormPreview: openAssetFormPreview,
+    closeAssetFormPreview: closeAssetFormPreview,
+    getSelectedAssetId: function () { return selectedAsset ? selectedAsset.id : ''; },
     selectAssetImage: selectAssetImage,
     toggleDisableCode: toggleDisableCode,
     deleteFeedbackCode: deleteFeedbackCode,
