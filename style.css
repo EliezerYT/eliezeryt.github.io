@@ -316,3 +316,130 @@ html.light .status-notification-toast .toast-desc {
     display: none !important;
   }
 }
+
+
+/* Asset action button effects */
+#asset-modal-like-btn {
+  isolation: isolate;
+  transform-origin: center;
+}
+
+#asset-modal-like-btn.ely-heart-pop {
+  animation: elyLikeButtonPop 0.48s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes elyLikeButtonPop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.08); }
+  65% { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+
+.ely-like-heart {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 20;
+  pointer-events: none;
+  color: #fb7185;
+  font-size: 14px;
+  line-height: 1;
+  text-shadow: 0 0 10px rgba(251, 113, 133, 0.85);
+  transform: translate(-50%, -50%) scale(0.35);
+  animation: elyHeartFloat 0.82s cubic-bezier(0.16, 1, 0.3, 1) var(--heart-delay) forwards;
+}
+
+@keyframes elyHeartFloat {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.35) rotate(-8deg);
+  }
+  20% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--heart-x)), calc(-50% + var(--heart-y))) scale(1.05) rotate(8deg);
+  }
+}
+
+.btn-101 {
+  --thickness: 0.3rem;
+  --roundness: 1.2rem;
+  --color: #eff6ff;
+  --opacity: 0.6;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-mask-image: -webkit-radial-gradient(#000, #fff);
+  backdrop-filter: blur(100px);
+  background: hsla(0, 0%, 100%, 0.2) !important;
+  border: none;
+  border-radius: var(--roundness);
+  color: var(--color);
+  cursor: pointer;
+  font-family: Poppins, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+  position: relative;
+}
+
+.btn-101:hover {
+  background: hsla(0, 0%, 100%, 0.3) !important;
+  filter: brightness(1.2);
+}
+
+.btn-101:active {
+  --opacity: 0;
+  background: hsla(0, 0%, 100%, 0.1) !important;
+}
+
+.btn-101 svg {
+  border-radius: var(--roundness);
+  display: block;
+  filter: url(#glow);
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  pointer-events: none;
+}
+
+.btn-101 rect {
+  fill: none;
+  stroke: var(--color);
+  stroke-width: var(--thickness);
+  rx: var(--roundness);
+  stroke-linejoin: round;
+  stroke-dasharray: 185%;
+  stroke-dashoffset: 80;
+  animation: snake 2s linear infinite;
+  animation-play-state: paused;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.2s;
+  width: 100%;
+}
+
+.btn-101:hover rect,
+.btn-101.btn-101-active rect {
+  animation-play-state: running;
+  opacity: var(--opacity);
+}
+
+.btn-101.btn-101-active {
+  animation: elyDownloadButtonPop 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes snake {
+  to { stroke-dashoffset: 370%; }
+}
+
+@keyframes elyDownloadButtonPop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.035); }
+  100% { transform: scale(1); }
+}
+
+.toast-download-name {
+  color: #34d399 !important;
+  font-weight: 700 !important;
+}
