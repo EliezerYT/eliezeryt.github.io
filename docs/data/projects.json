@@ -373,13 +373,13 @@
     "id": "dominoes-republic",
     "title": "Dominoes Republic",
     "tagline": "Se soluciono un error con la Geolocalizacion",
-    "description": "Intervención especializada para resolver errores críticos en las reglas de juego y solucionar interferencias con separadores de geolocalización en partidas competitivas.",
-    "fullStory": "Contratado por SHL para un diagnóstico urgente de errores y estabilización del juego Dominoes Republic. Identifiqué y corregí la interferencia en la lógica de geolocalización que afectaba el emparejamiento entre regiones y pulí las reglas de puntuación.",
+    "description": "Errores solucionados",
+    "fullStory": "Contratado por SHL para un diagnóstico urgente de errores y estabilización del juego Dominoes Republic. Identifiqué y corregí la interferencia en la lógica de geolocalización que afectaba las posiciones de algunos objetos.",
     "category": "juegos",
-    "origin": "servicios",
+    "origin": "trabajado",
     "clientOrTeam": "SHL (Cliente Comercial)",
     "year": "2022",
-    "role": "Freelance Game Developer (Bug Fixer & Optimization)",
+    "role": "Freelance Game Developer",
     "featured": false,
     "coverImage": "./assets/images/ely/icon-dominoesrepublic.png",
     "galleryImages": [
@@ -390,8 +390,8 @@
       "Unity",
       "C#",
       "Geolocation Services",
-      "Board Game Logic",
-      "Profiling"
+      "Dominican",
+      "Domino"
     ],
     "metrics": [
       {
@@ -404,17 +404,20 @@
       }
     ],
     "keyContributions": [
-      "Depuración a fondo de la capa de geolocalización eliminando conflictos de red.",
-      "Refactorización del cálculo de puntos y validación de fichas jugables en tiempo real."
+      "Depuracion del problema.",
+      "Diagnostico entregado al cliente.",
+      "Errores solucionados!"
     ],
-    "links": [
-      {
-        "label": "Play Store",
-        "url": "https://play.google.com/store/apps/details?id=com.SLH.DominoRepublic",
-        "type": "external"
-      }
-    ],
-    "requirements": []
+    "links": [],
+    "requirements": [],
+    "pinned": false,
+    "cardEffects": [],
+    "cardEffect": "none",
+    "cardEffectColor": "#fbbf24",
+    "icon": "./assets/images/ely/icon-dominoesrepublic.png",
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.SLH.DominoRepublic",
+    "itchUrl": "",
+    "steamUrl": ""
   },
   {
     "id": "adventure-world",
@@ -917,29 +920,28 @@
   },
   {
     "id": "service-multiplayer-pun",
-    "title": "Multiplayer Photon Network | $120",
+    "title": "Multiplayer Photon Network",
     "tagline": "Arquitectura multijugador online, lobbies y sincronización en tiempo real",
-    "description": "Configuración y programación de juego multijugador en línea usando Photon PUN 2: salas por código, emparejamiento, sincronización de transformadas y eventos.",
-    "fullStory": "Convierte tu juego single-player en una experiencia multijugador competitiva o cooperativa. Implemento la infraestructura de red con Photon PUN 2, gestionando salas, lobby, sincronización de animaciones y RPCs con manejo suave de latencia.",
+    "description": "Configuración y programación de juego multijugador en línea usando Photon PUN 2",
+    "fullStory": "Convierte tu juego single-player en una experiencia multijugador competitiva o cooperativa.",
     "category": "juegos",
     "origin": "servicios",
     "year": "2024 - 2025",
     "showDate": false,
     "priceTag": "$120 USD",
     "deliveryTime": "4 - 7 días hábiles",
-    "role": "Ingeniero de Redes & Multijugador",
+    "role": "Multijugador",
     "featured": false,
-    "coverImage": "./assets/images/ely/icon-dominicanpower.png",
+    "coverImage": "./assets/images/ely/Profile/3.png",
     "galleryImages": [
-      "./assets/images/ely/icon-dominicanpower.png"
+      "./assets/images/ely/Profile/3.png"
     ],
     "youtubeVideo": "",
     "technologies": [
-      "Photon PUN 2",
-      "Photon Voice",
-      "C# Network Streams",
-      "Multiplayer Interpolation",
-      "Lobby System"
+      "Photon Network",
+      "Pun 2",
+      "Fusion",
+      "Online"
     ],
     "metrics": [
       {
@@ -956,24 +958,23 @@
       }
     ],
     "keyContributions": [
-      "Sistema de creación y unión a salas públicas o privadas por código.",
-      "Replicación de movimientos y variables sincronizadas vía PhotonView y PhotonTransformView.",
-      "Manejo de desconexiones imprevistas y transferencia de Master Client sin caídas.",
-      "UI de sala de espera con selector de personaje y estado \"Listo\"."
+      "Sistema de creación y unión a salas públicas o privadas por código. (extra $)",
+      "Sincronizacion de jugadores.",
+      "Mas info privado."
     ],
     "requirements": [
-      "Cuenta gratuita de Photon Engine (photonengine.com) con App ID de PUN 2 listo.",
-      "Prefabs de personajes con scripts básicos de movimiento y animaciones ya creados.",
-      "Mecánicas centrales del juego definidas."
+      "Tener la logica de tu juego."
     ],
-    "links": [
-      {
-        "label": "Ver Ficha en Canva",
-        "url": "https://www.canva.com/design/DAHCk6iQVwY/FlPYVFA3lew686sjP3Cyvw/view",
-        "type": "canva"
-      }
-    ],
-    "workedCount": 12
+    "links": [],
+    "workedCount": 12,
+    "pinned": false,
+    "cardEffects": [],
+    "cardEffect": "none",
+    "cardEffectColor": "#fbbf24",
+    "icon": "./assets/images/ely/Profile/3.png",
+    "playStoreUrl": "",
+    "itchUrl": "",
+    "steamUrl": ""
   },
   {
     "id": "clase-unity-csharp",
