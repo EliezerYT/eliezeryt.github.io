@@ -6361,7 +6361,7 @@
       });
     }
     
-    document.querySelectorAll('#projects-grid > article:not([data-asset-id])').forEach(function (card) {
+    document.querySelectorAll('#projects-grid > article').forEach(function (card) {
       if (card.dataset.elyMotionBound !== '1') {
         card.dataset.elyMotionBound = '1';
         card.addEventListener('pointermove', function (e) {
