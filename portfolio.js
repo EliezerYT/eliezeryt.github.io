@@ -1672,6 +1672,34 @@
         '</div></article>';
     }).join('');
     initElyDevMotionEnhancements();
+    initAssetCardInteractions();
+  }
+
+  function initAssetCardInteractions() {
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return;
+    document.querySelectorAll('#projects-grid > article[data-asset-id]').forEach(function (card) {
+      if (card.dataset.assetTiltBound === '1') return;
+      card.dataset.assetTiltBound = '1';
+      card.addEventListener('pointermove', function (e) {
+        const rect = card.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        const rx = ((y - 50) / 50) * -4;
+        const ry = ((x - 50) / 50) * 4;
+        card.style.setProperty('--ely-mx', x + '%');
+        card.style.setProperty('--ely-my', y + '%');
+        card.style.setProperty('--ely-rx', rx + 'deg');
+        card.style.setProperty('--ely-ry', ry + 'deg');
+      }, { passive: true });
+      card.addEventListener('pointerleave', function () {
+        card.style.setProperty('--ely-mx', '50%');
+        card.style.setProperty('--ely-my', '50%');
+        card.style.setProperty('--ely-rx', '0deg');
+        card.style.setProperty('--ely-ry', '0deg');
+      });
+    });
   }
 
   function moveAssetOrder(assetId, direction) {
