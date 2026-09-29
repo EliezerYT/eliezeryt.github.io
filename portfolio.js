@@ -1654,9 +1654,9 @@
       const popularBadge = (Number(asset.downloads) || 0) >= 10 ? '<span class="asset-compact-badge asset-popular-badge">🔥 Popular</span>' : '';
       const favorite = isAssetFavorite(asset.id);
       const favoriteButton = '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.toggleAssetFavorite(\'' + safeId + '\')" class="absolute left-3 top-3 z-[121] h-7 w-7 rounded-lg bg-black/55 border border-white/10 text-sm hover:border-amber-400/50" title="' + (favorite ? 'Quitar de favoritos' : 'Agregar a favoritos') + '">' + (favorite ? '★' : '☆') + '</button>';
-      const image = asset.image ? '<div class="h-40 overflow-hidden bg-black/20 border-b border-white/5"><img src="' + asset.image + '" alt="' + asset.name + '" class="w-full h-full object-cover" onerror="this.style.display=\'none\'"></div>' : '';
+      const image = asset.image ? '<div class="relative aspect-video w-full overflow-hidden bg-[#181d28] cursor-pointer"><img src="' + asset.image + '" alt="' + asset.name + '" class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105" onerror="this.style.display=\'none\'"><div class="absolute inset-0 bg-gradient-to-t from-[#12151d] via-transparent to-black/40"></div></div>' : '';
       const moderatorBar = (isModerator && !visitorPreviewMode) ? '<div class="flex items-center justify-between gap-2 p-2 bg-amber-400/10 border-b border-amber-400/20 text-[10px] relative z-[130]"><div class="flex items-center gap-1"><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.moveAssetOrder(\'' + safeId + '\',-1)" class="px-1.5 py-1 rounded bg-white/5 hover:bg-white/10">▲</button><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.moveAssetOrder(\'' + safeId + '\',1)" class="px-1.5 py-1 rounded bg-white/5 hover:bg-white/10">▼</button></div><div class="flex items-center gap-1"><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.duplicateAsset(\'' + safeId + '\')" class="px-2 py-1 rounded bg-white/5 hover:bg-white/10">📋</button><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.editAsset(\'' + safeId + '\')" class="px-2 py-1 rounded bg-amber-400 text-black font-bold">✏️</button><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.deleteAsset(\'' + safeId + '\')" class="px-2 py-1 rounded bg-red-600 text-white">🗑️</button></div></div>' : '';
-      return '<article data-asset-id="' + safeId + '" onclick="window.ElyPortfolio.openAssetModal(\'' + safeId + '\')" class="group cursor-pointer relative rounded-2xl bg-[#12151d] border border-[#232733] overflow-visible hover:border-cyan-400/50 transition-all hover:-translate-y-0.5 shadow-lg' + effectClasses + '"' + effectStyle + '>' +
+      return '<article data-asset-id="' + safeId + '" onclick="window.ElyPortfolio.openAssetModal(\'' + safeId + '\')" class="card-fade-in group relative flex flex-col overflow-hidden rounded-2xl bg-[#12151d] border border-[#232733] hover:border-amber-400/60 transform hover:scale-105 transition-all duration-300 ease-out shadow-lg hover:shadow-2xl hover:shadow-amber-500/20 z-0 hover:z-10 cursor-pointer' + effectClasses + '"' + effectStyle + '>' +
         moderatorBar + pinnedBadge + favoriteButton +
         '<div class="absolute top-3 right-3 z-[121] flex gap-1">' + newBadge + popularBadge + '</div>' +
         image +
@@ -1671,6 +1671,7 @@
           '</div>' +
         '</div></article>';
     }).join('');
+    initElyDevMotionEnhancements();
   }
 
   function moveAssetOrder(assetId, direction) {
@@ -2394,6 +2395,7 @@
 
     container.innerHTML = html;
     renderedCardIds = new Set(filteredProjects.map(p => p.id));
+    initElyDevMotionEnhancements();
   }
 
   // 6. Modal de detalle del proyecto (Soporta 16:9, Múltiples Imágenes y Videos de YouTube en Grande)
@@ -6313,7 +6315,7 @@
   function initElyDevMotionEnhancements() {
     const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const grid = document.getElementById('projects-grid');
-    const revealTargets = document.querySelectorAll('#projects-grid > article:not([data-asset-id]), section > div.grid > article:not([data-asset-id]), section > div.grid > div:not([data-asset-id]), .group.cursor-pointer:not([data-asset-id])');
+    const revealTargets = document.querySelectorAll('#projects-grid > article, section > div.grid > article, section > div.grid > div, .group.cursor-pointer');
     
     document.querySelectorAll('button, a').forEach(function (el) {
       if (!el.classList.contains('ely-magnetic')) el.classList.add('ely-magnetic');
@@ -6332,7 +6334,7 @@
       }
     });
     
-    document.querySelectorAll('#projects-grid > article:not([data-asset-id])').forEach(function (card) {
+    document.querySelectorAll('#projects-grid > article').forEach(function (card) {
       card.classList.add('ely-interactive-card');
       if (!card.querySelector('.ely-spotlight')) {
         const spotlight = document.createElement('span');
