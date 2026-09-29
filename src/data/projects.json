@@ -45,18 +45,7 @@
       "Dirección y edición de los teasers cinematográficos oficiales publicados en el canal de YouTube.",
       "Diseño de circuitos urbanos nocturnos con iluminación optimizada para tasas de cuadros estables."
     ],
-    "links": [
-      {
-        "label": "Ver Teaser #2 en YouTube",
-        "url": "https://www.youtube.com/watch?v=PH6cK45nkto",
-        "type": "external"
-      },
-      {
-        "label": "Colaboración Musical Cifra Slimk",
-        "url": "https://www.youtube.com/watch?v=jA9kxcgnPmw",
-        "type": "external"
-      }
-    ],
+    "links": [],
     "requirements": [],
     "cardEffects": [
       "electrify",
