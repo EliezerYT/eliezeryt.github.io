@@ -12,6 +12,9 @@
   const TESTIMONIALS_STORAGE_KEY = 'portfolio_satisfied_clients_v3';
   const FEEDBACK_CODES_STORAGE_KEY = 'portfolio_feedback_codes_v2';
   const ASSETS_STORAGE_KEY = 'portfolio_community_assets_v1';
+  const ASSET_LIKES_KEY = 'portfolio_community_asset_likes_v1';
+  const ASSET_COMMENTS_KEY = 'portfolio_community_asset_comments_v1';
+  const ASSET_DOWNLOAD_DAYS_KEY = 'portfolio_community_asset_download_days_v1';
   const AUTH_STORAGE_KEY = 'portfolio_auth_user_v2';
   const THEME_STORAGE_KEY = 'portfolio_theme_elydev';
   const GITHUB_OWNER = 'EliezerYT';
@@ -1012,6 +1015,17 @@
   let editingAssetId = null;
   let selectedAssetSort = 'newest';
   let showOnlyFavoriteAssets = false;
+  let assetViewMode = 'cards';
+  let assetLikes = {};
+  let assetComments = {};
+  let assetDownloadDays = {};
+  try { assetViewMode = localStorage.getItem('portfolio_community_asset_view_v1') === 'list' ? 'list' : 'cards'; } catch (e) {}
+  try { assetLikes = JSON.parse(localStorage.getItem(ASSET_LIKES_KEY) || '{}'); } catch (e) { assetLikes = {}; }
+  try { assetComments = JSON.parse(localStorage.getItem(ASSET_COMMENTS_KEY) || '{}'); } catch (e) { assetComments = {}; }
+  try { assetDownloadDays = JSON.parse(localStorage.getItem(ASSET_DOWNLOAD_DAYS_KEY) || '{}'); } catch (e) { assetDownloadDays = {}; }
+  if (!assetLikes || typeof assetLikes !== 'object') assetLikes = {};
+  if (!assetComments || typeof assetComments !== 'object') assetComments = {};
+  if (!assetDownloadDays || typeof assetDownloadDays !== 'object') assetDownloadDays = {};
   const ASSET_FAVORITES_KEY = 'portfolio_community_asset_favorites_v1';
   let favoriteAssetIds = [];
   try {
@@ -1483,6 +1497,62 @@
     if (index >= 0) favoriteAssetIds.splice(index, 1);
     else favoriteAssetIds.push(assetId);
     try { localStorage.setItem(ASSET_FAVORITES_KEY, JSON.stringify(favoriteAssetIds)); } catch (e) {}
+    renderAssetsGrid();
+  }
+
+  function assetTodayKey() { return new Date().toISOString().slice(0,10); }
+  function getAssetLikes(assetId) { return Number(assetLikes[assetId]) || 0; }
+  function toggleAssetLike(assetId) {
+    assetLikes[assetId] = getAssetLikes(assetId) + 1;
+    try { localStorage.setItem(ASSET_LIKES_KEY, JSON.stringify(assetLikes)); } catch(e) {}
+    if (selectedAsset && selectedAsset.id === assetId) {
+      const el=document.getElementById('asset-modal-likes'); if(el) el.textContent=String(getAssetLikes(assetId));
+    }
+    renderAssetsGrid();
+  }
+  function getAssetComments(assetId) { return Array.isArray(assetComments[assetId]) ? assetComments[assetId] : []; }
+  function renderAssetComments(assetId) {
+    const el=document.getElementById('asset-modal-comments-list'); if(!el) return;
+    const list=getAssetComments(assetId);
+    el.innerHTML=list.length ? list.slice().reverse().map(function(c){return '<div class="rounded-lg bg-white/[.03] border border-white/5 p-2.5"><div class="text-[10px] text-cyan-300 font-semibold">'+String(c.name||'Visitante').replace(/</g,'&lt;')+'</div><div class="text-[11px] text-slate-300 mt-1 whitespace-pre-line">'+String(c.text||'').replace(/</g,'&lt;')+'</div></div>';}).join('') : '<div class="text-[11px] text-slate-500 text-center py-3">Aún no hay comentarios.</div>';
+  }
+  function addAssetComment() {
+    if(!selectedAsset) return;
+    const input=document.getElementById('asset-modal-comment-input'); if(!input) return;
+    const text=input.value.trim(); if(!text) return;
+    if(!assetComments[selectedAsset.id]) assetComments[selectedAsset.id]=[];
+    assetComments[selectedAsset.id].push({name:'Visitante',text:text,createdAt:Date.now()});
+    try { localStorage.setItem(ASSET_COMMENTS_KEY, JSON.stringify(assetComments)); } catch(e) {}
+    input.value=''; renderAssetComments(selectedAsset.id);
+  }
+  function copyAssetCode() {
+    if(!selectedAsset || !selectedAsset.codeExample) return;
+    const code=selectedAsset.codeExample;
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(function(){showStatusNotification({title:'Código Copiado',message:'El ejemplo de código está en tu portapapeles.',type:'success',icon:'📋'});});
+    else window.prompt('Copia el código:',code);
+  }
+  function trackAssetDownload(asset) {
+    const today=assetTodayKey();
+    if(!assetDownloadDays[asset.id]) assetDownloadDays[asset.id]={};
+    assetDownloadDays[asset.id][today]=(Number(assetDownloadDays[asset.id][today])||0)+1;
+    try { localStorage.setItem(ASSET_DOWNLOAD_DAYS_KEY,JSON.stringify(assetDownloadDays)); } catch(e) {}
+  }
+  function getAssetDownloadsToday(assetId) {
+    return Number((assetDownloadDays[assetId]||{})[assetTodayKey()])||0;
+  }
+  function getRelatedAssets(asset) {
+    const sourceTags=(asset.tags||[]).map(function(t){return String(t).toLowerCase();});
+    return assets.filter(function(other){
+      if(!other || other.id===asset.id || other.published===false) return false;
+      return (other.tags||[]).some(function(t){return sourceTags.includes(String(t).toLowerCase());});
+    }).sort(function(a,b){
+      const score=function(x){return (x.tags||[]).filter(function(t){return sourceTags.includes(String(t).toLowerCase());}).length;};
+      return score(b)-score(a);
+    }).slice(0,4);
+  }
+  function toggleAssetViewMode() {
+    assetViewMode=assetViewMode==='cards'?'list':'cards';
+    try { localStorage.setItem('portfolio_community_asset_view_v1',assetViewMode); } catch(e) {}
     renderAssetsGrid();
   }
 
