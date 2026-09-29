@@ -6314,6 +6314,19 @@
     
     document.querySelectorAll('button, a').forEach(function (el) {
       if (!el.classList.contains('ely-magnetic')) el.classList.add('ely-magnetic');
+      if (el.dataset.elyMagneticBound !== '1') {
+        el.dataset.elyMagneticBound = '1';
+        el.addEventListener('pointermove', function (e) {
+          if (reduceMotion) return;
+          const rect = el.getBoundingClientRect();
+          const dx = (e.clientX - (rect.left + rect.width / 2)) / Math.max(rect.width, 1);
+          const dy = (e.clientY - (rect.top + rect.height / 2)) / Math.max(rect.height, 1);
+          el.style.transform = 'translate(' + (dx * 4) + 'px,' + (dy * 3) + 'px)';
+        }, { passive: true });
+        el.addEventListener('pointerleave', function () {
+          el.style.transform = '';
+        });
+      }
     });
     
     document.querySelectorAll('#projects-grid > article').forEach(function (card) {
@@ -6322,6 +6335,11 @@
         const spotlight = document.createElement('span');
         spotlight.className = 'ely-spotlight';
         card.appendChild(spotlight);
+      }
+      if (!card.querySelector('.ely-border-light')) {
+        const borderLight = document.createElement('span');
+        borderLight.className = 'ely-border-light';
+        card.appendChild(borderLight);
       }
     });
     
@@ -6383,7 +6401,7 @@
     }, true);
     
     document.addEventListener('click', function (e) {
-      const el = e.target.closest('#asset-modal-like-btn, #asset-modal-favorite-btn, #asset-modal-download-btn, [title*="favoritos"], [title*="Favorito"]');
+      const el = e.target.closest('#asset-modal-like-btn, #asset-modal-favorite-btn, #asset-modal-download-btn, [onclick*="toggleAssetLike"], [title*="favoritos"], [title*="Favorito"]');
       if (!el || reduceMotion) return;
       const isLike = el.id === 'asset-modal-like-btn';
       el.classList.remove('ely-pop-like', 'ely-pop-favorite', 'ely-pop-download', 'ely-pop-share');
