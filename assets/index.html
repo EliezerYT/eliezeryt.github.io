@@ -135,6 +135,83 @@
     </section>
   </main>
 
+    <!-- SUBVENTANA 12: MODAL DE BIBLIOTECA DE IMÁGENES (DRAG & DROP + SELECCIÓN VISUAL) -->
+    <div id="image-library-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
+      <div class="relative w-full max-w-5xl rounded-2xl bg-[#12151d] border border-[#232733] shadow-2xl p-5 sm:p-6 space-y-4 max-h-[96vh] flex flex-col overflow-hidden">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b border-[#1e2330] pb-3">
+          <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-amber-400/20 text-amber-400 flex items-center justify-center text-xl font-bold shrink-0">
+              🖼️
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-white font-display">Biblioteca de Imágenes & Multimedia</h3>
+              <p class="text-xs text-slate-400">Arrastra imágenes desde tu computadora para subirlas o haz clic en cualquier imagen para autoreferenciarla.</p>
+            </div>
+          </div>
+          <button type="button" onclick="window.ElyPortfolio.closeImageLibraryModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+        </div>
+
+        <!-- Zona Drag & Drop para subir a la biblioteca -->
+        <div id="library-upload-dropzone" class="image-dropzone p-5 text-center cursor-pointer border-dashed border-2">
+          <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-amber-400/10 text-amber-400 text-xl mb-2 pointer-events-none">
+            ☁️
+          </div>
+          <div class="text-xs font-bold text-white pointer-events-none">Arrastra y suelta imágenes aquí desde tu PC</div>
+          <div class="text-[11px] text-slate-400 pointer-events-none mt-0.5">Se agregan automáticamente a la biblioteca y se auto-referencian (PNG, JPG, WEBP, GIF, SVG)</div>
+          <input type="file" id="library-upload-file-input" accept="image/*" multiple class="hidden" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-3">
+          <div>
+            <label class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">Carpeta de destino</label>
+            <select id="library-folder-style" class="w-full rounded-lg bg-[#0d1017] border border-[#262c3b] px-2.5 py-2 text-xs text-white focus:border-amber-400 focus:outline-none">
+              <option value="Profile">Profile</option>
+              <option value="Screenshot">Screenshot</option>
+              <option value="AppLogo">AppLogo</option>
+              <option value="Custom">Custom</option>
+            </select>
+          </div>
+          <div id="library-custom-folder-wrap" class="hidden sm:col-span-2">
+            <label class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">Nombre de carpeta personalizada</label>
+            <input id="library-custom-folder" type="text" placeholder="Ej. Banners, Logos, OverDrivers" class="w-full rounded-lg bg-[#0d1017] border border-[#262c3b] px-2.5 py-2 text-xs text-white placeholder-slate-600 focus:border-amber-400 focus:outline-none" />
+          </div>
+        </div>
+
+        <!-- Barra de búsqueda y conteo -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
+          <div class="relative w-full sm:max-w-xs">
+            <input
+              id="library-search-input"
+              type="text"
+              placeholder="Buscar imagen por nombre o etiqueta..."
+              class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3.5 py-1.5 pl-8 text-xs text-white placeholder-slate-500 focus:border-amber-400 focus:outline-none"
+            />
+            <span class="absolute left-2.5 top-1.5 text-slate-500 text-xs">🔍</span>
+          </div>
+          <div class="flex items-center gap-2 text-[10px] text-slate-400"><span>📐 Tamaño</span><input id="library-size-slider" type="range" min="120" max="300" value="190" class="w-32 accent-amber-400"><span id="library-size-value" class="font-mono text-amber-400 w-12">190px</span></div>
+          <button type="button" onclick="window.ElyPortfolio.refreshElyImageLibrary()" class="rounded-md bg-white/10 hover:bg-white/20 border border-white/10 px-2.5 py-1 text-[10px] font-bold text-slate-200 transition-colors">🔄 Recargar imágenes</button>
+          <div class="text-xs text-slate-400">Imágenes: <strong id="library-images-count" class="text-amber-400">0</strong></div>
+        </div>
+
+        <!-- Cuadrícula de Imágenes -->
+        <div id="library-images-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto flex-1 min-h-0 p-2 max-h-[62vh] pr-3 items-start" style="grid-auto-rows:max-content;align-content:start;grid-auto-flow:row;">
+          <!-- Inyectado dinámicamente con thumbnails, nombres y botón de seleccionar -->
+        </div>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-between pt-3 border-t border-[#1e2330]">
+          <span id="library-selection-help" class="text-[11px] text-slate-500">Haz clic en "Seleccionar" para asignar una imagen.</span>
+          <button id="library-gallery-apply-btn" type="button" onclick="window.ElyPortfolio.applySelectedGalleryLibraryImages()" class="hidden px-4 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-xs text-black font-bold">Agregar seleccionadas (0)</button>
+          <button type="button" onclick="window.ElyPortfolio.closeImageLibraryModal()" class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white font-semibold">
+            Cerrar Biblioteca
+          </button>
+        </div>
+      </div>
+    </div>
+
+
   <div id="asset-detail-modal" class="hidden fixed inset-0 z-[55] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
     <div class="relative w-full max-w-xl rounded-2xl bg-[#12151d] border border-cyan-400/20 shadow-2xl overflow-hidden">
       <div class="flex items-center justify-between gap-3 p-5 border-b border-[#1e2330]">
@@ -210,6 +287,9 @@
     document.addEventListener('DOMContentLoaded', function () {
       if (window.ElyPortfolio && window.ElyPortfolio.filterAssetsByTag) {
         window.ElyPortfolio.filterAssetsByTag('');
+        setTimeout(function () {
+          if (window.ElyPortfolio.initElyDevMotionEnhancements) window.ElyPortfolio.initElyDevMotionEnhancements();
+        }, 50);
       }
       var managerButton = document.getElementById('assets-manager-open');
       if (managerButton && localStorage.getItem('portfolio_auth_user_v2')) managerButton.classList.remove('hidden');
