@@ -208,8 +208,8 @@
   <script src="portfolio.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      if (window.ElyPortfolio && window.ElyPortfolio.renderAssetsGrid) {
-        window.ElyPortfolio.renderAssetsGrid();
+      if (window.ElyPortfolio && window.ElyPortfolio.filterAssetsByTag) {
+        window.ElyPortfolio.filterAssetsByTag('');
       }
       var managerButton = document.getElementById('assets-manager-open');
       if (managerButton && localStorage.getItem('portfolio_auth_user_v2')) managerButton.classList.remove('hidden');
