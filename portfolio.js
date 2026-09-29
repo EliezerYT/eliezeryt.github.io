@@ -1550,6 +1550,22 @@
       return score(b)-score(a);
     }).slice(0,4);
   }
+  function renderRelatedAssets(asset) {
+    const container = document.getElementById('asset-modal-related-list');
+    if (!container) return;
+    container.innerHTML = '';
+    getRelatedAssets(asset).forEach(function(other) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'text-left rounded-lg bg-white/[.03] border border-white/5 hover:border-cyan-400/40 p-2';
+      button.innerHTML = '<div class="text-[11px] font-bold text-white truncate"></div><div class="text-[9px] text-slate-500"></div>';
+      button.querySelector('div').textContent = other.name;
+      button.querySelectorAll('div')[1].textContent = (other.type === 'script' ? 'Script' : 'Asset') + ' · ↓ ' + (Number(other.downloads) || 0);
+      button.addEventListener('click', function() { openAssetModal(other.id); });
+      container.appendChild(button);
+    });
+  }
+
   function toggleAssetViewMode() {
     assetViewMode=assetViewMode==='cards'?'list':'cards';
     try { localStorage.setItem('portfolio_community_asset_view_v1',assetViewMode); } catch(e) {}
@@ -1792,6 +1808,7 @@
     if (likesEl) likesEl.textContent = String(getAssetLikes(asset.id));
     if (dailyEl) dailyEl.textContent = String(getAssetDownloadsToday(asset.id));
     renderAssetComments(asset.id);
+    renderRelatedAssets(asset);
     const moderatorActions = document.getElementById('asset-modal-moderator-actions');
     window.ElyPortfolio.getSelectedAssetId = function () { return selectedAsset ? selectedAsset.id : ''; };
     if (moderatorActions) moderatorActions.classList.toggle('hidden', !(isModerator && !visitorPreviewMode));
