@@ -1,20 +1,5 @@
 [
   {
-    "id": "client-capricornio",
-    "name": "CapricornioTV & Capricornio Games",
-    "role": "Influencer Masivo & Productora",
-    "project": "MotoLoco | En Una Goma (Juego + Web + Backend)",
-    "year": "2024 - 2025",
-    "rating": 5,
-    "avatar": "./assets/images/ely/icon-enunagoma.png",
-    "feedback": "Desarrollo completo del juego y la plataforma web oficial. Eliezer manejó tanto la programación del videojuego en Unity como la web promocional con base de datos en tiempo récord para nuestra comunidad.",
-    "tags": [
-      "Videojuego Unity",
-      "Web PHP/MySQL",
-      "Audiencia Masiva"
-    ]
-  },
-  {
     "id": "client-shl",
     "name": "SHL (Empresa / Cliente Comercial)",
     "role": "Cliente Comercial",
@@ -60,26 +45,11 @@
     ]
   },
   {
-    "id": "client-cifraslimk",
-    "name": "Cifra Slimk (Artista Musical)",
-    "role": "Artista Urbano / Producción Sonora",
-    "project": "OverDrivers Soundtrack (\"Quieren Quitarme\")",
-    "year": "2024 - 2025",
-    "rating": 5,
-    "avatar": "./assets/images/ely/overdrivers-teaser.jpg",
-    "feedback": "Increíble visión para sincronizar el ritmo de la música con las físicas de carreras del juego y crear los teasers cinematográficos oficiales con excelente calidad audiovisual.",
-    "tags": [
-      "Banda Sonora",
-      "Teasers YouTube",
-      "Colaboración"
-    ]
-  },
-  {
     "id": "client-moneyfight",
-    "name": "MoneyFight & Cesar",
-    "role": "Empresa / Desarrolladores Asociados",
-    "project": "Nuevo Título Interactivo Confidencial",
-    "year": "2025 - Presente",
+    "name": "MoneyFight & CesarNoJoda",
+    "role": "Influencer",
+    "project": "Nuevo Título",
+    "year": "2023-2025",
     "rating": 5,
     "avatar": "./assets/images/ely/my-avatar.png",
     "feedback": "Actualmente trabajando en un proyecto comercial interactivo de alto impacto. Gran rigurosidad técnica, cumplimiento de hitos y comunicación fluida en cada fase.",
@@ -87,21 +57,6 @@
       "En Desarrollo Activo",
       "Unity C#",
       "Arquitectura"
-    ]
-  },
-  {
-    "id": "client-students",
-    "name": "Alumnos de Clases Privadas Unity",
-    "role": "Comunidad de Alumnos & Desarrolladores Indie",
-    "project": "Mentorías Personalizadas en Unity, C# & Monetización",
-    "year": "2024 - 2025",
-    "rating": 5,
-    "avatar": "./assets/images/ely/icon-appads.png",
-    "feedback": "Las clases personalizadas 1 a 1 te ahorran meses de ensayo y error. Eliezer te enseña directamente en tu proyecto cómo implementar Ads, IAP, multijugador online y cómo compilar sin fallos para la tienda.",
-    "tags": [
-      "Mentoría 1 a 1",
-      "Unity & C#",
-      "Monetización"
     ]
   }
 ]
