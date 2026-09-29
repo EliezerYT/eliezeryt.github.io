@@ -1816,7 +1816,9 @@
         const target = assets.find(function (a) { return a.id === asset.id; });
         if (!target) return;
         target.downloads = (Number(target.downloads) || 0) + 1;
+        trackAssetDownload(target);
         try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
+        if (dailyEl) dailyEl.textContent = String(getAssetDownloadsToday(target.id));
         if (downloadsEl) downloadsEl.textContent = String(target.downloads);
         window.open(target.downloadUrl, '_blank', 'noopener,noreferrer');
         renderAssetsGrid();
