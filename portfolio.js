@@ -1503,7 +1503,7 @@
     renderAssetsGrid();
   }
 
-  const GLOBAL_COUNTER_URL = '/downloadcounter/counter.php';
+  const GLOBAL_COUNTER_URL = 'https://script.google.com/macros/s/AKfycbzcbBZtcpI7B41ngSMU6bAEjdOS-9PSEXmWBVF3EhcPg2T-be9ntGnW3_c5ANsVFYbEJg/exec';
   let globalAssetCounters = {};
 
   function assetTodayKey() { return new Date().toISOString().slice(0,10); }
@@ -1907,9 +1907,12 @@
     }
     if (favoriteBtn) favoriteBtn.textContent = isAssetFavorite(asset.id) ? '★ Favorito' : '☆ Favorito';
     if (likesEl) likesEl.textContent = String(getAssetLikes(asset.id));
+    if (downloadsEl) downloadsEl.textContent = String(Number(globalAssetCounters[asset.id]?.downloads) || Number(asset.downloads) || 0);
     if (dailyEl) dailyEl.textContent = String(getAssetDownloadsToday(asset.id));
-    refreshGlobalAssetCounter(asset.id, 'likes').then(updateGlobalAssetCounterUI);
-    refreshGlobalAssetCounter(asset.id, 'downloads').then(updateGlobalAssetCounterUI);
+    Promise.all([
+      refreshGlobalAssetCounter(asset.id, 'likes'),
+      refreshGlobalAssetCounter(asset.id, 'downloads')
+    ]).then(updateGlobalAssetCounterUI);
     renderAssetComments(asset.id);
     renderRelatedAssets(asset);
     const moderatorActions = document.getElementById('asset-modal-moderator-actions');
