@@ -122,10 +122,8 @@
     "steamUrl": "https://store.steampowered.com/app/3137780/En_Una_Goma/?l=latam&curator_clanid=4777282",
     "icon": "./assets/images/ely/AppLogo/MotoLocoLogo.png",
     "pinned": false,
-    "cardEffects": [
-      "glow"
-    ],
-    "cardEffect": "glow",
+    "cardEffects": [],
+    "cardEffect": "none",
     "cardEffectColor": "#fbbf24"
   },
   {
