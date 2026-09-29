@@ -6343,20 +6343,25 @@
     }
     
     document.querySelectorAll('#projects-grid > article').forEach(function (card) {
-      card.addEventListener('pointermove', function (e) {
-        if (reduceMotion) return;
-        const rect = card.getBoundingClientRect();
-        const x = ((e.clientX - rect.left) / rect.width) * 100;
-        const y = ((e.clientY - rect.top) / rect.height) * 100;
-        card.style.setProperty('--ely-mx', x + '%');
-        card.style.setProperty('--ely-my', y + '%');
-      }, { passive: true });
-      card.addEventListener('pointerleave', function () {
-        card.style.removeProperty('--ely-mx');
-        card.style.removeProperty('--ely-my');
-      });
+      if (card.dataset.elyMotionBound !== '1') {
+        card.dataset.elyMotionBound = '1';
+        card.addEventListener('pointermove', function (e) {
+          if (reduceMotion) return;
+          const rect = card.getBoundingClientRect();
+          const x = ((e.clientX - rect.left) / rect.width) * 100;
+          const y = ((e.clientY - rect.top) / rect.height) * 100;
+          card.style.setProperty('--ely-mx', x + '%');
+          card.style.setProperty('--ely-my', y + '%');
+        }, { passive: true });
+        card.addEventListener('pointerleave', function () {
+          card.style.removeProperty('--ely-mx');
+          card.style.removeProperty('--ely-my');
+        });
+      }
     });
     
+    if (document.body.dataset.elyGlobalMotion !== '1') {
+    document.body.dataset.elyGlobalMotion = '1';
     document.addEventListener('click', function (e) {
       const button = e.target.closest('button, a');
       if (!button || button.dataset.elyRipple === '1') return;
@@ -6385,6 +6390,7 @@
       void el.offsetWidth;
       el.classList.add(isLike ? 'ely-pop-like' : el.id === 'asset-modal-download-btn' ? 'ely-pop-download' : 'ely-pop-favorite');
     }, true);
+    }
     
     const observer = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
