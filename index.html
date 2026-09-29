@@ -487,7 +487,8 @@
             </div>
 
             <!-- Input de Búsqueda en Vivo -->
-            <div class="relative max-w-xs w-full">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:max-w-lg">
+              <div class="relative flex-1">
               <input
                 id="projects-search-input"
                 type="text"
@@ -503,6 +504,17 @@
               >
                 ✕
               </button>
+              </div>
+              <div id="asset-tools" class="hidden items-center gap-1.5">
+                <select id="asset-sort-select" class="rounded-xl bg-[#0b0d11] border border-[#262c3b] px-2.5 py-1.5 text-[11px] text-slate-300 focus:outline-none focus:border-cyan-400">
+                  <option value="newest">Más nuevos</option>
+                  <option value="downloads">Más descargados</option>
+                  <option value="name">A-Z</option>
+                  <option value="oldest">Más antiguos</option>
+                  <option value="manual">Orden manual</option>
+                </select>
+                <button id="asset-favorites-filter" type="button" class="px-2.5 py-1.5 rounded-xl bg-white/5 border border-[#262c3b] text-[11px] text-slate-300 hover:text-white" title="Mostrar favoritos">☆</button>
+              </div>
             </div>
           </div>
 
@@ -907,6 +919,7 @@
         <div class="flex items-center justify-between gap-3 p-5 border-b border-[#1e2330]">
           <div class="min-w-0">
             <div class="flex items-center gap-2">
+              <button id="asset-modal-favorite-btn" type="button" onclick="window.ElyPortfolio.toggleAssetFavorite(window.ElyPortfolio.getSelectedAssetId())" class="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[10px] text-slate-300">☆ Favorito</button>
               <span id="asset-modal-type" class="px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-400/20 text-[10px] font-bold uppercase">Asset</span>
               <span id="asset-modal-version" class="text-[10px] text-slate-500 font-mono"></span>
             </div>
@@ -924,6 +937,10 @@
           <div class="rounded-xl bg-[#0b0d11] border border-[#232733] p-3">
             <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Utilidad</div>
             <p id="asset-modal-utility" class="text-xs text-slate-200 leading-relaxed"></p>
+          </div>
+          <div id="asset-modal-code-wrap" class="hidden rounded-xl bg-[#080a0f] border border-[#232733] overflow-hidden">
+            <div class="px-3 py-2 border-b border-[#232733] text-[10px] uppercase tracking-wider text-slate-500">Ejemplo de código</div>
+            <pre id="asset-modal-code" class="p-3 text-[11px] text-slate-200 overflow-x-auto whitespace-pre-wrap font-mono"></pre>
           </div>
           <div>
             <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Etiquetas</div>
@@ -953,7 +970,7 @@
       <div class="relative w-full max-w-2xl rounded-2xl bg-[#12151d] border border-cyan-400/20 shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between border-b border-[#1e2330] pb-3">
           <div>
-            <h3 class="text-base font-bold text-white font-display">📦 Scripts / Assets de la Comunidad</h3>
+            <h3 class="text-base font-bold text-white font-display">📦 ElyDev Community</h3>
             <p class="text-xs text-slate-400">Crea recursos compartibles con un enlace #asset-ID.</p>
           </div>
           <button type="button" onclick="window.ElyPortfolio.closeAssetsManagerModal()" class="text-slate-400 hover:text-white">✕</button>
@@ -995,6 +1012,16 @@
             <input id="asset-form-download" type="url" required placeholder="https://github.com/.../releases/..." class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
           </div>
           <div>
+            <label class="block text-slate-300 mb-1">Ejemplo de código (opcional):</label>
+            <textarea id="asset-form-code" rows="5" placeholder="Pega aquí un ejemplo de uso..." class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white font-mono text-[11px]"></textarea>
+          </div>
+          <div>
+            <label class="inline-flex items-center gap-2 text-xs text-white cursor-pointer">
+              <input id="asset-form-published" type="checkbox" checked class="accent-emerald-400">
+              <span>🚀 Publicar inmediatamente</span>
+            </label>
+          </div>
+          <div>
             <label class="block text-slate-300 mb-1">Imagen (opcional):</label>
             <div class="flex flex-col sm:flex-row gap-2">
               <input id="asset-form-image" type="text" readonly placeholder="Selecciona una imagen de la biblioteca" class="flex-1 rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
@@ -1031,8 +1058,9 @@
             </label>
           </div>
           <div class="flex justify-end gap-2 pt-2">
+            <button type="button" onclick="window.ElyPortfolio.openAssetFormPreview()" class="px-4 py-2 rounded-lg bg-white/10 text-white">👁 Vista previa</button>
             <button type="button" onclick="window.ElyPortfolio.closeAssetsManagerModal()" class="px-4 py-2 rounded-lg bg-white/10 text-white">Cerrar</button>
-            <button type="submit" class="px-5 py-2 rounded-lg bg-cyan-400 text-black font-bold hover:bg-cyan-300">Crear recurso</button>
+            <button type="submit" class="px-5 py-2 rounded-lg bg-cyan-400 text-black font-bold hover:bg-cyan-300">📦 Publicar recurso</button>
           </div>
         </form>
         <div class="border-t border-[#1e2330] pt-4 space-y-2">
@@ -1041,6 +1069,25 @@
             <span id="assets-total-count" class="text-[10px] text-slate-500 font-mono">0</span>
           </div>
           <div id="assets-manager-list" class="space-y-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="asset-preview-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
+      <div class="relative w-full max-w-xl rounded-2xl bg-[#12151d] border border-cyan-400/20 shadow-2xl overflow-hidden">
+        <div class="flex items-center justify-between p-5 border-b border-[#1e2330]">
+          <div>
+            <div class="text-[10px] uppercase tracking-wider text-cyan-300">Vista previa</div>
+            <h3 id="asset-preview-title" class="text-lg font-bold text-white font-display text-center">Recurso</h3>
+          </div>
+          <button type="button" onclick="window.ElyPortfolio.closeAssetFormPreview()" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+        <div class="p-5 space-y-4 max-h-[78vh] overflow-y-auto">
+          <div id="asset-preview-image-wrap" class="hidden rounded-xl overflow-hidden border border-[#232733] bg-black/30"><img id="asset-preview-image" src="" alt="Vista previa" class="w-full max-h-64 object-contain"></div>
+          <div class="flex justify-center gap-2"><span id="asset-preview-type" class="px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-400/20 text-[10px] font-bold"></span><span id="asset-preview-version" class="text-[10px] text-slate-500 font-mono"></span></div>
+          <p id="asset-preview-description" class="text-xs text-slate-300 leading-relaxed text-center"></p>
+          <div class="rounded-xl bg-[#0b0d11] border border-[#232733] p-3"><div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Utilidad</div><p id="asset-preview-utility" class="text-xs text-slate-200 text-center"></p></div>
+          <div id="asset-preview-tags" class="flex flex-wrap justify-center gap-1.5"></div>
         </div>
       </div>
     </div>
