@@ -6313,7 +6313,7 @@
   function initElyDevMotionEnhancements() {
     const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const grid = document.getElementById('projects-grid');
-    const revealTargets = document.querySelectorAll('#projects-grid > article:not([data-asset-id]), section > div.grid > article, section > div.grid > div, .group.cursor-pointer');
+    const revealTargets = document.querySelectorAll('#projects-grid > article:not([data-asset-id]), section > div.grid > article:not([data-asset-id]), section > div.grid > div:not([data-asset-id]), .group.cursor-pointer:not([data-asset-id])');
     
     document.querySelectorAll('button, a').forEach(function (el) {
       if (!el.classList.contains('ely-magnetic')) el.classList.add('ely-magnetic');
