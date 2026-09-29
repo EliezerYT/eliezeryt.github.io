@@ -372,6 +372,13 @@
             </button>
             <button
               type="button"
+              onclick="window.ElyPortfolio.openAssetsManagerModal()"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-cyan-500/15 text-cyan-300 border border-cyan-400/30 hover:bg-cyan-500/25 transition-colors shadow-sm"
+            >
+              <span>📦 Scripts / Assets</span>
+            </button>
+            <button
+              type="button"
               onclick="window.ElyPortfolio.resetSampleData()"
               title="Restablecer proyectos iniciales"
               class="p-1.5 text-slate-400 hover:text-white rounded-lg bg-[#141822] border border-[#232733] hover:bg-[#1f2534] transition-colors"
@@ -420,13 +427,21 @@
             >
               Clases Privadas (1 a 1)
             </button>
+            <button
+              type="button"
+              data-origin-filter="assets"
+              class="px-3.5 py-1.5 rounded-lg bg-[#141822] text-slate-300 hover:text-white hover:bg-white/10 transition-all"
+            >
+              Scripts / Assets
+            </button>
           </div>
 
           <!-- Filtro Secundario por Categoría + Barra de Búsqueda -->
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-2 border-t border-[#1e2330]">
             <!-- Píldoras de Categoría (Se ocultan automáticamente al seleccionar Servicios o Clases) -->
             <div id="secondary-category-filters" class="flex flex-wrap items-center gap-1.5 text-xs">
-              <span class="text-slate-500 text-[11px] mr-1">Categoría:</span>
+              <span id="normal-category-label" class="text-slate-500 text-[11px] mr-1">Categoría:</span>
+              <span id="asset-category-label" class="hidden text-slate-500 text-[11px] mr-1">Tipo:</span>
               <button
                 type="button"
                 data-category-filter="todos"
@@ -451,9 +466,23 @@
               <button
                 type="button"
                 data-category-filter="collab"
-                class="px-2.5 py-1 rounded-full bg-white/5 text-slate-400 hover:text-white text-[11px] font-medium"
+                class="normal-category-filter px-2.5 py-1 rounded-full bg-white/5 text-slate-400 hover:text-white text-[11px] font-medium"
               >
                 🤝 Colaboraciones
+              </button>
+              <button
+                type="button"
+                data-category-filter="script"
+                class="asset-category-filter hidden px-2.5 py-1 rounded-full bg-white/5 text-slate-400 hover:text-white text-[11px] font-medium"
+              >
+                📜 Scripts
+              </button>
+              <button
+                type="button"
+                data-category-filter="asset"
+                class="asset-category-filter hidden px-2.5 py-1 rounded-full bg-white/5 text-slate-400 hover:text-white text-[11px] font-medium"
+              >
+                📦 Assets
               </button>
             </div>
 
@@ -858,6 +887,114 @@
           >
             Solicitar Servicio / Contactar por este Proyecto →
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBVENTANA: DETALLE DE SCRIPT / ASSET -->
+    <div id="asset-detail-modal" class="hidden fixed inset-0 z-[55] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
+      <div class="relative w-full max-w-xl rounded-2xl bg-[#12151d] border border-cyan-400/20 shadow-2xl overflow-hidden">
+        <div class="flex items-center justify-between gap-3 p-5 border-b border-[#1e2330]">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <span id="asset-modal-type" class="px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-400/20 text-[10px] font-bold uppercase">Asset</span>
+              <span id="asset-modal-version" class="text-[10px] text-slate-500 font-mono"></span>
+            </div>
+            <h3 id="asset-modal-title" class="text-lg font-bold text-white font-display mt-1 truncate">Recurso</h3>
+          </div>
+          <button type="button" onclick="window.ElyPortfolio.closeAssetModal()" class="text-slate-400 hover:text-white text-base">✕</button>
+        </div>
+        <div class="p-5 space-y-4 max-h-[78vh] overflow-y-auto">
+          <div id="asset-modal-image-wrap" class="hidden rounded-xl overflow-hidden border border-[#232733] bg-black/30">
+            <img id="asset-modal-image" src="" alt="Asset" class="w-full max-h-64 object-contain" />
+          </div>
+          <div>
+            <p id="asset-modal-description" class="text-xs text-slate-300 leading-relaxed whitespace-pre-line"></p>
+          </div>
+          <div class="rounded-xl bg-[#0b0d11] border border-[#232733] p-3">
+            <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Utilidad</div>
+            <p id="asset-modal-utility" class="text-xs text-slate-200 leading-relaxed"></p>
+          </div>
+          <div>
+            <div class="text-[10px] uppercase tracking-wider text-slate-500 mb-1">Etiquetas</div>
+            <div id="asset-modal-tags" class="flex flex-wrap gap-1.5"></div>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[#0b0d11] border border-[#232733] p-3">
+            <div>
+              <div class="text-[10px] uppercase tracking-wider text-slate-500">Descargas</div>
+              <div id="asset-modal-downloads" class="text-lg font-black text-white font-mono">0</div>
+            </div>
+            <button id="asset-modal-download-btn" type="button" class="px-5 py-2.5 rounded-lg bg-cyan-400 text-black font-bold text-xs hover:bg-cyan-300 transition-colors">↓ Descargar</button>
+          </div>
+          <div class="pt-2 border-t border-[#1e2330] flex flex-wrap gap-2">
+            <button type="button" onclick="window.ElyPortfolio.copyAssetLink()" class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-slate-300 hover:text-white">🔗 Copiar enlace</button>
+            <span id="asset-modal-link" class="text-[10px] text-slate-500 font-mono break-all self-center"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBVENTANA: GESTIÓN DE SCRIPTS / ASSETS -->
+    <div id="assets-manager-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
+      <div class="relative w-full max-w-2xl rounded-2xl bg-[#12151d] border border-cyan-400/20 shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-[#1e2330] pb-3">
+          <div>
+            <h3 class="text-base font-bold text-white font-display">📦 Scripts / Assets de la Comunidad</h3>
+            <p class="text-xs text-slate-400">Crea recursos compartibles con un enlace #asset-ID.</p>
+          </div>
+          <button type="button" onclick="window.ElyPortfolio.closeAssetsManagerModal()" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+        <form id="asset-form" class="space-y-3 text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-300 mb-1">Nombre:</label>
+              <input id="asset-form-name" type="text" required placeholder="Vehicle Light Manager" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1">Tipo:</label>
+              <select id="asset-form-type" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white">
+                <option value="script">Script</option>
+                <option value="asset">Asset</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Utilidad:</label>
+            <input id="asset-form-utility" type="text" required placeholder="Sistema modular para controlar luces..." class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Descripción:</label>
+            <textarea id="asset-form-description" rows="3" placeholder="Explica qué incluye y cómo se utiliza." class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white"></textarea>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-slate-300 mb-1">Etiquetas (coma):</label>
+              <input id="asset-form-tags" type="text" placeholder="Unity, C#, Vehicles" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1">Versión:</label>
+              <input id="asset-form-version" type="text" value="1.0.0" class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Link de descarga:</label>
+            <input id="asset-form-download" type="url" required placeholder="https://github.com/.../releases/..." class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Imagen (opcional):</label>
+            <input id="asset-form-image" type="text" placeholder="./assets/images/ely/..." class="w-full rounded-xl bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-white" />
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" onclick="window.ElyPortfolio.closeAssetsManagerModal()" class="px-4 py-2 rounded-lg bg-white/10 text-white">Cerrar</button>
+            <button type="submit" class="px-5 py-2 rounded-lg bg-cyan-400 text-black font-bold hover:bg-cyan-300">Crear recurso</button>
+          </div>
+        </form>
+        <div class="border-t border-[#1e2330] pt-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold text-white">Recursos registrados</h4>
+            <span id="assets-total-count" class="text-[10px] text-slate-500 font-mono">0</span>
+          </div>
+          <div id="assets-manager-list" class="space-y-2"></div>
         </div>
       </div>
     </div>
