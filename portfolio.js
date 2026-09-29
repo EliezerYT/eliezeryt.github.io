@@ -1681,23 +1681,27 @@
     document.querySelectorAll('#projects-grid > article[data-asset-id]').forEach(function (card) {
       if (card.dataset.assetTiltBound === '1') return;
       card.dataset.assetTiltBound = '1';
+      card.style.transformStyle = 'preserve-3d';
+      card.style.willChange = 'transform';
       card.addEventListener('pointermove', function (e) {
         const rect = card.getBoundingClientRect();
         if (!rect.width || !rect.height) return;
-        const x = ((e.clientX - rect.left) / rect.width) * 100;
-        const y = ((e.clientY - rect.top) / rect.height) * 100;
-        const rx = ((y - 50) / 50) * -4;
-        const ry = ((x - 50) / 50) * 4;
+        const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+        const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+        const rx = ((y - 50) / 50) * -5;
+        const ry = ((x - 50) / 50) * 5;
         card.style.setProperty('--ely-mx', x + '%');
         card.style.setProperty('--ely-my', y + '%');
         card.style.setProperty('--ely-rx', rx + 'deg');
         card.style.setProperty('--ely-ry', ry + 'deg');
+        card.style.transform = 'perspective(900px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) translateZ(0) scale(1.015)';
       }, { passive: true });
       card.addEventListener('pointerleave', function () {
         card.style.setProperty('--ely-mx', '50%');
         card.style.setProperty('--ely-my', '50%');
         card.style.setProperty('--ely-rx', '0deg');
         card.style.setProperty('--ely-ry', '0deg');
+        card.style.removeProperty('transform');
       });
     });
   }
