@@ -11,6 +11,7 @@
   const EXPERIENCES_STORAGE_KEY = 'portfolio_experiences_v2';
   const TESTIMONIALS_STORAGE_KEY = 'portfolio_satisfied_clients_v3';
   const FEEDBACK_CODES_STORAGE_KEY = 'portfolio_feedback_codes_v2';
+  const ASSETS_STORAGE_KEY = 'portfolio_community_assets_v1';
   const AUTH_STORAGE_KEY = 'portfolio_auth_user_v2';
   const THEME_STORAGE_KEY = 'portfolio_theme_elydev';
   const GITHUB_OWNER = 'EliezerYT';
@@ -922,6 +923,8 @@
   ];
 
   // 1.3 Códigos Especiales Iniciales para Realizar Feedback (Uso Único)
+  const initialCommunityAssets = [];
+
   const initialFeedbackCodes = [
     { code: 'ELY-VIP-2026', label: 'Invitación VIP Cliente', used: false, disabled: false, createdAt: '2026-03-01' },
     { code: 'CLIENT-GAME-77', label: 'Cliente Videojuego Unity', used: false, disabled: false, createdAt: '2026-03-05' },
@@ -977,6 +980,7 @@
 
   // Códigos de Feedback
   let feedbackCodes = [];
+  let assets = [];
   try {
     const codesSaved = localStorage.getItem(FEEDBACK_CODES_STORAGE_KEY);
     if (codesSaved) {
@@ -990,9 +994,21 @@
     feedbackCodes = JSON.parse(JSON.stringify(initialFeedbackCodes));
   }
 
+  try {
+    const assetsSaved = localStorage.getItem(ASSETS_STORAGE_KEY);
+    if (assetsSaved) {
+      const parsedAssets = JSON.parse(assetsSaved);
+      if (Array.isArray(parsedAssets)) assets = parsedAssets;
+    }
+  } catch (e) {}
+  if (!Array.isArray(assets) || assets.length === 0) {
+    assets = JSON.parse(JSON.stringify(initialCommunityAssets));
+  }
+
   let experienceSortOrder = 'desc'; // 'desc' = más recientes primero, 'asc' = más antiguos primero
   let selectedOrigin = 'todos';
   let selectedCategory = 'todos';
+  let selectedAsset = null;
   let searchQuery = '';
   let selectedProject = null;
   let activeMediaIndex = 0; // Para el carrusel de imágenes
@@ -1284,6 +1300,7 @@
   // 4. Filtrado de proyectos
   // Regla del usuario: "al seleccionar servicios comunes o clases privadas no deben aparecer las categorías secundarias"
   function getFilteredProjects() {
+    if (selectedOrigin === 'assets') return [];
     return projects.filter(function (project) {
       if (selectedOrigin === 'todos') {
         if (project.origin === 'servicios' || project.origin === 'clases') {
@@ -1333,6 +1350,10 @@
     const secondaryFilters = document.getElementById('secondary-category-filters');
 
     // Ocultar categorías secundarias si se elige Servicios o Clases
+    const assetCategoryLabel = document.getElementById('asset-category-label');
+    const normalCategoryLabel = document.getElementById('normal-category-label');
+    const assetCategoryFilters = document.querySelectorAll('.asset-category-filter');
+    const normalCategoryFilters = document.querySelectorAll('.normal-category-filter');
     if (secondaryFilters) {
       if (selectedOrigin === 'servicios' || selectedOrigin === 'clases') {
         secondaryFilters.classList.add('hidden');
@@ -1340,13 +1361,22 @@
         secondaryFilters.classList.remove('hidden');
       }
     }
+    if (assetCategoryLabel) assetCategoryLabel.classList.toggle('hidden', selectedOrigin !== 'assets');
+    if (normalCategoryLabel) normalCategoryLabel.classList.toggle('hidden', selectedOrigin === 'assets');
+    assetCategoryFilters.forEach(function (el) { el.classList.toggle('hidden', selectedOrigin !== 'assets'); });
+    normalCategoryFilters.forEach(function (el) { el.classList.toggle('hidden', selectedOrigin === 'assets'); });
 
     if (countDisplay) {
-      countDisplay.textContent = 'Mostrando ' + filteredProjects.length + ' de ' + projects.length + ' elementos';
+      const count = selectedOrigin === 'assets'
+        ? getFilteredAssets().length
+        : filteredProjects.length;
+      const total = selectedOrigin === 'assets' ? assets.length : projects.length;
+      countDisplay.textContent = 'Mostrando ' + count + ' de ' + total + ' elementos';
     }
 
     if (badgeLabel) {
       badgeLabel.textContent =
+        selectedOrigin === 'assets' ? 'Biblioteca de Scripts / Assets' :
         selectedOrigin === 'servicios' ? 'Catálogo de Servicios Comunes' :
         selectedOrigin === 'clases' ? 'Clases Privadas Personalizadas' :
         selectedOrigin === 'propio' ? 'Proyectos Propios (Indie)' :
@@ -1356,6 +1386,7 @@
 
     if (headerTitle) {
       headerTitle.textContent =
+        selectedOrigin === 'assets' ? 'Scripts / Assets para la Comunidad' :
         selectedOrigin === 'servicios' ? 'Servicios Técnicos Especializados' :
         selectedOrigin === 'clases' ? 'Clases & Asesorías Privadas' :
         'Proyectos Trabajados & Propios';
@@ -1363,6 +1394,7 @@
 
     if (headerSub) {
       headerSub.textContent =
+        selectedOrigin === 'assets' ? 'Recursos descargables, scripts y herramientas compartidas con la comunidad.' :
         selectedOrigin === 'servicios' ? 'Sistemas llave en mano de monetización publicitaria, compras in-app, audio y multiplayer.' :
         selectedOrigin === 'clases' ? 'Aprende Unity, programación C#, monetización y multijugador online con sesiones 1 a 1 en vivo.' :
         'Filtra por Propios, Trabajados o explora Servicios Comunes y Clases Privadas.';
@@ -1420,7 +1452,258 @@
     setProjectWorkCount(projectId, Math.max(0, (Number(project.workedCount) || 0) + delta));
   }
 
-  function renderProjectsGrid(forceFilterTransition) {
+  function slugifyAssetId(value) {
+    return String(value || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80) || 'asset-' + Date.now();
+  }
+
+  function getFilteredAssets() {
+    return assets.filter(function (asset) {
+      if (selectedCategory !== 'todos' && asset.type !== selectedCategory) return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const haystack = [
+          asset.name, asset.utility, asset.description, asset.version,
+          (asset.tags || []).join(' ')
+        ].join(' ').toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return asset.published !== false;
+    });
+  }
+
+  function assetDirectLink(asset) {
+    return window.location.origin + window.location.pathname + '#asset-' + encodeURIComponent(asset.id);
+  }
+
+  function renderAssetsGrid() {
+    const container = document.getElementById('projects-grid');
+    const emptyState = document.getElementById('projects-empty-state');
+    if (!container) return;
+    const list = getFilteredAssets();
+    filteredProjects = [];
+    if (emptyState) emptyState.classList.toggle('hidden', list.length > 0);
+    container.classList.toggle('hidden', list.length === 0);
+    if (!list.length) {
+      container.innerHTML = '';
+      return;
+    }
+    container.innerHTML = list.map(function (asset) {
+      const typeLabel = asset.type === 'script' ? 'SCRIPT' : 'ASSET';
+      const typeClass = asset.type === 'script' ? 'text-cyan-300 bg-cyan-500/10 border-cyan-400/20' : 'text-amber-300 bg-amber-500/10 border-amber-400/20';
+      const tags = (asset.tags || []).slice(0, 5).map(function (tag) {
+        return '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300 border border-white/10">' + tag + '</span>';
+      }).join('');
+      const image = asset.image ? '<div class="h-40 overflow-hidden bg-black/20 border-b border-white/5"><img src="' + asset.image + '" alt="' + asset.name + '" class="w-full h-full object-cover" onerror="this.style.display=\'none\'"></div>' : '';
+      return '<article data-asset-id="' + asset.id + '" onclick="window.ElyPortfolio.openAssetModal(\'' + asset.id.replace(/'/g, "\\'") + '\')" class="group cursor-pointer rounded-2xl bg-[#12151d] border border-[#232733] overflow-hidden hover:border-cyan-400/50 transition-all hover:-translate-y-0.5 shadow-lg">' +
+        image +
+        '<div class="p-4 space-y-3">' +
+          '<div class="flex items-center justify-between gap-2"><span class="px-2 py-0.5 rounded-md border text-[10px] font-bold ' + typeClass + '">' + typeLabel + '</span><span class="text-[10px] text-slate-500 font-mono">v' + (asset.version || '1.0.0') + '</span></div>' +
+          '<h3 class="text-base font-bold text-white font-display">' + asset.name + '</h3>' +
+          '<p class="text-xs text-slate-400 line-clamp-2">' + (asset.utility || asset.description || '') + '</p>' +
+          '<div class="flex flex-wrap gap-1">' + tags + '</div>' +
+          '<div class="flex items-center justify-between gap-2 pt-2 border-t border-[#1e2330]">' +
+            '<span class="text-[10px] text-slate-500 font-mono">↓ ' + (Number(asset.downloads) || 0) + ' descargas</span>' +
+            '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.openAssetModal(\'' + asset.id.replace(/'/g, "\\'") + '\')" class="px-3 py-1.5 rounded-lg bg-cyan-400 text-black text-[11px] font-bold hover:bg-cyan-300">Ver recurso →</button>' +
+          '</div>' +
+        '</div></article>';
+    }).join('');
+  }
+
+  function openAssetModal(assetId, updateHash) {
+    const asset = assets.find(function (a) { return a.id === assetId; });
+    if (!asset) return;
+    selectedAsset = asset;
+    if (updateHash !== false) {
+      history.replaceState(null, '', '#asset-' + encodeURIComponent(asset.id));
+    }
+    const modal = document.getElementById('asset-detail-modal');
+    if (!modal) return;
+    const typeEl = document.getElementById('asset-modal-type');
+    const versionEl = document.getElementById('asset-modal-version');
+    const titleEl = document.getElementById('asset-modal-title');
+    const descEl = document.getElementById('asset-modal-description');
+    const utilityEl = document.getElementById('asset-modal-utility');
+    const tagsEl = document.getElementById('asset-modal-tags');
+    const downloadsEl = document.getElementById('asset-modal-downloads');
+    const linkEl = document.getElementById('asset-modal-link');
+    const imageWrap = document.getElementById('asset-modal-image-wrap');
+    const imageEl = document.getElementById('asset-modal-image');
+    const downloadBtn = document.getElementById('asset-modal-download-btn');
+    if (typeEl) typeEl.textContent = asset.type === 'script' ? 'SCRIPT' : 'ASSET';
+    if (versionEl) versionEl.textContent = 'v' + (asset.version || '1.0.0');
+    if (titleEl) titleEl.textContent = asset.name || asset.id;
+    if (descEl) descEl.textContent = asset.description || '';
+    if (utilityEl) utilityEl.textContent = asset.utility || '';
+    if (tagsEl) tagsEl.innerHTML = (asset.tags || []).map(function (tag) { return '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300 border border-white/10">' + tag + '</span>'; }).join('');
+    if (downloadsEl) downloadsEl.textContent = String(Number(asset.downloads) || 0);
+    if (linkEl) linkEl.textContent = assetDirectLink(asset);
+    if (imageWrap && imageEl) {
+      if (asset.image) {
+        imageEl.src = asset.image;
+        imageEl.alt = asset.name || 'Asset';
+        imageWrap.classList.remove('hidden');
+      } else {
+        imageWrap.classList.add('hidden');
+      }
+    }
+    if (downloadBtn) {
+      downloadBtn.onclick = function () {
+        const target = assets.find(function (a) { return a.id === asset.id; });
+        if (!target) return;
+        target.downloads = (Number(target.downloads) || 0) + 1;
+        try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
+        if (downloadsEl) downloadsEl.textContent = String(target.downloads);
+        window.open(target.downloadUrl, '_blank', 'noopener,noreferrer');
+        renderAssetsGrid();
+      };
+    }
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeAssetModal() {
+    const modal = document.getElementById('asset-detail-modal');
+    if (modal) modal.classList.add('hidden');
+    if ((window.location.hash || '').toLowerCase().startsWith('#asset-')) {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+    document.body.style.overflow = '';
+    selectedAsset = null;
+  }
+
+  function copyAssetLink() {
+    if (!selectedAsset) return;
+    const link = assetDirectLink(selectedAsset);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(link).then(function () {
+        showStatusNotification({ title: 'Enlace Copiado', message: link, type: 'success', icon: '🔗' });
+      });
+    } else {
+      window.prompt('Copia este enlace:', link);
+    }
+  }
+
+  function renderAssetsManagerList() {
+    const container = document.getElementById('assets-manager-list');
+    const count = document.getElementById('assets-total-count');
+    if (count) count.textContent = String(assets.length);
+    if (!container) return;
+    if (!assets.length) {
+      container.innerHTML = '<div class="p-4 rounded-xl bg-[#141822] text-center text-xs text-slate-400">No hay recursos registrados todavía.</div>';
+      return;
+    }
+    container.innerHTML = assets.map(function (asset) {
+      return '<div class="rounded-xl bg-[#141822] border border-[#232733] p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">' +
+        '<div class="min-w-0"><div class="flex items-center gap-2"><span class="text-[10px] uppercase font-bold text-cyan-300">' + (asset.type === 'script' ? 'SCRIPT' : 'ASSET') + '</span><span class="text-xs font-bold text-white truncate">' + asset.name + '</span></div><div class="text-[10px] text-slate-500 font-mono truncate">' + assetDirectLink(asset) + '</div></div>' +
+        '<div class="flex items-center gap-1.5 shrink-0"><button type="button" onclick="window.ElyPortfolio.copyAssetLinkById(\'' + asset.id.replace(/'/g, "\\'") + '\')" class="px-2.5 py-1 rounded bg-white/5 text-xs text-slate-300">📋 Link</button><button type="button" onclick="window.ElyPortfolio.deleteAsset(\'' + asset.id.replace(/'/g, "\\'") + '\')" class="px-2.5 py-1 rounded bg-red-600 text-white text-xs">🗑️</button></div></div>';
+    }).join('');
+  }
+
+  function openAssetsManagerModal() {
+    if (!isModerator) {
+      openAuthModal();
+      return;
+    }
+    renderAssetsManagerList();
+    const form = document.getElementById('asset-form');
+    if (form) form.reset();
+    const version = document.getElementById('asset-form-version');
+    if (version) version.value = '1.0.0';
+    const modal = document.getElementById('assets-manager-modal');
+    if (modal) modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeAssetsManagerModal() {
+    const modal = document.getElementById('assets-manager-modal');
+    if (modal) modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  function handleAssetSubmit(e) {
+    e.preventDefault();
+    if (!isModerator) return;
+    const name = document.getElementById('asset-form-name').value.trim();
+    const type = document.getElementById('asset-form-type').value;
+    const utility = document.getElementById('asset-form-utility').value.trim();
+    const description = document.getElementById('asset-form-description').value.trim();
+    const tags = document.getElementById('asset-form-tags').value.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+    const version = document.getElementById('asset-form-version').value.trim() || '1.0.0';
+    const downloadUrl = document.getElementById('asset-form-download').value.trim();
+    const image = document.getElementById('asset-form-image').value.trim();
+    if (!name || !utility || !downloadUrl) return;
+    let id = slugifyAssetId(name);
+    let suffix = 2;
+    while (assets.some(function (a) { return a.id === id; })) id = slugifyAssetId(name) + '-' + suffix++;
+    assets.unshift({
+      id: id,
+      name: name,
+      type: type === 'asset' ? 'asset' : 'script',
+      utility: utility,
+      description: description,
+      tags: tags,
+      downloadUrl: downloadUrl,
+      image: image,
+      version: version,
+      downloads: 0,
+      published: true
+    });
+    try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (err) {}
+    renderAssetsManagerList();
+    if (selectedOrigin === 'assets') renderAssetsGrid();
+    showStatusNotification({ title: 'Recurso Creado', message: 'Enlace: ' + assetDirectLink(assets[0]), type: 'success', icon: '📦' });
+    e.target.reset();
+    document.getElementById('asset-form-version').value = '1.0.0';
+  }
+
+  function deleteAsset(assetId) {
+    if (!isModerator) return;
+    const target = assets.find(function (a) { return a.id === assetId; });
+    if (!target) return;
+    showConfirmModal({
+      title: '¿Eliminar recurso?',
+      message: 'Se eliminará "' + target.name + '" de la biblioteca local.',
+      icon: '📦',
+      confirmText: 'Sí, eliminar',
+      danger: true,
+      onConfirm: function () {
+        assets = assets.filter(function (a) { return a.id !== assetId; });
+        try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
+        renderAssetsManagerList();
+        if (selectedOrigin === 'assets') renderAssetsGrid();
+      }
+    });
+  }
+
+  function copyAssetLinkById(assetId) {
+    const asset = assets.find(function (a) { return a.id === assetId; });
+    if (!asset) return;
+    const link = assetDirectLink(asset);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(link).then(function () {
+        showStatusNotification({ title: 'Enlace del Asset Copiado', message: link, type: 'success', icon: '🔗' });
+      });
+    } else {
+      window.prompt('Copia este enlace:', link);
+    }
+  }
+
+  function checkAssetHashParam() {
+    const hash = window.location.hash || '';
+    if (!hash.toLowerCase().startsWith('#asset-')) return;
+    const id = decodeURIComponent(hash.substring(7));
+    if (!id) return;
+    const target = assets.find(function (a) { return a.id === id; });
+    if (target) {
+      setTimeout(function () { openAssetModal(id, false); }, 250);
+    }
+  }
+
+   function renderProjectsGrid(forceFilterTransition) {
+    if (selectedOrigin === 'assets') {
+      renderAssetsGrid();
+      return;
+    }
     filteredProjects = getFilteredProjects().sort(function(a, b) { return (b.pinned === true ? 1 : 0) - (a.pinned === true ? 1 : 0); });
     updateCatalogHeaders();
 
@@ -4083,7 +4366,7 @@
 
   function getGithubSyncFingerprint() {
     try {
-      return JSON.stringify({ projects: projects, experiences: experiences, testimonials: satisfiedClients, library: customLibraryImages });
+      return JSON.stringify({ projects: projects, experiences: experiences, testimonials: satisfiedClients, assets: assets, library: customLibraryImages });
     } catch (e) {
       return '';
     }
@@ -4192,6 +4475,7 @@
       const syncedProjects = await prepareGithubData(projects, uploadedImages);
       const syncedExperiences = await prepareGithubData(experiences, uploadedImages);
       const syncedTestimonials = await prepareGithubData(satisfiedClients, uploadedImages);
+      const syncedAssets = await prepareGithubData(assets, uploadedImages);
       const syncedLibrary = await prepareGithubData(getLibraryManifest(), uploadedImages);
 
       const files = [
@@ -4204,6 +4488,9 @@
         ['src/data/testimonials.json', syncedTestimonials],
         ['public/data/testimonials.json', syncedTestimonials],
         ['docs/data/testimonials.json', syncedTestimonials],
+        ['src/data/assets.json', syncedAssets],
+        ['public/data/assets.json', syncedAssets],
+        ['docs/data/assets.json', syncedAssets],
         ['src/data/library.json', syncedLibrary],
         ['public/data/library.json', syncedLibrary],
         ['docs/data/library.json', syncedLibrary]
@@ -4372,6 +4659,13 @@
       try { localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients)); } catch (e) {}
       renderTestimonialsPreview();
       renderSatisfiedClientsModalList();
+    });
+
+    loadJson('assets', (list) => {
+      assets = list;
+      try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
+      if (selectedOrigin === 'assets') renderAssetsGrid();
+      checkAssetHashParam();
     });
   }
 
@@ -5532,6 +5826,13 @@
     const createCodeForm = document.getElementById('create-code-form');
     if (createCodeForm) createCodeForm.addEventListener('submit', handleCreateCodeSubmit);
 
+    const assetForm = document.getElementById('asset-form');
+    if (assetForm) assetForm.addEventListener('submit', handleAssetSubmit);
+
+    window.addEventListener('hashchange', function () {
+      checkAssetHashParam();
+    });
+
     // Keyboard navigation (Escape, ArrowLeft, ArrowRight)
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
@@ -5546,6 +5847,8 @@
         closeTestimonialModal();
         closeFeedbackModal();
         closeFeedbackCodesModal();
+        closeAssetModal();
+        closeAssetsManagerModal();
         closeImageLibraryModal();
         closeConfirmModal();
         closeSyncFilesModal();
@@ -5561,6 +5864,7 @@
     renderExperiences();
     renderTestimonialsPreview();
     checkFeedbackUrlParam();
+    checkAssetHashParam();
   });
 
   // Exponer API global para interactividad
@@ -5620,6 +5924,13 @@
     openFeedbackCodesModal: openFeedbackCodesModal,
     closeFeedbackCodesModal: closeFeedbackCodesModal,
     generateRandomCodeInput: generateRandomCodeInput,
+    openAssetModal: openAssetModal,
+    closeAssetModal: closeAssetModal,
+    copyAssetLink: copyAssetLink,
+    copyAssetLinkById: copyAssetLinkById,
+    openAssetsManagerModal: openAssetsManagerModal,
+    closeAssetsManagerModal: closeAssetsManagerModal,
+    deleteAsset: deleteAsset,
     toggleDisableCode: toggleDisableCode,
     deleteFeedbackCode: deleteFeedbackCode,
     copyFeedbackLink: copyFeedbackLink,
