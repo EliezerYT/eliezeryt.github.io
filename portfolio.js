@@ -6837,7 +6837,9 @@
     if (isAssetsPage()) selectedOrigin = 'assets';
     applyTheme(currentTheme);
     setupImageDropzones();
-    loadAllDataFromBackend();
+    Promise.resolve(loadAllDataFromBackend()).finally(function () {
+      refreshAllSocialNetworkCounts();
+    });
     loadLibraryManifestFromGithub();
     loadImagesFromMainElyFolder();
 
@@ -6859,7 +6861,7 @@
       const storedSocialNetworks = JSON.parse(localStorage.getItem(SOCIAL_NETWORKS_STORAGE_KEY) || 'null');
       if (Array.isArray(storedSocialNetworks) && storedSocialNetworks.length) initialProfile.socialNetworks = storedSocialNetworks;
     } catch (e) {}
-    refreshAllSocialNetworkCounts();
+    // Los contadores de redes se actualizan cuando termina la carga de datos.
 
     // Confirm Modal Action Button
     const confirmActionBtn = document.getElementById('confirm-modal-action-btn');
