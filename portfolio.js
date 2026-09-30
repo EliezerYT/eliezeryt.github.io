@@ -3250,9 +3250,15 @@
 
     [nameInput, roleInput, serviceInput, projInput, avatarInput, tagsInput].forEach(function (input) {
       if (!input) return;
-      input.readOnly = true;
-      input.classList.add('opacity-70', 'cursor-not-allowed');
-      if (input.tagName === 'SELECT') input.disabled = true;
+      if (input === nameInput) {
+        input.readOnly = false;
+        input.disabled = false;
+        input.classList.remove('opacity-70', 'cursor-not-allowed');
+      } else {
+        input.readOnly = true;
+        input.classList.add('opacity-70', 'cursor-not-allowed');
+        if (input.tagName === 'SELECT') input.disabled = true;
+      }
     });
     return true;
   }
