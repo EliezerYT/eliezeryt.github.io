@@ -1362,7 +1362,7 @@
     animateCounterElement(classesCountPublicEl, classesWorkCount);
   }
 
-  function setCategoryWorkCount(origin, value) {
+  async function setCategoryWorkCount(origin, value) {
     if (origin !== 'servicios' && origin !== 'clases') return;
     const categoryProjects = projects.filter(p => p.origin === origin);
     if (!categoryProjects.length) return;
@@ -1372,7 +1372,7 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (e) {}
     renderProjectsGrid();
     updateCatalogHeaders();
-    syncProjectsWithBackend(projects);
+    await persistProjectsImmediately('counter', origin);
   }
 
   function changeCategoryWorkCount(origin, delta) {
@@ -1381,14 +1381,14 @@
     setCategoryWorkCount(origin, total + delta);
   }
 
-  function setProjectWorkCount(projectId, value) {
+  async function setProjectWorkCount(projectId, value) {
     const project = projects.find(p => p.id === projectId);
     if (!project || (project.origin !== 'servicios' && project.origin !== 'clases')) return;
     const count = Math.max(0, Math.floor(Number(value) || 0));
     project.workedCount = count;
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (e) {}
     renderProjectsGrid();
-    syncProjectsWithBackend(projects);
+    await persistProjectsImmediately('counter', project.title);
   }
 
   function changeProjectWorkCount(projectId, delta) {
