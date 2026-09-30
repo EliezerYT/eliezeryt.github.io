@@ -6698,27 +6698,43 @@
     const inviteCode = extractDiscordInviteCode(item.discordInviteCode || item.url || '');
     let guildId = String(item.discordGuildId || '').trim();
     let inviteData = null;
+    let widget = null;
+    let inviteError = null;
 
     if (inviteCode) {
-      const inviteResponse = await fetch('https://discord.com/api/v10/invites/' + encodeURIComponent(inviteCode) + '?with_counts=true', { cache: 'no-store' });
-      if (!inviteResponse.ok) throw new Error('Discord invite HTTP ' + inviteResponse.status);
-      inviteData = await inviteResponse.json();
-      guildId = guildId || String(inviteData && inviteData.guild && inviteData.guild.id || '');
+      try {
+        const inviteResponse = await fetch('https://discord.com/api/v10/invites/' + encodeURIComponent(inviteCode) + '?with_counts=true', { cache: 'no-store' });
+        if (!inviteResponse.ok) throw new Error('Discord invite HTTP ' + inviteResponse.status);
+        inviteData = await inviteResponse.json();
+        guildId = guildId || String(inviteData && inviteData.guild && inviteData.guild.id || '');
+      } catch (error) {
+        inviteError = error;
+      }
     }
 
-    if (!guildId) throw new Error('No se pudo determinar el ID del servidor Discord.');
+    if (!guildId && !inviteData) {
+      throw inviteError || new Error('Configura el enlace de invitación o el ID del servidor Discord.');
+    }
 
-    const widgetResponse = await fetch('https://discord.com/api/guilds/' + encodeURIComponent(guildId) + '/widget.json', { cache: 'no-store' });
-    if (!widgetResponse.ok) throw new Error('Discord widget HTTP ' + widgetResponse.status);
-    const widget = await widgetResponse.json();
+    if (guildId) {
+      try {
+        const widgetResponse = await fetch('https://discord.com/api/guilds/' + encodeURIComponent(guildId) + '/widget.json', { cache: 'no-store' });
+        if (widgetResponse.ok) widget = await widgetResponse.json();
+      } catch (error) {
+        console.warn('[DISCORD WIDGET]', error);
+      }
+    }
 
     const stats = normalizeDiscordStats({
-      members: inviteData && inviteData.approximate_member_count,
-      online: widget && widget.presence_count != null ? widget.presence_count : inviteData && inviteData.approximate_presence_count
+      members: inviteData && (inviteData.approximate_member_count ?? inviteData.guild?.approximate_member_count),
+      online: widget && widget.presence_count != null
+        ? widget.presence_count
+        : inviteData && inviteData.approximate_presence_count
     });
 
-    if (!stats.members && inviteData && inviteData.guild && inviteData.guild.approximate_member_count) {
-      stats.members = Number(inviteData.guild.approximate_member_count) || 0;
+    if (!stats.members && item.countValue) stats.members = Math.max(0, Number(item.countValue) || 0);
+    if (!stats.members && !stats.online) {
+      throw inviteError || new Error('Discord no devolvió estadísticas. Comprueba que la invitación sea válida y que el widget del servidor esté habilitado.');
     }
 
     item.networkType = 'discord';
@@ -6729,16 +6745,25 @@
     item.countLabel = 'Miembros';
     item.countMode = 'discord';
     item.countUrl = '';
-    if (widget && widget.name && (!item.name || item.name === 'Discord')) item.name = widget.name;
+    if (widget && widget.name) item.name = widget.name;
     if (widget && widget.instant_invite && !item.url) item.url = widget.instant_invite;
 
     initialProfile.socialNetworks = getSocialNetworks();
     try { localStorage.setItem(SOCIAL_NETWORKS_STORAGE_KEY, JSON.stringify(getSocialNetworks())); } catch (e) {}
     renderSocialNetworks();
     renderSocialNetworksManager();
-    if (!silent) showStatusNotification({ title:'Discord actualizado', message:formatSocialNumber(stats.members) + ' miembros · ' + formatSocialNumber(stats.online) + ' online', type:'success', icon:'💬' });
+
+    if (!silent) {
+      showStatusNotification({
+        title: 'Discord actualizado',
+        message: formatSocialNumber(stats.members) + ' miembros · ' + formatSocialNumber(stats.online) + ' online' + (widget ? '' : ' · widget no habilitado'),
+        type: 'success',
+        icon: '💬'
+      });
+    }
     return stats;
   }
+
 
   async function refreshYouTubeSocialNetwork(item, silent) {
     const channelId = extractYouTubeChannelId(item.youtubeChannelId || item.url) || 'UCuiY3lZrlrbXsX-RR9v3Kbg';
