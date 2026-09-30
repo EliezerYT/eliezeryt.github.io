@@ -3248,7 +3248,11 @@
   }
 
   // 8.1 Sistema de Feedback con Códigos Especiales (Dejar Feedback)
-  function openFeedbackModal(initialCode) {
+  async function openFeedbackModal(initialCode) {
+    await loadAllDataFromBackend();
+    renderTestimonialsPreview();
+    renderSatisfiedClientsModalList();
+
     const modal = document.getElementById('feedback-modal');
     const codeInput = document.getElementById('feedback-input-code');
     const statusMsg = document.getElementById('feedback-status-msg');
@@ -3265,10 +3269,14 @@
     document.body.style.overflow = 'hidden';
   }
 
-  function closeFeedbackModal() {
+  async function closeFeedbackModal() {
     const modal = document.getElementById('feedback-modal');
     if (modal) modal.classList.add('hidden');
     document.body.style.overflow = '';
+
+    await loadAllDataFromBackend();
+    renderTestimonialsPreview();
+    renderSatisfiedClientsModalList();
   }
 
   function handleFeedbackSubmit(e) {
