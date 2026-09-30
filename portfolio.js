@@ -4618,6 +4618,9 @@
     experiences.forEach(function (item) {
       if (item && item.id) records.push({ id: String(item.id), type: 'experience', data: item });
     });
+    skillCards.forEach(function (item) {
+      if (item && item.id) records.push({ id: String(item.id), type: 'skill_card', data: item });
+    });
     assets.forEach(function (item) {
       if (item && item.id) records.push({ id: String(item.id), type: 'asset', data: item });
     });
