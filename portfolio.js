@@ -5043,6 +5043,8 @@
   }
 
   async function syncAllToGithubCore() {
+    const githubSyncStartFingerprint = getGithubSyncFingerprint();
+
     let syncNotification = showStatusNotification({
       title: 'Sincronizando',
       message: 'Guardando datos en Google Sheets...',
@@ -5141,7 +5143,11 @@
         }
       }
 
-      markGithubSyncComplete();
+      if (getGithubSyncFingerprint() === githubSyncStartFingerprint) {
+        markGithubSyncComplete();
+      } else {
+        console.info('[GITHUB SYNC] Se detectaron cambios durante la sincronización; GitHub queda pendiente.');
+      }
 
       const lastSavedEl = document.getElementById('sync-last-saved');
       if (lastSavedEl) lastSavedEl.textContent = new Date().toLocaleTimeString();
