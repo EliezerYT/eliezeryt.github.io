@@ -303,11 +303,10 @@
   <script src="../portfolio.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      if (window.ElyPortfolio && window.ElyPortfolio.filterAssetsByTag) {
+      if (window.ElyPortfolio && window.ElyPortfolio.refreshAssetsPageRuntime) {
+        window.ElyPortfolio.refreshAssetsPageRuntime();
+      } else if (window.ElyPortfolio && window.ElyPortfolio.filterAssetsByTag) {
         window.ElyPortfolio.filterAssetsByTag('');
-        setTimeout(function () {
-          if (window.ElyPortfolio.initElyDevMotionEnhancements) window.ElyPortfolio.initElyDevMotionEnhancements();
-        }, 50);
       }
       var managerButton = document.getElementById('assets-manager-open');
       if (managerButton && localStorage.getItem('portfolio_auth_user_v2')) managerButton.classList.remove('hidden');
