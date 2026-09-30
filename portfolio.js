@@ -44,7 +44,7 @@
     github: 'https://github.com/eliezeryt',
     linkedin: 'https://www.linkedin.com',
     socialNetworks: [
-      { id: 'youtube', name: 'YouTube', icon: '▶️', color: 'red', url: 'https://www.youtube.com/channel/UCuiY3lZrlrbXsX-RR9v3Kbg', countLabel: 'Suscriptores', countValue: 0, countMode: 'livecounts', countUrl: 'https://livecounts.io/youtube-live-subscriber-counter/UCuiY3lZrlrbXsX-RR9v3Kbg', enabled: true },
+      { id: 'youtube', networkType: 'youtube', name: 'YouTube', icon: '▶️', color: 'red', url: 'https://www.youtube.com/channel/UCuiY3lZrlrbXsX-RR9v3Kbg', countLabel: 'Suscriptores', countValue: 0, countMode: 'youtube', countUrl: '', youtubeChannelId: 'UCuiY3lZrlrbXsX-RR9v3Kbg', youtubeStats: { subscribers: 0, videos: 0, views: 0 }, enabled: true },
       { id: 'discord', name: 'Discord', icon: '💬', color: 'indigo', url: 'https://discord.gg/sqGUT7UjMr', countLabel: 'Usuarios', countValue: 0, countMode: 'manual', countUrl: '', enabled: true },
       { id: 'whatsapp', name: 'WhatsApp', icon: '🟢', color: 'green', url: '', countLabel: 'Usuarios', countValue: 0, countMode: 'manual', countUrl: '', enabled: true }
     ],
@@ -6442,24 +6442,80 @@
 
   // Redes sociales configurables
   const SOCIAL_NETWORKS_STORAGE_KEY = 'portfolio_social_networks_v1';
+  const SOCIAL_NETWORK_TYPES = {
+    youtube: { name: 'YouTube', icon: '▶️', color: 'red' },
+    discord: { name: 'Discord', icon: '💬', color: 'indigo' },
+    instagram: { name: 'Instagram', icon: '◎', color: 'pink' },
+    tiktok: { name: 'TikTok', icon: '♪', color: 'black' },
+    twitch: { name: 'Twitch', icon: '◉', color: 'purple' },
+    facebook: { name: 'Facebook', icon: 'f', color: 'blue' },
+    twitter: { name: 'X / Twitter', icon: '𝕏', color: 'slate' },
+    linkedin: { name: 'LinkedIn', icon: 'in', color: 'sky' },
+    github: { name: 'GitHub', icon: '◖', color: 'slate' },
+    whatsapp: { name: 'WhatsApp', icon: '🟢', color: 'green' },
+    other: { name: 'Otra red', icon: '🌐', color: 'cyan' }
+  };
 
   function getSocialNetworks() {
     if (!Array.isArray(initialProfile.socialNetworks)) initialProfile.socialNetworks = [];
     return initialProfile.socialNetworks;
   }
 
-  function normalizeSocialNetwork(item, index) {
+  function getSocialNetworkType(item) {
+    const raw = String(item && item.networkType || '').toLowerCase();
+    if (SOCIAL_NETWORK_TYPES[raw]) return raw;
+    const id = String(item && item.id || '').toLowerCase();
+    if (SOCIAL_NETWORK_TYPES[id]) return id;
+    const name = String(item && item.name || '').toLowerCase();
+    if (name.includes('youtube')) return 'youtube';
+    if (name.includes('discord')) return 'discord';
+    if (name.includes('instagram')) return 'instagram';
+    if (name.includes('tiktok')) return 'tiktok';
+    if (name.includes('twitch')) return 'twitch';
+    if (name.includes('facebook')) return 'facebook';
+    if (name === 'x' || name.includes('twitter')) return 'twitter';
+    if (name.includes('linkedin')) return 'linkedin';
+    if (name.includes('github')) return 'github';
+    if (name.includes('whatsapp')) return 'whatsapp';
+    return 'other';
+  }
+
+  function extractYouTubeChannelId(value) {
+    const text = String(value || '').trim();
+    if (!text) return '';
+    if (/^UC[a-zA-Z0-9_-]{20,}$/.test(text)) return text;
+    const match = text.match(/(?:channel[\/=]|channel_id=)(UC[a-zA-Z0-9_-]{20,})/i);
+    return match ? match[1] : '';
+  }
+
+  function normalizeYouTubeStats(stats) {
+    const source = stats && typeof stats === 'object' ? stats : {};
     return {
-      id: String(item.id || ('social-' + Date.now() + '-' + index)),
-      name: String(item.name || 'Red social'),
-      icon: String(item.icon || '🌐'),
-      color: String(item.color || 'cyan'),
-      url: String(item.url || ''),
-      countLabel: String(item.countLabel || 'Usuarios'),
-      countValue: Number(item.countValue) || 0,
-      countMode: item.countMode === 'livecounts' ? 'livecounts' : (item.countMode === 'url' ? 'url' : 'manual'),
-      countUrl: String(item.countUrl || ''),
-      enabled: item.enabled !== false
+      subscribers: Math.max(0, Number(source.subscribers ?? source.subscriberCount) || 0),
+      videos: Math.max(0, Number(source.videos ?? source.videoCount) || 0),
+      views: Math.max(0, Number(source.views ?? source.viewCount) || 0)
+    };
+  }
+
+  function normalizeSocialNetwork(item, index) {
+    const networkType = getSocialNetworkType(item);
+    const defaults = SOCIAL_NETWORK_TYPES[networkType] || SOCIAL_NETWORK_TYPES.other;
+    const youtubeChannelId = extractYouTubeChannelId(item && (item.youtubeChannelId || item.url || ''));
+    const youtubeStats = normalizeYouTubeStats(item && item.youtubeStats);
+    return {
+      id: String(item && item.id || ('social-' + Date.now() + '-' + index)),
+      networkType: networkType,
+      name: String(item && item.name || defaults.name),
+      icon: String(item && item.icon || defaults.icon),
+      color: String(item && item.color || defaults.color),
+      url: String(item && item.url || ''),
+      countLabel: String(item && item.countLabel || (networkType === 'youtube' ? 'Suscriptores' : 'Usuarios')),
+      countValue: Number(item && item.countValue) || youtubeStats.subscribers,
+      countMode: networkType === 'youtube' ? 'youtube' : (item && item.countMode === 'livecounts' ? 'livecounts' : (item && item.countMode === 'url' ? 'url' : 'manual')),
+      countUrl: String(item && item.countUrl || ''),
+      youtubeChannelId: youtubeChannelId,
+      youtubeStats: youtubeStats,
+      enabled: !item || item.enabled !== false
     };
   }
 
@@ -6473,6 +6529,10 @@
     return escapeSocialText(value).replace(/javascript:/gi, '');
   }
 
+  function formatSocialNumber(value) {
+    return (Number(value) || 0).toLocaleString('es-DO');
+  }
+
   function renderSocialNetworks() {
     const grid = document.getElementById('social-networks-grid');
     if (!grid) return;
@@ -6482,16 +6542,22 @@
       return;
     }
     grid.innerHTML = list.map(function(item) {
-      const count = Number(item.countValue) || 0;
-      const formatted = count.toLocaleString('es-DO');
+      const stats = item.youtubeStats;
+      const body = item.networkType === 'youtube'
+        ? '<div class="grid grid-cols-3 gap-2 mt-4">' +
+            '<div class="rounded-xl bg-white/[.03] border border-white/5 p-2.5 text-center"><div class="text-[9px] uppercase tracking-wider text-slate-500">Subs</div><div class="text-sm font-bold text-cyan-300 font-mono mt-1">' + formatSocialNumber(stats.subscribers) + '</div></div>' +
+            '<div class="rounded-xl bg-white/[.03] border border-white/5 p-2.5 text-center"><div class="text-[9px] uppercase tracking-wider text-slate-500">Videos</div><div class="text-sm font-bold text-cyan-300 font-mono mt-1">' + formatSocialNumber(stats.videos) + '</div></div>' +
+            '<div class="rounded-xl bg-white/[.03] border border-white/5 p-2.5 text-center"><div class="text-[9px] uppercase tracking-wider text-slate-500">Views</div><div class="text-sm font-bold text-cyan-300 font-mono mt-1">' + formatSocialNumber(stats.views) + '</div></div>' +
+          '</div>'
+        : '<div class="mt-4 flex items-center justify-between rounded-xl bg-white/[.03] border border-white/5 px-3 py-2.5"><span class="text-[10px] text-slate-500">' + escapeSocialText(item.countLabel) + '</span><span class="text-cyan-300 font-mono text-sm font-bold">' + formatSocialNumber(item.countValue) + '</span></div>';
       return '<article class="rounded-2xl bg-[#0e1118] border border-[#232733] p-4 hover:border-cyan-400/40 transition-all">' +
         '<div class="flex items-start justify-between gap-3">' +
           '<div class="flex items-center gap-3 min-w-0">' +
-            '<div class="w-11 h-11 rounded-xl bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center text-xl">' + item.icon + '</div>' +
-            '<div class="min-w-0"><h4 class="font-bold text-white truncate">' + escapeSocialText(item.name) + '</h4><p class="text-[10px] text-slate-500">' + escapeSocialText(item.countLabel) + '</p></div>' +
+            '<div class="w-11 h-11 rounded-xl bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center text-xl font-bold">' + escapeSocialText(item.icon) + '</div>' +
+            '<div class="min-w-0"><h4 class="font-bold text-white truncate">' + escapeSocialText(item.name) + '</h4><p class="text-[10px] text-slate-500">' + escapeSocialText(SOCIAL_NETWORK_TYPES[item.networkType]?.name || item.networkType) + '</p></div>' +
           '</div>' +
-          '<span class="text-cyan-300 font-mono text-sm font-bold">' + formatted + '</span>' +
         '</div>' +
+        body +
         '<div class="mt-4 flex gap-2">' +
           (item.url ? '<a href="' + escapeSocialAttr(item.url) + '" target="_blank" rel="noopener noreferrer" class="flex-1 text-center px-3 py-2 rounded-lg bg-cyan-400 text-black text-[11px] font-bold hover:bg-cyan-300">Visitar →</a>' : '<span class="flex-1 text-center px-3 py-2 rounded-lg bg-white/5 text-slate-500 text-[11px]">Sin enlace</span>') +
           (isModerator && !visitorPreviewMode ? '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.editSocialNetwork(' + JSON.stringify(item.id) + ')" class="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-[11px] font-bold hover:bg-white/10">Editar</button>' : '') +
@@ -6522,16 +6588,27 @@
     }
     manager.classList.remove('hidden');
     const list = getSocialNetworks();
-    manager.innerHTML = '<div class="flex items-center justify-between mb-3"><div><h4 class="text-sm font-bold text-white">Administrar redes</h4><p class="text-[10px] text-slate-500">Agrega, edita y configura los contadores.</p></div><button type="button" onclick="window.ElyPortfolio.editSocialNetwork(\'\')" class="px-3 py-2 rounded-lg bg-cyan-400 text-black text-[11px] font-bold">+ Agregar red</button></div>' +
+    manager.innerHTML = '<div class="flex items-center justify-between mb-3"><div><h4 class="text-sm font-bold text-white">Administrar redes</h4><p class="text-[10px] text-slate-500">Cada red tiene un tipo y muestra sus métricas correspondientes.</p></div><button type="button" onclick="window.ElyPortfolio.editSocialNetwork(\'\')" class="px-3 py-2 rounded-lg bg-cyan-400 text-black text-[11px] font-bold">+ Agregar red</button></div>' +
       '<div class="space-y-2">' + (list.length ? list.map(function(item) {
         const n = normalizeSocialNetwork(item, 0);
         return '<div class="flex items-center gap-3 p-3 rounded-xl bg-white/[.03] border border-white/5">' +
-          '<span class="text-lg">' + n.icon + '</span><span class="flex-1 text-xs text-white font-semibold">' + escapeSocialText(n.name) + '</span>' +
-          '<span class="text-[10px] text-slate-500">' + (n.countMode === 'livecounts' ? 'Livecounts' : (n.countMode === 'url' ? 'Endpoint JSON' : 'Manual')) + '</span>' +
+          '<span class="text-lg">' + escapeSocialText(n.icon) + '</span><span class="flex-1 text-xs text-white font-semibold">' + escapeSocialText(n.name) + '</span>' +
+          '<span class="text-[10px] text-slate-500">' + escapeSocialText(SOCIAL_NETWORK_TYPES[n.networkType]?.name || n.networkType) + '</span>' +
+          (n.networkType === 'youtube' ? '<span class="text-[10px] text-cyan-300">Subs / Videos / Views</span>' : '<span class="text-[10px] text-slate-500">' + (n.countMode === 'url' ? 'Endpoint JSON' : (n.countMode === 'livecounts' ? 'Livecounts' : 'Manual')) + '</span>') +
           '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.editSocialNetwork(' + JSON.stringify(n.id) + ')" class="px-2.5 py-1.5 rounded-lg bg-white/5 text-[10px] text-slate-300">Editar</button>' +
           '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.deleteSocialNetwork(' + JSON.stringify(n.id) + ')" class="px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-300 text-[10px]">Eliminar</button>' +
         '</div>';
       }).join('') : '<div class="text-xs text-slate-500 py-3">No hay redes configuradas.</div>') + '</div>';
+  }
+
+  function updateSocialNetworkFormFields() {
+    const typeEl = document.getElementById('social-form-network-type');
+    const youtubeFields = document.getElementById('social-form-youtube-fields');
+    const genericFields = document.getElementById('social-form-generic-fields');
+    if (!typeEl) return;
+    const isYoutube = typeEl.value === 'youtube';
+    if (youtubeFields) youtubeFields.classList.toggle('hidden', !isYoutube);
+    if (genericFields) genericFields.classList.toggle('hidden', isYoutube);
   }
 
   function editSocialNetwork(id) {
@@ -6540,23 +6617,54 @@
       return;
     }
     const item = id ? getSocialNetworks().find(function(x) { return String(x.id) === String(id); }) : null;
+    const n = normalizeSocialNetwork(item || { networkType: 'other' }, 0);
     const form = document.getElementById('social-network-form');
     if (!form) return;
     document.getElementById('social-form-id').value = item ? item.id : '';
-    document.getElementById('social-form-name').value = item ? item.name : '';
-    document.getElementById('social-form-icon').value = item ? item.icon : '🌐';
+    document.getElementById('social-form-network-type').value = n.networkType;
+    document.getElementById('social-form-name').value = item ? item.name : n.name;
+    document.getElementById('social-form-icon').value = item ? item.icon : n.icon;
     document.getElementById('social-form-url').value = item ? item.url : '';
-    document.getElementById('social-form-label').value = item ? item.countLabel : 'Usuarios';
+    document.getElementById('social-form-label').value = item ? item.countLabel : (n.networkType === 'youtube' ? 'Suscriptores' : 'Usuarios');
     document.getElementById('social-form-count').value = item ? (Number(item.countValue) || 0) : 0;
-    document.getElementById('social-form-mode').value = item && item.countMode === 'livecounts' ? 'livecounts' : (item && item.countMode === 'url' ? 'url' : 'manual');
+    document.getElementById('social-form-mode').value = item && item.countMode === 'url' ? 'url' : (item && item.countMode === 'livecounts' ? 'livecounts' : 'manual');
     document.getElementById('social-form-count-url').value = item ? item.countUrl : '';
+    document.getElementById('social-form-youtube-channel').value = n.youtubeChannelId || 'UCuiY3lZrlrbXsX-RR9v3Kbg';
     document.getElementById('social-form-enabled').checked = !item || item.enabled !== false;
+    updateSocialNetworkFormFields();
     document.getElementById('social-network-editor').classList.remove('hidden');
   }
 
   function closeSocialNetworkEditor() {
     const editor = document.getElementById('social-network-editor');
     if (editor) editor.classList.add('hidden');
+  }
+
+  async function refreshYouTubeSocialNetwork(item, silent) {
+    const channelId = extractYouTubeChannelId(item.youtubeChannelId || item.url) || 'UCuiY3lZrlrbXsX-RR9v3Kbg';
+    const response = await fetch(GLOBAL_COUNTER_URL + '?action=youtubestats&channelId=' + encodeURIComponent(channelId), { cache: 'no-store' });
+    if (!response.ok) throw new Error('YouTube stats HTTP ' + response.status);
+    const data = await response.json();
+    if (!data || data.success === false) throw new Error(data && data.error ? data.error : 'No se recibieron estadísticas de YouTube.');
+    const stats = normalizeYouTubeStats({
+      subscribers: data.subscribers,
+      videos: data.videos,
+      views: data.views
+    });
+    if (!stats.subscribers && !stats.videos && !stats.views) throw new Error('La respuesta de YouTube no contiene estadísticas.');
+    item.networkType = 'youtube';
+    item.youtubeChannelId = channelId;
+    item.youtubeStats = stats;
+    item.countValue = stats.subscribers;
+    item.countLabel = 'Suscriptores';
+    item.countMode = 'youtube';
+    item.countUrl = '';
+    initialProfile.socialNetworks = getSocialNetworks();
+    try { localStorage.setItem(SOCIAL_NETWORKS_STORAGE_KEY, JSON.stringify(getSocialNetworks())); } catch (e) {}
+    renderSocialNetworks();
+    renderSocialNetworksManager();
+    if (!silent) showStatusNotification({ title:'YouTube actualizado', message:formatSocialNumber(stats.subscribers) + ' subs · ' + formatSocialNumber(stats.videos) + ' videos · ' + formatSocialNumber(stats.views) + ' views', type:'success', icon:'▶️' });
+    return stats;
   }
 
   function extractLiveCountsOdometerDocument(doc) {
@@ -6584,6 +6692,18 @@
   async function refreshSocialNetworkCount(id, silent) {
     const item = getSocialNetworks().find(function(x) { return String(x.id) === String(id); });
     if (!item) return;
+    const networkType = getSocialNetworkType(item);
+
+    if (networkType === 'youtube') {
+      try {
+        await refreshYouTubeSocialNetwork(item, silent);
+        return;
+      } catch (youtubeError) {
+        console.error('[YOUTUBE STATS]', youtubeError);
+        if (!silent) showStatusNotification({ title:'No se pudo leer YouTube', message: youtubeError.message || 'Error consultando las estadísticas de YouTube.', type:'error', icon:'⚠️' });
+        return;
+      }
+    }
 
     if (item.countMode === 'manual') {
       if (!silent) showStatusNotification({title:'Contador manual',message:item.name + ' usa un valor manual.',type:'info',icon:'ℹ️'});
@@ -6633,7 +6753,7 @@
 
   function refreshAllSocialNetworkCounts() {
     getSocialNetworks().filter(function(item) {
-      return item.countMode === 'livecounts' || (item.countMode === 'url' && item.countUrl);
+      return getSocialNetworkType(item) === 'youtube' || item.countMode === 'livecounts' || (item.countMode === 'url' && item.countUrl);
     }).forEach(function(item) {
       refreshSocialNetworkCount(item.id, true);
     });
@@ -6643,15 +6763,24 @@
     event.preventDefault();
     if (!isModerator || visitorPreviewMode) return;
     const id = document.getElementById('social-form-id').value.trim();
+    const networkType = document.getElementById('social-form-network-type').value || 'other';
+    const defaults = SOCIAL_NETWORK_TYPES[networkType] || SOCIAL_NETWORK_TYPES.other;
+    const existing = id ? getSocialNetworks().find(function(x) { return String(x.id) === String(id); }) : null;
+    const youtubeChannelId = extractYouTubeChannelId(document.getElementById('social-form-youtube-channel').value);
+    const isYoutube = networkType === 'youtube';
     const item = {
-      id: id || 'social-' + Date.now(),
-      name: document.getElementById('social-form-name').value.trim() || 'Red social',
-      icon: document.getElementById('social-form-icon').value.trim() || '🌐',
+      id: id || networkType + '-' + Date.now(),
+      networkType: networkType,
+      name: document.getElementById('social-form-name').value.trim() || defaults.name,
+      icon: document.getElementById('social-form-icon').value.trim() || defaults.icon,
+      color: defaults.color,
       url: document.getElementById('social-form-url').value.trim(),
-      countLabel: document.getElementById('social-form-label').value.trim() || 'Usuarios',
-      countValue: Math.max(0, Number(document.getElementById('social-form-count').value) || 0),
-      countMode: document.getElementById('social-form-mode').value === 'livecounts' ? 'livecounts' : (document.getElementById('social-form-mode').value === 'url' ? 'url' : 'manual'),
-      countUrl: document.getElementById('social-form-count-url').value.trim(),
+      countLabel: isYoutube ? 'Suscriptores' : (document.getElementById('social-form-label').value.trim() || 'Usuarios'),
+      countValue: isYoutube ? (existing ? Number(existing.countValue) || 0 : 0) : Math.max(0, Number(document.getElementById('social-form-count').value) || 0),
+      countMode: isYoutube ? 'youtube' : (document.getElementById('social-form-mode').value === 'livecounts' ? 'livecounts' : (document.getElementById('social-form-mode').value === 'url' ? 'url' : 'manual')),
+      countUrl: isYoutube ? '' : document.getElementById('social-form-count-url').value.trim(),
+      youtubeChannelId: isYoutube ? (youtubeChannelId || 'UCuiY3lZrlrbXsX-RR9v3Kbg') : '',
+      youtubeStats: isYoutube ? normalizeYouTubeStats(existing && existing.youtubeStats) : { subscribers: 0, videos: 0, views: 0 },
       enabled: document.getElementById('social-form-enabled').checked
     };
     const list = getSocialNetworks();
@@ -6664,8 +6793,10 @@
     renderSocialNetworksManager();
     try {
       await syncLocalDataToGoogleSheets();
+      if (isYoutube) refreshSocialNetworkCount(item.id, true);
       showStatusNotification({title:'Red guardada',message:item.name + ' fue guardada en Google Sheets.',type:'success',icon:'✓'});
     } catch (error) {
+      if (isYoutube) refreshSocialNetworkCount(item.id, true);
       showStatusNotification({title:'Red guardada localmente',message:'Google Sheets no está disponible ahora mismo.',type:'info',icon:'💾'});
     }
   }
@@ -6711,7 +6842,19 @@
     loadImagesFromMainElyFolder();
 
     const socialNetworkForm = document.getElementById('social-network-form');
+    const socialNetworkType = document.getElementById('social-form-network-type');
     if (socialNetworkForm) socialNetworkForm.addEventListener('submit', handleSocialNetworkSubmit);
+    if (socialNetworkType) {
+      socialNetworkType.addEventListener('change', function () {
+        const type = SOCIAL_NETWORK_TYPES[this.value] || SOCIAL_NETWORK_TYPES.other;
+        const nameInput = document.getElementById('social-form-name');
+        const iconInput = document.getElementById('social-form-icon');
+        if (nameInput && !nameInput.value.trim()) nameInput.value = type.name;
+        if (iconInput && !iconInput.value.trim()) iconInput.value = type.icon;
+        updateSocialNetworkFormFields();
+      });
+      updateSocialNetworkFormFields();
+    }
     try {
       const storedSocialNetworks = JSON.parse(localStorage.getItem(SOCIAL_NETWORKS_STORAGE_KEY) || 'null');
       if (Array.isArray(storedSocialNetworks) && storedSocialNetworks.length) initialProfile.socialNetworks = storedSocialNetworks;
