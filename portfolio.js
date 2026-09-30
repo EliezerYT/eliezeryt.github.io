@@ -877,6 +877,15 @@
   // Clientes Satisfechos / Feedback: Google Sheets es la única fuente de verdad.
   let satisfiedClients = [];
 
+  // Habilidades & Especialidades: se cargan desde CardsInfo cuando existe el registro.
+  const initialSkillCards = [
+    { id: 'skill-card-1', title: 'Desarrollo Videojuegos 2D/3D', color: 'amber', lines: ['Unity Engine (Especialista C#)', 'Físicas 2D & 3D (Rigidbody, Colisiones)', 'Diseño de Niveles & Mecánicas', 'Animación & Controladores de Estado', 'Optimización Móvil (Draw Calls)', 'Publicación en Google Play Store'] },
+    { id: 'skill-card-2', title: 'Multijugador & Red', color: 'cyan', lines: ['Photon Network & Photon PUN 2', 'Sincronización de Salas & Matchmaking', 'Replicación de Estados en Tiempo Real', 'Economía Dentro del Juego & Tiendas', 'Personalización de Avatares / Skins', 'WebSockets & Cliente-Servidor'] },
+    { id: 'skill-card-3', title: 'Monetización & Backend', color: 'emerald', lines: ['Anuncios (Banner, Interstitial, Rewarded)', 'Compras Integradas (IAP Billing)', 'PHP & Bases de Datos MySQL', 'Desarrollo Web (HTML5, CSS3, JS)', 'Arquitectura de Audio & Sound FX', 'Git & GitHub Version Control'] }
+  ];
+  let skillCards = JSON.parse(JSON.stringify(initialSkillCards));
+  let editingSkillCardId = null;
+
   // Códigos de Feedback
   let feedbackCodes = [];
   let assets = [];
@@ -4575,6 +4584,9 @@
         data: normalizeSocialNetwork(item, index)
       });
     });
+    skillCards.forEach(function (item) {
+      if (item && item.id) records.push({ id: String(item.id), type: 'skill_card', data: item });
+    });
     return records;
   }
 
@@ -5167,6 +5179,22 @@
       const codesFromSheet = cards
         .filter(function(record) { return record && record.type === 'feedback_code' && record.data; })
         .map(function(record) { return record.data; });
+
+      const skillCardsFromSheet = cards
+        .filter(function(record) { return record && record.type === 'skill_card' && record.data; })
+        .map(function(record) { return record.data; });
+
+      if (skillCardsFromSheet.length) {
+        const byId = {};
+        skillCardsFromSheet.forEach(function(item) { if (item && item.id) byId[String(item.id)] = item; });
+        skillCards = initialSkillCards.map(function(base) {
+          const saved = byId[String(base.id)];
+          return saved ? Object.assign({}, base, saved, { lines: Array.isArray(saved.lines) ? saved.lines.slice(0, 6) : base.lines.slice() }) : JSON.parse(JSON.stringify(base));
+        });
+      } else {
+        skillCards = JSON.parse(JSON.stringify(initialSkillCards));
+      }
+      renderSkillCards();
 
       const socialNetworkRecordsFromSheet = cards
         .filter(function(record) { return record && record.type === 'social_network' && record.data; });
@@ -6894,6 +6922,63 @@
     });
   }
 
+  function renderSkillCards() {
+    const grid = document.getElementById('skill-cards-grid');
+    if (!grid) return;
+    const colorMap = { amber: 'amber', cyan: 'cyan', emerald: 'emerald' };
+    grid.innerHTML = skillCards.map(function(card) {
+      const color = colorMap[card.color] || 'amber';
+      const canEdit = isModerator && !visitorPreviewMode;
+      return '<div class="skill-card rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-3" data-skill-id="' + escapeHtml(String(card.id)) + '">' +
+        '<div class="flex items-start justify-between gap-3"><h4 class="text-sm font-bold text-' + color + '-400">' + escapeHtml(card.title) + '</h4>' +
+        (canEdit ? '<button type="button" onclick="window.ElyPortfolio.openSkillCardEditor(\'' + escapeHtml(String(card.id)) + '\')" class="shrink-0 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] text-slate-300">Editar</button>' : '') + '</div>' +
+        '<ul class="space-y-1.5 text-xs text-slate-300">' +
+        (Array.isArray(card.lines) ? card.lines : []).map(function(line, index) { return '<li class="skill-line" style="--skill-delay:' + (index * 90) + 'ms">• ' + escapeHtml(String(line || '')) + '</li>'; }).join('') +
+        '</ul></div>';
+    }).join('');
+  }
+
+  function openSkillCardEditor(id) {
+    if (!isModerator || visitorPreviewMode) return;
+    const card = skillCards.find(function(item) { return String(item.id) === String(id); });
+    const modal = document.getElementById('skill-card-editor-modal');
+    const title = document.getElementById('skill-editor-title');
+    const fields = document.getElementById('skill-editor-fields');
+    if (!card || !modal || !fields) return;
+    editingSkillCardId = card.id;
+    if (title) title.textContent = 'Editar ' + card.title;
+    fields.innerHTML = (Array.isArray(card.lines) ? card.lines : []).slice(0, 6).map(function(line, index) {
+      return '<div><label class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">Línea ' + (index + 1) + '</label><input id="skill-editor-line-' + index + '" value="' + escapeHtml(String(line || '')) + '" class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white focus:border-amber-400 focus:outline-none"></div>';
+    }).join('');
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSkillCardEditor() {
+    const modal = document.getElementById('skill-card-editor-modal');
+    if (modal) modal.classList.add('hidden');
+    editingSkillCardId = null;
+    document.body.style.overflow = '';
+  }
+
+  async function saveSkillCardEditor() {
+    if (!isModerator || visitorPreviewMode || !editingSkillCardId) return;
+    const card = skillCards.find(function(item) { return String(item.id) === String(editingSkillCardId); });
+    if (!card) return;
+    card.lines = Array.from({ length: 6 }, function(_, index) {
+      const input = document.getElementById('skill-editor-line-' + index);
+      return input ? input.value.trim() : '';
+    });
+    renderSkillCards();
+    closeSkillCardEditor();
+    try {
+      await syncLocalDataToGoogleSheets();
+      showStatusNotification({ title: 'Especialidad guardada', message: 'Las líneas de ' + card.title + ' se guardaron automáticamente en CardsInfo.', type: 'success', icon: '✓' });
+    } catch (error) {
+      showStatusNotification({ title: 'Error al guardar', message: 'No se pudo guardar la especialidad en Google Sheets.', type: 'error', icon: '⚠️' });
+    }
+  }
+
   // 17. Event Listeners y arranque
   window.addEventListener('pageshow', function () {
     setTimeout(function () {
@@ -6945,7 +7030,9 @@
     if (isAssetsPage()) selectedOrigin = 'assets';
     applyTheme(currentTheme);
     setupImageDropzones();
+    renderSkillCards();
     Promise.resolve(loadAllDataFromBackend()).finally(function () {
+      renderSkillCards();
       refreshAllSocialNetworkCounts();
     });
     loadLibraryManifestFromGithub();
@@ -7529,7 +7616,11 @@
   // Exponer API global para interactividad
   window.ElyPortfolio = {
     // Redes sociales
-    openSocialNetworksModal: openSocialNetworksModal,
+    openSkillCardEditor: openSkillCardEditor,
+    closeSkillCardEditor: closeSkillCardEditor,
+    saveSkillCardEditor: saveSkillCardEditor,
+    renderSkillCards: renderSkillCards,
+        openSocialNetworksModal: openSocialNetworksModal,
     closeSocialNetworksModal: closeSocialNetworksModal,
     editSocialNetwork: editSocialNetwork,
     deleteSocialNetwork: deleteSocialNetwork,
