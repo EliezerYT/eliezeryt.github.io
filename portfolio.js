@@ -3402,7 +3402,11 @@
       if(loadingText)loadingText.classList.add('hidden');
       if(loadingHint)loadingHint.classList.add('hidden');
       if(publishedAnimation)publishedAnimation.classList.remove('hidden');
-      setTimeout(function(){closeFeedbackModal();},1800);
+      setTimeout(function(){
+        closeFeedbackModal();
+        closeSatisfiedClientsModal();
+        window.scrollTo({top:0,behavior:'smooth'});
+      },1800);
     }catch(error){
       satisfiedClients=satisfiedClients.filter(c=>c.id!==newFeedback.id);
       foundCode.used=false;
