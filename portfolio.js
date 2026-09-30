@@ -6929,11 +6929,11 @@
     grid.innerHTML = skillCards.map(function(card) {
       const color = colorMap[card.color] || 'amber';
       const canEdit = isModerator && !visitorPreviewMode;
-      return '<div class="skill-card rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-3" data-skill-id="' + escapeHtml(String(card.id)) + '">' +
-        '<div class="flex items-start justify-between gap-3"><h4 class="text-sm font-bold text-' + color + '-400">' + escapeHtml(card.title) + '</h4>' +
-        (canEdit ? '<button type="button" onclick="window.ElyPortfolio.openSkillCardEditor(\'' + escapeHtml(String(card.id)) + '\')" class="shrink-0 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] text-slate-300">Editar</button>' : '') + '</div>' +
+      return '<div class="skill-card rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-3" data-skill-id="' + escapeSocialText(String(card.id)) + '">' +
+        '<div class="flex items-start justify-between gap-3"><h4 class="text-sm font-bold text-' + color + '-400">' + escapeSocialText(card.title) + '</h4>' +
+        (canEdit ? '<button type="button" onclick="window.ElyPortfolio.openSkillCardEditor(\'' + escapeSocialText(String(card.id)) + '\')" class="shrink-0 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] text-slate-300">Editar</button>' : '') + '</div>' +
         '<ul class="space-y-1.5 text-xs text-slate-300">' +
-        (Array.isArray(card.lines) ? card.lines : []).map(function(line, index) { return '<li class="skill-line" style="--skill-delay:' + (index * 90) + 'ms">• ' + escapeHtml(String(line || '')) + '</li>'; }).join('') +
+        (Array.isArray(card.lines) ? card.lines : []).map(function(line, index) { return '<li class="skill-line" style="--skill-delay:' + (index * 90) + 'ms">• ' + escapeSocialText(String(line || '')) + '</li>'; }).join('') +
         '</ul></div>';
     }).join('');
   }
@@ -6948,7 +6948,7 @@
     editingSkillCardId = card.id;
     if (title) title.textContent = 'Editar ' + card.title;
     fields.innerHTML = (Array.isArray(card.lines) ? card.lines : []).slice(0, 6).map(function(line, index) {
-      return '<div><label class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">Línea ' + (index + 1) + '</label><input id="skill-editor-line-' + index + '" value="' + escapeHtml(String(line || '')) + '" class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white focus:border-amber-400 focus:outline-none"></div>';
+      return '<div><label class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">Línea ' + (index + 1) + '</label><input id="skill-editor-line-' + index + '" value="' + escapeSocialText(String(line || '')) + '" class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white focus:border-amber-400 focus:outline-none"></div>';
     }).join('');
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
