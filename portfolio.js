@@ -3961,7 +3961,7 @@
       icon: '🗑️',
       confirmText: 'Sí, Eliminar Proyecto',
       danger: true,
-      onConfirm: function () {
+      onConfirm: async function () {
         projects = projects.filter(p => p.id !== projectId);
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
