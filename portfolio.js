@@ -967,6 +967,8 @@
   let catalogRefreshPromise = null;
   let catalogLastRefreshAt = 0;
   const CATALOG_REFRESH_TTL_MS = 1500;
+  const CATALOG_BACKGROUND_REFRESH_MS = 15000;
+  let catalogBackgroundRefreshTimer = null;
 
   try {
     const authSaved = localStorage.getItem(AUTH_STORAGE_KEY);
@@ -1887,11 +1889,9 @@
     closeAssetImagePicker();
   }
 
-  async function openAssetModal(assetId, updateHash, skipRefresh) {
-    if (!skipRefresh) {
-      await refreshCatalogFromSheet(true);
-    }
-
+  function openAssetModal(assetId, updateHash, skipRefresh) {
+    // La información ya fue cargada al entrar. Abrimos inmediatamente con el estado actual.
+    // Las actualizaciones de Sheets ocurren en segundo plano y no bloquean el click.
     const asset = assets.find(function (a) { return a.id === assetId; });
     if (!asset || (asset.published === false && (!isModerator || visitorPreviewMode))) return;
     selectedAsset = asset;
@@ -2537,11 +2537,9 @@
   }
 
   // 6. Modal de detalle del proyecto (Soporta 16:9, Múltiples Imágenes y Videos de YouTube en Grande)
-  async function openProjectModal(projectId, skipRefresh) {
-    if (!skipRefresh) {
-      await refreshCatalogFromSheet(true);
-    }
-
+  function openProjectModal(projectId, skipRefresh) {
+    // La información ya fue cargada al entrar. Abrimos inmediatamente con el estado actual.
+    // Las actualizaciones de Sheets ocurren en segundo plano y no bloquean el click.
     const project = projects.find(p => p.id === projectId);
     if (!project) return;
     selectedProject = project;
@@ -7051,6 +7049,23 @@
 
     return catalogRefreshPromise;
   }
+
+  function startCatalogBackgroundRefresh() {
+    if (catalogBackgroundRefreshTimer) clearInterval(catalogBackgroundRefreshTimer);
+
+    catalogBackgroundRefreshTimer = setInterval(function () {
+      if (document.hidden) return;
+      refreshCatalogFromSheet(true);
+    }, CATALOG_BACKGROUND_REFRESH_MS);
+  }
+
+  function stopCatalogBackgroundRefresh() {
+    if (catalogBackgroundRefreshTimer) {
+      clearInterval(catalogBackgroundRefreshTimer);
+      catalogBackgroundRefreshTimer = null;
+    }
+  }
+
   function clearPortfolioRouteAndNavigate(sectionId) {
     const section = document.getElementById(sectionId);
     if (window.location.search || window.location.hash) history.replaceState(null, '', window.location.pathname);
@@ -7086,6 +7101,7 @@
     Promise.resolve(refreshCatalogFromSheet(true)).finally(function () {
       renderSkillCards();
       refreshAllSocialNetworkCounts();
+      startCatalogBackgroundRefresh();
     });
     loadLibraryManifestFromGithub();
     loadImagesFromMainElyFolder();
