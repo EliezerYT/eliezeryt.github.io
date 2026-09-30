@@ -2334,6 +2334,14 @@
               <input id="social-form-youtube-channel" type="text" placeholder="UC..." class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white font-mono">
               <p class="text-[10px] text-slate-500 mt-1.5">YouTube mostrará automáticamente Suscriptores, Videos y Views.</p>
             </div>
+            
+            <div id="social-form-discord-fields" class="sm:col-span-2 hidden rounded-xl bg-indigo-500/5 border border-indigo-400/15 p-3">
+              <label class="block text-[10px] text-indigo-300 mb-1">ID del servidor Discord <span class="text-slate-500">(opcional)</span></label>
+              <input id="social-form-discord-guild" type="text" placeholder="Se obtiene automáticamente desde la invitación" class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white font-mono">
+              <label class="block text-[10px] text-indigo-300 mb-1.5 mt-3">Código / enlace de invitación</label>
+              <input id="social-form-discord-invite" type="text" placeholder="https://discord.gg/..." class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white">
+              <p class="text-[10px] text-slate-500 mt-1.5">Usa el widget oficial de Discord para mostrar Miembros y Online. Si dejas el ID vacío, se intentará obtener desde la invitación.</p>
+            </div>
 
             <div id="social-form-generic-fields" class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><label class="block text-[10px] text-slate-400 mb-1">Texto del contador</label><input id="social-form-label" placeholder="Usuarios / Miembros" class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white"></div>
