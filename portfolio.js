@@ -7010,6 +7010,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     applyAssetsRouteUI();
+    renderSkillCards();
     if (isAssetsPage()) selectedOrigin = 'assets';
     applyTheme(currentTheme);
     setupImageDropzones();
