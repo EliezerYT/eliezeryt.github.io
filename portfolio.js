@@ -46,7 +46,7 @@
     socialNetworks: [
       { id: 'youtube', networkType: 'youtube', name: 'YouTube', icon: '▶️', color: 'red', url: 'https://www.youtube.com/channel/UCuiY3lZrlrbXsX-RR9v3Kbg', countLabel: 'Suscriptores', countValue: 0, countMode: 'youtube', countUrl: '', youtubeChannelId: 'UCuiY3lZrlrbXsX-RR9v3Kbg', youtubeStats: { subscribers: 0, videos: 0, views: 0 }, enabled: true },
       { id: 'discord', networkType: 'discord', name: 'Discord', icon: '💬', color: 'discord', url: 'https://discord.gg/sqGUT7UjMr', countLabel: 'Miembros', countValue: 0, countMode: 'discord', countUrl: '', discordGuildId: '', discordInviteCode: 'sqGUT7UjMr', discordStats: { members: 0, online: 0 }, enabled: true },
-      { id: 'whatsapp', name: 'WhatsApp', icon: '🟢', color: 'green', url: '', countLabel: 'Usuarios', countValue: 0, countMode: 'manual', countUrl: '', enabled: true }
+      { id: 'whatsapp', networkType: 'whatsapp', name: 'WhatsApp', icon: '🟢', color: 'green', url: 'https://chat.whatsapp.com/HfM7oRSV5q29AEJB8NwXT8', countLabel: 'Miembros', countValue: 0, countMode: 'manual', countUrl: '', enabled: true }
     ],
   };
 
@@ -6591,9 +6591,9 @@
       const safeId = escapeSocialJs(item.id);
       const body = item.networkType === 'youtube'
         ? '<div class="grid grid-cols-3 gap-2 mt-4">' +
-            '<div class="rounded-xl bg-white/[.03] border border-white/5 p-2.5 text-center"><div class="text-[9px] uppercase tracking-wider text-slate-500">Subs</div><div class="text-sm font-bold font-mono mt-1" style="color:' + style.accent + '">' + formatSocialNumber(stats.subscribers) + '</div></div>' +
-            '<div class="rounded-xl bg-white/[.03] border border-white/5 p-2.5 text-center"><div class="text-[9px] uppercase tracking-wider text-slate-500">Videos</div><div class="text-sm font-bold font-mono mt-1" style="color:' + style.accent + '">' + formatSocialNumber(stats.videos) + '</div></div>' +
-            '<div class="rounded-xl bg-white/[.03] border border-white/5 p-2.5 text-center"><div class="text-[9px] uppercase tracking-wider text-slate-500">Views</div><div class="text-sm font-bold font-mono mt-1" style="color:' + style.accent + '">' + formatSocialNumber(stats.views) + '</div></div>' +
+            '<div class="rounded-xl border p-2.5 text-center" style="background:' + style.soft + ';border-color:' + style.border + '"><div class="text-[9px] uppercase tracking-wider text-slate-500">Subs</div><div class="text-sm font-bold font-mono mt-1" style="color:' + style.accent + '">' + formatSocialNumber(stats.subscribers) + '</div></div>' +
+            '<div class="rounded-xl border p-2.5 text-center" style="background:' + style.soft + ';border-color:' + style.border + '"><div class="text-[9px] uppercase tracking-wider text-slate-500">Videos</div><div class="text-sm font-bold font-mono mt-1" style="color:' + style.accent + '">' + formatSocialNumber(stats.videos) + '</div></div>' +
+            '<div class="rounded-xl border p-2.5 text-center" style="background:' + style.soft + ';border-color:' + style.border + '"><div class="text-[9px] uppercase tracking-wider text-slate-500">Views</div><div class="text-sm font-bold font-mono mt-1" style="color:' + style.accent + '">' + formatSocialNumber(stats.views) + '</div></div>' +
           '</div>'
         : item.networkType === 'discord'
           ? '<div class="grid grid-cols-2 gap-2 mt-4">' +
@@ -6601,7 +6601,7 @@
               '<div class="rounded-xl border p-2.5 text-center" style="background:' + style.soft + ';border-color:' + style.border + '"><div class="text-[9px] uppercase tracking-wider text-slate-500">Online</div><div class="text-sm font-bold font-mono mt-1" style="color:' + style.accent + '">' + formatSocialNumber(item.discordStats.online) + '</div></div>' +
             '</div>' +
             '<div class="mt-2 text-[9px] text-slate-500 flex items-center gap-1.5"><span class="inline-block w-1.5 h-1.5 rounded-full" style="background:' + style.accent + '"></span>Datos del widget de Discord</div>'
-          : '<div class="mt-4 flex items-center justify-between rounded-xl bg-white/[.03] border border-white/5 px-3 py-2.5"><span class="text-[10px] text-slate-500">' + escapeSocialText(item.countLabel) + '</span><span class="font-mono text-sm font-bold" style="color:' + style.accent + '">' + formatSocialNumber(item.countValue) + '</span></div>';
+          : '<div class="mt-4 flex items-center justify-between rounded-xl border px-3 py-2.5" style="background:' + style.soft + ';border-color:' + style.border + '"><span class="text-[10px] text-slate-500">' + escapeSocialText(item.countLabel) + '</span><span class="font-mono text-sm font-bold" style="color:' + style.accent + '">' + formatSocialNumber(item.countValue) + '</span></div>';
       return '<article class="rounded-2xl bg-[#0e1118] border p-4 transition-all" style="border-color:' + style.border + '">' +
         '<div class="flex items-start justify-between gap-3">' +
           '<div class="flex items-center gap-3 min-w-0">' +
