@@ -7592,6 +7592,32 @@
     const feedbackForm = document.getElementById('feedback-submission-form');
     if (feedbackForm) feedbackForm.addEventListener('submit', handleFeedbackSubmit);
 
+    const feedbackLoadCodeBtn = document.getElementById('feedback-load-code-btn');
+    if (feedbackLoadCodeBtn) feedbackLoadCodeBtn.addEventListener('click', function () {
+      const codeInput = document.getElementById('feedback-input-code');
+      const code = codeInput ? codeInput.value.trim().toUpperCase() : '';
+      if (!code) return;
+      if (codeInput) {
+        codeInput.readOnly = true;
+        codeInput.classList.add('opacity-70');
+      }
+      setFeedbackLoading(true, 'Buscando la información de tu servicio...');
+      loadFeedbackCodeDetails(code).then(function (record) {
+        if (!record) {
+          const msg = document.getElementById('feedback-status-msg');
+          if (msg) {
+            msg.className = 'p-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-300 text-xs leading-relaxed';
+            msg.innerHTML = '❌ <strong>Código no encontrado:</strong> Verifica el código e inténtalo nuevamente.';
+            msg.classList.remove('hidden');
+          }
+          if (codeInput) {
+            codeInput.readOnly = false;
+            codeInput.classList.remove('opacity-70');
+          }
+        }
+      });
+    });
+
     const createCodeForm = document.getElementById('create-code-form');
     if (createCodeForm) createCodeForm.addEventListener('submit', handleCreateCodeSubmit);
 
