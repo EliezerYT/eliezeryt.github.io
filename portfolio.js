@@ -1788,6 +1788,7 @@
     other.order = currentOrder;
     assets = sorted;
     try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
+    syncCardsInfoImmediately().catch(function(error) { console.error('[ASSETS SHEET SYNC ERROR]', error); });
     renderAssetsManagerList();
     if (selectedOrigin === 'assets') renderAssetsGrid();
   }
@@ -1810,6 +1811,7 @@
     assets.unshift(copy);
     try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
     renderAssetsManagerList();
+    syncCardsInfoImmediately().catch(function(error) { console.error('[ASSETS SHEET SYNC ERROR]', error); });
     if (selectedOrigin === 'assets') renderAssetsGrid();
     showStatusNotification({title:'Recurso Duplicado',message:'Se creó como borrador para que puedas revisarlo antes de publicarlo.',type:'success',icon:'📋'});
   }
@@ -2164,6 +2166,7 @@
     try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (err) {}
     renderAssetsManagerList();
     if (selectedOrigin === 'assets') renderAssetsGrid();
+    syncCardsInfoImmediately().catch(function(error) { console.error('[ASSETS SHEET SYNC ERROR]', error); });
     const savedAsset = editingAssetId ? assets.find(function(a){return a.id===editingAssetId;}) : assets.find(function(a){return a.id===slugifyAssetId(name) || a.name===name;});
     showStatusNotification({ title: editingAssetId ? 'Recurso Actualizado' : 'Recurso Creado', message: editingAssetId ? 'Los cambios fueron guardados.' : (published ? 'Recurso publicado. Enlace: ' + assetDirectLink(savedAsset || assets[0]) : 'Guardado como borrador.'), type: 'success', icon: editingAssetId ? '✏️' : '📦' });
     editingAssetId = null;
@@ -2183,6 +2186,7 @@
     if (!target) return;
     target.published = target.published === false;
     try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
+    syncCardsInfoImmediately().catch(function(error) { console.error('[ASSETS SHEET SYNC ERROR]', error); });
     renderAssetsManagerList();
     if (selectedOrigin === 'assets') renderAssetsGrid();
   }
@@ -2200,6 +2204,7 @@
       onConfirm: function () {
         assets = assets.filter(function (a) { return a.id !== assetId; });
         try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
+        syncCardsInfoImmediately().catch(function(error) { console.error('[ASSETS SHEET SYNC ERROR]', error); });
         renderAssetsManagerList();
         if (selectedOrigin === 'assets') renderAssetsGrid();
       }
@@ -3732,6 +3737,7 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
     } catch (err) {}
 
+    syncProjectsWithBackend(projects);
     renderProjectsGrid();
     showStatusNotification({
       title: 'Posición Actualizada',
@@ -4510,23 +4516,14 @@
   }
 
   // Sincronización completa con el backend y almacenamiento en disco
-  function syncProjectsWithBackend(list) {
-    if (typeof fetch === 'function') {
-      fetch('/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projects: list })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.success) {
-          updateSyncModalCounters();
-          console.log('[PROYECTOS GUARDADOS]', data.message);
-        }
-      })
-      .catch(function () {});
-    }
+  let cardsInfoSyncQueue = Promise.resolve();
+  function syncCardsInfoImmediately() {
+    cardsInfoSyncQueue = cardsInfoSyncQueue.catch(function () {}).then(function () {
+      return syncDataToGoogleSheet(CARDS_INFO_SHEET_NAME, getCardsInfoSheetRecords());
+    });
+    return cardsInfoSyncQueue;
   }
+  function syncProjectsWithBackend(list) { return syncCardsInfoImmediately(); }
 
   function syncExperiencesWithBackend(list) {
     if (typeof fetch === 'function') {
@@ -5216,11 +5213,9 @@
         .filter(function(record) { return record && record.data; })
         .map(function(record) { return record.data; });
 
-      if (projectsFromSheet.length > 0) {
-        projects = projectsFromSheet;
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (e) {}
-        if (!isAssetsPage()) renderProjectsGrid();
-      }
+      projects = projectsFromSheet;
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (e) {}
+      if (!isAssetsPage()) renderProjectsGrid();
 
       if (experiencesFromSheet.length > 0) {
         experiences = experiencesFromSheet;
@@ -5232,12 +5227,10 @@
       renderTestimonialsPreview();
       renderSatisfiedClientsModalList();
 
-      if (assetsFromSheet.length > 0) {
-        assets = assetsFromSheet;
-        try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
-        if (selectedOrigin === 'assets') renderAssetsGrid();
-        checkAssetHashParam();
-      }
+      assets = assetsFromSheet;
+      try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
+      if (selectedOrigin === 'assets') renderAssetsGrid();
+      checkAssetHashParam();
 
       if (codesFromSheet.length > 0) {
         feedbackCodes = codesFromSheet;
@@ -5311,7 +5304,7 @@
       await loadFromGoogleSheets();
     } catch (error) {
       console.warn('[GOOGLE SHEETS LOAD ERROR]', error);
-      await loadGithubFallback();
+      showStatusNotification({ title: 'Google Sheets no disponible', message: 'No se pudieron actualizar Proyectos y Assets desde CardsInfo. Se mantienen los datos actuales.', type: 'error', icon: '⚠️' });
     }
   }
 
@@ -6984,28 +6977,38 @@
     setTimeout(function () {
       applyAssetsRouteUI();
       applySocialQueryRoute();
+      refreshCatalogFromSheet();
     }, 0);
   });
 
   window.addEventListener('hashchange', function () {
     applyAssetsRouteUI();
     checkAssetHashParam();
+    refreshCatalogFromSheet();
   });
 
   window.addEventListener('popstate', function () {
     applyAssetsRouteUI();
     applySocialQueryRoute();
+    refreshCatalogFromSheet();
   });
 
   document.addEventListener('visibilitychange', function () {
     if (!document.hidden) setTimeout(applyAssetsRouteUI, 0);
   });
 
+  function refreshCatalogFromSheet() {
+    return loadAllDataFromBackend().then(function () {
+      if (isAssetsPage()) refreshAssetsPageRuntime();
+      else renderProjectsGrid(true);
+    }).catch(function () {});
+  }
   function clearPortfolioRouteAndNavigate(sectionId) {
     const section = document.getElementById(sectionId);
     if (window.location.search || window.location.hash) history.replaceState(null, '', window.location.pathname);
     if (section) requestAnimationFrame(function () { section.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
     applyAssetsRouteUI();
+    refreshCatalogFromSheet();
   }
 
   function applySocialQueryRoute() {
