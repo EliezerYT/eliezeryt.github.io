@@ -6542,8 +6542,8 @@
       color: String(item && item.color || defaults.color),
       url: String(item && item.url || ''),
       countLabel: String(item && item.countLabel || (networkType === 'youtube' ? 'Suscriptores' : 'Usuarios')),
-      countValue: Number(item && item.countValue) || youtubeStats.subscribers,
-      countMode: networkType === 'youtube' ? 'youtube' : (networkType === 'discord' ? 'discord' : (networkType === 'instagram' ? 'instagram' : (item && item.countMode === 'livecounts' ? 'livecounts' : (item && item.countMode === 'url' ? 'url' : 'manual')))),
+      countValue: networkType === 'youtube' ? (Number(item && item.countValue) || youtubeStats.subscribers) : (networkType === 'instagram' ? (Number(item && item.countValue) || Number(instagramStats.followers) || 0) : (Number(item && item.countValue) || 0)),
+      countMode: networkType === 'youtube' ? 'youtube' : (networkType === 'discord' ? 'discord' : (item && item.countMode === 'livecounts' ? 'livecounts' : (item && item.countMode === 'url' ? 'url' : 'manual'))),
       countUrl: String(item && item.countUrl || ''),
       youtubeChannelId: youtubeChannelId,
       youtubeStats: youtubeStats,
@@ -6691,6 +6691,16 @@
     const isYoutube = typeEl.value === 'youtube';
     if (youtubeFields) youtubeFields.classList.toggle('hidden', !isYoutube);
     if (genericFields) genericFields.classList.toggle('hidden', isYoutube);
+    const labelEl = document.getElementById('social-form-label');
+    const countEl = document.getElementById('social-form-count');
+    const postsWrap = document.getElementById('social-form-instagram-posts-wrap');
+    if (typeEl.value === 'instagram') {
+      if (labelEl) labelEl.value = 'Seguidores';
+      if (countEl) countEl.previousElementSibling.textContent = 'Seguidores';
+      if (postsWrap) postsWrap.classList.remove('hidden');
+    } else {
+      if (postsWrap) postsWrap.classList.add('hidden');
+    }
   }
 
   function editSocialNetwork(id) {
@@ -6708,7 +6718,9 @@
     document.getElementById('social-form-icon').value = item ? item.icon : n.icon;
     document.getElementById('social-form-url').value = item ? item.url : '';
     document.getElementById('social-form-label').value = item ? item.countLabel : (n.networkType === 'youtube' ? 'Suscriptores' : 'Usuarios');
-    document.getElementById('social-form-count').value = item ? (Number(item.countValue) || 0) : 0;
+    document.getElementById('social-form-count').value = item ? (Number(item.countValue) || Number(n.instagramStats.followers) || 0) : 0;
+    const instagramPostsInput = document.getElementById('social-form-instagram-posts');
+    if (instagramPostsInput) instagramPostsInput.value = item ? (Number(n.instagramStats.posts) || 0) : 0;
     document.getElementById('social-form-mode').value = item && item.countMode === 'url' ? 'url' : (item && item.countMode === 'livecounts' ? 'livecounts' : 'manual');
     document.getElementById('social-form-count-url').value = item ? item.countUrl : '';
     document.getElementById('social-form-youtube-channel').value = n.youtubeChannelId || 'UCuiY3lZrlrbXsX-RR9v3Kbg';
@@ -6949,6 +6961,11 @@
       }
     }
 
+    if (networkType === 'instagram' && item.countMode === 'manual') {
+      if (!silent) showStatusNotification({title:'Contador manual',message:item.name + ' usa seguidores y posts configurados manualmente.',type:'info',icon:'ℹ️'});
+      return;
+    }
+
     if (networkType === 'instagram') {
       try {
         await refreshInstagramSocialNetwork(item, silent);
@@ -7008,7 +7025,7 @@
 
   function refreshAllSocialNetworkCounts() {
     getSocialNetworks().filter(function(item) {
-      return getSocialNetworkType(item) === 'youtube' || getSocialNetworkType(item) === 'discord' || getSocialNetworkType(item) === 'instagram' || item.countMode === 'livecounts' || (item.countMode === 'url' && item.countUrl);
+      return getSocialNetworkType(item) === 'youtube' || getSocialNetworkType(item) === 'discord' || (getSocialNetworkType(item) === 'instagram' && item.countMode !== 'manual') || item.countMode === 'livecounts' || (item.countMode === 'url' && item.countUrl);
     }).forEach(function(item) {
       refreshSocialNetworkCount(item.id, true);
     });
@@ -7036,8 +7053,8 @@
       color: defaults.color,
       url: document.getElementById('social-form-url').value.trim(),
       countLabel: isYoutube ? 'Suscriptores' : (isDiscord ? 'Miembros' : (document.getElementById('social-form-label').value.trim() || 'Usuarios')),
-      countValue: isYoutube ? (existing ? Number(existing.countValue) || 0 : 0) : (isDiscord ? (existing ? Number(existing.countValue) || 0 : 0) : (isInstagram ? (existing ? Number(existing.countValue) || 0 : 0) : Math.max(0, Number(document.getElementById('social-form-count').value) || 0))),
-      countMode: isYoutube ? 'youtube' : (isDiscord ? 'discord' : (isInstagram ? 'instagram' : (document.getElementById('social-form-mode').value === 'livecounts' ? 'livecounts' : (document.getElementById('social-form-mode').value === 'url' ? 'url' : 'manual')))),
+      countValue: isYoutube ? (existing ? Number(existing.countValue) || 0 : 0) : (isDiscord ? (existing ? Number(existing.countValue) || 0 : 0) : Math.max(0, Number(document.getElementById('social-form-count').value) || 0)),
+      countMode: isYoutube ? 'youtube' : (isDiscord ? 'discord' : (document.getElementById('social-form-mode').value === 'livecounts' ? 'livecounts' : (document.getElementById('social-form-mode').value === 'url' ? 'url' : 'manual'))),
       countUrl: isYoutube || isDiscord ? '' : document.getElementById('social-form-count-url').value.trim(),
       youtubeChannelId: isYoutube ? (youtubeChannelId || 'UCuiY3lZrlrbXsX-RR9v3Kbg') : '',
       youtubeStats: isYoutube ? normalizeYouTubeStats(existing && existing.youtubeStats) : { subscribers: 0, videos: 0, views: 0 },
@@ -7045,7 +7062,10 @@
       discordInviteCode: isDiscord ? discordInviteCode : '',
       discordStats: isDiscord ? normalizeDiscordStats(existing && existing.discordStats) : { members: 0, online: 0 },
       instagramUsername: isInstagram ? (instagramUsername || (existing && existing.instagramUsername) || '') : '',
-      instagramStats: isInstagram ? normalizeInstagramStats(existing && existing.instagramStats) : { followers: 0, posts: 0 },
+      instagramStats: isInstagram ? normalizeInstagramStats({
+        followers: Math.max(0, Number(document.getElementById('social-form-count').value) || 0),
+        posts: Math.max(0, Number(document.getElementById('social-form-instagram-posts')?.value) || (existing && existing.instagramStats && Number(existing.instagramStats.posts) || 0))
+      }) : { followers: 0, posts: 0 },
       enabled: document.getElementById('social-form-enabled').checked
     };
     const list = getSocialNetworks();
@@ -7058,10 +7078,10 @@
     renderSocialNetworksManager();
     try {
       await syncLocalDataToGoogleSheets();
-      if (isYoutube || isDiscord || isInstagram) refreshSocialNetworkCount(item.id, true);
+      if (isYoutube || isDiscord || (isInstagram && item.countMode !== 'manual')) refreshSocialNetworkCount(item.id, true);
       showStatusNotification({title:'Red guardada',message:item.name + ' fue guardada en Google Sheets.',type:'success',icon:'✓'});
     } catch (error) {
-      if (isYoutube || isDiscord || isInstagram) refreshSocialNetworkCount(item.id, true);
+      if (isYoutube || isDiscord || (isInstagram && item.countMode !== 'manual')) refreshSocialNetworkCount(item.id, true);
       showStatusNotification({title:'Red guardada localmente',message:'Google Sheets no está disponible ahora mismo.',type:'info',icon:'💾'});
     }
   }
