@@ -1,5 +1,19 @@
 [
   {
+    "id": "feedback-1790772460550",
+    "name": "ElyDev",
+    "role": "Cliente Verificado",
+    "project": "Servicio",
+    "year": "2026",
+    "rating": 5,
+    "avatar": "./assets/images/ely/my-avatar.png",
+    "feedback": "test de feedbback",
+    "tags": [
+      "Feedback Verificado",
+      "Cliente Satisfecho"
+    ]
+  },
+  {
     "id": "client-jobslaru",
     "name": "Jobs Laru",
     "role": "Estudio de Videojuegos / Colaborador Frecuente",
