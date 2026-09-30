@@ -43,12 +43,6 @@
     instagram: 'https://www.instagram.com/_elydev',
     github: 'https://github.com/eliezeryt',
     linkedin: 'https://www.linkedin.com',
-    socialNetworks: [
-      { id: 'youtube', networkType: 'youtube', name: 'YouTube', icon: '▶️', color: 'red', url: 'https://www.youtube.com/channel/UCuiY3lZrlrbXsX-RR9v3Kbg', countLabel: 'Suscriptores', countValue: 0, countMode: 'youtube', countUrl: '', youtubeChannelId: 'UCuiY3lZrlrbXsX-RR9v3Kbg', youtubeStats: { subscribers: 0, videos: 0, views: 0 }, enabled: true },
-      { id: 'discord', networkType: 'discord', name: 'Discord', icon: '💬', color: 'discord', url: 'https://discord.gg/sqGUT7UjMr', countLabel: 'Miembros', countValue: 0, countMode: 'discord', countUrl: '', discordGuildId: '', discordInviteCode: 'sqGUT7UjMr', discordStats: { members: 0, online: 0 }, enabled: true },
-      { id: 'whatsapp', networkType: 'whatsapp', name: 'WhatsApp', icon: '🟢', color: 'green', url: 'https://chat.whatsapp.com/HfM7oRSV5q29AEJB8NwXT8', countLabel: 'Miembros', countValue: 0, countMode: 'manual', countUrl: '', enabled: true },
-      { id: 'instagram', networkType: 'instagram', name: 'Instagram', icon: '📸', color: 'pink', url: 'https://www.instagram.com/_elydev', countLabel: 'Seguidores', countValue: 0, countMode: 'instagram', countUrl: '', instagramUsername: '_elydev', instagramStats: { followers: 0, posts: 0 }, enabled: true }
-    ],
   };
 
   const initialProjects = [
@@ -5403,15 +5397,14 @@
 
       const profileRecord = cardMap.profile;
       if (profileRecord && profileRecord.data && typeof profileRecord.data === 'object') {
-        Object.assign(initialProfile, profileRecord.data);
+        const profileData = Object.assign({}, profileRecord.data);
+        delete profileData.socialNetworks;
+        Object.assign(initialProfile, profileData);
       }
 
-      if (socialNetworkRecordsFromSheet.length > 0) {
-        initialProfile.socialNetworks = socialNetworksFromSheet;
-        try { localStorage.setItem(SOCIAL_NETWORKS_STORAGE_KEY, JSON.stringify(socialNetworksFromSheet)); } catch (e) {}
-        renderSocialNetworks();
-        renderSocialNetworksManager();
-      }
+      socialNetworksState = socialNetworksFromSheet;
+      renderSocialNetworks();
+      renderSocialNetworksManager();
 
       const feedbacksFromSheet = feedbacks
         .filter(function(record) { return record && record.data; })
@@ -6465,7 +6458,7 @@
 
 
   // Redes sociales configurables
-  const SOCIAL_NETWORKS_STORAGE_KEY = 'portfolio_social_networks_v1';
+  let socialNetworksState = [];
   const SOCIAL_NETWORK_TYPES = {
     youtube: { name: 'YouTube', icon: '▶️', color: 'youtube' },
     discord: { name: 'Discord', icon: '💬', color: 'discord' },
@@ -6495,8 +6488,7 @@
   };
 
   function getSocialNetworks() {
-    if (!Array.isArray(initialProfile.socialNetworks)) initialProfile.socialNetworks = [];
-    return initialProfile.socialNetworks;
+    return socialNetworksState;
   }
 
   function getSocialNetworkType(item) {
@@ -6817,8 +6809,6 @@
     if (widget && widget.name) item.name = widget.name;
     if (widget && widget.instant_invite && !item.url) item.url = widget.instant_invite;
 
-    initialProfile.socialNetworks = getSocialNetworks();
-    try { localStorage.setItem(SOCIAL_NETWORKS_STORAGE_KEY, JSON.stringify(getSocialNetworks())); } catch (e) {}
     renderSocialNetworks();
     renderSocialNetworksManager();
 
@@ -6899,8 +6889,6 @@
         item.countValue = stats.followers;
         item.countLabel = 'Seguidores';
         item.countMode = 'instagram';
-        initialProfile.socialNetworks = getSocialNetworks();
-        try { localStorage.setItem(SOCIAL_NETWORKS_STORAGE_KEY, JSON.stringify(getSocialNetworks())); } catch (e) {}
         renderSocialNetworks();
         renderSocialNetworksManager();
         if (!silent) showStatusNotification({title:'Instagram actualizado',message:formatSocialNumber(stats.followers) + ' seguidores · ' + formatSocialNumber(stats.posts) + ' posts',type:'success',icon:'📸'});
@@ -6931,8 +6919,6 @@
     item.countLabel = 'Suscriptores';
     item.countMode = 'youtube';
     item.countUrl = '';
-    initialProfile.socialNetworks = getSocialNetworks();
-    try { localStorage.setItem(SOCIAL_NETWORKS_STORAGE_KEY, JSON.stringify(getSocialNetworks())); } catch (e) {}
     renderSocialNetworks();
     renderSocialNetworksManager();
     if (!silent) showStatusNotification({ title:'YouTube actualizado', message:formatSocialNumber(stats.subscribers) + ' subs · ' + formatSocialNumber(stats.videos) + ' videos · ' + formatSocialNumber(stats.views) + ' views', type:'success', icon:'▶️' });
@@ -7027,8 +7013,6 @@
         item.countValue = Math.max(0, Math.floor(value));
       }
 
-      initialProfile.socialNetworks = getSocialNetworks();
-      try { localStorage.setItem(SOCIAL_NETWORKS_STORAGE_KEY, JSON.stringify(getSocialNetworks())); } catch (e) {}
       renderSocialNetworks();
       renderSocialNetworksManager();
       if (!silent) showStatusNotification({
@@ -7098,8 +7082,7 @@
     const list = getSocialNetworks();
     const index = list.findIndex(function(x) { return String(x.id) === String(item.id); });
     if (index >= 0) list[index] = item; else list.push(item);
-    initialProfile.socialNetworks = list;
-    try { localStorage.setItem(SOCIAL_NETWORKS_STORAGE_KEY, JSON.stringify(list)); } catch (e) {}
+    socialNetworksState = list;
     closeSocialNetworkEditor();
     renderSocialNetworks();
     renderSocialNetworksManager();
@@ -7116,8 +7099,7 @@
   function deleteSocialNetwork(id) {
     if (!isModerator || visitorPreviewMode) return;
     showConfirmModal('¿Eliminar esta red social?', function() {
-      initialProfile.socialNetworks = getSocialNetworks().filter(function(item) { return String(item.id) !== String(id); });
-      try { localStorage.setItem(SOCIAL_NETWORKS_STORAGE_KEY, JSON.stringify(initialProfile.socialNetworks)); } catch (e) {}
+      socialNetworksState = getSocialNetworks().filter(function(item) { return String(item.id) !== String(id); });
       renderSocialNetworks();
       renderSocialNetworksManager();
       syncLocalDataToGoogleSheets().catch(function() {});
