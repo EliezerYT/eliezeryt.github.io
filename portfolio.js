@@ -6714,7 +6714,7 @@
       const storedSocialNetworks = JSON.parse(localStorage.getItem(SOCIAL_NETWORKS_STORAGE_KEY) || 'null');
       if (Array.isArray(storedSocialNetworks) && storedSocialNetworks.length) initialProfile.socialNetworks = storedSocialNetworks;
     } catch (e) {}
-    refreshAllSocialNetworkCounts;
+    refreshAllSocialNetworkCounts();
 
     // Confirm Modal Action Button
     const confirmActionBtn = document.getElementById('confirm-modal-action-btn');
