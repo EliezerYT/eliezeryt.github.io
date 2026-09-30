@@ -5326,7 +5326,43 @@
       const socialNetworkRecordsFromSheet = cards
         .filter(function(record) { return record && record.type === 'social_network' && record.data; });
       const socialNetworksFromSheet = socialNetworkRecordsFromSheet
-        .map(function(record) { return normalizeSocialNetwork(record.data, 0); });
+        .map(function(record, index) {
+          const normalized = normalizeSocialNetwork(record.data, index);
+          const previous = previousSocialNetworks.find(function(item) {
+            return item && String(item.id) === String(normalized.id);
+          });
+          if (previous && (normalized.networkType === 'youtube' || normalized.networkType === 'discord')) {
+            if (normalized.networkType === 'youtube') {
+              const previousStats = normalizeYouTubeStats(previous.youtubeStats);
+              const sheetStats = normalizeYouTubeStats(normalized.youtubeStats);
+              if ((!sheetStats.subscribers && previousStats.subscribers) ||
+                  (!sheetStats.videos && previousStats.videos) ||
+                  (!sheetStats.views && previousStats.views)) {
+                normalized.youtubeStats = {
+                  subscribers: sheetStats.subscribers || previousStats.subscribers,
+                  videos: sheetStats.videos || previousStats.videos,
+                  views: sheetStats.views || previousStats.views
+                };
+              }
+              if (!Number(normalized.countValue) && Number(previous.countValue)) {
+                normalized.countValue = Number(previous.countValue);
+              }
+            } else {
+              const previousStats = normalizeDiscordStats(previous.discordStats);
+              const sheetStats = normalizeDiscordStats(normalized.discordStats);
+              if ((!sheetStats.members && previousStats.members) || (!sheetStats.online && previousStats.online)) {
+                normalized.discordStats = {
+                  members: sheetStats.members || previousStats.members,
+                  online: sheetStats.online || previousStats.online
+                };
+              }
+              if (!Number(normalized.countValue) && Number(previous.countValue)) {
+                normalized.countValue = Number(previous.countValue);
+              }
+            }
+          }
+          return normalized;
+        });
 
       const profileRecord = cardMap.profile;
       if (profileRecord && profileRecord.data && typeof profileRecord.data === 'object') {
