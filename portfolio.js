@@ -1560,23 +1560,40 @@
     updateGlobalAssetCounterUI();
   }
 
-  function updateGlobalAssetCounterUI() {
+  function animateAssetCounterElement(el, kind) {
+    if (!el) return;
+    el.classList.remove('ely-counter-update', 'ely-counter-like', 'ely-counter-download');
+    void el.offsetWidth;
+    el.classList.add('ely-counter-update', kind === 'likes' ? 'ely-counter-like' : 'ely-counter-download');
+  }
+
+  function updateGlobalAssetCounterUI(animate) {
     document.querySelectorAll('[data-global-likes-id]').forEach(function(el) {
       const id = el.getAttribute('data-global-likes-id');
       el.textContent = String(getAssetLikes(id));
+      if (animate) animateAssetCounterElement(el, 'likes');
     });
     document.querySelectorAll('[data-global-downloads-id]').forEach(function(el) {
       const id = el.getAttribute('data-global-downloads-id');
       const count = Number(globalAssetCounters[id]?.downloads);
-      if (Number.isFinite(count)) el.textContent = '↓ ' + count;
+      if (Number.isFinite(count)) {
+        el.textContent = '↓ ' + count;
+        if (animate) animateAssetCounterElement(el, 'downloads');
+      }
     });
     if (selectedAsset) {
       const likesEl = document.getElementById('asset-modal-likes');
       const downloadsEl = document.getElementById('asset-modal-downloads');
       const likes = Number(globalAssetCounters[selectedAsset.id]?.likes);
       const downloads = Number(globalAssetCounters[selectedAsset.id]?.downloads);
-      if (likesEl && Number.isFinite(likes)) likesEl.textContent = String(likes);
-      if (downloadsEl && Number.isFinite(downloads)) downloadsEl.textContent = String(downloads);
+      if (likesEl && Number.isFinite(likes)) {
+        likesEl.textContent = String(likes);
+        if (animate) animateAssetCounterElement(likesEl, 'likes');
+      }
+      if (downloadsEl && Number.isFinite(downloads)) {
+        downloadsEl.textContent = String(downloads);
+        if (animate) animateAssetCounterElement(downloadsEl, 'downloads');
+      }
     }
   }
 
@@ -1585,12 +1602,8 @@
     if (count === null) return;
     assetLikes[assetId] = count;
     try { localStorage.setItem(ASSET_LIKES_KEY, JSON.stringify(assetLikes)); } catch(e) {}
-    if (selectedAsset && selectedAsset.id === assetId) {
-      const el = document.getElementById('asset-modal-likes');
-      if (el) el.textContent = String(count);
-    }
-    updateGlobalAssetCounterUI();
     renderAssetsGrid();
+    updateGlobalAssetCounterUI(true);
   }
   function getAssetComments(assetId) { return Array.isArray(assetComments[assetId]) ? assetComments[assetId] : []; }
   function renderAssetComments(assetId) {
@@ -1979,9 +1992,8 @@
         requestGlobalAssetCounter(target.id, 'downloads', 'increment').then(function(count) {
           if (count === null) return;
           target.downloads = count;
-          if (downloadsEl) downloadsEl.textContent = String(count);
-          updateGlobalAssetCounterUI();
           renderAssetsGrid();
+          updateGlobalAssetCounterUI(true);
         });
         if (dailyEl) dailyEl.textContent = String(getAssetDownloadsToday(target.id));
         window.open(target.downloadUrl, '_blank', 'noopener,noreferrer');
