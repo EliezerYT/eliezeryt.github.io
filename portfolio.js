@@ -4952,29 +4952,6 @@
     return value;
   }
 
-  async function syncGithubJson(path, data) {
-    const content = JSON.stringify(data, null, 2);
-    const base64 = btoa(unescape(encodeURIComponent(content)));
-    return putGithubFile(path, base64, 'Sync portfolio data');
-  }
-
-  function getGithubSyncFingerprint() {
-    try {
-      return JSON.stringify({ projects: projects, experiences: experiences, testimonials: satisfiedClients, assets: assets });
-    } catch (e) {
-      return '';
-    }
-  }
-
-  function hasGithubSyncChanges() {
-    let saved = '';
-    try { saved = localStorage.getItem(SYNC_FINGERPRINT_KEY) || ''; } catch (e) {}
-    return !saved || saved !== getGithubSyncFingerprint();
-  }
-
-  function markGithubSyncComplete() {
-    try { localStorage.setItem(SYNC_FINGERPRINT_KEY, getGithubSyncFingerprint()); } catch (e) {}
-  }
 
   function getLibraryManifest() {
     return customLibraryImages.map(function (image) {
