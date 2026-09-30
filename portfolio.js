@@ -5782,8 +5782,8 @@
             </div>
           </div>
           <div class="grid grid-cols-2 gap-1.5 mt-3">
-            <button type="button" class="rounded-md bg-amber-400 hover:bg-amber-300 px-2 py-1 text-[9px] font-bold text-black transition-colors select-image-btn" title="Seleccionar imagen" aria-label="Seleccionar imagen">✓</button>
-            <button type="button" class="rounded-md bg-white/5 hover:bg-white/10 border border-white/10 px-2 py-1 text-[9px] font-bold text-slate-300 transition-colors library-preview-btn" title="Ver imagen grande" aria-label="Ver imagen grande">🔍</button>
+            <button type="button" class="rounded-md bg-amber-400 hover:bg-amber-300 border border-transparent py-1 text-[10px] font-bold text-black transition-colors select-image-btn" title="Seleccionar imagen" aria-label="Seleccionar imagen">✓</button>
+            <button type="button" class="rounded-md bg-white/5 hover:bg-white/10 border border-white/10 py-1 text-[10px] font-bold text-slate-300 transition-colors library-preview-btn" title="Ver imagen grande" aria-label="Ver imagen grande">🔍</button>
           </div>
           ${canMove ? `
             <div class="grid grid-cols-2 gap-1.5 mt-1.5">
