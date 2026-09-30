@@ -2616,6 +2616,17 @@
     });
 
     container.innerHTML = html;
+    container.classList.remove('hidden');
+    container.style.removeProperty('display');
+    container.style.removeProperty('visibility');
+    container.style.removeProperty('opacity');
+    container.querySelectorAll('article[data-id]').forEach(function(card) {
+      card.classList.remove('card-collapse-exit');
+      card.style.removeProperty('display');
+      card.style.removeProperty('visibility');
+      card.style.removeProperty('opacity');
+      card.style.pointerEvents = 'auto';
+    });
     renderedCardIds = new Set(filteredProjects.map(p => p.id));
     initElyDevMotionEnhancements();
   }
@@ -6704,9 +6715,6 @@
     if (isAssetsPage()) selectedOrigin = 'assets';
     applyTheme(currentTheme);
     setupImageDropzones();
-    const socialForm = document.getElementById('social-network-form');
-    if (socialForm) socialForm.addEventListener('submit', handleSocialNetworkSubmit);
-
     loadAllDataFromBackend();
     loadLibraryManifestFromGithub();
     loadImagesFromMainElyFolder();
@@ -6717,7 +6725,7 @@
       const storedSocialNetworks = JSON.parse(localStorage.getItem(SOCIAL_NETWORKS_STORAGE_KEY) || 'null');
       if (Array.isArray(storedSocialNetworks) && storedSocialNetworks.length) initialProfile.socialNetworks = storedSocialNetworks;
     } catch (e) {}
-    refreshAllSocialNetworkCounts();
+    setTimeout(refreshAllSocialNetworkCounts, 1000);
 
     // Confirm Modal Action Button
     const confirmActionBtn = document.getElementById('confirm-modal-action-btn');
