@@ -6548,7 +6548,7 @@
     document.getElementById('social-form-url').value = item ? item.url : '';
     document.getElementById('social-form-label').value = item ? item.countLabel : 'Usuarios';
     document.getElementById('social-form-count').value = item ? (Number(item.countValue) || 0) : 0;
-    document.getElementById('social-form-mode').value = item && item.countMode === 'url' ? 'url' : 'manual';
+    document.getElementById('social-form-mode').value = item && item.countMode === 'livecounts' ? 'livecounts' : (item && item.countMode === 'url' ? 'url' : 'manual');
     document.getElementById('social-form-count-url').value = item ? item.countUrl : '';
     document.getElementById('social-form-enabled').checked = !item || item.enabled !== false;
     document.getElementById('social-network-editor').classList.remove('hidden');
@@ -6648,7 +6648,7 @@
       url: document.getElementById('social-form-url').value.trim(),
       countLabel: document.getElementById('social-form-label').value.trim() || 'Usuarios',
       countValue: Math.max(0, Number(document.getElementById('social-form-count').value) || 0),
-      countMode: document.getElementById('social-form-mode').value === 'url' ? 'url' : 'manual',
+      countMode: document.getElementById('social-form-mode').value === 'livecounts' ? 'livecounts' : (document.getElementById('social-form-mode').value === 'url' ? 'url' : 'manual'),
       countUrl: document.getElementById('social-form-count-url').value.trim(),
       enabled: document.getElementById('social-form-enabled').checked
     };
