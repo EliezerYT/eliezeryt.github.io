@@ -6576,9 +6576,9 @@
 
   function extractLiveCountsOdometerHtml(text) {
     if (!text) return '';
-    const match = text.match(/odometer-inside[\\s\\S]*?<\\/div>/i);
+    const match = text.match(/odometer-inside[\s\S]*?<\/div>/i);
     if (!match) return '';
-    return (match[0].match(/\\d/g) || []).join('');
+    return (match[0].match(/\d/g) || []).join('');
   }
 
   async function refreshSocialNetworkCount(id, silent) {
