@@ -1823,7 +1823,7 @@
         image +
         '<div class="p-4 space-y-3 text-center">' +
           '<div class="flex items-center justify-center gap-2"><span class="px-2 py-0.5 rounded-md border text-[10px] font-bold ' + typeClass + '">' + typeLabel + '</span><span class="text-[10px] text-slate-500 font-mono">v' + (asset.version || '1.0.0') + '</span></div>' +
-          '<h3 class="text-base font-bold text-white font-display">' + asset.name + '</h3>' +
+          '<h3 class="asset-card-title text-base font-bold text-white font-display text-center w-full">' + asset.name + '</h3>' +
           '<p class="text-xs text-slate-400 line-clamp-2">' + (asset.utility || asset.description || '') + '</p>' +
           '<div class="flex items-center justify-start gap-3 pt-2 border-t border-[#1e2330]">' +
             '<span class="text-[10px] text-rose-300" data-global-likes-id="' + safeId + '">♥ ' + getAssetLikes(asset.id) + '</span>' +
