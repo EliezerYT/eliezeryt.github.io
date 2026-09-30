@@ -5766,12 +5766,13 @@
              data-library-img-id="${img.id || ''}"
              data-library-img-path="${img.path}"
              data-library-img-name="${img.name || ''}">
-          <div class="relative h-44 sm:h-52 w-full shrink-0 overflow-hidden rounded-xl bg-[#141822] mb-3 border border-white/5 cursor-zoom-in library-preview-btn">
+          <div class="relative h-44 sm:h-52 w-full shrink-0 overflow-hidden rounded-xl bg-[#141822] mb-3 border border-white/5 cursor-pointer library-image-area">
             <img src="${img.path}" alt="${img.name || 'Imagen'}" class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105" onerror="this.src='./assets/images/ely/my-avatar.png'" />
             <span class="absolute top-2 left-2 rounded bg-black/80 px-2 py-1 text-[10px] font-mono text-amber-400 border border-amber-400/20 backdrop-blur-sm">
               ${img.category || 'Asset'}
             </span>
-            ${canMove ? `<span class="absolute top-2 right-2 rounded bg-black/80 px-2 py-1 text-[10px] text-slate-300 border border-white/10">↕ Arrastra</span>` : ''}
+            <button type="button" class="absolute top-2 right-2 z-10 h-7 w-7 rounded-md bg-black/75 hover:bg-black/90 border border-white/15 text-sm flex items-center justify-center transition-all library-preview-btn" title="Ver imagen grande" aria-label="Ver imagen grande">🔍</button>
+            ${canMove ? `<span class="absolute top-2 right-11 rounded bg-black/80 px-2 py-1 text-[10px] text-slate-300 border border-white/10">↕ Arrastra</span>` : ''}
           </div>
           <div class="flex-1 min-w-0">
             <div class="truncate text-sm font-semibold text-slate-200 group-hover:text-amber-400 font-display" title="${img.name}">
@@ -5783,25 +5784,8 @@
           </div>
           ${canMove ? `
             <div class="grid grid-cols-2 gap-1.5 mt-3">
-              <button type="button" class="rounded-md bg-amber-400 hover:bg-amber-300 py-1 text-[10px] font-bold text-black select-image-btn" title="Seleccionar imagen" aria-label="Seleccionar imagen">✓ Seleccionar</button>
-              <button type="button" class="rounded-md bg-white/5 hover:bg-white/10 border border-white/10 py-1 text-[10px] font-bold text-slate-300 library-preview-btn" title="Ver imagen grande" aria-label="Ver imagen grande">🔍 Ver grande</button>
-            </div>
-          ` : `
-            <div class="grid grid-cols-2 gap-1.5 mt-3">
-              <button type="button" class="rounded-md bg-amber-400 hover:bg-amber-300 py-1 text-[10px] font-bold text-black select-image-btn" title="Seleccionar imagen" aria-label="Seleccionar imagen">✓ Seleccionar</button>
-              <button type="button" class="rounded-md bg-white/5 hover:bg-white/10 border border-white/10 py-1 text-[10px] font-bold text-slate-300 library-preview-btn" title="Ver imagen grande" aria-label="Ver imagen grande">🔍 Ver grande</button>
-            </div>
-          `}
-${isCustom ? `
-            <div class="mt-2 space-y-1.5">
-              <select class="library-folder-move-select w-full rounded-md bg-[#0b0d11] border border-[#262c3b] px-2 py-1.5 text-[10px] text-white focus:border-amber-400 focus:outline-none">
-                <option value="Profile" ${getLibraryImageFolder(img) === 'Profile' ? 'selected' : ''}>Profile</option>
-                <option value="Screenshot" ${getLibraryImageFolder(img) === 'Screenshot' ? 'selected' : ''}>Screenshot</option>
-                <option value="AppLogo" ${getLibraryImageFolder(img) === 'AppLogo' ? 'selected' : ''}>AppLogo</option>
-                <option value="Custom" ${!['Profile','Screenshot','AppLogo'].includes(getLibraryImageFolder(img)) ? 'selected' : ''}>Custom</option>
-              </select>
-              <input type="text" value="${!['Profile','Screenshot'].includes(getLibraryImageFolder(img)) ? getLibraryImageFolder(img) : ''}" placeholder="Carpeta personalizada" class="library-folder-move-custom ${!['Profile','Screenshot'].includes(getLibraryImageFolder(img)) ? '' : 'hidden'} w-full rounded-md bg-[#0b0d11] border border-[#262c3b] px-2 py-1.5 text-[10px] text-white placeholder-slate-600 focus:border-amber-400 focus:outline-none" />
-              <button type="button" class="library-move-folder-btn w-full rounded-md bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/20 py-1 text-[10px] font-bold text-cyan-300 transition-colors">📁 Mover carpeta</button>
+              <button type="button" class="rounded-md bg-white/5 hover:bg-white/10 border border-white/10 py-1 text-[10px] font-bold text-slate-300 library-move-up-btn">▲ Subir</button>
+              <button type="button" class="rounded-md bg-white/5 hover:bg-white/10 border border-white/10 py-1 text-[10px] font-bold text-slate-300 library-move-down-btn">▼ Bajar</button>
             </div>
           ` : ''}
           ${isCustom ? `
@@ -5821,6 +5805,25 @@ ${isCustom ? `
       });
     });
 
+    grid.querySelectorAll('.library-image-area').forEach(area => {
+      area.addEventListener('click', function (e) {
+        if (e.target.closest('.library-preview-btn')) return;
+        const card = this.closest('[data-library-img-path]');
+        if (!card) return;
+        const path = card.getAttribute('data-library-img-path');
+        const name = card.getAttribute('data-library-img-name');
+        if (currentLibraryTarget && currentLibraryTarget.type === 'gallery') {
+          if (selectedGalleryLibraryImages.has(path)) selectedGalleryLibraryImages.delete(path);
+          else selectedGalleryLibraryImages.add(path);
+          updateLibraryGallerySelectionUI();
+          card.classList.remove('library-selection-shake');
+          void card.offsetWidth;
+          if (selectedGalleryLibraryImages.has(path)) card.classList.add('library-selection-shake');
+        } else {
+          selectImageFromLibrary(path, name);
+        }
+      });
+    });
     grid.querySelectorAll('.library-preview-btn').forEach(button => {
       button.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -6065,6 +6068,8 @@ ${isCustom ? `
     openImageLibraryModal();
     updateLibraryGallerySelectionUI();
   }
+
+  if (!document.getElementById('library-selection-shake-style')) { const style=document.createElement('style'); style.id='library-selection-shake-style'; style.textContent='@keyframes librarySelectionShake{0%,100%{transform:translateX(0) rotate(0)}20%{transform:translateX(-3px) rotate(-1deg)}40%{transform:translateX(3px) rotate(1deg)}60%{transform:translateX(-2px) rotate(-0.5deg)}80%{transform:translateX(2px) rotate(0.5deg)}} .library-selection-shake{animation:librarySelectionShake .4s ease-in-out}'; document.head.appendChild(style); }
 
   function updateLibraryGallerySelectionUI() {
     const applyBtn = document.getElementById('library-gallery-apply-btn');
