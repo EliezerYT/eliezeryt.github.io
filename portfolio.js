@@ -3249,10 +3249,14 @@
     if (serviceInput && codeData.service) serviceInput.value = codeData.service;
     if (projInput && (codeData.project || codeData.serviceType)) {
       const value = String(codeData.project || codeData.serviceType);
-      const option = Array.from(projInput.options || []).find(function (item) {
-        return item.value.toLowerCase() === value.toLowerCase() || item.textContent.trim().toLowerCase() === value.toLowerCase();
-      });
-      if (option) projInput.value = option.value;
+      if (projInput.tagName === 'SELECT') {
+        const option = Array.from(projInput.options || []).find(function (item) {
+          return item.value.toLowerCase() === value.toLowerCase() || item.textContent.trim().toLowerCase() === value.toLowerCase();
+        });
+        if (option) projInput.value = option.value;
+      } else {
+        projInput.value = value;
+      }
     }
     if (avatarInput && codeData.avatar) avatarInput.value = codeData.avatar;
     if (tagsInput && Array.isArray(codeData.tags)) tagsInput.value = codeData.tags.join(', ');
