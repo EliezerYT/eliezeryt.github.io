@@ -3389,9 +3389,12 @@
     foundCode.used=true;
     foundCode.usedBy=name;
     foundCode.usedAt=new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
-    const newFeedback={id:'feedback-'+Date.now(),name,role:role||'Cliente Verificado',project,year:new Date().getFullYear().toString(),rating,avatar,feedback,tags:tags.length?tags:['Feedback Verificado','Cliente Satisfecho']};
+    const serviceInput=document.getElementById('feedback-input-service');
+    const service=serviceInput?serviceInput.value.trim():'';
+    const newFeedback={id:'feedback-'+Date.now(),name,role:role||'Cliente Verificado',service,project,year:new Date().getFullYear().toString(),rating,avatar,feedback,tags:tags.length?tags:['Feedback Verificado','Cliente Satisfecho']};
     satisfiedClients.unshift(newFeedback);
     try{localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY,JSON.stringify(feedbackCodes));}catch(err){}
+    syncLocalDataToGoogleSheets().catch(function () {});
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
     if(submitBtn)submitBtn.disabled=true;
