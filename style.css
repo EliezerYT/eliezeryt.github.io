@@ -611,15 +611,19 @@ main > section { scroll-margin-top: 88px; }
 }
 
 #projects-grid > article > .p-4 > .flex.items-center.justify-center.gap-3 > [data-global-downloads-id],
-#projects-grid > article > .p-4 > .flex.items-center.justify-center.gap-3 > [data-global-likes-id] {
+#projects-grid > article > .p-4 > .flex.items-center.justify-center.gap-3 > [data-global-likes-id],
+#projects-grid > article > .p-4 > .flex.items-center.justify-center.gap-3 > .asset-view-resource-btn {
+  width: 44px;
   min-width: 44px;
+  height: 30px;
   min-height: 30px;
-  padding: 3px 8px;
+  padding: 0;
   border-radius: 9px;
-  font-size: 12px !important;
+  font-size: 11px !important;
   font-weight: 800 !important;
   line-height: 1;
-  flex: 0 0 auto;
+  flex: 0 0 44px;
+  box-sizing: border-box;
 }
 
 #projects-grid > article > .p-4 > .flex.items-center.justify-center.gap-3 > [data-global-downloads-id] {
@@ -641,15 +645,10 @@ main > section { scroll-margin-top: 88px; }
   right: 0;
   bottom: 0;
   margin: 0;
-  width: 48px;
-  height: 32px;
-  padding: 0;
-  border-radius: 10px;
   border: 1px solid rgba(34,211,238,.38);
   background: rgba(34,211,238,.12);
   color: #67e8f9;
-  font-size: 15px;
-  line-height: 1;
+  font-size: 14px !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -669,16 +668,14 @@ main > section { scroll-margin-top: 88px; }
     gap: 7px;
   }
   #projects-grid > article > .p-4 > .flex.items-center.justify-center.gap-3 > [data-global-downloads-id],
-  #projects-grid > article > .p-4 > .flex.items-center.justify-center.gap-3 > [data-global-likes-id] {
-    min-width: 42px;
-    min-height: 28px;
-    font-size: 11px !important;
-    padding: 3px 7px;
-  }
-  #projects-grid > article > .p-4 > .flex.items-center.justify-center.gap-3 > .bg-cyan-400 {
+  #projects-grid > article > .p-4 > .flex.items-center.justify-center.gap-3 > [data-global-likes-id],
+  #projects-grid > article > .p-4 > .flex.items-center.justify-center.gap-3 > .asset-view-resource-btn {
     width: 42px;
+    min-width: 42px;
     height: 28px;
     min-height: 28px;
+    flex-basis: 42px;
+    font-size: 10px !important;
     padding: 0;
   }
 }
