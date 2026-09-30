@@ -47,7 +47,7 @@
       { id: 'youtube', networkType: 'youtube', name: 'YouTube', icon: '▶️', color: 'red', url: 'https://www.youtube.com/channel/UCuiY3lZrlrbXsX-RR9v3Kbg', countLabel: 'Suscriptores', countValue: 0, countMode: 'youtube', countUrl: '', youtubeChannelId: 'UCuiY3lZrlrbXsX-RR9v3Kbg', youtubeStats: { subscribers: 0, videos: 0, views: 0 }, enabled: true },
       { id: 'discord', networkType: 'discord', name: 'Discord', icon: '💬', color: 'discord', url: 'https://discord.gg/sqGUT7UjMr', countLabel: 'Miembros', countValue: 0, countMode: 'discord', countUrl: '', discordGuildId: '', discordInviteCode: 'sqGUT7UjMr', discordStats: { members: 0, online: 0 }, enabled: true },
       { id: 'whatsapp', networkType: 'whatsapp', name: 'WhatsApp', icon: '🟢', color: 'green', url: 'https://chat.whatsapp.com/HfM7oRSV5q29AEJB8NwXT8', countLabel: 'Miembros', countValue: 0, countMode: 'manual', countUrl: '', enabled: true },
-      { id: 'instagram', networkType: 'instagram', name: 'Instagram', icon: '📸', color: 'pink', url: 'https://www.instagram.com/_elydev', countLabel: 'Seguidores', countValue: 0, countMode: 'manual', countUrl: '', enabled: true }
+      { id: 'instagram', networkType: 'instagram', name: 'Instagram', icon: '📸', color: 'pink', url: 'https://www.instagram.com/_elydev', countLabel: 'Seguidores', countValue: 0, countMode: 'instagram', countUrl: '', instagramUsername: '_elydev', instagramStats: { followers: 0, posts: 0 }, enabled: true }
     ],
   };
 
@@ -1847,7 +1847,7 @@
     const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduceMotion) return;
     document.querySelectorAll('#projects-grid > article[data-asset-id]').forEach(function (card) {
-      if (card.dataset.assetTiltBound === '1') return;
+      if (card.dataset.assetTiltBound === '1' || card.dataset.elyMotionBound === '1') return;
       card.dataset.assetTiltBound = '1';
       card.style.transformStyle = 'preserve-3d';
       card.style.willChange = 'transform';
@@ -6533,6 +6533,7 @@
     const youtubeChannelId = extractYouTubeChannelId(item && (item.youtubeChannelId || item.url || ''));
     const youtubeStats = normalizeYouTubeStats(item && item.youtubeStats);
     const discordStats = item && item.discordStats && typeof item.discordStats === 'object' ? item.discordStats : {};
+    const instagramStats = item && item.instagramStats && typeof item.instagramStats === 'object' ? item.instagramStats : {};
     return {
       id: String(item && item.id || ('social-' + Date.now() + '-' + index)),
       networkType: networkType,
@@ -6552,7 +6553,27 @@
         members: Math.max(0, Number(discordStats.members ?? discordStats.memberCount) || Number(item && item.countValue) || 0),
         online: Math.max(0, Number(discordStats.online ?? discordStats.onlineCount) || 0)
       },
+      instagramUsername: String(item && item.instagramUsername || extractInstagramUsername(item && item.url || '')),
+      instagramStats: {
+        followers: Math.max(0, Number(instagramStats.followers ?? instagramStats.followerCount) || Number(item && item.countValue) || 0),
+        posts: Math.max(0, Number(instagramStats.posts ?? instagramStats.postCount) || 0)
+      },
       enabled: !item || item.enabled !== false
+    };
+  }
+
+  function extractInstagramUsername(value) {
+    const text = String(value || '').trim();
+    if (!text) return '';
+    const match = text.match(/instagram\.com\/([a-zA-Z0-9._]+)\/?/i);
+    return match ? match[1] : text.replace(/^@/, '').split(/[/?#]/)[0];
+  }
+
+  function normalizeInstagramStats(stats) {
+    const source = stats && typeof stats === 'object' ? stats : {};
+    return {
+      followers: Math.max(0, Number(source.followers ?? source.followerCount ?? source.followersCount) || 0),
+      posts: Math.max(0, Number(source.posts ?? source.postCount ?? source.postsCount ?? source.mediaCount) || 0)
     };
   }
 
@@ -6602,7 +6623,13 @@
               '<div class="rounded-xl border p-2.5 text-center" style="background:' + style.soft + ';border-color:' + style.border + '"><div class="text-[9px] uppercase tracking-wider text-slate-500">Online</div><div class="text-sm font-bold font-mono mt-1" style="color:' + style.accent + '">' + formatSocialNumber(item.discordStats.online) + '</div></div>' +
             '</div>' +
             '<div class="mt-2 text-[9px] text-slate-500 flex items-center gap-1.5"><span class="inline-block w-1.5 h-1.5 rounded-full" style="background:' + style.accent + '"></span>Datos del widget de Discord</div>'
-          : '<div class="mt-4 flex items-center justify-between rounded-xl border px-3 py-2.5" style="background:' + style.soft + ';border-color:' + style.border + '"><span class="text-[10px] text-slate-500">' + escapeSocialText(item.countLabel) + '</span><span class="font-mono text-sm font-bold" style="color:' + style.accent + '">' + formatSocialNumber(item.countValue) + '</span></div>';
+          : item.networkType === 'instagram'
+            ? '<div class="grid grid-cols-2 gap-2 mt-4">' +
+                '<div class="rounded-xl border p-2.5 text-center" style="background:' + style.soft + ';border-color:' + style.border + '"><div class="text-[9px] uppercase tracking-wider text-slate-500">Seguidores</div><div class="text-sm font-bold font-mono mt-1" style="color:' + style.accent + '">' + formatSocialNumber(item.instagramStats.followers) + '</div></div>' +
+                '<div class="rounded-xl border p-2.5 text-center" style="background:' + style.soft + ';border-color:' + style.border + '"><div class="text-[9px] uppercase tracking-wider text-slate-500">Posts</div><div class="text-sm font-bold font-mono mt-1" style="color:' + style.accent + '">' + formatSocialNumber(item.instagramStats.posts) + '</div></div>' +
+              '</div>' +
+              '<div class="mt-2 text-[9px] text-slate-500 flex items-center gap-1.5"><span class="inline-block w-1.5 h-1.5 rounded-full" style="background:' + style.accent + '"></span>@' + escapeSocialText(item.instagramUsername || extractInstagramUsername(item.url)) + '</div>'
+            : '<div class="mt-4 flex items-center justify-between rounded-xl border px-3 py-2.5" style="background:' + style.soft + ';border-color:' + style.border + '"><span class="text-[10px] text-slate-500">' + escapeSocialText(item.countLabel) + '</span><span class="font-mono text-sm font-bold" style="color:' + style.accent + '">' + formatSocialNumber(item.countValue) + '</span></div>';
       return '<article class="rounded-2xl bg-[#0e1118] border p-4 transition-all" style="border-color:' + style.border + '">' +
         '<div class="flex items-start justify-between gap-3">' +
           '<div class="flex items-center gap-3 min-w-0">' +
@@ -6630,6 +6657,8 @@
   function closeSocialNetworksModal() {
     const modal = document.getElementById('social-networks-modal');
     if (modal) modal.classList.add('hidden');
+    const params = new URLSearchParams(window.location.search || '');
+    if (params.has('redes')) history.replaceState(null, '', window.location.pathname);
   }
 
   function renderSocialNetworksManager() {
@@ -6766,6 +6795,85 @@
   }
 
 
+  async function refreshInstagramSocialNetwork(item, silent) {
+    const username = extractInstagramUsername(item.instagramUsername || item.url || '');
+    if (!username) throw new Error('Configura el usuario o URL de Instagram.');
+
+    const parseInstagramPayload = function(payload) {
+      const candidates = [
+        payload,
+        payload && payload.data,
+        payload && payload.data && payload.data.user,
+        payload && payload.profile,
+        payload && payload.author,
+        payload && payload.user
+      ].filter(Boolean);
+
+      for (const source of candidates) {
+        const stats = normalizeInstagramStats({
+          followers: source.followers ?? source.followersCount ?? source.follower_count ?? source.edge_followed_by?.count,
+          posts: source.posts ?? source.postsCount ?? source.post_count ?? source.mediaCount ?? source.edge_owner_to_timeline_media?.count
+        });
+        if (stats.followers || stats.posts) return stats;
+      }
+      return null;
+    };
+
+    const urls = [
+      GLOBAL_COUNTER_URL + '?action=instagramstats&username=' + encodeURIComponent(username),
+      'https://i.instagram.com/api/v1/users/web_profile_info/?username=' + encodeURIComponent(username),
+      'https://www.instagram.com/' + encodeURIComponent(username) + '/?__a=1&__d=dis',
+      'https://r.jina.ai/https://www.instagram.com/' + encodeURIComponent(username) + '/'
+    ];
+
+    let lastError = null;
+    for (const url of urls) {
+      try {
+        const response = await fetch(url, {
+          cache: 'no-store',
+          mode: 'cors',
+          headers: url.indexOf('i.instagram.com') >= 0 ? { 'X-IG-App-ID': '936619743392459', 'Accept': 'application/json' } : {}
+        });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const text = await response.text();
+        let payload = null;
+        try { payload = JSON.parse(text); } catch (e) {}
+
+        let stats = payload ? parseInstagramPayload(payload) : null;
+        if (!stats) {
+          const followerMatches = text.match(/(?:followers|seguidores)[^\d]{0,80}([\d.,]+\s*[KMB]?)/i);
+          const postMatches = text.match(/(?:posts|publicaciones)[^\d]{0,80}([\d.,]+\s*[KMB]?)/i);
+          const parseCount = function(raw) {
+            if (!raw) return 0;
+            const clean = raw.replace(/\s/g, '').replace(/,/g, '');
+            const suffix = clean.slice(-1).toUpperCase();
+            const n = parseFloat(suffix === 'K' || suffix === 'M' || suffix === 'B' ? clean.slice(0,-1) : clean);
+            if (!Number.isFinite(n)) return 0;
+            return Math.round(n * (suffix === 'K' ? 1e3 : suffix === 'M' ? 1e6 : suffix === 'B' ? 1e9 : 1));
+          };
+          stats = normalizeInstagramStats({ followers: parseCount(followerMatches && followerMatches[1]), posts: parseCount(postMatches && postMatches[1]) });
+        }
+
+        if (!stats || (!stats.followers && !stats.posts)) throw new Error('No se encontraron seguidores/posts.');
+        item.networkType = 'instagram';
+        item.instagramUsername = username;
+        item.instagramStats = stats;
+        item.countValue = stats.followers;
+        item.countLabel = 'Seguidores';
+        item.countMode = 'instagram';
+        initialProfile.socialNetworks = getSocialNetworks();
+        try { localStorage.setItem(SOCIAL_NETWORKS_STORAGE_KEY, JSON.stringify(getSocialNetworks())); } catch (e) {}
+        renderSocialNetworks();
+        renderSocialNetworksManager();
+        if (!silent) showStatusNotification({title:'Instagram actualizado',message:formatSocialNumber(stats.followers) + ' seguidores · ' + formatSocialNumber(stats.posts) + ' posts',type:'success',icon:'📸'});
+        return stats;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError || new Error('Instagram no devolvió estadísticas.');
+  }
+
   async function refreshYouTubeSocialNetwork(item, silent) {
     const channelId = extractYouTubeChannelId(item.youtubeChannelId || item.url) || 'UCuiY3lZrlrbXsX-RR9v3Kbg';
     const response = await fetch(GLOBAL_COUNTER_URL + '?action=youtubestats&channelId=' + encodeURIComponent(channelId), { cache: 'no-store' });
@@ -6842,6 +6950,17 @@
       }
     }
 
+    if (networkType === 'instagram') {
+      try {
+        await refreshInstagramSocialNetwork(item, silent);
+        return;
+      } catch (instagramError) {
+        console.error('[INSTAGRAM STATS]', instagramError);
+        if (!silent) showStatusNotification({ title:'No se pudo leer Instagram', message: instagramError.message || 'Instagram no devolvió seguidores/posts.', type:'error', icon:'⚠️' });
+        return;
+      }
+    }
+
     if (item.countMode === 'manual') {
       if (!silent) showStatusNotification({title:'Contador manual',message:item.name + ' usa un valor manual.',type:'info',icon:'ℹ️'});
       return;
@@ -6890,7 +7009,7 @@
 
   function refreshAllSocialNetworkCounts() {
     getSocialNetworks().filter(function(item) {
-      return getSocialNetworkType(item) === 'youtube' || getSocialNetworkType(item) === 'discord' || item.countMode === 'livecounts' || (item.countMode === 'url' && item.countUrl);
+      return getSocialNetworkType(item) === 'youtube' || getSocialNetworkType(item) === 'discord' || getSocialNetworkType(item) === 'instagram' || item.countMode === 'livecounts' || (item.countMode === 'url' && item.countUrl);
     }).forEach(function(item) {
       refreshSocialNetworkCount(item.id, true);
     });
@@ -6908,6 +7027,8 @@
     const discordInviteCode = extractDiscordInviteCode(document.getElementById('social-form-discord-invite').value.trim() || document.getElementById('social-form-url').value.trim());
     const isYoutube = networkType === 'youtube';
     const isDiscord = networkType === 'discord';
+    const isInstagram = networkType === 'instagram';
+    const instagramUsername = extractInstagramUsername(document.getElementById('social-form-url').value.trim());
     const item = {
       id: id || networkType + '-' + Date.now(),
       networkType: networkType,
@@ -6916,14 +7037,16 @@
       color: defaults.color,
       url: document.getElementById('social-form-url').value.trim(),
       countLabel: isYoutube ? 'Suscriptores' : (isDiscord ? 'Miembros' : (document.getElementById('social-form-label').value.trim() || 'Usuarios')),
-      countValue: isYoutube ? (existing ? Number(existing.countValue) || 0 : 0) : (isDiscord ? (existing ? Number(existing.countValue) || 0 : 0) : Math.max(0, Number(document.getElementById('social-form-count').value) || 0)),
-      countMode: isYoutube ? 'youtube' : (isDiscord ? 'discord' : (document.getElementById('social-form-mode').value === 'livecounts' ? 'livecounts' : (document.getElementById('social-form-mode').value === 'url' ? 'url' : 'manual'))),
+      countValue: isYoutube ? (existing ? Number(existing.countValue) || 0 : 0) : (isDiscord ? (existing ? Number(existing.countValue) || 0 : 0) : (isInstagram ? (existing ? Number(existing.countValue) || 0 : 0) : Math.max(0, Number(document.getElementById('social-form-count').value) || 0))),
+      countMode: isYoutube ? 'youtube' : (isDiscord ? 'discord' : (isInstagram ? 'instagram' : (document.getElementById('social-form-mode').value === 'livecounts' ? 'livecounts' : (document.getElementById('social-form-mode').value === 'url' ? 'url' : 'manual')))),
       countUrl: isYoutube || isDiscord ? '' : document.getElementById('social-form-count-url').value.trim(),
       youtubeChannelId: isYoutube ? (youtubeChannelId || 'UCuiY3lZrlrbXsX-RR9v3Kbg') : '',
       youtubeStats: isYoutube ? normalizeYouTubeStats(existing && existing.youtubeStats) : { subscribers: 0, videos: 0, views: 0 },
       discordGuildId: isDiscord ? discordGuildId : '',
       discordInviteCode: isDiscord ? discordInviteCode : '',
       discordStats: isDiscord ? normalizeDiscordStats(existing && existing.discordStats) : { members: 0, online: 0 },
+      instagramUsername: isInstagram ? (instagramUsername || (existing && existing.instagramUsername) || '') : '',
+      instagramStats: isInstagram ? normalizeInstagramStats(existing && existing.instagramStats) : { followers: 0, posts: 0 },
       enabled: document.getElementById('social-form-enabled').checked
     };
     const list = getSocialNetworks();
@@ -6936,10 +7059,10 @@
     renderSocialNetworksManager();
     try {
       await syncLocalDataToGoogleSheets();
-      if (isYoutube || isDiscord) refreshSocialNetworkCount(item.id, true);
+      if (isYoutube || isDiscord || isInstagram) refreshSocialNetworkCount(item.id, true);
       showStatusNotification({title:'Red guardada',message:item.name + ' fue guardada en Google Sheets.',type:'success',icon:'✓'});
     } catch (error) {
-      if (isYoutube || isDiscord) refreshSocialNetworkCount(item.id, true);
+      if (isYoutube || isDiscord || isInstagram) refreshSocialNetworkCount(item.id, true);
       showStatusNotification({title:'Red guardada localmente',message:'Google Sheets no está disponible ahora mismo.',type:'info',icon:'💾'});
     }
   }
@@ -6959,6 +7082,7 @@
   window.addEventListener('pageshow', function () {
     setTimeout(function () {
       applyAssetsRouteUI();
+      applySocialQueryRoute();
     }, 0);
   });
 
@@ -6969,10 +7093,35 @@
 
   window.addEventListener('popstate', function () {
     applyAssetsRouteUI();
+    applySocialQueryRoute();
   });
 
   document.addEventListener('visibilitychange', function () {
     if (!document.hidden) setTimeout(applyAssetsRouteUI, 0);
+  });
+
+  function clearPortfolioRouteAndNavigate(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (window.location.search || window.location.hash) history.replaceState(null, '', window.location.pathname);
+    if (section) requestAnimationFrame(function () { section.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    applyAssetsRouteUI();
+  }
+
+  function applySocialQueryRoute() {
+    const params = new URLSearchParams(window.location.search || '');
+    if (!params.has('redes')) return false;
+    setTimeout(function () { openSocialNetworksModal(); }, 0);
+    return true;
+  }
+
+  document.addEventListener('click', function (event) {
+    const link = event.target.closest('a[href^="#"]');
+    if (!link) return;
+    const href = link.getAttribute('href') || '';
+    const sectionId = href.slice(1);
+    if (!['inicio', 'proyectos', 'feedback'].includes(sectionId)) return;
+    event.preventDefault();
+    clearPortfolioRouteAndNavigate(sectionId);
   });
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -7005,6 +7154,9 @@
       if (Array.isArray(storedSocialNetworks) && storedSocialNetworks.length) initialProfile.socialNetworks = storedSocialNetworks;
     } catch (e) {}
     // Los contadores de redes se actualizan cuando termina la carga de datos.
+    setTimeout(function () {
+      if (new URLSearchParams(window.location.search || '').has('redes')) openSocialNetworksModal();
+    }, 120);
 
     // Confirm Modal Action Button
     const confirmActionBtn = document.getElementById('confirm-modal-action-btn');
@@ -7451,6 +7603,8 @@
     document.querySelectorAll('#projects-grid > article').forEach(function (card) {
       if (card.dataset.elyMotionBound !== '1') {
         card.dataset.elyMotionBound = '1';
+        card.style.transformStyle = 'preserve-3d';
+        card.style.willChange = 'transform';
         card.addEventListener('pointermove', function (e) {
           if (reduceMotion) return;
           const rect = card.getBoundingClientRect();
@@ -7462,12 +7616,14 @@
           card.style.setProperty('--ely-my', y + '%');
           card.style.setProperty('--ely-rx', rx + 'deg');
           card.style.setProperty('--ely-ry', ry + 'deg');
+          card.style.transform = 'perspective(900px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) translateZ(0) scale(1.015)';
         }, { passive: true });
         card.addEventListener('pointerleave', function () {
           card.style.removeProperty('--ely-mx');
           card.style.removeProperty('--ely-my');
           card.style.removeProperty('--ely-rx');
           card.style.removeProperty('--ely-ry');
+          card.style.removeProperty('transform');
         });
       }
     });
