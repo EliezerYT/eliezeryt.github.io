@@ -3076,10 +3076,11 @@
 
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
-    syncTestimonialsWithBackend(satisfiedClients).then(function () {
-      showStatusNotification({ title: 'Posición Actualizada', message: 'El orden del feedback se guardó en Google Sheets.', type: 'info', icon: '⇅' });
-    }).catch(function () {
-      showStatusNotification({ title: 'Error al guardar', message: 'El cambio no pudo guardarse en Google Sheets.', type: 'error', icon: '⚠️' });
+    showStatusNotification({
+      title: 'Posición Actualizada',
+      message: `Se reordenó la posición del feedback de "${satisfiedClients[newIndex].name}".`,
+      type: 'info',
+      icon: '⇅'
     });
   }
 
@@ -3100,10 +3101,11 @@
 
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
-    syncTestimonialsWithBackend(satisfiedClients).then(function () {
-      showStatusNotification({ title: 'Feedback Duplicado', message: 'La copia se guardó en Google Sheets.', type: 'success', icon: '📋' });
-    }).catch(function () {
-      showStatusNotification({ title: 'Error al guardar', message: 'La copia no pudo guardarse en Google Sheets.', type: 'error', icon: '⚠️' });
+    showStatusNotification({
+      title: 'Feedback Duplicado',
+      message: `Se ha creado una copia del feedback de "${target.name}".`,
+      type: 'success',
+      icon: '📋'
     });
   }
 
@@ -3121,8 +3123,14 @@
 
         renderTestimonialsPreview();
         renderSatisfiedClientsModalList();
-        syncTestimonialsWithBackend(satisfiedClients).then(function () { showStatusNotification({ title: 'Feedback Eliminado', message: 'El feedback fue eliminado y guardado en Google Sheets.', type: 'info', icon: '🗑️' }); }).catch(function () { showStatusNotification({ title: 'Error al guardar', message: 'El cambio no pudo guardarse en Google Sheets.', type: 'error', icon: '⚠️' }); });
-}
+        syncTestimonialsWithBackend(satisfiedClients);
+        showStatusNotification({
+          title: 'Feedback Eliminado',
+          message: `El feedback de "${target.name}" ha sido eliminado y guardado.`,
+          type: 'info',
+          icon: '🗑️'
+        });
+      }
     });
   }
 
@@ -3232,8 +3240,12 @@
     closeTestimonialModal();
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
-    syncTestimonialsWithBackend(satisfiedClients).then(function () { showStatusNotification({ title: editingTestimonialId ? 'Feedback Actualizado' : 'Feedback Guardado', message: 'El feedback se guardó en Google Sheets.', type: 'success', icon: '⭐' }); }).catch(function () { showStatusNotification({ title: 'Error al guardar', message: 'El feedback no pudo guardarse en Google Sheets.', type: 'error', icon: '⚠️' }); });
-}
+    syncTestimonialsWithBackend(satisfiedClients).then(function () {
+      showStatusNotification({ title: editingTestimonialId ? 'Feedback Actualizado' : 'Feedback Guardado', message: 'El feedback se guardó en Google Sheets.', type: 'success', icon: '⭐' });
+    }).catch(function () {
+      showStatusNotification({ title: 'Error al guardar', message: 'El feedback no pudo guardarse en Google Sheets.', type: 'error', icon: '⚠️' });
+    });
+  }
 
   // 8.1 Sistema de Feedback con Códigos Especiales (Dejar Feedback)
   function openFeedbackModal(initialCode) {
@@ -3337,30 +3349,6 @@
 
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
-
-    syncTestimonialsWithBackend(satisfiedClients).then(function () {
-      if (statusMsg) {
-        statusMsg.className = 'p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs leading-relaxed';
-        statusMsg.innerHTML = '✓ <strong>¡Muchas gracias!</strong> Tu feedback ha sido verificado con éxito y guardado en Google Sheets.';
-        statusMsg.classList.remove('hidden');
-      }
-      if (submitBtn) submitBtn.disabled = true;
-      setTimeout(function () {
-        if (submitBtn) submitBtn.disabled = false;
-        closeFeedbackModal();
-      }, 2500);
-    }).catch(function () {
-      satisfiedClients = satisfiedClients.filter(function (item) { return item.id !== newFeedback.id; });
-      if (statusMsg) {
-        statusMsg.className = 'p-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-300 text-xs leading-relaxed';
-        statusMsg.innerHTML = '❌ <strong>No se pudo guardar el feedback:</strong> Google Sheets no respondió correctamente.';
-        statusMsg.classList.remove('hidden');
-      }
-      if (submitBtn) submitBtn.disabled = false;
-      renderTestimonialsPreview();
-      renderSatisfiedClientsModalList();
-    });
-    return;
 
     if (statusMsg) {
       statusMsg.className = 'p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs leading-relaxed';
@@ -5308,10 +5296,6 @@
       satisfiedClients = feedbacksFromSheet;
       renderTestimonialsPreview();
       renderSatisfiedClientsModalList();
-
-        renderTestimonialsPreview();
-        renderSatisfiedClientsModalList();
-      }
 
       if (assetsFromSheet.length > 0) {
         assets = assetsFromSheet;
