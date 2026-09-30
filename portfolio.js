@@ -6543,7 +6543,7 @@
       url: String(item && item.url || ''),
       countLabel: String(item && item.countLabel || (networkType === 'youtube' ? 'Suscriptores' : 'Usuarios')),
       countValue: Number(item && item.countValue) || youtubeStats.subscribers,
-      countMode: networkType === 'youtube' ? 'youtube' : (networkType === 'discord' ? 'discord' : (item && item.countMode === 'livecounts' ? 'livecounts' : (item && item.countMode === 'url' ? 'url' : 'manual'))),
+      countMode: networkType === 'youtube' ? 'youtube' : (networkType === 'discord' ? 'discord' : (networkType === 'instagram' ? 'instagram' : (item && item.countMode === 'livecounts' ? 'livecounts' : (item && item.countMode === 'url' ? 'url' : 'manual')))),
       countUrl: String(item && item.countUrl || ''),
       youtubeChannelId: youtubeChannelId,
       youtubeStats: youtubeStats,
@@ -6820,10 +6820,9 @@
     };
 
     const urls = [
-      GLOBAL_COUNTER_URL + '?action=instagramstats&username=' + encodeURIComponent(username),
+      'https://r.jina.ai/https://www.instagram.com/' + encodeURIComponent(username) + '/',
       'https://i.instagram.com/api/v1/users/web_profile_info/?username=' + encodeURIComponent(username),
-      'https://www.instagram.com/' + encodeURIComponent(username) + '/?__a=1&__d=dis',
-      'https://r.jina.ai/https://www.instagram.com/' + encodeURIComponent(username) + '/'
+      GLOBAL_COUNTER_URL + '?action=instagramstats&username=' + encodeURIComponent(username)
     ];
 
     let lastError = null;
@@ -6841,8 +6840,8 @@
 
         let stats = payload ? parseInstagramPayload(payload) : null;
         if (!stats) {
-          const followerMatches = text.match(/(?:followers|seguidores)[^\d]{0,80}([\d.,]+\s*[KMB]?)/i);
-          const postMatches = text.match(/(?:posts|publicaciones)[^\d]{0,80}([\d.,]+\s*[KMB]?)/i);
+          const followerMatches = text.match(/(?:followers|seguidores)[^\d]{0,120}([\d.,]+\s*[KMB]?)/i) || text.match(/([\d.,]+\s*[KMB]?)\s*(?:followers|seguidores)/i);
+          const postMatches = text.match(/(?:posts|publicaciones)[^\d]{0,120}([\d.,]+\s*[KMB]?)/i) || text.match(/([\d.,]+\s*[KMB]?)\s*(?:posts|publicaciones)/i);
           const parseCount = function(raw) {
             if (!raw) return 0;
             const clean = raw.replace(/\s/g, '').replace(/,/g, '');
