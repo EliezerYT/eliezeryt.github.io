@@ -4626,14 +4626,33 @@
     });
   }
 
-  // Sincronización completa con el backend y almacenamiento en disco
-  let cardsInfoSyncQueue = Promise.resolve();
+  // Todas las escrituras y cargas usan una única cola para evitar condiciones de carrera.
+  // Nunca se permite que un guardado de Sheets, sincronización de GitHub o carga
+  // reemplace datos mientras otra operación todavía está trabajando.
+  let backendSyncQueue = Promise.resolve();
+  let backendSyncBusy = false;
+
+  function queueBackendSync(operation) {
+    const run = backendSyncQueue.catch(function () {}).then(async function () {
+      backendSyncBusy = true;
+      try {
+        return await operation();
+      } finally {
+        backendSyncBusy = false;
+      }
+    });
+    backendSyncQueue = run.catch(function () {});
+    return run;
+  }
+
   function syncCardsInfoImmediately() {
-    cardsInfoSyncQueue = cardsInfoSyncQueue.catch(function () {}).then(function () {
+    return queueBackendSync(function () {
+      // Los registros se generan cuando la operación realmente comienza,
+      // nunca antes. Así no se guarda un snapshot viejo que estaba esperando en cola.
       return syncDataToGoogleSheet(CARDS_INFO_SHEET_NAME, getCardsInfoSheetRecords());
     });
-    return cardsInfoSyncQueue;
   }
+
   function saveFeedbackCodesImmediately() {
     return syncCardsInfoImmediately();
   }
@@ -4682,12 +4701,14 @@
   }
 
   async function syncTestimonialsWithBackend(list) {
-    const feedbackRecords = (Array.isArray(list) ? list : [])
-      .filter(function (item) { return item && item.id; })
-      .map(function (item) {
-        return { id: String(item.id), type: 'feedback', data: item };
-      });
-    return syncDataToGoogleSheet(FEEDBACKS_SHEET_NAME, feedbackRecords);
+    return queueBackendSync(function () {
+      const feedbackRecords = (Array.isArray(list) ? list : [])
+        .filter(function (item) { return item && item.id; })
+        .map(function (item) {
+          return { id: String(item.id), type: 'feedback', data: item };
+        });
+      return syncDataToGoogleSheet(FEEDBACKS_SHEET_NAME, feedbackRecords);
+    });
   }
 
   const CARDS_INFO_SHEET_NAME = 'CardsInfo';
@@ -4751,23 +4772,26 @@
   }
 
   async function syncLocalDataToGoogleSheets() {
-    const cardsRecords = getCardsInfoSheetRecords();
-    const feedbackRecords = satisfiedClients
-      .filter(function (item) { return item && item.id; })
-      .map(function (item) {
-        return { id: String(item.id), type: 'feedback', data: item };
-      });
+    return queueBackendSync(async function () {
+      // Snapshot tomado justo al comenzar la operación.
+      const cardsRecords = getCardsInfoSheetRecords();
+      const feedbackRecords = satisfiedClients
+        .filter(function (item) { return item && item.id; })
+        .map(function (item) {
+          return { id: String(item.id), type: 'feedback', data: item };
+        });
 
-    const results = await Promise.all([
-      syncDataToGoogleSheet(CARDS_INFO_SHEET_NAME, cardsRecords),
-      syncDataToGoogleSheet(FEEDBACKS_SHEET_NAME, feedbackRecords)
-    ]);
+      const results = await Promise.all([
+        syncDataToGoogleSheet(CARDS_INFO_SHEET_NAME, cardsRecords),
+        syncDataToGoogleSheet(FEEDBACKS_SHEET_NAME, feedbackRecords)
+      ]);
 
-    return {
-      cards: cardsRecords.length,
-      feedbacks: feedbackRecords.length,
-      results: results
-    };
+      return {
+        cards: cardsRecords.length,
+        feedbacks: feedbackRecords.length,
+        results: results
+      };
+    });
   }
 
   function saveAllDataToBackend() {
@@ -4994,7 +5018,31 @@
     });
   }
 
+  async function syncLocalDataToGoogleSheetsDirect() {
+    const cardsRecords = getCardsInfoSheetRecords();
+    const feedbackRecords = satisfiedClients
+      .filter(function (item) { return item && item.id; })
+      .map(function (item) {
+        return { id: String(item.id), type: 'feedback', data: item };
+      });
+    const results = await Promise.all([
+      syncDataToGoogleSheet(CARDS_INFO_SHEET_NAME, cardsRecords),
+      syncDataToGoogleSheet(FEEDBACKS_SHEET_NAME, feedbackRecords)
+    ]);
+    return {
+      cards: cardsRecords.length,
+      feedbacks: feedbackRecords.length,
+      results: results
+    };
+  }
+
   async function syncAllToGithub() {
+    return queueBackendSync(function () {
+      return syncAllToGithubCore();
+    });
+  }
+
+  async function syncAllToGithubCore() {
     let syncNotification = showStatusNotification({
       title: 'Sincronizando',
       message: 'Guardando datos en Google Sheets...',
@@ -5007,7 +5055,7 @@
     let sheetError = null;
 
     try {
-      sheetSync = await syncLocalDataToGoogleSheets();
+      sheetSync = await syncLocalDataToGoogleSheetsDirect();
       if (syncNotification && typeof syncNotification.update === 'function') {
         syncNotification.update({
           title: 'Sincronizando',
@@ -5208,6 +5256,10 @@
 
   async function loadAllDataFromBackend() {
     if (typeof fetch !== 'function') return;
+    // Si hay un guardado pendiente o en progreso, primero se termina.
+    // Así "Cargar cambios" nunca puede traer una versión anterior y borrar
+    // lo que acaba de guardarse.
+    await backendSyncQueue.catch(function () {});
 
     const loadFromGoogleSheets = async () => {
       const previousSocialNetworks = Array.isArray(socialNetworksState) ? socialNetworksState.slice() : [];
