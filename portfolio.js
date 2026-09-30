@@ -9,7 +9,6 @@
 
   const STORAGE_KEY = 'portfolio_projects_elydev_v8';
   const EXPERIENCES_STORAGE_KEY = 'portfolio_experiences_v2';
-  const FEEDBACK_CODES_STORAGE_KEY = 'portfolio_feedback_codes_v2';
   const ASSETS_STORAGE_KEY = 'portfolio_community_assets_v1';
   const ASSET_LIKES_KEY = 'portfolio_community_asset_likes_v1';
   const ASSET_COMMENTS_KEY = 'portfolio_community_asset_comments_v1';
@@ -886,21 +885,9 @@
   let skillCards = JSON.parse(JSON.stringify(initialSkillCards));
   let editingSkillCardId = null;
 
-  // Códigos de Feedback
+  // Códigos de Feedback: la única fuente es Google Sheets.
   let feedbackCodes = [];
   let assets = [];
-  try {
-    const codesSaved = localStorage.getItem(FEEDBACK_CODES_STORAGE_KEY);
-    if (codesSaved) {
-      const parsedCodes = JSON.parse(codesSaved);
-      if (Array.isArray(parsedCodes) && parsedCodes.length > 0) {
-        feedbackCodes = parsedCodes;
-      }
-    }
-  } catch (e) {}
-  if (!feedbackCodes || feedbackCodes.length === 0) {
-    feedbackCodes = JSON.parse(JSON.stringify(initialFeedbackCodes));
-  }
 
   try {
     const assetsSaved = localStorage.getItem(ASSETS_STORAGE_KEY);
@@ -3286,11 +3273,6 @@
       return null;
     }
 
-    const cached = feedbackCodes.find(function (item) {
-      return item && String(item.code || '').toUpperCase() === normalized;
-    });
-    if (cached) applyFeedbackCodeData(cached);
-
     try {
       const url = GLOBAL_COUNTER_URL + '?action=loadSheetData&cacheBust=' + Date.now();
       const response = await fetch(url, { cache: 'no-store' });
@@ -3310,14 +3292,13 @@
       });
       if (existingIndex >= 0) feedbackCodes[existingIndex] = normalizedRemote;
       else feedbackCodes.push(normalizedRemote);
-      try { localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes)); } catch (e) {}
 
       applyFeedbackCodeData(normalizedRemote);
       setFeedbackLoading(false);
       return normalizedRemote;
     } catch (error) {
       setFeedbackLoading(false, 'No se pudo consultar la información del código.');
-      return cached || null;
+      return null;
     }
   }
 
@@ -3535,10 +3516,6 @@
       createdAt: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
     });
 
-    try {
-      localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes));
-    } catch (err) {}
-
     codeInput.value = '';
     labelInput.value = '';
     if (nameInput) nameInput.value = '';
@@ -3594,9 +3571,9 @@
       danger: true,
       onConfirm: function () {
         feedbackCodes = feedbackCodes.filter(c => c.code.toUpperCase() !== codeStr.toUpperCase());
-        try {
-          localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes));
-        } catch (err) {}
+        saveFeedbackCodesImmediately().catch(function () {
+          showStatusNotification({ title: 'Error al eliminar el código', message: 'Google Sheets no confirmó la eliminación.', type: 'error', icon: '⚠️' });
+        });
         renderFeedbackCodesList();
         showStatusNotification({
           title: 'Código Eliminado',
@@ -4668,9 +4645,6 @@
     return cardsInfoSyncQueue;
   }
   function saveFeedbackCodesImmediately() {
-    try {
-      localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes));
-    } catch (err) {}
     return syncCardsInfoImmediately();
   }
   function syncProjectsWithBackend(list) { return syncCardsInfoImmediately(); }
@@ -5382,10 +5356,7 @@
       if (selectedOrigin === 'assets') renderAssetsGrid();
       checkAssetHashParam();
 
-      if (codesFromSheet.length > 0) {
-        feedbackCodes = codesFromSheet;
-        try { localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes)); } catch (e) {}
-      }
+      feedbackCodes = Array.isArray(codesFromSheet) ? codesFromSheet : [];
 
       return {
         projects: projectsFromSheet.length,
