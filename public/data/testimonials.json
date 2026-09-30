@@ -1,20 +1,5 @@
 [
   {
-    "id": "client-shl",
-    "name": "SHL (Empresa / Cliente Comercial)",
-    "role": "Cliente Comercial",
-    "project": "Dominoes Republic (Optimización & Reglas)",
-    "year": "2022",
-    "rating": 5,
-    "avatar": "./assets/images/ely/icon-dominoesrepublic.png",
-    "feedback": "Excelente diagnóstico para solucionar errores críticos de geolocalización y sincronización de reglas en partidas competitivas. Muy resolutivo en situaciones de alta presión.",
-    "tags": [
-      "Bug Fixing",
-      "Geolocalización",
-      "Reglas de Juego"
-    ]
-  },
-  {
     "id": "client-jobslaru",
     "name": "Jobs Laru",
     "role": "Estudio de Videojuegos / Colaborador Frecuente",
