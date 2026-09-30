@@ -6742,6 +6742,25 @@
     refreshAllSocialNetworkCounts();
   }
 
+  function copySocialNetworksLink() {
+    const directUrl = window.location.origin + window.location.pathname + '?redes';
+    const copyFallback = function () {
+      window.prompt('Copia este enlace:', directUrl);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(directUrl).then(function () {
+        showStatusNotification({
+          title: 'Enlace de Redes Copiado',
+          message: 'El enlace directo a este panel fue copiado al portapapeles.',
+          type: 'success',
+          icon: '🔗'
+        });
+      }).catch(copyFallback);
+    } else {
+      copyFallback();
+    }
+  }
+
   function closeSocialNetworksModal() {
     const modal = document.getElementById('social-networks-modal');
     if (modal) modal.classList.add('hidden');
@@ -7987,6 +8006,7 @@
     closeSocialNetworkEditor: closeSocialNetworkEditor,
     refreshSocialNetworkCount: refreshSocialNetworkCount,
     refreshAllSocialNetworkCounts: refreshAllSocialNetworkCounts,
+    copySocialNetworksLink: copySocialNetworksLink,
     // Confirmación In-App
     showConfirmModal: showConfirmModal,
     closeConfirmModal: closeConfirmModal,
