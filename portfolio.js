@@ -1570,7 +1570,7 @@
   function updateGlobalAssetCounterUI(animate) {
     document.querySelectorAll('[data-global-likes-id]').forEach(function(el) {
       const id = el.getAttribute('data-global-likes-id');
-      el.textContent = String(getAssetLikes(id));
+      el.textContent = '♥ ' + getAssetLikes(id);
       if (animate) animateAssetCounterElement(el, 'likes');
     });
     document.querySelectorAll('[data-global-downloads-id]').forEach(function(el) {
@@ -1814,7 +1814,8 @@
       const popularBadge = (Number(asset.downloads) || 0) >= 10 ? '<span class="asset-compact-badge asset-popular-badge">🔥 Popular</span>' : '';
       const favorite = isAssetFavorite(asset.id);
       const favoriteButton = '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.toggleAssetFavorite(\'' + safeId + '\')" class="absolute left-3 top-3 z-[121] h-7 w-7 rounded-lg bg-black/55 border border-white/10 text-sm hover:border-amber-400/50" title="' + (favorite ? 'Quitar de favoritos' : 'Agregar a favoritos') + '">' + (favorite ? '★' : '☆') + '</button>';
-      const image = asset.image ? '<div class="asset-card-media relative aspect-video w-full overflow-hidden bg-[#181d28] cursor-pointer"><img src="' + asset.image + '" alt="' + asset.name + '" class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105" onerror="this.style.display=\'none\'"><div class="absolute inset-0 bg-gradient-to-t from-[#12151d] via-transparent to-black/40"></div><div class="asset-quick-preview"><span class="asset-quick-preview-icon">◉</span><span>Preview rápida</span></div></div>' : '';
+      const quickPreviewText = escapeHtml ? escapeHtml(asset.previewText || 'Preview rápida') : (asset.previewText || 'Preview rápida');
+      const image = asset.image ? '<div class="asset-card-media relative aspect-video w-full overflow-hidden bg-[#181d28] cursor-pointer"><img src="' + asset.image + '" alt="' + asset.name + '" class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105" onerror="this.style.display=\'none\'"><div class="absolute inset-0 bg-gradient-to-t from-[#12151d] via-transparent to-black/40"></div><div class="asset-quick-preview"><span class="asset-quick-preview-icon">◉</span><span>' + quickPreviewText + '</span></div></div>' : '';
       const moderatorBar = (isModerator && !visitorPreviewMode) ? '<div class="flex items-center justify-between gap-2 p-2 bg-amber-400/10 border-b border-amber-400/20 text-[10px] relative z-[130]"><div class="flex items-center gap-1"><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.moveAssetOrder(\'' + safeId + '\',-1)" class="px-1.5 py-1 rounded bg-white/5 hover:bg-white/10">▲</button><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.moveAssetOrder(\'' + safeId + '\',1)" class="px-1.5 py-1 rounded bg-white/5 hover:bg-white/10">▼</button></div><div class="flex items-center gap-1"><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.duplicateAsset(\'' + safeId + '\')" class="px-2 py-1 rounded bg-white/5 hover:bg-white/10">📋</button><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.editAsset(\'' + safeId + '\')" class="px-2 py-1 rounded bg-amber-400 text-black font-bold">✏️</button><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.deleteAsset(\'' + safeId + '\')" class="px-2 py-1 rounded bg-red-600 text-white">🗑️</button></div></div>' : '';
       return '<article data-asset-id="' + safeId + '" onclick="window.ElyPortfolio.openAssetModal(\'' + safeId + '\')" class="card-fade-in group relative flex flex-col overflow-hidden rounded-2xl bg-[#12151d] border border-[#232733] hover:border-amber-400/60 transform hover:scale-105 transition-all duration-300 ease-out shadow-lg hover:shadow-2xl hover:shadow-amber-500/20 z-0 hover:z-10 cursor-pointer' + effectClasses + '"' + effectStyle + '>' +
         moderatorBar + pinnedBadge + favoriteButton +
@@ -1827,7 +1828,7 @@
           '<div class="flex items-center justify-center gap-3 pt-2 border-t border-[#1e2330]">' +
             '<span class="text-[10px] text-slate-500 font-mono" data-global-downloads-id="' + safeId + '">↓ ' + (Number(globalAssetCounters[asset.id]?.downloads) || Number(asset.downloads) || 0) + '</span>' +
             '<span class="text-[10px] text-rose-300" data-global-likes-id="' + safeId + '">♥ ' + getAssetLikes(asset.id) + '</span>' +
-            '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.openAssetModal(\'' + safeId + '\')" class="px-3 py-1.5 rounded-lg bg-cyan-400 text-black text-[11px] font-bold hover:bg-cyan-300">Ver recurso →</button>' +
+            '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.openAssetModal(\'' + safeId + '\')" class="asset-view-resource-btn" title="Ver recurso">👁️</button>' +
           '</div>' +
         '</div></article>';
     }).join('');
@@ -2124,6 +2125,8 @@
     document.getElementById('asset-form-type').value = asset.type === 'asset' ? 'asset' : 'script';
     document.getElementById('asset-form-utility').value = asset.utility || '';
     document.getElementById('asset-form-description').value = asset.description || '';
+    const previewText = document.getElementById('asset-form-preview-text');
+    if (previewText) previewText.value = asset.previewText || 'Preview rápida';
     document.getElementById('asset-form-tags').value = (asset.tags || []).join(', ');
     document.getElementById('asset-form-version').value = asset.version || '1.0.0';
     document.getElementById('asset-form-download').value = asset.downloadUrl || '';
@@ -2191,6 +2194,7 @@
     const type = document.getElementById('asset-form-type').value;
     const utility = document.getElementById('asset-form-utility').value.trim();
     const description = document.getElementById('asset-form-description').value.trim();
+    const previewText = document.getElementById('asset-form-preview-text')?.value.trim() || 'Preview rápida';
     const tags = document.getElementById('asset-form-tags').value.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
     const version = document.getElementById('asset-form-version').value.trim() || '1.0.0';
     const downloadUrl = document.getElementById('asset-form-download').value.trim();
@@ -2212,6 +2216,7 @@
       target.type = type === 'asset' ? 'asset' : 'script';
       target.utility = utility;
       target.description = description;
+      target.previewText = previewText;
       target.tags = tags;
       target.downloadUrl = downloadUrl;
       target.image = image;
@@ -2234,6 +2239,7 @@
         type: type === 'asset' ? 'asset' : 'script',
         utility: utility,
         description: description,
+        previewText: previewText,
         tags: tags,
         downloadUrl: downloadUrl,
         image: image,
