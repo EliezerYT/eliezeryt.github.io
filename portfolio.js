@@ -6326,6 +6326,11 @@
   }
 
   function setupImageDropzones() {
+    if (document.body.dataset.libraryDropzonesInitialized === '1') {
+      setLibraryFolderUI();
+      return;
+    }
+    document.body.dataset.libraryDropzonesInitialized = '1';
     const folderStyle = document.getElementById('library-folder-style');
     if (folderStyle && folderStyle.dataset.libraryFolderBound !== '1') {
       folderStyle.dataset.libraryFolderBound = '1';
