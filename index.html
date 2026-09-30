@@ -207,6 +207,15 @@
             <span>✉</span>
           </button>
 
+          <button
+            type="button"
+            onclick="window.ElyPortfolio.openSocialNetworksModal()"
+            class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-cyan-400 text-black text-xs font-bold hover:bg-cyan-300 transition-colors shadow-sm shadow-cyan-400/20"
+          >
+            <span>Redes</span>
+            <span>🌐</span>
+          </button>
+
           <!-- Botón de Moderador -->
           <button
             id="visitor-preview-btn"
@@ -1585,6 +1594,48 @@
             <p>Unity 2D & 3D, C#, Photon PUN 2, Google AdMob, In-App Purchases, PHP, MySQL, FMOD Audio, Git.</p>
           </div>
         </div>
+      </div>
+    </div>
+
+
+    <!-- MODAL DE REDES SOCIALES -->
+    <div id="social-networks-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
+      <div class="relative w-full max-w-4xl rounded-2xl bg-[#12151d] border border-[#232733] shadow-2xl p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-[#1e2330] pb-3 gap-3">
+          <div>
+            <h3 class="text-lg font-bold text-cyan-300 font-display">Redes Sociales</h3>
+            <p class="text-[11px] text-slate-500">Configura cada red, su enlace y sus estadísticas.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="window.ElyPortfolio.editSocialNetwork('')" class="moderator-only hidden px-3 py-1.5 rounded-lg bg-cyan-400 text-black text-[11px] font-bold hover:bg-cyan-300">＋ Agregar red</button>
+            <button type="button" onclick="window.ElyPortfolio.closeSocialNetworksModal()" class="text-slate-400 hover:text-white text-base">✕</button>
+          </div>
+        </div>
+
+        <div id="social-networks-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+        <form id="social-network-form" class="hidden space-y-3 rounded-2xl bg-[#0b0d11] border border-cyan-400/20 p-4 text-xs">
+          <div class="flex items-center justify-between border-b border-[#232733] pb-2">
+            <h4 id="social-form-title" class="font-bold text-cyan-300">Agregar red</h4>
+            <button type="button" onclick="document.getElementById('social-network-form').classList.add('hidden')" class="text-slate-500 hover:text-white">✕</button>
+          </div>
+          <input type="hidden" id="social-form-id" />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div><label class="block text-slate-300 mb-1">Nombre:</label><input id="social-form-name" required type="text" placeholder="YouTube" class="w-full rounded-xl bg-[#141822] border border-[#262c3b] px-3 py-2 text-white" /></div>
+            <div><label class="block text-slate-300 mb-1">Emoji / icono:</label><input id="social-form-icon" type="text" placeholder="▶️" class="w-full rounded-xl bg-[#141822] border border-[#262c3b] px-3 py-2 text-white" /></div>
+          </div>
+          <div><label class="block text-slate-300 mb-1">Link de la red:</label><input id="social-form-url" required type="url" placeholder="https://..." class="w-full rounded-xl bg-[#141822] border border-[#262c3b] px-3 py-2 text-white" /></div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div><label class="block text-slate-300 mb-1">Contador manual:</label><input id="social-form-count" type="number" min="0" value="0" class="w-full rounded-xl bg-[#141822] border border-[#262c3b] px-3 py-2 text-white" /></div>
+            <div><label class="block text-slate-300 mb-1">Texto del contador:</label><input id="social-form-label" type="text" value="usuarios" placeholder="suscriptores" class="w-full rounded-xl bg-[#141822] border border-[#262c3b] px-3 py-2 text-white" /></div>
+            <div><label class="block text-slate-300 mb-1">Proveedor:</label><select id="social-form-provider" class="w-full rounded-xl bg-[#141822] border border-[#262c3b] px-3 py-2 text-white"><option value="manual">Manual</option><option value="youtube">YouTube</option><option value="discord">Discord</option><option value="whatsapp">WhatsApp</option></select></div>
+          </div>
+          <label class="flex items-center gap-2 text-slate-300 cursor-pointer"><input id="social-form-auto" type="checkbox" class="accent-cyan-400" /> Leer contador automáticamente</label>
+          <div><label class="block text-slate-300 mb-1">ID del canal / servidor:</label><input id="social-form-channel" type="text" placeholder="YouTube Channel ID o Discord Server ID" class="w-full rounded-xl bg-[#141822] border border-[#262c3b] px-3 py-2 text-white" /></div>
+          <div><label class="block text-slate-300 mb-1">API Key (solo si el proveedor la necesita):</label><input id="social-form-api-key" type="password" placeholder="API key de YouTube u otro servicio" class="w-full rounded-xl bg-[#141822] border border-[#262c3b] px-3 py-2 text-white" /><p class="text-[10px] text-amber-400/80 mt-1">En una web estática esta clave queda expuesta al navegador. Para producción es preferible usar un proxy/backend.</p></div>
+          <div class="border-t border-[#232733] pt-3"><div class="text-[11px] font-bold text-white mb-2">Fuente JSON personalizada (opcional)</div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><input id="social-form-stats-url" type="url" placeholder="https://tu-api.com/stats" class="w-full rounded-xl bg-[#141822] border border-[#262c3b] px-3 py-2 text-white" /><input id="social-form-stats-path" type="text" value="count" placeholder="count o data.members" class="w-full rounded-xl bg-[#141822] border border-[#262c3b] px-3 py-2 text-white" /></div><p class="text-[10px] text-slate-500 mt-1">La respuesta debe ser JSON. Ejemplo: {"count":1234}.</p></div>
+          <div class="flex justify-between pt-2"><button type="button" onclick="window.ElyPortfolio.deleteSocialNetwork()" class="bg-red-500/10 border border-red-500/20 text-red-300 px-3 py-2 rounded-lg text-[11px] moderator-only hidden">Eliminar</button><div class="ml-auto flex gap-2"><button type="button" onclick="document.getElementById('social-network-form').classList.add('hidden')" class="px-4 py-2 rounded-lg bg-white/10 text-white">Cancelar</button><button type="submit" class="px-4 py-2 rounded-lg bg-cyan-400 text-black font-bold">Guardar</button></div></div>
+        </form>
       </div>
     </div>
 
