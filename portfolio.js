@@ -5358,6 +5358,7 @@
     if (typeof fetch !== 'function') return;
 
     const loadFromGoogleSheets = async () => {
+      socialNetworksState = [];
       const url = GLOBAL_COUNTER_URL + '?action=loadSheetData&cacheBust=' + Date.now();
       const response = await fetch(url, { cache: 'no-store' });
       if (!response.ok) throw new Error('Google Sheets HTTP ' + response.status);
@@ -6664,10 +6665,8 @@
   async function openSocialNetworksModal() {
     const modal = document.getElementById('social-networks-modal');
     if (!modal) return;
-    modal.classList.remove('hidden');
-    renderSocialNetworks();
-    renderSocialNetworksManager();
     await loadAllDataFromBackend();
+    modal.classList.remove('hidden');
     renderSocialNetworks();
     renderSocialNetworksManager();
     refreshAllSocialNetworkCounts();
