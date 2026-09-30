@@ -42,7 +42,12 @@
     youtube: 'https://www.youtube.com/channel/UCuiY3lZrlrbXsX-RR9v3Kbg',
     instagram: 'https://www.instagram.com/_elydev',
     github: 'https://github.com/eliezeryt',
-    linkedin: 'https://www.linkedin.com'
+    linkedin: 'https://www.linkedin.com',
+    socialNetworks: [
+      { id: 'youtube', name: 'YouTube', icon: '▶️', color: 'red', url: 'https://www.youtube.com/channel/UCuiY3lZrlrbXsX-RR9v3Kbg', countLabel: 'Suscriptores', countValue: 0, countMode: 'manual', countUrl: '', enabled: true },
+      { id: 'discord', name: 'Discord', icon: '💬', color: 'indigo', url: 'https://discord.gg/sqGUT7UjMr', countLabel: 'Usuarios', countValue: 0, countMode: 'manual', countUrl: '', enabled: true },
+      { id: 'whatsapp', name: 'WhatsApp', icon: '🟢', color: 'green', url: '', countLabel: 'Usuarios', countValue: 0, countMode: 'manual', countUrl: '', enabled: true }
+    ],
   };
 
   const initialProjects = [
@@ -6434,6 +6439,189 @@
     bindSingleDropzone('test-form-avatar-dropzone', 'test-form-avatar-file', 'test-form-avatar', 'test-form-avatar-preview');
   }
 
+
+  // Redes sociales configurables
+  const SOCIAL_NETWORKS_STORAGE_KEY = 'portfolio_social_networks_v1';
+
+  function getSocialNetworks() {
+    if (!Array.isArray(initialProfile.socialNetworks)) initialProfile.socialNetworks = [];
+    return initialProfile.socialNetworks;
+  }
+
+  function normalizeSocialNetwork(item, index) {
+    return {
+      id: String(item.id || ('social-' + Date.now() + '-' + index)),
+      name: String(item.name || 'Red social'),
+      icon: String(item.icon || '🌐'),
+      color: String(item.color || 'cyan'),
+      url: String(item.url || ''),
+      countLabel: String(item.countLabel || 'Usuarios'),
+      countValue: Number(item.countValue) || 0,
+      countMode: item.countMode === 'url' ? 'url' : 'manual',
+      countUrl: String(item.countUrl || ''),
+      enabled: item.enabled !== false
+    };
+  }
+
+  function escapeSocialText(value) {
+    return String(value || '').replace(/[&<>"']/g, function(ch) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+    });
+  }
+
+  function escapeSocialAttr(value) {
+    return escapeSocialText(value).replace(/javascript:/gi, '');
+  }
+
+  function renderSocialNetworks() {
+    const grid = document.getElementById('social-networks-grid');
+    if (!grid) return;
+    const list = getSocialNetworks().map(normalizeSocialNetwork).filter(function(item) { return item.enabled; });
+    if (!list.length) {
+      grid.innerHTML = '<div class="col-span-full text-center py-10 text-sm text-slate-500">No hay redes configuradas.</div>';
+      return;
+    }
+    grid.innerHTML = list.map(function(item) {
+      const count = Number(item.countValue) || 0;
+      const formatted = count.toLocaleString('es-DO');
+      return '<article class="rounded-2xl bg-[#0e1118] border border-[#232733] p-4 hover:border-cyan-400/40 transition-all">' +
+        '<div class="flex items-start justify-between gap-3">' +
+          '<div class="flex items-center gap-3 min-w-0">' +
+            '<div class="w-11 h-11 rounded-xl bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center text-xl">' + item.icon + '</div>' +
+            '<div class="min-w-0"><h4 class="font-bold text-white truncate">' + escapeSocialText(item.name) + '</h4><p class="text-[10px] text-slate-500">' + escapeSocialText(item.countLabel) + '</p></div>' +
+          '</div>' +
+          '<span class="text-cyan-300 font-mono text-sm font-bold">' + formatted + '</span>' +
+        '</div>' +
+        '<div class="mt-4 flex gap-2">' +
+          (item.url ? '<a href="' + escapeSocialAttr(item.url) + '" target="_blank" rel="noopener noreferrer" class="flex-1 text-center px-3 py-2 rounded-lg bg-cyan-400 text-black text-[11px] font-bold hover:bg-cyan-300">Visitar →</a>' : '<span class="flex-1 text-center px-3 py-2 rounded-lg bg-white/5 text-slate-500 text-[11px]">Sin enlace</span>') +
+          (isModerator && !visitorPreviewMode ? '<button type="button" onclick="window.ElyPortfolio.editSocialNetwork(' + JSON.stringify(item.id) + ')" class="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-[11px] font-bold hover:bg-white/10">Editar</button>' : '') +
+        '</div>' +
+      '</article>';
+    }).join('');
+  }
+
+  function openSocialNetworksModal() {
+    const modal = document.getElementById('social-networks-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    renderSocialNetworks();
+    renderSocialNetworksManager();
+  }
+
+  function closeSocialNetworksModal() {
+    const modal = document.getElementById('social-networks-modal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  function renderSocialNetworksManager() {
+    const manager = document.getElementById('social-networks-manager');
+    if (!manager) return;
+    if (!isModerator || visitorPreviewMode) {
+      manager.classList.add('hidden');
+      return;
+    }
+    manager.classList.remove('hidden');
+    const list = getSocialNetworks();
+    manager.innerHTML = '<div class="flex items-center justify-between mb-3"><div><h4 class="text-sm font-bold text-white">Administrar redes</h4><p class="text-[10px] text-slate-500">Agrega, edita y configura los contadores.</p></div><button type="button" onclick="window.ElyPortfolio.editSocialNetwork(\'\')" class="px-3 py-2 rounded-lg bg-cyan-400 text-black text-[11px] font-bold">+ Agregar red</button></div>' +
+      '<div class="space-y-2">' + (list.length ? list.map(function(item) {
+        const n = normalizeSocialNetwork(item, 0);
+        return '<div class="flex items-center gap-3 p-3 rounded-xl bg-white/[.03] border border-white/5">' +
+          '<span class="text-lg">' + n.icon + '</span><span class="flex-1 text-xs text-white font-semibold">' + escapeSocialText(n.name) + '</span>' +
+          '<span class="text-[10px] text-slate-500">' + (n.countMode === 'url' ? 'Automático' : 'Manual') + '</span>' +
+          '<button type="button" onclick="window.ElyPortfolio.editSocialNetwork(' + JSON.stringify(n.id) + ')" class="px-2.5 py-1.5 rounded-lg bg-white/5 text-[10px] text-slate-300">Editar</button>' +
+          '<button type="button" onclick="window.ElyPortfolio.deleteSocialNetwork(' + JSON.stringify(n.id) + ')" class="px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-300 text-[10px]">Eliminar</button>' +
+        '</div>';
+      }).join('') : '<div class="text-xs text-slate-500 py-3">No hay redes configuradas.</div>') + '</div>';
+  }
+
+  function editSocialNetwork(id) {
+    if (!isModerator || visitorPreviewMode) return;
+    const item = id ? getSocialNetworks().find(function(x) { return String(x.id) === String(id); }) : null;
+    const form = document.getElementById('social-network-form');
+    if (!form) return;
+    document.getElementById('social-form-id').value = item ? item.id : '';
+    document.getElementById('social-form-name').value = item ? item.name : '';
+    document.getElementById('social-form-icon').value = item ? item.icon : '🌐';
+    document.getElementById('social-form-url').value = item ? item.url : '';
+    document.getElementById('social-form-label').value = item ? item.countLabel : 'Usuarios';
+    document.getElementById('social-form-count').value = item ? (Number(item.countValue) || 0) : 0;
+    document.getElementById('social-form-mode').value = item && item.countMode === 'url' ? 'url' : 'manual';
+    document.getElementById('social-form-count-url').value = item ? item.countUrl : '';
+    document.getElementById('social-form-enabled').checked = !item || item.enabled !== false;
+    document.getElementById('social-network-editor').classList.remove('hidden');
+  }
+
+  function closeSocialNetworkEditor() {
+    const editor = document.getElementById('social-network-editor');
+    if (editor) editor.classList.add('hidden');
+  }
+
+  async function refreshSocialNetworkCount(id, silent) {
+    const item = getSocialNetworks().find(function(x) { return String(x.id) === String(id); });
+    if (!item || item.countMode !== 'url' || !item.countUrl) return;
+    try {
+      const response = await fetch(item.countUrl, { cache: 'no-store' });
+      if (!response.ok) throw new Error('Endpoint no disponible');
+      const data = await response.json();
+      const value = Number(data.count ?? data.subscribers ?? data.members ?? data.users ?? data.total);
+      if (!Number.isFinite(value)) throw new Error('El endpoint no devolvió un contador válido');
+      item.countValue = Math.max(0, Math.floor(value));
+      try { localStorage.setItem(SOCIAL_NETWORKS_STORAGE_KEY, JSON.stringify(getSocialNetworks())); } catch (e) {}
+      renderSocialNetworks();
+      if (!silent) showStatusNotification({title:'Contador actualizado',message:item.name + ': ' + item.countValue.toLocaleString('es-DO'),type:'success',icon:'✓'});
+    } catch (error) {
+      if (!silent) showStatusNotification({title:'No se pudo actualizar',message:error.message || 'Error consultando el contador.',type:'error',icon:'⚠️'});
+    }
+  }
+
+  function refreshAllSocialNetworkCounts() {
+    getSocialNetworks().filter(function(item) { return item.countMode === 'url' && item.countUrl; }).forEach(function(item) {
+      refreshSocialNetworkCount(item.id, true);
+    });
+  }
+
+  async function handleSocialNetworkSubmit(event) {
+    event.preventDefault();
+    if (!isModerator || visitorPreviewMode) return;
+    const id = document.getElementById('social-form-id').value.trim();
+    const item = {
+      id: id || 'social-' + Date.now(),
+      name: document.getElementById('social-form-name').value.trim() || 'Red social',
+      icon: document.getElementById('social-form-icon').value.trim() || '🌐',
+      url: document.getElementById('social-form-url').value.trim(),
+      countLabel: document.getElementById('social-form-label').value.trim() || 'Usuarios',
+      countValue: Math.max(0, Number(document.getElementById('social-form-count').value) || 0),
+      countMode: document.getElementById('social-form-mode').value === 'url' ? 'url' : 'manual',
+      countUrl: document.getElementById('social-form-count-url').value.trim(),
+      enabled: document.getElementById('social-form-enabled').checked
+    };
+    const list = getSocialNetworks();
+    const index = list.findIndex(function(x) { return String(x.id) === String(item.id); });
+    if (index >= 0) list[index] = item; else list.push(item);
+    initialProfile.socialNetworks = list;
+    try { localStorage.setItem(SOCIAL_NETWORKS_STORAGE_KEY, JSON.stringify(list)); } catch (e) {}
+    closeSocialNetworkEditor();
+    renderSocialNetworks();
+    renderSocialNetworksManager();
+    try {
+      await syncLocalDataToGoogleSheets();
+      showStatusNotification({title:'Red guardada',message:item.name + ' fue guardada en Google Sheets.',type:'success',icon:'✓'});
+    } catch (error) {
+      showStatusNotification({title:'Red guardada localmente',message:'Google Sheets no está disponible ahora mismo.',type:'info',icon:'💾'});
+    }
+  }
+
+  function deleteSocialNetwork(id) {
+    if (!isModerator || visitorPreviewMode) return;
+    showConfirmModal('¿Eliminar esta red social?', function() {
+      initialProfile.socialNetworks = getSocialNetworks().filter(function(item) { return String(item.id) !== String(id); });
+      try { localStorage.setItem(SOCIAL_NETWORKS_STORAGE_KEY, JSON.stringify(initialProfile.socialNetworks)); } catch (e) {}
+      renderSocialNetworks();
+      renderSocialNetworksManager();
+      syncLocalDataToGoogleSheets().catch(function() {});
+    });
+  }
+
   // 17. Event Listeners y arranque
   window.addEventListener('pageshow', function () {
     setTimeout(function () {
@@ -6462,6 +6650,14 @@
     loadAllDataFromBackend();
     loadLibraryManifestFromGithub();
     loadImagesFromMainElyFolder();
+
+    const socialNetworkForm = document.getElementById('social-network-form');
+    if (socialNetworkForm) socialNetworkForm.addEventListener('submit', handleSocialNetworkSubmit);
+    try {
+      const storedSocialNetworks = JSON.parse(localStorage.getItem(SOCIAL_NETWORKS_STORAGE_KEY) || 'null');
+      if (Array.isArray(storedSocialNetworks) && storedSocialNetworks.length) initialProfile.socialNetworks = storedSocialNetworks;
+    } catch (e) {}
+    refreshAllSocialNetworkCounts();
 
     // Confirm Modal Action Button
     const confirmActionBtn = document.getElementById('confirm-modal-action-btn');
@@ -7015,6 +7211,14 @@
 
   // Exponer API global para interactividad
   window.ElyPortfolio = {
+    // Redes sociales
+    openSocialNetworksModal: openSocialNetworksModal,
+    closeSocialNetworksModal: closeSocialNetworksModal,
+    editSocialNetwork: editSocialNetwork,
+    deleteSocialNetwork: deleteSocialNetwork,
+    closeSocialNetworkEditor: closeSocialNetworkEditor,
+    refreshSocialNetworkCount: refreshSocialNetworkCount,
+    refreshAllSocialNetworkCounts: refreshAllSocialNetworkCounts,
     // Confirmación In-App
     showConfirmModal: showConfirmModal,
     closeConfirmModal: closeConfirmModal,
