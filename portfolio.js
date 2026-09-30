@@ -6943,17 +6943,27 @@
   function renderSkillCards() {
     const grid = document.getElementById('skill-cards-grid');
     if (!grid) return;
-    const colorMap = { amber: 'amber', cyan: 'cyan', emerald: 'emerald' };
     grid.innerHTML = skillCards.map(function(card) {
-      const color = colorMap[card.color] || 'amber';
+      const color = normalizeSkillCardColor(card.color);
       const canEdit = isModerator && !visitorPreviewMode;
       return '<div class="skill-card rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-3" data-skill-id="' + escapeSocialText(String(card.id)) + '">' +
-        '<div class="flex items-start justify-between gap-3"><h4 class="text-sm font-bold text-' + color + '-400">' + escapeSocialText(card.title) + '</h4>' +
+        '<div class="flex items-start justify-between gap-3"><h4 class="text-sm font-bold" style="color:' + color + '">' + escapeSocialText(card.title) + '</h4>' +
         (canEdit ? '<button type="button" onclick="window.ElyPortfolio.openSkillCardEditor(\'' + escapeSocialText(String(card.id)) + '\')" class="shrink-0 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] text-slate-300">Editar</button>' : '') + '</div>' +
         '<ul class="space-y-1.5 text-xs text-slate-300">' +
         (Array.isArray(card.lines) ? card.lines : []).map(function(line, index) { return '<li class="skill-line" style="--skill-delay:' + (index * 90) + 'ms">• ' + escapeSocialText(String(line || '')) + '</li>'; }).join('') +
         '</ul></div>';
     }).join('');
+  }
+
+  function normalizeSkillCardColor(color) {
+    const value = String(color || '').trim().toLowerCase();
+    const legacy = {
+      amber: '#fbbf24',
+      cyan: '#22d3ee',
+      emerald: '#34d399'
+    };
+    if (legacy[value]) return legacy[value];
+    return /^#[0-9a-f]{6}$/i.test(value) ? value : '#fbbf24';
   }
 
   function openSkillCardEditor(id) {
@@ -6965,9 +6975,22 @@
     if (!card || !modal || !fields) return;
     editingSkillCardId = card.id;
     if (title) title.textContent = 'Editar ' + card.title;
-    fields.innerHTML = (Array.isArray(card.lines) ? card.lines : []).slice(0, 6).map(function(line, index) {
-      return '<div><label class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">Línea ' + (index + 1) + '</label><input id="skill-editor-line-' + index + '" value="' + escapeSocialText(String(line || '')) + '" class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white focus:border-amber-400 focus:outline-none"></div>';
-    }).join('');
+    const color = normalizeSkillCardColor(card.color);
+    fields.innerHTML =
+      '<div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">' +
+        '<div><label class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">Título de la tarjeta</label><input id="skill-editor-title-input" type="text" maxlength="80" value="' + escapeSocialText(String(card.title || '')) + '" class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-sm text-white focus:border-amber-400 focus:outline-none"></div>' +
+        '<div><label class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">Color</label><div class="flex items-center gap-2"><input id="skill-editor-color" type="color" value="' + color + '" class="h-10 w-14 rounded-lg bg-[#0b0d11] border border-[#262c3b] cursor-pointer"><span id="skill-editor-color-value" class="text-[10px] text-slate-400 font-mono">' + color + '</span></div></div>' +
+      '</div>' +
+      '<div class="border-t border-[#1e2330] pt-3 space-y-3">' +
+        (Array.isArray(card.lines) ? card.lines : []).slice(0, 6).map(function(line, index) {
+          return '<div><label class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">Línea ' + (index + 1) + '</label><input id="skill-editor-line-' + index + '" value="' + escapeSocialText(String(line || '')) + '" class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white focus:border-amber-400 focus:outline-none"></div>';
+        }).join('') +
+      '</div>';
+    const colorInput = document.getElementById('skill-editor-color');
+    const colorValue = document.getElementById('skill-editor-color-value');
+    if (colorInput && colorValue) {
+      colorInput.addEventListener('input', function() { colorValue.textContent = colorInput.value.toUpperCase(); });
+    }
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
   }
@@ -6983,6 +7006,10 @@
     if (!isModerator || visitorPreviewMode || !editingSkillCardId) return;
     const card = skillCards.find(function(item) { return String(item.id) === String(editingSkillCardId); });
     if (!card) return;
+    const titleInput = document.getElementById('skill-editor-title-input');
+    const colorInput = document.getElementById('skill-editor-color');
+    card.title = titleInput ? titleInput.value.trim() || card.title : card.title;
+    card.color = colorInput ? normalizeSkillCardColor(colorInput.value) : normalizeSkillCardColor(card.color);
     card.lines = Array.from({ length: 6 }, function(_, index) {
       const input = document.getElementById('skill-editor-line-' + index);
       return input ? input.value.trim() : '';
@@ -6991,7 +7018,7 @@
     closeSkillCardEditor();
     try {
       await syncLocalDataToGoogleSheets();
-      showStatusNotification({ title: 'Especialidad guardada', message: 'Las líneas de ' + card.title + ' se guardaron automáticamente en CardsInfo.', type: 'success', icon: '✓' });
+      showStatusNotification({ title: 'Especialidad guardada', message: 'Título, color y contenido de ' + card.title + ' se guardaron automáticamente en CardsInfo.', type: 'success', icon: '✓' });
     } catch (error) {
       showStatusNotification({ title: 'Error al guardar', message: 'No se pudo guardar la especialidad en Google Sheets.', type: 'error', icon: '⚠️' });
     }
