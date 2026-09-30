@@ -1675,6 +1675,18 @@
     renderProjectsGrid(true);
   }
 
+  function refreshAssetsPageRuntime() {
+    if (!document.getElementById('projects-grid')) return;
+    selectedOrigin = 'assets';
+    renderAssetsGrid();
+    requestAnimationFrame(function () {
+      initElyDevMotionEnhancements();
+      initAssetCardInteractions();
+    });
+    refreshAllGlobalAssetCounters();
+    checkAssetHashParam();
+  }
+
   function sortAssetsList(list) {
     return list.sort(function (a, b) {
       if (assetDiscoveryMode === 'trending') return getAssetTrendScore(b) - getAssetTrendScore(a);
@@ -6371,6 +6383,26 @@
   }
 
   // 17. Event Listeners y arranque
+  window.addEventListener('pageshow', function () {
+    if (document.getElementById('projects-grid')) {
+      setTimeout(function () {
+        refreshAssetsPageRuntime();
+      }, 0);
+    }
+  });
+
+  window.addEventListener('hashchange', function () {
+    checkAssetHashParam();
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && document.getElementById('projects-grid')) {
+      setTimeout(function () {
+        refreshAssetsPageRuntime();
+      }, 0);
+    }
+  });
+
   document.addEventListener('DOMContentLoaded', function () {
     applyTheme(currentTheme);
     setupImageDropzones();
@@ -6925,6 +6957,7 @@
     copyAssetCode: copyAssetCode,
     toggleAssetViewMode: toggleAssetViewMode,
     filterAssetsByTag: filterAssetsByTag,
+    refreshAssetsPageRuntime: refreshAssetsPageRuntime,
     openAssetFormPreview: openAssetFormPreview,
     closeAssetFormPreview: closeAssetFormPreview,
     getSelectedAssetId: function () { return selectedAsset ? selectedAsset.id : ''; },
