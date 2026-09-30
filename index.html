@@ -2276,7 +2276,10 @@
       <div class="relative w-full max-w-3xl rounded-2xl bg-[#12151d] border border-cyan-400/25 shadow-2xl p-5 sm:p-6 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between gap-3 border-b border-[#1e2330] pb-4">
           <div><h3 class="text-lg font-bold text-cyan-300 font-display">🌐 Redes</h3><p class="text-xs text-slate-500">Mis comunidades y redes sociales.</p></div>
-          <button type="button" onclick="window.ElyPortfolio.closeSocialNetworksModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+          <div class="flex items-center gap-2 shrink-0">
+            <button type="button" onclick="window.ElyPortfolio.copySocialNetworksLink()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-400/10 hover:bg-cyan-400/20 border border-cyan-400/25 text-cyan-300 text-[11px] font-bold transition-colors" title="Copiar enlace directo al panel de redes">🔗 Compartir</button>
+            <button type="button" onclick="window.ElyPortfolio.closeSocialNetworksModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+          </div>
         </div>
         <div id="social-networks-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 py-5"></div>
         <div id="social-networks-manager" class="hidden border-t border-[#1e2330] pt-5"></div>
