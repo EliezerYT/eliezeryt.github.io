@@ -444,6 +444,64 @@ html.light .status-notification-toast .toast-desc {
   font-weight: 700 !important;
 }
 
+/* Asset counter update feedback */
+.ely-counter-update {
+  display: inline-block;
+  transform-origin: center;
+  animation: elyCounterZoomGlow 0.62s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, filter, text-shadow;
+}
+.ely-counter-like {
+  --counter-glow: rgba(251, 113, 133, 0.9);
+}
+.ely-counter-download {
+  --counter-glow: rgba(52, 211, 153, 0.9);
+}
+@keyframes elyCounterZoomGlow {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+    text-shadow: 0 0 0 transparent;
+  }
+  28% {
+    transform: scale(1.38);
+    filter: brightness(1.8);
+    text-shadow: 0 0 5px var(--counter-glow), 0 0 14px var(--counter-glow);
+  }
+  55% {
+    transform: scale(0.92);
+    filter: brightness(1.35);
+    text-shadow: 0 0 4px var(--counter-glow), 0 0 10px var(--counter-glow);
+  }
+  78% {
+    transform: scale(1.12);
+    filter: brightness(1.2);
+    text-shadow: 0 0 3px var(--counter-glow);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+    text-shadow: 0 0 0 transparent;
+  }
+}
+
+/* Restore asset action feedback even when the motion enhancement is reinitialized */
+#asset-modal-like-btn,
+[data-asset-like-btn],
+[data-asset-download-btn] {
+  transform-origin: center;
+  will-change: transform, filter;
+}
+[data-asset-like-btn].ely-pop-like,
+#asset-modal-like-btn.ely-pop-like {
+  animation: elyLikeButtonPop 0.48s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 0 8px rgba(251, 113, 133, 0.55));
+}
+[data-asset-download-btn].ely-pop-download,
+.btn-101.btn-101-active {
+  filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.45));
+}
+
 /* ElyDev discovery, quick preview, particles and responsive polish */
 html { scroll-behavior: smooth; }
 main > section { scroll-margin-top: 88px; }
