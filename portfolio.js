@@ -1682,6 +1682,7 @@
   function refreshAssetsPageRuntime() {
     if (!isAssetsPage() || !document.getElementById('projects-grid')) return;
     selectedOrigin = 'assets';
+    addElyDevBackgroundMotion();
     renderAssetsGrid();
     requestAnimationFrame(function () {
       initElyDevMotionEnhancements();
@@ -5343,7 +5344,7 @@
       if (projectsFromSheet.length > 0) {
         projects = projectsFromSheet;
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (e) {}
-        renderProjectsGrid();
+        if (!isAssetsPage()) renderProjectsGrid();
       }
 
       if (experiencesFromSheet.length > 0) {
@@ -5410,7 +5411,7 @@
       await loadJson('projects', (list) => {
         projects = list;
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (e) {}
-        renderProjectsGrid();
+        if (!isAssetsPage()) renderProjectsGrid();
       });
 
       await loadJson('experiences', (list) => {
@@ -6408,6 +6409,7 @@
   });
 
   document.addEventListener('DOMContentLoaded', function () {
+    if (isAssetsPage()) selectedOrigin = 'assets';
     applyTheme(currentTheme);
     setupImageDropzones();
     loadAllDataFromBackend();
