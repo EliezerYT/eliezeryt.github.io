@@ -4794,37 +4794,7 @@
     });
   }
 
-  function saveAllDataToBackend() {
-    if (typeof fetch === 'function') {
-      fetch('/api/sync-all', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          projects: projects,
-          experiences: experiences,
-          testimonials: satisfiedClients
-        })
-      })
-      .then(res => res.json())
-      .then(data => {
-        updateSyncModalCounters();
-        const lastSavedEl = document.getElementById('sync-last-saved');
-        if (lastSavedEl) lastSavedEl.textContent = new Date().toLocaleTimeString();
-        showStatusNotification({
-          title: 'Archivos Guardados',
-          message: 'Todos los datos (proyectos, experiencias, testimonios) han sido guardados en src/data, public/data y docs/data.',
-          type: 'success',
-          icon: '💾'
-        });
-      })
-      .catch(() => {
-        // Si el backend no está disponible, ofrecer descarga directa
-        downloadDataJson('all');
-      });
-    } else {
-      downloadDataJson('all');
-    }
-  }
+  // Los datos ya no se sincronizan con archivos JSON ni con GitHub.
 
   function getGithubToken() {
     let token = '';
@@ -5036,156 +5006,11 @@
     };
   }
 
-  async function syncAllToGithub() {
-    return queueBackendSync(function () {
-      return syncAllToGithubCore();
-    });
-  }
-
-  async function syncAllToGithubCore() {
-    const githubSyncStartFingerprint = getGithubSyncFingerprint();
-
-    let syncNotification = showStatusNotification({
-      title: 'Sincronizando',
-      message: 'Guardando datos en Google Sheets...',
-      type: 'info',
-      icon: '⏳',
-      duration: 60000
-    });
-
-    let sheetSync = null;
-    let sheetError = null;
-
-    try {
-      sheetSync = await syncLocalDataToGoogleSheetsDirect();
-      if (syncNotification && typeof syncNotification.update === 'function') {
-        syncNotification.update({
-          title: 'Sincronizando',
-          message: 'Google Sheets guardado: ' + sheetSync.cards + ' registros de CardsInfo y ' + sheetSync.feedbacks + ' de Feedbacks.'
-        });
-      }
-    } catch (error) {
-      sheetError = error;
-      console.error('[GOOGLE SHEETS SYNC ERROR]', error);
-      if (syncNotification && typeof syncNotification.update === 'function') {
-        syncNotification.update({
-          title: 'Advertencia',
-          message: 'No se pudo guardar Google Sheets: ' + (error.message || 'Error desconocido') + '. Continuando con GitHub...'
-        });
-      }
-    }
-
-    if (!hasGithubSyncChanges()) {
-      if (syncNotification && typeof syncNotification.dismiss === 'function') syncNotification.dismiss();
-      showStatusNotification({
-        title: sheetError ? 'Error de sincronización' : 'Datos guardados',
-        message: sheetError
-          ? 'Google Sheets no se pudo actualizar: ' + (sheetError.message || 'Error desconocido') + '.'
-          : 'CardsInfo y Feedbacks fueron actualizados en Google Sheets. GitHub ya estaba sincronizado.',
-        type: sheetError ? 'error' : 'success',
-        icon: sheetError ? '⚠️' : '✓'
-      });
-      return;
-    }
-
-    const token = getGithubToken();
-    if (!token) {
-      if (syncNotification && typeof syncNotification.dismiss === 'function') syncNotification.dismiss();
-      showStatusNotification({
-        title: sheetError ? 'Error de sincronización' : 'Google Sheets guardado',
-        message: sheetError
-          ? 'No se pudo guardar Google Sheets y no hay un token de GitHub configurado.'
-          : 'Google Sheets fue actualizado, pero no hay un token de GitHub configurado para completar el repositorio.',
-        type: sheetError ? 'error' : 'warning',
-        icon: sheetError ? '⚠️' : '✓'
-      });
-      return;
-    }
-
-    const syncButton = document.getElementById('github-native-sync-btn');
-    if (syncButton) {
-      syncButton.disabled = true;
-      syncButton.innerHTML = '<span>⏳ Sincronizando...</span>';
-    }
-
-    try {
-      const uploadedImages = new Map();
-
-      const syncedProjects = await prepareGithubData(projects, uploadedImages);
-      const syncedExperiences = await prepareGithubData(experiences, uploadedImages);
-      const syncedTestimonials = await prepareGithubData(satisfiedClients, uploadedImages);
-      const syncedAssets = await prepareGithubData(assets, uploadedImages);
-
-      const files = [
-        ['src/data/projects.json', syncedProjects],
-        ['public/data/projects.json', syncedProjects],
-        ['docs/data/projects.json', syncedProjects],
-        ['src/data/experiences.json', syncedExperiences],
-        ['public/data/experiences.json', syncedExperiences],
-        ['docs/data/experiences.json', syncedExperiences],
-        ['src/data/testimonials.json', syncedTestimonials],
-        ['public/data/testimonials.json', syncedTestimonials],
-        ['docs/data/testimonials.json', syncedTestimonials],
-        ['src/data/assets.json', syncedAssets],
-        ['public/data/assets.json', syncedAssets],
-        ['docs/data/assets.json', syncedAssets]
-      ];
-
-      let commits = 0;
-      for (const [path, data] of files) {
-        await syncGithubJson(path, data);
-        commits++;
-        if (syncNotification && typeof syncNotification.update === 'function') {
-          syncNotification.update({
-            title: 'Sincronizando',
-            message: 'Google Sheets + GitHub: ' + commits + '/' + files.length + ' • ' + path.split('/').pop()
-          });
-        }
-      }
-
-      if (getGithubSyncFingerprint() === githubSyncStartFingerprint) {
-        markGithubSyncComplete();
-      } else {
-        console.info('[GITHUB SYNC] Se detectaron cambios durante la sincronización; GitHub queda pendiente.');
-      }
-
-      const lastSavedEl = document.getElementById('sync-last-saved');
-      if (lastSavedEl) lastSavedEl.textContent = new Date().toLocaleTimeString();
-
-      if (syncNotification && typeof syncNotification.dismiss === 'function') syncNotification.dismiss();
-      showStatusNotification({
-        title: sheetError ? 'GitHub sincronizado' : 'Todo sincronizado',
-        message: (sheetError
-          ? 'GitHub fue actualizado, pero Google Sheets no se pudo guardar. '
-          : 'CardsInfo y Feedbacks fueron guardados en Google Sheets. ') +
-          'Archivos GitHub actualizados: ' + commits + '. Imágenes nuevas: ' + uploadedImages.size + '.',
-        type: sheetError ? 'warning' : 'success',
-        icon: sheetError ? '⚠️' : '🚀'
-      });
-    } catch (error) {
-      console.error('[GITHUB SYNC ERROR]', error);
-      if (syncNotification && typeof syncNotification.dismiss === 'function') syncNotification.dismiss();
-      showStatusNotification({
-        title: 'Error de GitHub',
-        message: sheetError
-          ? 'Google Sheets también falló. ' + (error.message || 'No se pudo sincronizar el repositorio.')
-          : 'Google Sheets fue guardado, pero GitHub falló: ' + (error.message || 'No se pudo sincronizar el repositorio.'),
-        type: 'error',
-        icon: '⚠️'
-      });
-    } finally {
-      if (syncButton) {
-        syncButton.disabled = false;
-        syncButton.innerHTML = '<span>🚀 Sincronizar directamente con GitHub</span>';
-      }
-    }
-  }
 
   function updateSyncModalCounters() {
     const projCount = document.getElementById('sync-projects-count');
     const expCount = document.getElementById('sync-experiences-count');
     const testCount = document.getElementById('sync-testimonials-count');
-
     if (projCount) projCount.textContent = String(projects.length);
     if (expCount) expCount.textContent = String(experiences.length);
     if (testCount) testCount.textContent = String(satisfiedClients.length);
@@ -5205,60 +5030,80 @@
     document.body.style.overflow = '';
   }
 
-  function downloadDataJson(type) {
-    let filename = 'projects.json';
-    let content = '';
-
-    if (type === 'projects') {
-      filename = 'projects.json';
-      content = JSON.stringify(projects, null, 2);
-    } else if (type === 'experiences') {
-      filename = 'experiences.json';
-      content = JSON.stringify(experiences, null, 2);
-    } else if (type === 'testimonials') {
-      filename = 'testimonials.json';
-      content = JSON.stringify(satisfiedClients, null, 2);
-    } else {
-      filename = 'portfolio-full-data.json';
-      content = JSON.stringify({ projects, experiences, testimonials: satisfiedClients }, null, 2);
+  async function saveSheetsBackup() {
+    try {
+      showStatusNotification({title:'Creando backup',message:'Leyendo CardsInfo y Feedbacks desde Google Sheets...',type:'info',icon:'⏳',duration:15000});
+      await backendSyncQueue.catch(function () {});
+      const response = await fetch(GLOBAL_COUNTER_URL + '?action=loadSheetData&cacheBust=' + Date.now(), {cache:'no-store'});
+      if (!response.ok) throw new Error('Google Sheets HTTP ' + response.status);
+      const result = await response.json();
+      if (!result || !result.success) throw new Error(result && result.error ? result.error : 'Google Sheets no devolvió datos.');
+      const backup = {
+        version: 1,
+        createdAt: new Date().toISOString(),
+        source: 'Google Sheets',
+        cards: Array.isArray(result.cards) ? result.cards : [],
+        feedbacks: Array.isArray(result.feedbacks) ? result.feedbacks : []
+      };
+      const blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'elydev-sheets-backup-' + new Date().toISOString().replace(/[:.]/g,'-') + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showStatusNotification({title:'Backup guardado',message:'Se descargó una copia completa de CardsInfo y Feedbacks desde Google Sheets.',type:'success',icon:'💾'});
+    } catch (error) {
+      console.error('[SHEETS BACKUP SAVE ERROR]',error);
+      showStatusNotification({title:'Error al crear backup',message:error.message || 'No se pudo leer Google Sheets.',type:'error',icon:'⚠️'});
     }
-
-    const blob = new Blob([content], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    showStatusNotification({
-      title: 'Archivo Descargado',
-      message: `Se descargó "${filename}". Puedes colocarlo en tu carpeta src/data o en tu repositorio de GitHub.`,
-      type: 'success',
-      icon: '⬇️'
-    });
   }
 
-  function copyAllDataJson() {
-    const fullData = {
-      projects: projects,
-      experiences: experiences,
-      testimonials: satisfiedClients
-    };
-    const str = JSON.stringify(fullData, null, 2);
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(str).then(() => {
-        showStatusNotification({
-          title: 'JSON Copiado',
-          message: 'Todo el contenido de proyectos, experiencias y testimonios ha sido copiado al portapapeles.',
-          type: 'success',
-          icon: '📋'
-        });
+  function loadSheetsBackup() {
+    const input = document.getElementById('sheets-backup-file-input');
+    if (!input) return;
+    input.value = '';
+    input.click();
+  }
+
+  async function handleSheetsBackupFile(file) {
+    if (!file) return;
+    try {
+      const backup = JSON.parse(await file.text());
+      const cards = Array.isArray(backup.cards) ? backup.cards : null;
+      const feedbacks = Array.isArray(backup.feedbacks) ? backup.feedbacks : null;
+      if (!cards || !feedbacks) throw new Error('El backup no contiene las listas "cards" y "feedbacks".');
+      const confirmed = await new Promise(function(resolve) {
+        showConfirmModal('Restaurar backup','Esto reemplazará CardsInfo y Feedbacks en Google Sheets con el contenido del archivo seleccionado.','⚠️','Sí, Restaurar');
+        const actionBtn=document.getElementById('confirm-modal-action-btn');
+        const cancelBtn=document.getElementById('confirm-modal-cancel-btn');
+        const onAction=function(){cleanup(true);};
+        const onCancel=function(){cleanup(false);};
+        const cleanup=function(value){
+          if(actionBtn) actionBtn.removeEventListener('click',onAction);
+          if(cancelBtn) cancelBtn.removeEventListener('click',onCancel);
+          closeConfirmModal();
+          resolve(value);
+        };
+        if(actionBtn) actionBtn.addEventListener('click',onAction);
+        if(cancelBtn) cancelBtn.addEventListener('click',onCancel);
       });
+      if (!confirmed) return;
+      showStatusNotification({title:'Restaurando backup',message:'Subiendo CardsInfo y Feedbacks a Google Sheets...',type:'info',icon:'⏳',duration:15000});
+      await queueBackendSync(async function() {
+        await syncDataToGoogleSheet(CARDS_INFO_SHEET_NAME,cards);
+        await syncDataToGoogleSheet(FEEDBACKS_SHEET_NAME,feedbacks);
+      });
+      showStatusNotification({title:'Backup restaurado',message:'CardsInfo y Feedbacks fueron restaurados en Google Sheets.',type:'success',icon:'✓'});
+      await loadAllDataFromBackend();
+    } catch (error) {
+      console.error('[SHEETS BACKUP LOAD ERROR]',error);
+      showStatusNotification({title:'Error al restaurar backup',message:error.message || 'No se pudo cargar el backup en Google Sheets.',type:'error',icon:'⚠️'});
     }
   }
+
 
   async function loadAllDataFromBackend() {
     if (typeof fetch !== 'function') return;
@@ -7877,6 +7722,12 @@
     });
 
     // Form submits
+    const sheetsBackupInput = document.getElementById('sheets-backup-file-input');
+    if (sheetsBackupInput) sheetsBackupInput.addEventListener('change', function (event) {
+      const file = event.target.files && event.target.files[0];
+      handleSheetsBackupFile(file);
+    });
+
     const contactForm = document.getElementById('contact-form');
     if (contactForm) contactForm.addEventListener('submit', handleContactSubmit);
 
@@ -8170,8 +8021,8 @@
     // Gestión y Sincronización de Archivos
     openSyncFilesModal: openSyncFilesModal,
     closeSyncFilesModal: closeSyncFilesModal,
-    saveAllDataToBackend: saveAllDataToBackend,
-    syncAllToGithub: syncAllToGithub,
+    saveSheetsBackup: saveSheetsBackup,
+    loadSheetsBackup: loadSheetsBackup,
     saveAllDataToBackend: saveAllDataToBackend,
     loadAllDataFromBackend: loadAllDataFromBackend,
     // Proyectos
