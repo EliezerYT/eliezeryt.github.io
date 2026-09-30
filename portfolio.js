@@ -1675,8 +1675,12 @@
     renderProjectsGrid(true);
   }
 
+  function isAssetsPage() {
+    return document.body && document.body.getAttribute('data-page') === 'assets';
+  }
+
   function refreshAssetsPageRuntime() {
-    if (!document.getElementById('projects-grid')) return;
+    if (!isAssetsPage() || !document.getElementById('projects-grid')) return;
     selectedOrigin = 'assets';
     renderAssetsGrid();
     requestAnimationFrame(function () {
@@ -6384,7 +6388,7 @@
 
   // 17. Event Listeners y arranque
   window.addEventListener('pageshow', function () {
-    if (document.getElementById('projects-grid')) {
+    if (isAssetsPage() && document.getElementById('projects-grid')) {
       setTimeout(function () {
         refreshAssetsPageRuntime();
       }, 0);
@@ -6396,7 +6400,7 @@
   });
 
   document.addEventListener('visibilitychange', function () {
-    if (!document.hidden && document.getElementById('projects-grid')) {
+    if (!document.hidden && isAssetsPage() && document.getElementById('projects-grid')) {
       setTimeout(function () {
         refreshAssetsPageRuntime();
       }, 0);
