@@ -3219,35 +3219,146 @@
   }
 
   // 8.1 Sistema de Feedback con Códigos Especiales (Dejar Feedback)
-  async function openFeedbackModal(initialCode) {
-    await loadAllDataFromBackend();
-    renderTestimonialsPreview();
-    renderSatisfiedClientsModalList();
-
-    const modal = document.getElementById('feedback-modal');
-    const codeInput = document.getElementById('feedback-input-code');
-    const statusMsg = document.getElementById('feedback-status-msg');
-    if (!modal) return;
-
-    if (statusMsg) statusMsg.classList.add('hidden');
-    document.getElementById('feedback-submission-form').reset();
-
-    if (codeInput && initialCode) {
-      codeInput.value = initialCode.toUpperCase().trim();
-    }
-
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+  function getFeedbackCodeFromSheetData(result, code) {
+    const normalized = String(code || '').trim().toUpperCase();
+    if (!normalized || !result || !Array.isArray(result.cards)) return null;
+    const record = result.cards.find(function (item) {
+      return item && String(item.id || '').trim().toUpperCase() === normalized && item.type === 'feedback_code' && item.data;
+    });
+    return record && record.data ? record.data : null;
   }
 
-  async function closeFeedbackModal() {
+  function setFeedbackLoading(isLoading, message) {
+    const overlay = document.getElementById('feedback-loading-overlay');
+    const text = document.getElementById('feedback-loading-text');
+    if (text && message) text.textContent = message;
+    if (overlay) overlay.classList.toggle('hidden', !isLoading);
+  }
+
+  function applyFeedbackCodeData(codeData) {
+    if (!codeData) return false;
+    const nameInput = document.getElementById('feedback-input-name');
+    const roleInput = document.getElementById('feedback-input-role');
+    const serviceInput = document.getElementById('feedback-input-service');
+    const projInput = document.getElementById('feedback-input-project');
+    const avatarInput = document.getElementById('feedback-input-avatar');
+    const tagsInput = document.getElementById('feedback-input-tags');
+
+    if (nameInput && codeData.name) nameInput.value = codeData.name;
+    if (roleInput && codeData.role) roleInput.value = codeData.role;
+    if (serviceInput && codeData.service) serviceInput.value = codeData.service;
+    if (projInput && (codeData.project || codeData.serviceType)) {
+      const value = String(codeData.project || codeData.serviceType);
+      const option = Array.from(projInput.options || []).find(function (item) {
+        return item.value.toLowerCase() === value.toLowerCase() || item.textContent.trim().toLowerCase() === value.toLowerCase();
+      });
+      if (option) projInput.value = option.value;
+    }
+    if (avatarInput && codeData.avatar) avatarInput.value = codeData.avatar;
+    if (tagsInput && Array.isArray(codeData.tags)) tagsInput.value = codeData.tags.join(', ');
+
+    [nameInput, roleInput, serviceInput, projInput, avatarInput, tagsInput].forEach(function (input) {
+      if (!input) return;
+      input.readOnly = true;
+      input.classList.add('opacity-70', 'cursor-not-allowed');
+      if (input.tagName === 'SELECT') input.disabled = true;
+    });
+    return true;
+  }
+
+  function normalizeFeedbackCodeRecord(codeData, fallbackCode) {
+    if (!codeData) return null;
+    const normalized = Object.assign({}, codeData);
+    normalized.code = String(normalized.code || fallbackCode || '').trim().toUpperCase();
+    normalized.used = Boolean(normalized.used);
+    normalized.disabled = Boolean(normalized.disabled);
+    return normalized.code ? normalized : null;
+  }
+
+  async function loadFeedbackCodeDetails(code) {
+    const normalized = String(code || '').trim().toUpperCase();
+    if (!normalized) {
+      setFeedbackLoading(false);
+      return null;
+    }
+
+    const cached = feedbackCodes.find(function (item) {
+      return item && String(item.code || '').toUpperCase() === normalized;
+    });
+    if (cached) applyFeedbackCodeData(cached);
+
+    try {
+      const url = GLOBAL_COUNTER_URL + '?action=loadSheetData&cacheBust=' + Date.now();
+      const response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) throw new Error('Google Sheets HTTP ' + response.status);
+      const result = await response.json();
+      if (!result || !result.success) throw new Error('Google Sheets no devolvió datos.');
+
+      const remote = getFeedbackCodeFromSheetData(result, normalized);
+      if (!remote) {
+        setFeedbackLoading(false, 'No se encontró la información de este código.');
+        return null;
+      }
+
+      const normalizedRemote = normalizeFeedbackCodeRecord(remote, normalized);
+      const existingIndex = feedbackCodes.findIndex(function (item) {
+        return item && String(item.code || '').toUpperCase() === normalized;
+      });
+      if (existingIndex >= 0) feedbackCodes[existingIndex] = normalizedRemote;
+      else feedbackCodes.push(normalizedRemote);
+      try { localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes)); } catch (e) {}
+
+      applyFeedbackCodeData(normalizedRemote);
+      setFeedbackLoading(false);
+      return normalizedRemote;
+    } catch (error) {
+      setFeedbackLoading(false, 'No se pudo consultar la información del código.');
+      return cached || null;
+    }
+  }
+
+  function openFeedbackModal(initialCode) {
+    const modal = document.getElementById('feedback-modal');
+    const form = document.getElementById('feedback-submission-form');
+    const codeInput = document.getElementById('feedback-input-code');
+    const statusMsg = document.getElementById('feedback-status-msg');
+    if (!modal || !form) return;
+
+    form.reset();
+    if (statusMsg) statusMsg.classList.add('hidden');
+    setFeedbackLoading(false);
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlCode = initialCode || urlParams.get('feedback') || urlParams.get('code') || '';
+    const normalizedCode = String(urlCode).trim().toUpperCase();
+    if (codeInput) {
+      codeInput.value = normalizedCode;
+      codeInput.readOnly = Boolean(normalizedCode);
+      codeInput.classList.toggle('opacity-70', Boolean(normalizedCode));
+    }
+
+    if (normalizedCode) {
+      setFeedbackLoading(true, 'Buscando la información de tu servicio...');
+      loadFeedbackCodeDetails(normalizedCode).then(function (record) {
+        if (!record) {
+          const msg = document.getElementById('feedback-status-msg');
+          if (msg) {
+            msg.className = 'p-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-300 text-xs leading-relaxed';
+            msg.innerHTML = '❌ <strong>Código no encontrado:</strong> Verifica el enlace o solicita un nuevo código.';
+            msg.classList.remove('hidden');
+          }
+        }
+      });
+    }
+  }
+
+  function closeFeedbackModal() {
     const modal = document.getElementById('feedback-modal');
     if (modal) modal.classList.add('hidden');
+    setFeedbackLoading(false);
     document.body.style.overflow = '';
-
-    await loadAllDataFromBackend();
-    renderTestimonialsPreview();
-    renderSatisfiedClientsModalList();
   }
 
   async function handleFeedbackSubmit(e) {
@@ -3391,8 +3502,14 @@
     e.preventDefault();
     const codeInput = document.getElementById('new-code-input');
     const labelInput = document.getElementById('new-code-label');
+    const nameInput = document.getElementById('new-code-name');
+    const serviceInput = document.getElementById('new-code-service');
+    const projectInput = document.getElementById('new-code-project');
     const rawCode = codeInput.value.trim().toUpperCase();
     const label = labelInput.value.trim();
+    const name = nameInput ? nameInput.value.trim() : '';
+    const service = serviceInput ? serviceInput.value.trim() : '';
+    const project = projectInput ? projectInput.value.trim() : '';
 
     if (!rawCode) return;
 
@@ -3403,7 +3520,10 @@
 
     feedbackCodes.unshift({
       code: rawCode,
-      label: label || 'Código de cliente',
+      label: label || name || 'Código de cliente',
+      name: name,
+      service: service,
+      project: project || 'Servicio',
       used: false,
       disabled: false,
       createdAt: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -3415,7 +3535,11 @@
 
     codeInput.value = '';
     labelInput.value = '';
+    if (nameInput) nameInput.value = '';
+    if (serviceInput) serviceInput.value = '';
+    if (projectInput) projectInput.value = '';
     renderFeedbackCodesList();
+    syncLocalDataToGoogleSheets().catch(function () {});
     showStatusNotification({
       title: 'Código de Feedback Generado',
       message: `Código "${rawCode}" creado con éxito para ${label || 'cliente'}. Puedes enviárselo para su feedback.`,
