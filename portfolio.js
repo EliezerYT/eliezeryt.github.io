@@ -3957,7 +3957,7 @@
 
     showConfirmModal({
       title: '¿Eliminar Proyecto / Ficha?',
-      message: `¿Estás seguro de eliminar el cuadro de información "${target.title}"? Los cambios se guardarán automáticamente en los archivos (src/data/projects.json).`,
+      message: `¿Estás seguro de eliminar el cuadro de información "${target.title}"? Los cambios se guardarán automáticamente en los archivos (Google Sheets).`,
       icon: '🗑️',
       confirmText: 'Sí, Eliminar Proyecto',
       danger: true,
@@ -4420,7 +4420,7 @@
 
     showConfirmModal({
       title: '¿Eliminar Experiencia Laboral?',
-      message: `¿Estás seguro de eliminar la trayectoria "${exp.title}" en "${exp.company}"? Los cambios se guardarán automáticamente en src/data/experiences.json.`,
+      message: `¿Estás seguro de eliminar la trayectoria "${exp.title}" en "${exp.company}"? Los cambios se guardarán automáticamente en Google Sheets.`,
       icon: '💼',
       confirmText: 'Sí, Eliminar Experiencia',
       danger: true,
@@ -4601,7 +4601,7 @@
     syncExperiencesWithBackend(experiences);
     showStatusNotification({
       title: editingExpId ? 'Experiencia Editada' : 'Experiencia Guardada',
-      message: `"${title}" en ${company} guardada y sincronizada en src/data/experiences.json.`,
+      message: `"${title}" en ${company} guardada y sincronizada en Google Sheets.`,
       type: 'success',
       icon: '💼'
     });
@@ -4611,7 +4611,7 @@
   function resetSampleData() {
     showConfirmModal({
       title: '¿Restablecer Proyectos Originales?',
-      message: 'Esta acción restablecerá el catálogo a la muestra inicial y sincronizará el archivo src/data/projects.json.',
+      message: 'Esta acción restablecerá el catálogo a la muestra inicial y sincronizará el archivo Google Sheets.',
       icon: '🔄',
       confirmText: 'Sí, Restablecer',
       danger: false,
@@ -5280,78 +5280,16 @@
       };
     };
 
-    const loadGithubFallback = async () => {
-      const cacheBust = Date.now();
-      const githubDataBase = 'https://github.com/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/raw/refs/heads/' + GITHUB_BRANCH + '/public/data';
-
-      const loadJson = async (name, onData) => {
-        const urls = [
-          githubDataBase + '/' + name + '.json?v=' + cacheBust,
-          './data/' + name + '.json?v=' + cacheBust,
-          './public/data/' + name + '.json?v=' + cacheBust,
-          './docs/data/' + name + '.json?v=' + cacheBust
-        ];
-
-        for (const url of urls) {
-          try {
-            const response = await fetch(url, { cache: 'no-store' });
-            if (!response.ok) continue;
-            const data = await response.json();
-            if (Array.isArray(data) && data.length > 0) {
-              onData(data);
-              return true;
-            }
-          } catch (e) {}
-        }
-
-        return false;
-      };
-
-      await loadJson('projects', (list) => {
-        projects = list;
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (e) {}
-        if (!isAssetsPage()) renderProjectsGrid();
-      });
-
-      await loadJson('experiences', (list) => {
-        experiences = list;
-        try { localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences)); } catch (e) {}
-        renderExperiences();
-      });
-
-      await loadJson('testimonials', (list) => {
-        satisfiedClients = list;
-
-        renderTestimonialsPreview();
-        renderSatisfiedClientsModalList();
-      });
-
-      await loadJson('assets', (list) => {
-        assets = list;
-        try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
-        if (selectedOrigin === 'assets') renderAssetsGrid();
-        checkAssetHashParam();
-      });
-    };
-
     try {
       await loadFromGoogleSheets();
     } catch (error) {
       console.warn('[GOOGLE SHEETS LOAD ERROR]', error);
-
-      // Si Sheets falla, usamos los JSON publicados solo como respaldo.
-      // El catálogo no depende de GitHub Sync para funcionar.
-      try {
-        await loadGithubFallback();
-      } catch (fallbackError) {
-        console.warn('[CATALOG FALLBACK ERROR]', fallbackError);
-        showStatusNotification({
-          title: 'No se pudo actualizar el catálogo',
-          message: 'Google Sheets no respondió y tampoco se pudo cargar el respaldo local.',
-          type: 'error',
-          icon: '⚠️'
-        });
-      }
+      showStatusNotification({
+        title: 'No se pudo actualizar el catálogo',
+        message: 'Google Sheets no respondió. Los datos publicados ya no se cargan desde archivos JSON.',
+        type: 'error',
+        icon: '⚠️'
+      });
     }
   }
 
