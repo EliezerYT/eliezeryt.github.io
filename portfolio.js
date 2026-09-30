@@ -5783,20 +5783,16 @@
           </div>
           ${canMove ? `
             <div class="grid grid-cols-2 gap-1.5 mt-3">
-              <button type="button" class="rounded-md bg-amber-400 hover:bg-amber-300 border border-transparent py-1 text-[10px] font-bold text-black library-select-btn" title="Seleccionar imagen" aria-label="Seleccionar imagen">✓ Seleccionar</button>
-              <button type="button" class="rounded-md bg-white/10 hover:bg-white/20 border border-white/10 py-1 text-[10px] font-bold text-white library-preview-btn" title="Ver imagen grande" aria-label="Ver imagen grande">🔍 Ver grande</button>
-            </div>
-            <div class="grid grid-cols-2 gap-1.5 mt-1.5">
-              <button type="button" class="rounded-md bg-white/5 hover:bg-white/10 border border-white/10 py-1 text-[10px] font-bold text-slate-300 library-move-up-btn">▲ Subir</button>
-              <button type="button" class="rounded-md bg-white/5 hover:bg-white/10 border border-white/10 py-1 text-[10px] font-bold text-slate-300 library-move-down-btn">▼ Bajar</button>
+              <button type="button" class="rounded-md bg-amber-400 hover:bg-amber-300 py-1 text-[10px] font-bold text-black select-image-btn" title="Seleccionar imagen" aria-label="Seleccionar imagen">✓ Seleccionar</button>
+              <button type="button" class="rounded-md bg-white/5 hover:bg-white/10 border border-white/10 py-1 text-[10px] font-bold text-slate-300 library-preview-btn" title="Ver imagen grande" aria-label="Ver imagen grande">🔍 Ver grande</button>
             </div>
           ` : `
             <div class="grid grid-cols-2 gap-1.5 mt-3">
-              <button type="button" class="rounded-md bg-amber-400 hover:bg-amber-300 border border-transparent py-1 text-[10px] font-bold text-black library-select-btn" title="Seleccionar imagen" aria-label="Seleccionar imagen">✓ Seleccionar</button>
-              <button type="button" class="rounded-md bg-white/10 hover:bg-white/20 border border-white/10 py-1 text-[10px] font-bold text-white library-preview-btn" title="Ver imagen grande" aria-label="Ver imagen grande">🔍 Ver grande</button>
+              <button type="button" class="rounded-md bg-amber-400 hover:bg-amber-300 py-1 text-[10px] font-bold text-black select-image-btn" title="Seleccionar imagen" aria-label="Seleccionar imagen">✓ Seleccionar</button>
+              <button type="button" class="rounded-md bg-white/5 hover:bg-white/10 border border-white/10 py-1 text-[10px] font-bold text-slate-300 library-preview-btn" title="Ver imagen grande" aria-label="Ver imagen grande">🔍 Ver grande</button>
             </div>
           `}
-          ${isCustom ? `
+${isCustom ? `
             <div class="mt-2 space-y-1.5">
               <select class="library-folder-move-select w-full rounded-md bg-[#0b0d11] border border-[#262c3b] px-2 py-1.5 text-[10px] text-white focus:border-amber-400 focus:outline-none">
                 <option value="Profile" ${getLibraryImageFolder(img) === 'Profile' ? 'selected' : ''}>Profile</option>
