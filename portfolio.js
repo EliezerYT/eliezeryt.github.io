@@ -962,6 +962,12 @@
   let visitorPreviewMode = false;
   const SYNC_FINGERPRINT_KEY = 'portfolio_github_sync_fingerprint_v1';
 
+  // Google Sheets es la fuente de verdad del catálogo.
+  // Evita peticiones duplicadas cuando navegación, hash y click ocurren casi al mismo tiempo.
+  let catalogRefreshPromise = null;
+  let catalogLastRefreshAt = 0;
+  const CATALOG_REFRESH_TTL_MS = 1500;
+
   try {
     const authSaved = localStorage.getItem(AUTH_STORAGE_KEY);
     if (authSaved) {
@@ -1881,7 +1887,11 @@
     closeAssetImagePicker();
   }
 
-  function openAssetModal(assetId, updateHash) {
+  async function openAssetModal(assetId, updateHash, skipRefresh) {
+    if (!skipRefresh) {
+      await refreshCatalogFromSheet(true);
+    }
+
     const asset = assets.find(function (a) { return a.id === assetId; });
     if (!asset || (asset.published === false && (!isModerator || visitorPreviewMode))) return;
     selectedAsset = asset;
@@ -2527,7 +2537,11 @@
   }
 
   // 6. Modal de detalle del proyecto (Soporta 16:9, Múltiples Imágenes y Videos de YouTube en Grande)
-  function openProjectModal(projectId) {
+  async function openProjectModal(projectId, skipRefresh) {
+    if (!skipRefresh) {
+      await refreshCatalogFromSheet(true);
+    }
+
     const project = projects.find(p => p.id === projectId);
     if (!project) return;
     selectedProject = project;
@@ -5304,7 +5318,20 @@
       await loadFromGoogleSheets();
     } catch (error) {
       console.warn('[GOOGLE SHEETS LOAD ERROR]', error);
-      showStatusNotification({ title: 'Google Sheets no disponible', message: 'No se pudieron actualizar Proyectos y Assets desde CardsInfo. Se mantienen los datos actuales.', type: 'error', icon: '⚠️' });
+
+      // Si Sheets falla, usamos los JSON publicados solo como respaldo.
+      // El catálogo no depende de GitHub Sync para funcionar.
+      try {
+        await loadGithubFallback();
+      } catch (fallbackError) {
+        console.warn('[CATALOG FALLBACK ERROR]', fallbackError);
+        showStatusNotification({
+          title: 'No se pudo actualizar el catálogo',
+          message: 'Google Sheets no respondió y tampoco se pudo cargar el respaldo local.',
+          type: 'error',
+          icon: '⚠️'
+        });
+      }
     }
   }
 
@@ -6977,38 +7004,60 @@
     setTimeout(function () {
       applyAssetsRouteUI();
       applySocialQueryRoute();
-      refreshCatalogFromSheet();
+      refreshCatalogFromSheet(true);
     }, 0);
   });
 
   window.addEventListener('hashchange', function () {
     applyAssetsRouteUI();
     checkAssetHashParam();
-    refreshCatalogFromSheet();
+    refreshCatalogFromSheet(true);
   });
 
   window.addEventListener('popstate', function () {
     applyAssetsRouteUI();
     applySocialQueryRoute();
-    refreshCatalogFromSheet();
+    refreshCatalogFromSheet(true);
   });
 
   document.addEventListener('visibilitychange', function () {
     if (!document.hidden) setTimeout(applyAssetsRouteUI, 0);
   });
 
-  function refreshCatalogFromSheet() {
-    return loadAllDataFromBackend().then(function () {
-      if (isAssetsPage()) refreshAssetsPageRuntime();
-      else renderProjectsGrid(true);
-    }).catch(function () {});
+  // Recarga desde CardsInfo antes de navegar o abrir una ficha.
+  // Las ediciones del moderador ya escriben en Sheets; GitHub queda solo como respaldo/publicación.
+  function refreshCatalogFromSheet(force) {
+    const shouldForce = force !== false;
+    const now = Date.now();
+
+    if (catalogRefreshPromise) {
+      return catalogRefreshPromise;
+    }
+
+    if (!shouldForce && now - catalogLastRefreshAt < CATALOG_REFRESH_TTL_MS) {
+      return Promise.resolve();
+    }
+
+    catalogRefreshPromise = loadAllDataFromBackend()
+      .then(function () {
+        catalogLastRefreshAt = Date.now();
+        if (isAssetsPage()) refreshAssetsPageRuntime();
+        else renderProjectsGrid(true);
+      })
+      .catch(function () {})
+      .finally(function () {
+        catalogRefreshPromise = null;
+      });
+
+    return catalogRefreshPromise;
   }
   function clearPortfolioRouteAndNavigate(sectionId) {
     const section = document.getElementById(sectionId);
     if (window.location.search || window.location.hash) history.replaceState(null, '', window.location.pathname);
     if (section) requestAnimationFrame(function () { section.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
     applyAssetsRouteUI();
-    refreshCatalogFromSheet();
+    // Al volver a Inicio/Catálogo se consulta Sheets inmediatamente.
+    refreshCatalogFromSheet(true);
   }
 
   function applySocialQueryRoute() {
@@ -7034,7 +7083,7 @@
     applyTheme(currentTheme);
     setupImageDropzones();
     renderSkillCards();
-    Promise.resolve(loadAllDataFromBackend()).finally(function () {
+    Promise.resolve(refreshCatalogFromSheet(true)).finally(function () {
       renderSkillCards();
       refreshAllSocialNetworkCounts();
     });
