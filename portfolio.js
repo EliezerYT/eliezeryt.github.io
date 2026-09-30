@@ -4722,6 +4722,8 @@
     skillCards.forEach(function (item) {
       if (item && item.id) records.push({ id: String(item.id), type: 'skill_card', data: item });
     });
+    // La biblioteca se guarda como un único registro JSON dentro de CardsInfo.
+    // Esto permite reconstruirla desde Google Sheets sin depender de GitHub Sync.
     records.push({
       id: 'library-json',
       type: 'library_json',
