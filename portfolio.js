@@ -4614,19 +4614,13 @@
       icon: '🔄',
       confirmText: 'Sí, Restablecer',
       danger: false,
-      onConfirm: function () {
+      onConfirm: async function () {
         projects = JSON.parse(JSON.stringify(initialProjects));
         try {
-          localStorage.removeItem(STORAGE_KEY);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
         } catch (err) {}
         renderProjectsGrid();
-        syncProjectsWithBackend(projects);
-        showStatusNotification({
-          title: 'Datos Restablecidos',
-          message: 'Los proyectos han sido restablecidos a los valores predeterminados y guardados en el archivo.',
-          type: 'info',
-          icon: '🔄'
-        });
+        await persistProjectsImmediately('reset', 'los proyectos originales');
       }
     });
   }
