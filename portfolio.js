@@ -3397,7 +3397,7 @@
     const service=serviceInput?serviceInput.value.trim():'';
     const newFeedback={id:'feedback-'+Date.now(),name,role:role||'Cliente Verificado',service,project,year:new Date().getFullYear().toString(),rating,avatar,feedback,tags:tags.length?tags:['Feedback Verificado','Cliente Satisfecho']};
     satisfiedClients.unshift(newFeedback);
-    try{localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY,JSON.stringify(feedbackCodes));}catch(err){}
+    saveFeedbackCodesImmediately().catch(function () {});
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
     if(submitBtn)submitBtn.disabled=true;
