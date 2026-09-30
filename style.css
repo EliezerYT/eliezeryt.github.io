@@ -362,10 +362,10 @@ html.light .status-notification-toast .toast-desc {
 }
 
 .btn-101 {
-  --thickness: 0.3rem;
-  --roundness: 1.2rem;
+  --thickness: 0.11rem;
+  --roundness: 0.75rem;
   --color: #eff6ff;
-  --opacity: 0.6;
+  --opacity: 0.85;
   -webkit-tap-highlight-color: transparent;
   -webkit-mask-image: -webkit-radial-gradient(#000, #fff);
   backdrop-filter: blur(100px);
@@ -379,6 +379,7 @@ html.light .status-notification-toast .toast-desc {
   font-weight: 500;
   line-height: 1.5;
   position: relative;
+  overflow: hidden;
 }
 
 .btn-101:hover {
@@ -401,22 +402,21 @@ html.light .status-notification-toast .toast-desc {
   top: 0;
   width: 100%;
   pointer-events: none;
+  overflow: visible;
 }
 
 .btn-101 rect {
   fill: none;
   stroke: var(--color);
   stroke-width: var(--thickness);
-  rx: var(--roundness);
   stroke-linejoin: round;
-  stroke-dasharray: 185%;
-  stroke-dashoffset: 80;
-  animation: snake 2s linear infinite;
+  stroke-dasharray: 18 82;
+  stroke-dashoffset: 0;
+  vector-effect: non-scaling-stroke;
+  animation: snake 1.7s linear infinite;
   animation-play-state: paused;
-  height: 100%;
   opacity: 0;
-  transition: opacity 0.2s;
-  width: 100%;
+  transition: opacity 0.2s, stroke 0.2s;
 }
 
 .btn-101:hover rect,
@@ -430,7 +430,7 @@ html.light .status-notification-toast .toast-desc {
 }
 
 @keyframes snake {
-  to { stroke-dashoffset: 370%; }
+  to { stroke-dashoffset: -100; }
 }
 
 @keyframes elyDownloadButtonPop {
