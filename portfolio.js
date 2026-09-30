@@ -3064,74 +3064,44 @@
     document.body.style.overflow = '';
   }
 
-  function moveTestimonialOrder(testimonialId, delta) {
+  async function moveTestimonialOrder(testimonialId, delta) {
     const index = satisfiedClients.findIndex(c => c.id === testimonialId);
     if (index < 0) return;
     const newIndex = index + delta;
     if (newIndex < 0 || newIndex >= satisfiedClients.length) return;
-
     const temp = satisfiedClients[index];
     satisfiedClients[index] = satisfiedClients[newIndex];
     satisfiedClients[newIndex] = temp;
-
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
-    showStatusNotification({
-      title: 'Posición Actualizada',
-      message: `Se reordenó la posición del feedback de "${satisfiedClients[newIndex].name}".`,
-      type: 'info',
-      icon: '⇅'
-    });
+    try { await syncTestimonialsWithBackend(satisfiedClients); showStatusNotification({title:'Posición Actualizada',message:'El orden se guardó automáticamente en Google Sheets.',type:'success',icon:'⇅'}); }
+    catch (error) { showStatusNotification({title:'Error al guardar',message:'El nuevo orden no pudo guardarse en Google Sheets.',type:'error',icon:'⚠️'}); }
   }
 
-  function duplicateTestimonial(testimonialId) {
+  async function duplicateTestimonial(testimonialId) {
     const target = satisfiedClients.find(c => c.id === testimonialId);
     if (!target) return;
-
     const copy = JSON.parse(JSON.stringify(target));
     copy.id = 'client-' + Date.now();
     copy.name = '[Copia] ' + copy.name;
-
     const index = satisfiedClients.findIndex(c => c.id === testimonialId);
-    if (index >= 0) {
-      satisfiedClients.splice(index + 1, 0, copy);
-    } else {
-      satisfiedClients.unshift(copy);
-    }
-
+    if (index >= 0) satisfiedClients.splice(index + 1, 0, copy); else satisfiedClients.unshift(copy);
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
-    showStatusNotification({
-      title: 'Feedback Duplicado',
-      message: `Se ha creado una copia del feedback de "${target.name}".`,
-      type: 'success',
-      icon: '📋'
-    });
+    try { await syncTestimonialsWithBackend(satisfiedClients); showStatusNotification({title:'Feedback Duplicado',message:'La copia se guardó automáticamente en Google Sheets.',type:'success',icon:'📋'}); }
+    catch (error) { showStatusNotification({title:'Error al guardar',message:'El duplicado no pudo guardarse en Google Sheets.',type:'error',icon:'⚠️'}); }
   }
 
   function deleteTestimonial(testimonialId) {
     const target = satisfiedClients.find(c => c.id === testimonialId);
     if (!target) return;
-    showConfirmModal({
-      title: '¿Eliminar Feedback?',
-      message: `¿Estás seguro de eliminar el feedback de "${target.name}"? Los cambios se guardarán automáticamente en los archivos (src/data/testimonials.json).`,
-      icon: '💬',
-      confirmText: 'Sí, Eliminar Feedback',
-      danger: true,
-      onConfirm: function () {
-        satisfiedClients = satisfiedClients.filter(c => c.id !== testimonialId);
-
-        renderTestimonialsPreview();
-        renderSatisfiedClientsModalList();
-        syncTestimonialsWithBackend(satisfiedClients);
-        showStatusNotification({
-          title: 'Feedback Eliminado',
-          message: `El feedback de "${target.name}" ha sido eliminado y guardado.`,
-          type: 'info',
-          icon: '🗑️'
-        });
-      }
-    });
+    showConfirmModal({title:'¿Eliminar Feedback?',message:`¿Estás seguro de eliminar el feedback de "${target.name}"?`,icon:'💬',confirmText:'Sí, Eliminar Feedback',danger:true,onConfirm:async function(){
+      satisfiedClients = satisfiedClients.filter(c => c.id !== testimonialId);
+      renderTestimonialsPreview();
+      renderSatisfiedClientsModalList();
+      try { await syncTestimonialsWithBackend(satisfiedClients); showStatusNotification({title:'Feedback Eliminado',message:'El feedback se eliminó y guardó automáticamente en Google Sheets.',type:'success',icon:'🗑️'}); }
+      catch (error) { showStatusNotification({title:'Error al guardar',message:'El feedback eliminado no pudo guardarse en Google Sheets.',type:'error',icon:'⚠️'}); }
+    }});
   }
 
   let editingTestimonialId = null;
@@ -3198,53 +3168,28 @@
     editingTestimonialId = null;
   }
 
-  function handleTestimonialSubmit(e) {
+  async function handleTestimonialSubmit(e) {
     e.preventDefault();
-    const name = document.getElementById('test-form-name').value.trim();
-    const role = document.getElementById('test-form-role').value.trim();
-    const project = document.getElementById('test-form-project').value.trim();
-    const year = document.getElementById('test-form-year').value.trim();
-    const rating = parseInt(document.getElementById('test-form-rating').value, 10) || 5;
-    const avatar = document.getElementById('test-form-avatar').value.trim() || './assets/images/ely/my-avatar.png';
-    const feedback = document.getElementById('test-form-feedback').value.trim();
-    const tagsRaw = document.getElementById('test-form-tags').value;
-    const tags = tagsRaw.split(',').map(s => s.trim()).filter(Boolean);
-
-    if (editingTestimonialId) {
-      const target = satisfiedClients.find(c => c.id === editingTestimonialId);
-      if (target) {
-        target.name = name;
-        target.role = role;
-        target.project = project;
-        target.year = year;
-        target.rating = rating;
-        target.avatar = avatar;
-        target.feedback = feedback;
-        target.tags = tags;
-      }
-    } else {
-      const newTestimonial = {
-        id: 'client-' + Date.now(),
-        name: name,
-        role: role,
-        project: project,
-        year: year || '2025',
-        rating: rating,
-        avatar: avatar,
-        feedback: feedback,
-        tags: tags
-      };
-      satisfiedClients.unshift(newTestimonial);
+    const name=document.getElementById('test-form-name').value.trim();
+    const role=document.getElementById('test-form-role').value.trim();
+    const project=document.getElementById('test-form-project').value.trim();
+    const year=document.getElementById('test-form-year').value.trim();
+    const rating=parseInt(document.getElementById('test-form-rating').value,10)||5;
+    const avatar=document.getElementById('test-form-avatar').value.trim()||'./assets/images/ely/my-avatar.png';
+    const feedback=document.getElementById('test-form-feedback').value.trim();
+    const tags=document.getElementById('test-form-tags').value.split(',').map(s=>s.trim()).filter(Boolean);
+    const wasEditing=Boolean(editingTestimonialId);
+    if(editingTestimonialId){
+      const target=satisfiedClients.find(c=>c.id===editingTestimonialId);
+      if(target) Object.assign(target,{name,role,project,year,rating,avatar,feedback,tags});
+    }else{
+      satisfiedClients.unshift({id:'client-'+Date.now(),name,role,project,year:year||'2025',rating,avatar,feedback,tags});
     }
-
     closeTestimonialModal();
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
-    syncTestimonialsWithBackend(satisfiedClients).then(function () {
-      showStatusNotification({ title: editingTestimonialId ? 'Feedback Actualizado' : 'Feedback Guardado', message: 'El feedback se guardó en Google Sheets.', type: 'success', icon: '⭐' });
-    }).catch(function () {
-      showStatusNotification({ title: 'Error al guardar', message: 'El feedback no pudo guardarse en Google Sheets.', type: 'error', icon: '⚠️' });
-    });
+    try{await syncTestimonialsWithBackend(satisfiedClients);showStatusNotification({title:wasEditing?'Feedback Actualizado':'Feedback Guardado',message:'El feedback se guardó automáticamente en Google Sheets.',type:'success',icon:'⭐'});}
+    catch(error){showStatusNotification({title:'Error al guardar',message:'El feedback no pudo guardarse en Google Sheets.',type:'error',icon:'⚠️'});}
   }
 
   // 8.1 Sistema de Feedback con Códigos Especiales (Dejar Feedback)
@@ -3279,97 +3224,51 @@
     renderSatisfiedClientsModalList();
   }
 
-  function handleFeedbackSubmit(e) {
+  async function handleFeedbackSubmit(e) {
     e.preventDefault();
-    const codeInput = document.getElementById('feedback-input-code');
-    const nameInput = document.getElementById('feedback-input-name');
-    const roleInput = document.getElementById('feedback-input-role');
-    const projInput = document.getElementById('feedback-input-project');
-    const ratingInput = document.getElementById('feedback-input-rating');
-    const textInput = document.getElementById('feedback-input-text');
-    const avatarInput = document.getElementById('feedback-input-avatar');
-    const tagsInput = document.getElementById('feedback-input-tags');
-    const statusMsg = document.getElementById('feedback-status-msg');
-    const submitBtn = document.getElementById('feedback-submit-btn');
-
-    const enteredCode = codeInput.value.trim().toUpperCase();
-    const name = nameInput.value.trim();
-    const role = roleInput ? roleInput.value.trim() : '';
-    const project = projInput.value.trim();
-    const rating = parseInt(ratingInput.value, 10) || 5;
-    const feedback = textInput.value.trim();
-    const avatar = avatarInput.value.trim() || './assets/images/ely/my-avatar.png';
-    const tags = tagsInput.value.split(',').map(s => s.trim()).filter(Boolean);
-
-    // Validar código
-    const foundCode = feedbackCodes.find(c => c.code.toUpperCase() === enteredCode);
-
-    if (!foundCode) {
-      if (statusMsg) {
-        statusMsg.className = 'p-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-300 text-xs leading-relaxed';
-        statusMsg.innerHTML = '❌ <strong>Código no válido:</strong> El código ingresado no existe en el sistema. Solicita un código a Eliezer para poder publicar tu feedback.';
-        statusMsg.classList.remove('hidden');
-      }
+    const codeInput=document.getElementById('feedback-input-code');
+    const nameInput=document.getElementById('feedback-input-name');
+    const roleInput=document.getElementById('feedback-input-role');
+    const projInput=document.getElementById('feedback-input-project');
+    const ratingInput=document.getElementById('feedback-input-rating');
+    const textInput=document.getElementById('feedback-input-text');
+    const avatarInput=document.getElementById('feedback-input-avatar');
+    const tagsInput=document.getElementById('feedback-input-tags');
+    const statusMsg=document.getElementById('feedback-status-msg');
+    const submitBtn=document.getElementById('feedback-submit-btn');
+    const enteredCode=codeInput.value.trim().toUpperCase();
+    const name=nameInput.value.trim();
+    const role=roleInput?roleInput.value.trim():'';
+    const project=projInput.value.trim();
+    const rating=parseInt(ratingInput.value,10)||5;
+    const feedback=textInput.value.trim();
+    const avatar=avatarInput.value.trim()||'./assets/images/ely/my-avatar.png';
+    const tags=tagsInput.value.split(',').map(s=>s.trim()).filter(Boolean);
+    const foundCode=feedbackCodes.find(c=>c.code.toUpperCase()===enteredCode);
+    if(!foundCode||foundCode.disabled||foundCode.used){
+      if(statusMsg){statusMsg.className='p-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-300 text-xs leading-relaxed';statusMsg.innerHTML=!foundCode?'❌ <strong>Código no válido:</strong> El código ingresado no existe en el sistema.':foundCode.disabled?'⚠️ <strong>Código deshabilitado:</strong> Este código ha sido pausado temporalmente por el moderador.':'⚠️ <strong>Código ya utilizado:</strong> Este código fue registrado anteriormente.';statusMsg.classList.remove('hidden');}
       return;
     }
-
-    if (foundCode.disabled) {
-      if (statusMsg) {
-        statusMsg.className = 'p-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-300 text-xs leading-relaxed';
-        statusMsg.innerHTML = '⚠️ <strong>Código deshabilitado:</strong> Este código ha sido pausado temporalmente por el moderador.';
-        statusMsg.classList.remove('hidden');
-      }
-      return;
-    }
-
-    if (foundCode.used) {
-      if (statusMsg) {
-        statusMsg.className = 'p-3 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs leading-relaxed';
-        statusMsg.innerHTML = `⚠️ <strong>Código ya utilizado:</strong> Este código fue registrado${foundCode.usedBy ? ' por ' + foundCode.usedBy : ''}${foundCode.usedAt ? ' el ' + foundCode.usedAt : ''}. Cada código es de un solo uso.`;
-        statusMsg.classList.remove('hidden');
-      }
-      return;
-    }
-
-    // Invalida el código y registra uso
-    foundCode.used = true;
-    foundCode.usedBy = name;
-    foundCode.usedAt = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
-
-    // Agregar nuevo testimonio verificado
-    const newFeedback = {
-      id: 'feedback-' + Date.now(),
-      name: name,
-      role: role || 'Cliente Verificado',
-      project: project,
-      year: new Date().getFullYear().toString(),
-      rating: rating,
-      avatar: avatar,
-      feedback: feedback,
-      tags: tags.length > 0 ? tags : ['Feedback Verificado', 'Cliente Satisfecho']
-    };
-
+    foundCode.used=true;
+    foundCode.usedBy=name;
+    foundCode.usedAt=new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
+    const newFeedback={id:'feedback-'+Date.now(),name,role:role||'Cliente Verificado',project,year:new Date().getFullYear().toString(),rating,avatar,feedback,tags:tags.length?tags:['Feedback Verificado','Cliente Satisfecho']};
     satisfiedClients.unshift(newFeedback);
-
-    try {
-      localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes));
-    } catch (err) {}
-
+    try{localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY,JSON.stringify(feedbackCodes));}catch(err){}
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
-
-    if (statusMsg) {
-      statusMsg.className = 'p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs leading-relaxed';
-      statusMsg.innerHTML = '✓ <strong>¡Muchas gracias!</strong> Tu feedback ha sido verificado con éxito y ya aparece publicado en el feedback de Eliezer Terrero.';
-      statusMsg.classList.remove('hidden');
+    if(submitBtn)submitBtn.disabled=true;
+    try{
+      await syncTestimonialsWithBackend(satisfiedClients);
+      if(statusMsg){statusMsg.className='p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs leading-relaxed';statusMsg.innerHTML='✓ <strong>¡Muchas gracias!</strong> Tu feedback ha sido verificado y guardado automáticamente en Google Sheets.';statusMsg.classList.remove('hidden');}
+      setTimeout(function(){closeFeedbackModal();},2500);
+    }catch(error){
+      satisfiedClients=satisfiedClients.filter(c=>c.id!==newFeedback.id);
+      if(submitBtn)submitBtn.disabled=false;
+      renderTestimonialsPreview();
+      renderSatisfiedClientsModalList();
+      if(statusMsg){statusMsg.className='p-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-300 text-xs leading-relaxed';statusMsg.innerHTML='⚠️ <strong>No se pudo guardar el feedback.</strong> Inténtalo nuevamente.';statusMsg.classList.remove('hidden');}
     }
-
-    if (submitBtn) submitBtn.disabled = true;
-
-    setTimeout(function () {
-      if (submitBtn) submitBtn.disabled = false;
-      closeFeedbackModal();
-    }, 2500);
   }
 
   // 8.2 Panel Moderador de Códigos de Feedback
