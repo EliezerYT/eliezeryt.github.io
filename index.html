@@ -2309,13 +2309,39 @@
         <div id="social-network-editor" class="hidden border-t border-[#1e2330] mt-5 pt-5">
           <form id="social-network-form" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input id="social-form-id" type="hidden">
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-1">Tipo de red</label>
+              <select id="social-form-network-type" class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white">
+                <option value="youtube">YouTube</option>
+                <option value="discord">Discord</option>
+                <option value="instagram">Instagram</option>
+                <option value="tiktok">TikTok</option>
+                <option value="twitch">Twitch</option>
+                <option value="facebook">Facebook</option>
+                <option value="twitter">X / Twitter</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="github">GitHub</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="other">Otra red</option>
+              </select>
+            </div>
             <div><label class="block text-[10px] text-slate-400 mb-1">Nombre</label><input id="social-form-name" required class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white"></div>
             <div><label class="block text-[10px] text-slate-400 mb-1">Emoji / icono</label><input id="social-form-icon" maxlength="4" class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white"></div>
             <div class="sm:col-span-2"><label class="block text-[10px] text-slate-400 mb-1">Link de la red</label><input id="social-form-url" type="url" placeholder="https://..." class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white"></div>
-            <div><label class="block text-[10px] text-slate-400 mb-1">Texto del contador</label><input id="social-form-label" placeholder="Suscriptores / Usuarios" class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white"></div>
-            <div><label class="block text-[10px] text-slate-400 mb-1">Contador actual</label><input id="social-form-count" type="number" min="0" step="1" value="0" class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white"></div>
-            <div><label class="block text-[10px] text-slate-400 mb-1">Modo del contador</label><select id="social-form-mode" class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white"><option value="manual">Manual</option><option value="livecounts">Livecounts.io — extraer odometer</option><option value="url">Endpoint JSON</option></select></div>
-            <div><label class="block text-[10px] text-slate-400 mb-1">URL del contador JSON</label><input id="social-form-count-url" type="url" placeholder="URL de Livecounts o endpoint JSON" class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white"></div>
+
+            <div id="social-form-youtube-fields" class="sm:col-span-2 hidden rounded-xl bg-red-500/5 border border-red-500/15 p-3">
+              <label class="block text-[10px] text-red-300 mb-1">ID del canal de YouTube</label>
+              <input id="social-form-youtube-channel" type="text" placeholder="UC..." class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white font-mono">
+              <p class="text-[10px] text-slate-500 mt-1.5">YouTube mostrará automáticamente Suscriptores, Videos y Views.</p>
+            </div>
+
+            <div id="social-form-generic-fields" class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div><label class="block text-[10px] text-slate-400 mb-1">Texto del contador</label><input id="social-form-label" placeholder="Usuarios / Miembros" class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white"></div>
+              <div><label class="block text-[10px] text-slate-400 mb-1">Contador actual</label><input id="social-form-count" type="number" min="0" step="1" value="0" class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white"></div>
+              <div><label class="block text-[10px] text-slate-400 mb-1">Modo del contador</label><select id="social-form-mode" class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white"><option value="manual">Manual</option><option value="livecounts">Livecounts.io — extraer odometer</option><option value="url">Endpoint JSON</option></select></div>
+              <div><label class="block text-[10px] text-slate-400 mb-1">URL del contador JSON</label><input id="social-form-count-url" type="url" placeholder="https://..." class="w-full rounded-lg bg-[#0b0d11] border border-[#262c3b] px-3 py-2 text-xs text-white"></div>
+            </div>
+
             <label class="sm:col-span-2 flex items-center gap-2 text-xs text-slate-300"><input id="social-form-enabled" type="checkbox" checked> Mostrar esta red</label>
             <div class="sm:col-span-2 flex justify-end gap-2 pt-2"><button type="button" onclick="window.ElyPortfolio.closeSocialNetworkEditor()" class="px-4 py-2 rounded-lg bg-white/10 text-slate-300 text-xs font-semibold">Cancelar</button><button type="submit" class="px-4 py-2 rounded-lg bg-cyan-400 text-black text-xs font-bold">Guardar red</button></div>
           </form>
