@@ -5553,14 +5553,41 @@
   let githubElyFolderLoading = false;
 
   function getAllLibraryImages() {
-    const automaticImages = githubElyFolderImages.filter(function (remoteImage) {
-      return !DEFAULT_LIBRARY_IMAGES.some(function (defaultImage) {
-        return defaultImage.path === remoteImage.path;
-      }) && !customLibraryImages.some(function (customImage) {
-        return customImage.path === remoteImage.path;
-      });
+    const customKeys = new Set();
+    const getImageKey = function (image) {
+      if (!image) return '';
+      const path = String(image.path || '').trim().toLowerCase();
+      const folder = normalizeLibraryFolder(image.folder || image.category || '').toLowerCase();
+      const name = String(image.name || '').trim().toLowerCase();
+      if (path && !path.startsWith('data:image/')) return 'path:' + path;
+      return 'file:' + folder + '/' + name;
+    };
+    customLibraryImages.forEach(function (image) {
+      const key = getImageKey(image);
+      if (key) customKeys.add(key);
     });
-    return [...customLibraryImages, ...automaticImages, ...DEFAULT_LIBRARY_IMAGES];
+    const seen = new Set();
+    const result = [];
+    const addUnique = function (image) {
+      if (!image) return;
+      const key = getImageKey(image);
+      const fallbackKey = 'id:' + String(image.id || '');
+      const uniqueKey = key || fallbackKey;
+      if (seen.has(uniqueKey)) return;
+      seen.add(uniqueKey);
+      result.push(image);
+    };
+    customLibraryImages.forEach(addUnique);
+    githubElyFolderImages.forEach(function (remoteImage) {
+      const remoteKey = getImageKey(remoteImage);
+      if (DEFAULT_LIBRARY_IMAGES.some(function (defaultImage) {
+        return defaultImage.path === remoteImage.path;
+      })) return;
+      if (customKeys.has(remoteKey)) return;
+      addUnique(remoteImage);
+    });
+    DEFAULT_LIBRARY_IMAGES.forEach(addUnique);
+    return result;
   }
 
   const FALLBACK_ELY_IMAGE_MANIFEST = [
@@ -5816,9 +5843,6 @@
           if (selectedGalleryLibraryImages.has(path)) selectedGalleryLibraryImages.delete(path);
           else selectedGalleryLibraryImages.add(path);
           updateLibraryGallerySelectionUI();
-          card.classList.remove('library-selection-shake');
-          void card.offsetWidth;
-          if (selectedGalleryLibraryImages.has(path)) card.classList.add('library-selection-shake');
         } else {
           selectImageFromLibrary(path, name);
         }
@@ -6072,6 +6096,12 @@
   if (!document.getElementById('library-selection-shake-style')) { const style=document.createElement('style'); style.id='library-selection-shake-style'; style.textContent='@keyframes librarySelectionShake{0%,100%{transform:translateX(0) rotate(0)}20%{transform:translateX(-3px) rotate(-1deg)}40%{transform:translateX(3px) rotate(1deg)}60%{transform:translateX(-2px) rotate(-0.5deg)}80%{transform:translateX(2px) rotate(0.5deg)}} .library-selection-shake{animation:librarySelectionShake .4s ease-in-out}'; document.head.appendChild(style); }
 
   function updateLibraryGallerySelectionUI() {
+    if (!document.getElementById('library-selection-vibrate-style')) {
+      const style = document.createElement('style');
+      style.id = 'library-selection-vibrate-style';
+      style.textContent = '@keyframes librarySelectionVibrate{0%,100%{transform:translate(0,0) rotate(0)}20%{transform:translate(-1px,1px) rotate(-0.35deg)}40%{transform:translate(1px,-1px) rotate(0.35deg)}60%{transform:translate(-1px,-1px) rotate(-0.3deg)}80%{transform:translate(1px,1px) rotate(0.3deg)}} .library-selection-vibrate{animation:librarySelectionVibrate .22s ease-in-out infinite}';
+      document.head.appendChild(style);
+    }
     const applyBtn = document.getElementById('library-gallery-apply-btn');
     const help = document.getElementById('library-selection-help');
     const count = selectedGalleryLibraryImages.size;
@@ -6086,6 +6116,7 @@
       const selected = selectedGalleryLibraryImages.has(card.getAttribute('data-library-img-path'));
       card.classList.toggle('ring-2', selected);
       card.classList.toggle('ring-amber-400', selected);
+      card.classList.toggle('library-selection-vibrate', selected);
       const button = card.querySelector('.select-image-btn');
       if (button && currentLibraryTarget && currentLibraryTarget.type === 'gallery') button.textContent = selected ? '✓ Seleccionada' : 'Seleccionar';
     });
@@ -6189,6 +6220,16 @@
 
   function addCustomImageToLibrary(name, dataUrl, onUploaded) {
     const folder = getLibraryFolderConfig();
+    const normalizedName = String(name || 'Imagen Subida').trim().toLowerCase();
+    const duplicate = customLibraryImages.find(function (item) {
+      return String(item.name || '').trim().toLowerCase() === normalizedName &&
+        normalizeLibraryFolder(item.folder || item.category || '') === normalizeLibraryFolder(folder);
+    });
+    if (duplicate) {
+      if (typeof onUploaded === 'function') onUploaded(duplicate, dataUrl);
+      renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
+      return duplicate;
+    }
     const newImg = {
       id: 'custom-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
       name: name || 'Imagen Subida',
@@ -6205,11 +6246,36 @@
     return newImg;
   }
 
+  async function prepareLibraryUploadDataUrl(dataUrl, name) {
+    const maxBytes = 6500000;
+    if (!dataUrl || dataUrl.length <= maxBytes) return dataUrl;
+    if (!/^data:image\/(png|jpeg|jpg|webp);base64,/i.test(dataUrl)) return dataUrl;
+    return new Promise(function (resolve) {
+      const img = new Image();
+      img.onload = function () {
+        const maxDimension = 2560;
+        const scale = Math.min(1, maxDimension / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round((img.naturalWidth || img.width) * scale));
+        canvas.height = Math.max(1, Math.round((img.naturalHeight || img.height) * scale));
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve(dataUrl); return; }
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        let compressed = canvas.toDataURL('image/webp', 0.86);
+        if (compressed.length > maxBytes) compressed = canvas.toDataURL('image/jpeg', 0.84);
+        resolve(compressed.length < dataUrl.length ? compressed : dataUrl);
+      };
+      img.onerror = function () { resolve(dataUrl); };
+      img.src = dataUrl;
+    });
+  }
+
   async function uploadCustomImageImmediately(image, dataUrl) {
     if (!image || !dataUrl || !dataUrl.startsWith('data:image/')) return;
     if (!getGithubToken()) return;
 
-    const extension = imageExtension(dataUrl);
+    const prepared = await prepareLibraryUploadDataUrl(dataUrl, image.name);
+    const extension = imageExtension(prepared);
     const folder = normalizeLibraryFolder(image.folder || getLibraryFolderConfig());
     const filename = sanitizeGithubImageName(image.name, extension);
     const githubPath = 'assets/images/ely/' + folder + '/' + filename;
@@ -6222,7 +6288,7 @@
         icon: '☁️'
       });
 
-      await putGithubFile(githubPath, dataUrlToBase64(dataUrl), 'Upload library image ' + filename);
+      await putGithubFile(githubPath, dataUrlToBase64(prepared), 'Upload library image ' + filename);
 
       const previousPath = image.path;
       image.path = './' + githubPath;
@@ -6261,12 +6327,16 @@
 
   function setupImageDropzones() {
     const folderStyle = document.getElementById('library-folder-style');
-    if (folderStyle) folderStyle.addEventListener('change', setLibraryFolderUI);
+    if (folderStyle && folderStyle.dataset.libraryFolderBound !== '1') {
+      folderStyle.dataset.libraryFolderBound = '1';
+      folderStyle.addEventListener('change', setLibraryFolderUI);
+    }
     setLibraryFolderUI();
 
     // 1. Search in library
     const searchInput = document.getElementById('library-search-input');
-    if (searchInput) {
+    if (searchInput && searchInput.dataset.librarySearchBound !== '1') {
+      searchInput.dataset.librarySearchBound = '1';
       searchInput.addEventListener('input', function (e) {
         renderLibraryGrid(e.target.value);
       });
@@ -6276,7 +6346,8 @@
     const libDropzone = document.getElementById('library-upload-dropzone');
     const libFileInput = document.getElementById('library-upload-file-input');
 
-    if (libDropzone && libFileInput) {
+    if (libDropzone && libFileInput && libDropzone.dataset.libraryUploadBound !== '1') {
+      libDropzone.dataset.libraryUploadBound = '1';
       libDropzone.addEventListener('click', () => libFileInput.click());
       libDropzone.addEventListener('dragover', (e) => {
         e.preventDefault();
