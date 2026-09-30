@@ -5752,9 +5752,9 @@
       }
       image.folder = newFolder;
       image.category = newFolder;
-      try { localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages)); } catch (e) {}
       renderLibraryGrid();
-      showStatusNotification({ title: 'Carpeta actualizada', message: '"' + (image.name || 'Imagen') + '" movida a ' + newFolder + '.', type: 'success', icon: '📁' });
+      await persistLibraryImmediately('folder', image.name || 'Imagen');
+      showStatusNotification({ title: 'Carpeta actualizada', message: '"' + (image.name || 'Imagen') + '" movida a ' + newFolder + ' y guardada en Google Sheets.', type: 'success', icon: '📁' });
     } catch (error) {
       showStatusNotification({ title: 'No se pudo mover', message: error.message || 'Error moviendo la imagen.', type: 'error', icon: '⚠️' });
     }
@@ -6032,24 +6032,23 @@
       onConfirm: async function () {
         const previous = customLibraryImages.slice();
         customLibraryImages = customLibraryImages.filter(item => item.id !== imageId);
-        try {
-          localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages));
-        } catch (e) {}
         renderLibraryGrid();
         try {
           const token = getGithubToken();
           if (token && typeof image.path === 'string' && image.path.startsWith('./assets/images/ely/')) {
             await deleteGithubImageFile(image.path.substring(2));
+            await persistLibraryImmediately('delete', image.name || 'Imagen');
             showStatusNotification({
               title: 'Imagen Eliminada',
-              message: 'La imagen fue eliminada de la biblioteca y de GitHub.',
+              message: 'La imagen fue eliminada de la biblioteca, de GitHub y de Google Sheets.',
               type: 'success',
               icon: '🗑️'
             });
           } else {
+            await persistLibraryImmediately('delete', image.name || 'Imagen');
             showStatusNotification({
               title: 'Imagen Eliminada',
-              message: 'La imagen fue eliminada de la biblioteca local.',
+              message: 'La imagen fue eliminada de la biblioteca y de Google Sheets.',
               type: 'success',
               icon: '🗑️'
             });
