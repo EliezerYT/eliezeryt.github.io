@@ -6632,7 +6632,9 @@
   }
 
   function refreshAllSocialNetworkCounts() {
-    getSocialNetworks().filter(function(item) { return item.countMode === 'url' && item.countUrl; }).forEach(function(item) {
+    getSocialNetworks().filter(function(item) {
+      return item.countMode === 'livecounts' || (item.countMode === 'url' && item.countUrl);
+    }).forEach(function(item) {
       refreshSocialNetworkCount(item.id, true);
     });
   }
