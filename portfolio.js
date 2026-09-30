@@ -45,7 +45,7 @@
     linkedin: 'https://www.linkedin.com',
     socialNetworks: [
       { id: 'youtube', networkType: 'youtube', name: 'YouTube', icon: '▶️', color: 'red', url: 'https://www.youtube.com/channel/UCuiY3lZrlrbXsX-RR9v3Kbg', countLabel: 'Suscriptores', countValue: 0, countMode: 'youtube', countUrl: '', youtubeChannelId: 'UCuiY3lZrlrbXsX-RR9v3Kbg', youtubeStats: { subscribers: 0, videos: 0, views: 0 }, enabled: true },
-      { id: 'discord', name: 'Discord', icon: '💬', color: 'indigo', url: 'https://discord.gg/sqGUT7UjMr', countLabel: 'Usuarios', countValue: 0, countMode: 'manual', countUrl: '', enabled: true },
+      { id: 'discord', networkType: 'discord', name: 'Discord', icon: '💬', color: 'discord', url: 'https://discord.gg/sqGUT7UjMr', countLabel: 'Miembros', countValue: 0, countMode: 'discord', countUrl: '', discordGuildId: '', discordInviteCode: 'sqGUT7UjMr', discordStats: { members: 0, online: 0 }, enabled: true },
       { id: 'whatsapp', name: 'WhatsApp', icon: '🟢', color: 'green', url: '', countLabel: 'Usuarios', countValue: 0, countMode: 'manual', countUrl: '', enabled: true }
     ],
   };
@@ -6511,11 +6511,27 @@
     };
   }
 
+  function extractDiscordInviteCode(value) {
+    const text = String(value || '').trim();
+    if (!text) return '';
+    const match = text.match(/(?:discord(?:\.gg|\.com\/invite)\/)([a-zA-Z0-9-]+)/i);
+    return match ? match[1] : (text.indexOf('/') === -1 ? text : '');
+  }
+
+  function normalizeDiscordStats(stats) {
+    const source = stats && typeof stats === 'object' ? stats : {};
+    return {
+      members: Math.max(0, Number(source.members ?? source.memberCount) || 0),
+      online: Math.max(0, Number(source.online ?? source.onlineCount) || 0)
+    };
+  }
+
   function normalizeSocialNetwork(item, index) {
     const networkType = getSocialNetworkType(item);
     const defaults = SOCIAL_NETWORK_TYPES[networkType] || SOCIAL_NETWORK_TYPES.other;
     const youtubeChannelId = extractYouTubeChannelId(item && (item.youtubeChannelId || item.url || ''));
     const youtubeStats = normalizeYouTubeStats(item && item.youtubeStats);
+    const discordStats = item && item.discordStats && typeof item.discordStats === 'object' ? item.discordStats : {};
     return {
       id: String(item && item.id || ('social-' + Date.now() + '-' + index)),
       networkType: networkType,
@@ -6525,10 +6541,16 @@
       url: String(item && item.url || ''),
       countLabel: String(item && item.countLabel || (networkType === 'youtube' ? 'Suscriptores' : 'Usuarios')),
       countValue: Number(item && item.countValue) || youtubeStats.subscribers,
-      countMode: networkType === 'youtube' ? 'youtube' : (item && item.countMode === 'livecounts' ? 'livecounts' : (item && item.countMode === 'url' ? 'url' : 'manual')),
+      countMode: networkType === 'youtube' ? 'youtube' : (networkType === 'discord' ? 'discord' : (item && item.countMode === 'livecounts' ? 'livecounts' : (item && item.countMode === 'url' ? 'url' : 'manual'))),
       countUrl: String(item && item.countUrl || ''),
       youtubeChannelId: youtubeChannelId,
       youtubeStats: youtubeStats,
+      discordGuildId: String(item && item.discordGuildId || ''),
+      discordInviteCode: String(item && item.discordInviteCode || extractDiscordInviteCode(item && item.url || '')),
+      discordStats: {
+        members: Math.max(0, Number(discordStats.members ?? discordStats.memberCount) || Number(item && item.countValue) || 0),
+        online: Math.max(0, Number(discordStats.online ?? discordStats.onlineCount) || 0)
+      },
       enabled: !item || item.enabled !== false
     };
   }
@@ -6569,11 +6591,17 @@
       const safeId = escapeSocialJs(item.id);
       const body = item.networkType === 'youtube'
         ? '<div class="grid grid-cols-3 gap-2 mt-4">' +
-            '<div class="rounded-xl bg-white/[.03] border border-white/5 p-2.5 text-center"><div class="text-[9px] uppercase tracking-wider text-slate-500">Subs</div><div class="text-sm font-bold text-cyan-300 font-mono mt-1">' + formatSocialNumber(stats.subscribers) + '</div></div>' +
-            '<div class="rounded-xl bg-white/[.03] border border-white/5 p-2.5 text-center"><div class="text-[9px] uppercase tracking-wider text-slate-500">Videos</div><div class="text-sm font-bold text-cyan-300 font-mono mt-1">' + formatSocialNumber(stats.videos) + '</div></div>' +
-            '<div class="rounded-xl bg-white/[.03] border border-white/5 p-2.5 text-center"><div class="text-[9px] uppercase tracking-wider text-slate-500">Views</div><div class="text-sm font-bold text-cyan-300 font-mono mt-1">' + formatSocialNumber(stats.views) + '</div></div>' +
+            '<div class="rounded-xl bg-white/[.03] border border-white/5 p-2.5 text-center"><div class="text-[9px] uppercase tracking-wider text-slate-500">Subs</div><div class="text-sm font-bold font-mono mt-1" style="color:' + style.accent + '">' + formatSocialNumber(stats.subscribers) + '</div></div>' +
+            '<div class="rounded-xl bg-white/[.03] border border-white/5 p-2.5 text-center"><div class="text-[9px] uppercase tracking-wider text-slate-500">Videos</div><div class="text-sm font-bold font-mono mt-1" style="color:' + style.accent + '">' + formatSocialNumber(stats.videos) + '</div></div>' +
+            '<div class="rounded-xl bg-white/[.03] border border-white/5 p-2.5 text-center"><div class="text-[9px] uppercase tracking-wider text-slate-500">Views</div><div class="text-sm font-bold font-mono mt-1" style="color:' + style.accent + '">' + formatSocialNumber(stats.views) + '</div></div>' +
           '</div>'
-        : '<div class="mt-4 flex items-center justify-between rounded-xl bg-white/[.03] border border-white/5 px-3 py-2.5"><span class="text-[10px] text-slate-500">' + escapeSocialText(item.countLabel) + '</span><span class="text-cyan-300 font-mono text-sm font-bold">' + formatSocialNumber(item.countValue) + '</span></div>';
+        : item.networkType === 'discord'
+          ? '<div class="grid grid-cols-2 gap-2 mt-4">' +
+              '<div class="rounded-xl border p-2.5 text-center" style="background:' + style.soft + ';border-color:' + style.border + '"><div class="text-[9px] uppercase tracking-wider text-slate-500">Miembros</div><div class="text-sm font-bold font-mono mt-1" style="color:' + style.accent + '">' + formatSocialNumber(item.discordStats.members) + '</div></div>' +
+              '<div class="rounded-xl border p-2.5 text-center" style="background:' + style.soft + ';border-color:' + style.border + '"><div class="text-[9px] uppercase tracking-wider text-slate-500">Online</div><div class="text-sm font-bold font-mono mt-1" style="color:' + style.accent + '">' + formatSocialNumber(item.discordStats.online) + '</div></div>' +
+            '</div>' +
+            '<div class="mt-2 text-[9px] text-slate-500 flex items-center gap-1.5"><span class="inline-block w-1.5 h-1.5 rounded-full" style="background:' + style.accent + '"></span>Datos del widget de Discord</div>'
+          : '<div class="mt-4 flex items-center justify-between rounded-xl bg-white/[.03] border border-white/5 px-3 py-2.5"><span class="text-[10px] text-slate-500">' + escapeSocialText(item.countLabel) + '</span><span class="font-mono text-sm font-bold" style="color:' + style.accent + '">' + formatSocialNumber(item.countValue) + '</span></div>';
       return '<article class="rounded-2xl bg-[#0e1118] border p-4 transition-all" style="border-color:' + style.border + '">' +
         '<div class="flex items-start justify-between gap-3">' +
           '<div class="flex items-center gap-3 min-w-0">' +
@@ -6654,6 +6682,8 @@
     document.getElementById('social-form-mode').value = item && item.countMode === 'url' ? 'url' : (item && item.countMode === 'livecounts' ? 'livecounts' : 'manual');
     document.getElementById('social-form-count-url').value = item ? item.countUrl : '';
     document.getElementById('social-form-youtube-channel').value = n.youtubeChannelId || 'UCuiY3lZrlrbXsX-RR9v3Kbg';
+    document.getElementById('social-form-discord-guild').value = item ? (item.discordGuildId || '') : '';
+    document.getElementById('social-form-discord-invite').value = item ? (item.discordInviteCode || extractDiscordInviteCode(item.url || '')) : '';
     document.getElementById('social-form-enabled').checked = !item || item.enabled !== false;
     updateSocialNetworkFormFields();
     document.getElementById('social-network-editor').classList.remove('hidden');
@@ -6662,6 +6692,52 @@
   function closeSocialNetworkEditor() {
     const editor = document.getElementById('social-network-editor');
     if (editor) editor.classList.add('hidden');
+  }
+
+  async function refreshDiscordSocialNetwork(item, silent) {
+    const inviteCode = extractDiscordInviteCode(item.discordInviteCode || item.url || '');
+    let guildId = String(item.discordGuildId || '').trim();
+    let inviteData = null;
+
+    if (inviteCode) {
+      const inviteResponse = await fetch('https://discord.com/api/v10/invites/' + encodeURIComponent(inviteCode) + '?with_counts=true', { cache: 'no-store' });
+      if (!inviteResponse.ok) throw new Error('Discord invite HTTP ' + inviteResponse.status);
+      inviteData = await inviteResponse.json();
+      guildId = guildId || String(inviteData && inviteData.guild && inviteData.guild.id || '');
+    }
+
+    if (!guildId) throw new Error('No se pudo determinar el ID del servidor Discord.');
+
+    const widgetResponse = await fetch('https://discord.com/api/guilds/' + encodeURIComponent(guildId) + '/widget.json', { cache: 'no-store' });
+    if (!widgetResponse.ok) throw new Error('Discord widget HTTP ' + widgetResponse.status);
+    const widget = await widgetResponse.json();
+
+    const stats = normalizeDiscordStats({
+      members: inviteData && inviteData.approximate_member_count,
+      online: widget && widget.presence_count != null ? widget.presence_count : inviteData && inviteData.approximate_presence_count
+    });
+
+    if (!stats.members && inviteData && inviteData.guild && inviteData.guild.approximate_member_count) {
+      stats.members = Number(inviteData.guild.approximate_member_count) || 0;
+    }
+
+    item.networkType = 'discord';
+    item.discordGuildId = guildId;
+    item.discordInviteCode = inviteCode;
+    item.discordStats = stats;
+    item.countValue = stats.members;
+    item.countLabel = 'Miembros';
+    item.countMode = 'discord';
+    item.countUrl = '';
+    if (widget && widget.name && (!item.name || item.name === 'Discord')) item.name = widget.name;
+    if (widget && widget.instant_invite && !item.url) item.url = widget.instant_invite;
+
+    initialProfile.socialNetworks = getSocialNetworks();
+    try { localStorage.setItem(SOCIAL_NETWORKS_STORAGE_KEY, JSON.stringify(getSocialNetworks())); } catch (e) {}
+    renderSocialNetworks();
+    renderSocialNetworksManager();
+    if (!silent) showStatusNotification({ title:'Discord actualizado', message:formatSocialNumber(stats.members) + ' miembros · ' + formatSocialNumber(stats.online) + ' online', type:'success', icon:'💬' });
+    return stats;
   }
 
   async function refreshYouTubeSocialNetwork(item, silent) {
@@ -6729,6 +6805,17 @@
       }
     }
 
+    if (networkType === 'discord') {
+      try {
+        await refreshDiscordSocialNetwork(item, silent);
+        return;
+      } catch (discordError) {
+        console.error('[DISCORD STATS]', discordError);
+        if (!silent) showStatusNotification({ title:'No se pudo leer Discord', message: discordError.message || 'El widget de Discord no pudo ser consultado.', type:'error', icon:'⚠️' });
+        return;
+      }
+    }
+
     if (item.countMode === 'manual') {
       if (!silent) showStatusNotification({title:'Contador manual',message:item.name + ' usa un valor manual.',type:'info',icon:'ℹ️'});
       return;
@@ -6777,7 +6864,7 @@
 
   function refreshAllSocialNetworkCounts() {
     getSocialNetworks().filter(function(item) {
-      return getSocialNetworkType(item) === 'youtube' || item.countMode === 'livecounts' || (item.countMode === 'url' && item.countUrl);
+      return getSocialNetworkType(item) === 'youtube' || getSocialNetworkType(item) === 'discord' || item.countMode === 'livecounts' || (item.countMode === 'url' && item.countUrl);
     }).forEach(function(item) {
       refreshSocialNetworkCount(item.id, true);
     });
@@ -6791,7 +6878,10 @@
     const defaults = SOCIAL_NETWORK_TYPES[networkType] || SOCIAL_NETWORK_TYPES.other;
     const existing = id ? getSocialNetworks().find(function(x) { return String(x.id) === String(id); }) : null;
     const youtubeChannelId = extractYouTubeChannelId(document.getElementById('social-form-youtube-channel').value);
+    const discordGuildId = document.getElementById('social-form-discord-guild').value.trim();
+    const discordInviteCode = extractDiscordInviteCode(document.getElementById('social-form-discord-invite').value.trim() || document.getElementById('social-form-url').value.trim());
     const isYoutube = networkType === 'youtube';
+    const isDiscord = networkType === 'discord';
     const item = {
       id: id || networkType + '-' + Date.now(),
       networkType: networkType,
@@ -6799,12 +6889,15 @@
       icon: document.getElementById('social-form-icon').value.trim() || defaults.icon,
       color: defaults.color,
       url: document.getElementById('social-form-url').value.trim(),
-      countLabel: isYoutube ? 'Suscriptores' : (document.getElementById('social-form-label').value.trim() || 'Usuarios'),
-      countValue: isYoutube ? (existing ? Number(existing.countValue) || 0 : 0) : Math.max(0, Number(document.getElementById('social-form-count').value) || 0),
-      countMode: isYoutube ? 'youtube' : (document.getElementById('social-form-mode').value === 'livecounts' ? 'livecounts' : (document.getElementById('social-form-mode').value === 'url' ? 'url' : 'manual')),
-      countUrl: isYoutube ? '' : document.getElementById('social-form-count-url').value.trim(),
+      countLabel: isYoutube ? 'Suscriptores' : (isDiscord ? 'Miembros' : (document.getElementById('social-form-label').value.trim() || 'Usuarios')),
+      countValue: isYoutube ? (existing ? Number(existing.countValue) || 0 : 0) : (isDiscord ? (existing ? Number(existing.countValue) || 0 : 0) : Math.max(0, Number(document.getElementById('social-form-count').value) || 0)),
+      countMode: isYoutube ? 'youtube' : (isDiscord ? 'discord' : (document.getElementById('social-form-mode').value === 'livecounts' ? 'livecounts' : (document.getElementById('social-form-mode').value === 'url' ? 'url' : 'manual'))),
+      countUrl: isYoutube || isDiscord ? '' : document.getElementById('social-form-count-url').value.trim(),
       youtubeChannelId: isYoutube ? (youtubeChannelId || 'UCuiY3lZrlrbXsX-RR9v3Kbg') : '',
       youtubeStats: isYoutube ? normalizeYouTubeStats(existing && existing.youtubeStats) : { subscribers: 0, videos: 0, views: 0 },
+      discordGuildId: isDiscord ? discordGuildId : '',
+      discordInviteCode: isDiscord ? discordInviteCode : '',
+      discordStats: isDiscord ? normalizeDiscordStats(existing && existing.discordStats) : { members: 0, online: 0 },
       enabled: document.getElementById('social-form-enabled').checked
     };
     const list = getSocialNetworks();
@@ -6817,10 +6910,10 @@
     renderSocialNetworksManager();
     try {
       await syncLocalDataToGoogleSheets();
-      if (isYoutube) refreshSocialNetworkCount(item.id, true);
+      if (isYoutube || isDiscord) refreshSocialNetworkCount(item.id, true);
       showStatusNotification({title:'Red guardada',message:item.name + ' fue guardada en Google Sheets.',type:'success',icon:'✓'});
     } catch (error) {
-      if (isYoutube) refreshSocialNetworkCount(item.id, true);
+      if (isYoutube || isDiscord) refreshSocialNetworkCount(item.id, true);
       showStatusNotification({title:'Red guardada localmente',message:'Google Sheets no está disponible ahora mismo.',type:'info',icon:'💾'});
     }
   }
