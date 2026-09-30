@@ -5489,6 +5489,7 @@
   let selectedGalleryLibraryImages = new Set();
   let githubElyFolderImages = [];
   let githubElyFolderLoading = false;
+  const libraryUploadInFlight = new Map();
 
   function getAllLibraryImages() {
     const customKeys = new Set();
@@ -5732,7 +5733,7 @@
              data-library-img-path="${img.path}"
              data-library-img-name="${img.name || ''}">
           <div class="relative h-44 sm:h-52 w-full shrink-0 overflow-hidden rounded-xl bg-[#141822] mb-3 border border-white/5 cursor-pointer library-image-area">
-            <img src="${img.path}" alt="${img.name || 'Imagen'}" class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105" onerror="this.src='./assets/images/ely/my-avatar.png'" />
+            <img src="${img.path}" alt="${img.name || 'Imagen'}" class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105" onerror="this.removeAttribute('src'); this.classList.add('opacity-20');" />
             <span class="absolute top-2 left-2 rounded bg-black/80 px-2 py-1 text-[10px] font-mono text-amber-400 border border-amber-400/20 backdrop-blur-sm">
               ${img.category || 'Asset'}
             </span>
@@ -6180,20 +6181,20 @@
   function addCustomImageToLibrary(name, dataUrl, onUploaded) {
     const folder = getLibraryFolderConfig();
     const normalizedName = String(name || 'Imagen Subida').trim().toLowerCase();
+    const normalizedFolder = normalizeLibraryFolder(folder);
     const duplicate = customLibraryImages.find(function (item) {
-      return (
-        (typeof item.path === 'string' && item.path === dataUrl) ||
-        (
-          String(item.name || '').trim().toLowerCase() === normalizedName &&
-          normalizeLibraryFolder(item.folder || item.category || '') === normalizeLibraryFolder(folder)
-        )
-      );
+      const itemPath = typeof item.path === 'string' ? item.path : '';
+      const itemName = String(item.name || '').trim().toLowerCase();
+      const itemFolder = normalizeLibraryFolder(item.folder || item.category || '');
+      return itemPath === dataUrl ||
+        (itemName === normalizedName && itemFolder === normalizedFolder);
     });
     if (duplicate) {
       if (typeof onUploaded === 'function') onUploaded(duplicate, dataUrl);
       renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
       return duplicate;
     }
+
     const newImg = {
       id: 'custom-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
       name: name || 'Imagen Subida',
@@ -6204,7 +6205,17 @@
     customLibraryImages.unshift(newImg);
     persistCustomLibraryImages();
     renderLibraryGrid();
-    uploadCustomImageImmediately(newImg, dataUrl).then(() => {
+
+    const uploadKey = normalizedFolder + '|' + normalizedName + '|' + dataUrl;
+    let uploadPromise = libraryUploadInFlight.get(uploadKey);
+    if (!uploadPromise) {
+      uploadPromise = uploadCustomImageImmediately(newImg, dataUrl);
+      libraryUploadInFlight.set(uploadKey, uploadPromise);
+      uploadPromise.finally(function () {
+        libraryUploadInFlight.delete(uploadKey);
+      });
+    }
+    uploadPromise.then(function () {
       if (typeof onUploaded === 'function') onUploaded(newImg, dataUrl);
     });
     return newImg;
@@ -6256,16 +6267,31 @@
       const previousPath = image.path;
       image.path = './' + githubPath;
 
-      if (currentLibraryTarget && currentLibraryTarget.type === 'gallery') {
-        const galleryInput = document.getElementById(currentLibraryTarget.hiddenInputId);
-        if (galleryInput && galleryInput.value.includes(previousPath)) {
-          galleryInput.value = galleryInput.value.split(previousPath).join(image.path);
-          renderGalleryThumbnails(currentLibraryTarget.thumbsContainerId, currentLibraryTarget.hiddenInputId);
-        }
-        if (selectedGalleryLibraryImages.has(previousPath)) {
-          selectedGalleryLibraryImages.delete(previousPath);
-          selectedGalleryLibraryImages.add(image.path);
-          updateLibraryGallerySelectionUI();
+      if (currentLibraryTarget) {
+        if (currentLibraryTarget.type === 'input') {
+          const inputEl = document.getElementById(currentLibraryTarget.inputId);
+          const previewEl = currentLibraryTarget.previewId ? document.getElementById(currentLibraryTarget.previewId) : null;
+          if (inputEl && (!inputEl.value || inputEl.value === previousPath || inputEl.value === dataUrl)) inputEl.value = image.path;
+          if (previewEl && (!previewEl.src || previewEl.src === previousPath || previewEl.src === dataUrl)) {
+            previewEl.onerror = null;
+            previewEl.src = image.path;
+          }
+        } else if (currentLibraryTarget.type === 'gallery') {
+          const galleryInput = document.getElementById(currentLibraryTarget.hiddenInputId);
+          if (galleryInput) {
+            const current = galleryInput.value ? galleryInput.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
+            const replaced = current.map(function (item) {
+              return item === previousPath || item === dataUrl ? image.path : item;
+            });
+            galleryInput.value = Array.from(new Set(replaced)).join('\n');
+            renderGalleryThumbnails(currentLibraryTarget.thumbsContainerId, currentLibraryTarget.hiddenInputId);
+          }
+          if (selectedGalleryLibraryImages.has(previousPath) || selectedGalleryLibraryImages.has(dataUrl)) {
+            selectedGalleryLibraryImages.delete(previousPath);
+            selectedGalleryLibraryImages.delete(dataUrl);
+            selectedGalleryLibraryImages.add(image.path);
+            updateLibraryGallerySelectionUI();
+          }
         }
       }
 
@@ -6413,7 +6439,14 @@
             prev.onerror = null;
             prev.src = dataUrl;
           }
-          addCustomImageToLibrary(file.name, dataUrl);
+          addCustomImageToLibrary(file.name, dataUrl, function(uploadedImage) {
+            if (!uploadedImage || !uploadedImage.path || uploadedImage.path.startsWith('data:image/')) return;
+            if (inp) inp.value = uploadedImage.path;
+            if (prev) {
+              prev.onerror = null;
+              prev.src = uploadedImage.path;
+            }
+          });
           showStatusNotification({
             title: 'Imagen Cargada',
             message: `"${file.name}" cargada correctamente.`,
@@ -6464,21 +6497,20 @@
           reader.onload = (event) => {
             const dataUrl = event.target.result;
             const added = addCustomImageToLibrary(file.name, dataUrl, function(uploadedImage) {
-              if (hiddenInput && uploadedImage.path && uploadedImage.path !== dataUrl) {
-                const current = hiddenInput.value ? hiddenInput.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
-                const index = current.indexOf(dataUrl);
-                if (index >= 0) current[index] = uploadedImage.path;
-                hiddenInput.value = current.join('\n');
-                renderGalleryThumbnails(containerId, hiddenInputId);
-              }
+              if (!hiddenInput || !uploadedImage || !uploadedImage.path || uploadedImage.path.startsWith('data:image/')) return;
+              const current = hiddenInput.value ? hiddenInput.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
+              const replaced = current.map(function(item) {
+                return item === dataUrl ? uploadedImage.path : item;
+              });
+              hiddenInput.value = Array.from(new Set(replaced)).join('\n');
+              renderGalleryThumbnails(containerId, hiddenInputId);
             });
             if (hiddenInput) {
               const current = hiddenInput.value ? hiddenInput.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
-              if (!current.includes(dataUrl)) current.push(dataUrl);
-              hiddenInput.value = current.join('\n');
+              const resolvedPath = added && added.path && !added.path.startsWith('data:image/') ? added.path : dataUrl;
+              if (!current.includes(resolvedPath)) current.push(resolvedPath);
+              hiddenInput.value = Array.from(new Set(current)).join('\n');
               renderGalleryThumbnails(containerId, hiddenInputId);
-
-
             }
           };
           reader.readAsDataURL(file);
