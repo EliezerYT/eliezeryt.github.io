@@ -46,7 +46,8 @@
     socialNetworks: [
       { id: 'youtube', networkType: 'youtube', name: 'YouTube', icon: '▶️', color: 'red', url: 'https://www.youtube.com/channel/UCuiY3lZrlrbXsX-RR9v3Kbg', countLabel: 'Suscriptores', countValue: 0, countMode: 'youtube', countUrl: '', youtubeChannelId: 'UCuiY3lZrlrbXsX-RR9v3Kbg', youtubeStats: { subscribers: 0, videos: 0, views: 0 }, enabled: true },
       { id: 'discord', networkType: 'discord', name: 'Discord', icon: '💬', color: 'discord', url: 'https://discord.gg/sqGUT7UjMr', countLabel: 'Miembros', countValue: 0, countMode: 'discord', countUrl: '', discordGuildId: '', discordInviteCode: 'sqGUT7UjMr', discordStats: { members: 0, online: 0 }, enabled: true },
-      { id: 'whatsapp', networkType: 'whatsapp', name: 'WhatsApp', icon: '🟢', color: 'green', url: 'https://chat.whatsapp.com/HfM7oRSV5q29AEJB8NwXT8', countLabel: 'Miembros', countValue: 0, countMode: 'manual', countUrl: '', enabled: true }
+      { id: 'whatsapp', networkType: 'whatsapp', name: 'WhatsApp', icon: '🟢', color: 'green', url: 'https://chat.whatsapp.com/HfM7oRSV5q29AEJB8NwXT8', countLabel: 'Miembros', countValue: 0, countMode: 'manual', countUrl: '', enabled: true },
+      { id: 'instagram', networkType: 'instagram', name: 'Instagram', icon: '📸', color: 'pink', url: 'https://www.instagram.com/_elydev', countLabel: 'Seguidores', countValue: 0, countMode: 'manual', countUrl: '', enabled: true }
     ],
   };
 
