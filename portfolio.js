@@ -5392,8 +5392,9 @@
         .filter(function(record) { return record && record.type === 'feedback_code' && record.data; })
         .map(function(record) { return record.data; });
 
-      const socialNetworksFromSheet = cards
-        .filter(function(record) { return record && record.type === 'social_network' && record.data; })
+      const socialNetworkRecordsFromSheet = cards
+        .filter(function(record) { return record && record.type === 'social_network' && record.data; });
+      const socialNetworksFromSheet = socialNetworkRecordsFromSheet
         .map(function(record) { return normalizeSocialNetwork(record.data, 0); });
 
       const profileRecord = cardMap.profile;
@@ -5401,7 +5402,7 @@
         Object.assign(initialProfile, profileRecord.data);
       }
 
-      if (socialNetworksFromSheet.length > 0) {
+      if (socialNetworkRecordsFromSheet.length > 0) {
         initialProfile.socialNetworks = socialNetworksFromSheet;
         try { localStorage.setItem(SOCIAL_NETWORKS_STORAGE_KEY, JSON.stringify(socialNetworksFromSheet)); } catch (e) {}
         renderSocialNetworks();
@@ -7186,10 +7187,8 @@
       });
       updateSocialNetworkFormFields();
     }
-    try {
-      const storedSocialNetworks = JSON.parse(localStorage.getItem(SOCIAL_NETWORKS_STORAGE_KEY) || 'null');
-      if (Array.isArray(storedSocialNetworks) && storedSocialNetworks.length) initialProfile.socialNetworks = storedSocialNetworks;
-    } catch (e) {}
+    // Google Sheets es la fuente principal de las redes.
+    // localStorage solo se usa como respaldo si Google Sheets no puede cargar los datos.
     // Los contadores de redes se actualizan cuando termina la carga de datos.
     setTimeout(function () {
       if (new URLSearchParams(window.location.search || '').has('redes')) openSocialNetworksModal();
