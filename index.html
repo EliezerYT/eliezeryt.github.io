@@ -2391,6 +2391,11 @@
       document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('img').forEach(function (img) {
           img.addEventListener('error', function () {
+            if (this.id === 'library-image-preview' || this.closest('#library-images-grid')) {
+              this.removeAttribute('src');
+              this.style.opacity = '0.2';
+              return;
+            }
             if (!this.src.includes('my-avatar.png')) {
               this.src = './assets/images/ely/my-avatar.png';
             }
