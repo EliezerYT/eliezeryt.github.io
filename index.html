@@ -2352,18 +2352,18 @@
 
     <style>
       .skill-line {
-        opacity: 0;
-        transform: translateY(7px) scale(.97);
-        animation: skillLineReveal .55s cubic-bezier(.2,.8,.2,1) forwards;
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        animation: skillLineReveal 3.6s cubic-bezier(.2,.8,.2,1) infinite;
         animation-delay: var(--skill-delay, 0ms);
       }
       .skill-line::first-letter {
         color: rgb(251 191 36);
       }
       @keyframes skillLineReveal {
-        0% { opacity: 0; transform: translateY(7px) scale(.97); text-shadow: 0 0 0 transparent; }
-        45% { opacity: 1; transform: translateY(0) scale(1.025); text-shadow: 0 0 12px rgba(251,191,36,.55); }
-        100% { opacity: 1; transform: translateY(0) scale(1); text-shadow: 0 0 0 transparent; }
+        0%, 58%, 100% { opacity: 1; transform: translateY(0) scale(1); text-shadow: 0 0 0 transparent; }
+        12% { opacity: 1; transform: translateY(0) scale(1.025); text-shadow: 0 0 12px rgba(251,191,36,.55); }
+        24% { opacity: 1; transform: translateY(0) scale(1); text-shadow: 0 0 0 transparent; }
       }
       .skill-card {
         transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
