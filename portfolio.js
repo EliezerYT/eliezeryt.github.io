@@ -3868,7 +3868,7 @@
   }
 
   // 12. Reordenar Proyectos (Subir o Bajar orden)
-  function moveProjectOrder(projectId, delta) {
+  async function moveProjectOrder(projectId, delta) {
     const index = projects.findIndex(p => p.id === projectId);
     if (index < 0) return;
     const newIndex = index + delta;
@@ -3883,18 +3883,12 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
     } catch (err) {}
 
-    syncProjectsWithBackend(projects);
     renderProjectsGrid();
-    showStatusNotification({
-      title: 'Posición Actualizada',
-      message: `Se movió la posición de "${projects[newIndex].title}".`,
-      type: 'info',
-      icon: '⇅'
-    });
+    await persistProjectsImmediately('reorder', projects[newIndex].title);
   }
 
   // 12.1 Duplicar Proyecto
-  function duplicateProject(projectId) {
+  async function duplicateProject(projectId) {
     const project = projects.find(p => p.id === projectId);
     if (!project) return;
 
@@ -3914,13 +3908,7 @@
     } catch (err) {}
 
     renderProjectsGrid();
-    syncProjectsWithBackend(projects);
-    showStatusNotification({
-      title: 'Proyecto Duplicado',
-      message: `Se ha creado una copia de "${project.title}".`,
-      type: 'success',
-      icon: '📋'
-    });
+    await persistProjectsImmediately('duplicate', copy.title);
   }
 
   // Modal de Confirmación Moderno (Reemplaza confirm nativo bloqueado en iframes)
@@ -3963,7 +3951,7 @@
   }
 
   // 13. Eliminar Proyecto
-  function deleteProject(projectId) {
+  async function deleteProject(projectId) {
     const target = projects.find(p => p.id === projectId);
     if (!target) return;
 
@@ -3979,13 +3967,7 @@
           localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
         } catch (err) {}
         renderProjectsGrid();
-        syncProjectsWithBackend(projects);
-        showStatusNotification({
-          title: 'Proyecto Eliminado',
-          message: `"${target.title}" ha sido eliminado y los archivos fueron actualizados.`,
-          type: 'info',
-          icon: '🗑️'
-        });
+        await persistProjectsImmediately('delete', target.title);
       }
     });
   }
@@ -4076,7 +4058,7 @@
     editingProjectId = null;
   }
 
-  function handleEditProjectSubmit(e) {
+  async function handleEditProjectSubmit(e) {
     e.preventDefault();
     if (!editingProjectId) return;
     const project = projects.find(p => p.id === editingProjectId);
@@ -4148,13 +4130,7 @@
 
     closeEditProjectModal();
     renderProjectsGrid();
-    syncProjectsWithBackend(projects);
-    showStatusNotification({
-      title: 'Proyecto Guardado',
-      message: `Los cambios en "${project.title}" fueron actualizados y guardados exitosamente.`,
-      type: 'success',
-      icon: '✏️'
-    });
+    await persistProjectsImmediately('edit', project.title);
   }
 
   // 15. Modal para Agregar Proyecto (Solo moderador)
@@ -4204,7 +4180,7 @@
     }
   }
 
-  function handleAddProjectSubmit(e) {
+  async function handleAddProjectSubmit(e) {
     e.preventDefault();
     const title = document.getElementById('new-proj-title').value.trim();
     const tagline = document.getElementById('new-proj-tagline').value.trim();
@@ -4258,13 +4234,7 @@
 
     closeAddProjectModal();
     renderProjectsGrid();
-    syncProjectsWithBackend(projects);
-    showStatusNotification({
-      title: 'Proyecto Guardado',
-      message: `El proyecto "${newProject.title}" se guardó y publicó exitosamente en el catálogo.`,
-      type: 'success',
-      icon: '🚀'
-    });
+    await persistProjectsImmediately('create', newProject.title);
   }
 
   // 15.1 Experiencia Laboral & Contratos (CRUD, Reordenar, Duplicar)
@@ -4672,7 +4642,32 @@
   function saveFeedbackCodesImmediately() {
     return syncCardsInfoImmediately();
   }
-  function syncProjectsWithBackend(list) { return syncCardsInfoImmediately(); }
+  function syncProjectsWithBackend(list) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (err) {}
+    return syncCardsInfoImmediately();
+  }
+
+  async function persistProjectsImmediately(action, projectTitle) {
+    try {
+      await syncProjectsWithBackend(projects);
+      showStatusNotification({
+        title: 'Proyecto guardado',
+        message: (projectTitle ? '"' + projectTitle + '" ' : '') + 'se guardó inmediatamente en Google Sheets.',
+        type: 'success',
+        icon: '✓'
+      });
+      return true;
+    } catch (error) {
+      console.error('[PROJECT SAVE ERROR]', error);
+      showStatusNotification({
+        title: 'Error al guardar proyecto',
+        message: 'El cambio quedó aplicado localmente, pero Google Sheets no pudo actualizarse: ' + (error.message || 'Error desconocido.'),
+        type: 'error',
+        icon: '⚠️'
+      });
+      return false;
+    }
+  }
 
   function syncExperiencesWithBackend(list) {
     if (typeof fetch === 'function') {
