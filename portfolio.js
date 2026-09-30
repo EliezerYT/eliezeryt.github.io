@@ -4921,39 +4921,6 @@
     return clean;
   }
 
-  async function prepareLibraryImagesForGithub(uploadedImages) {
-    let changed = false;
-
-    for (const image of customLibraryImages) {
-      if (!image || typeof image.path !== 'string' || !image.path.startsWith('data:image/')) continue;
-      if (uploadedImages.has(image.path)) {
-        const saved = uploadedImages.get(image.path);
-        image.path = saved.url;
-        changed = true;
-        continue;
-      }
-
-      const dataUrl = image.path;
-      const extension = imageExtension(dataUrl);
-      const folder = (image.folder || image.category || 'Profile').replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
-      const filename = sanitizeGithubImageName(image.name, extension);
-      const path = 'assets/images/ely/' + folder + '/' + filename;
-      const url = './' + path;
-
-      await putGithubFile(path, dataUrlToBase64(dataUrl), 'Upload library image ' + filename);
-      uploadedImages.set(dataUrl, { path, url });
-      image.path = url;
-      changed = true;
-    }
-
-    if (changed) {
-      try {
-        localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages));
-      } catch (e) {}
-      renderLibraryGrid();
-    }
-  }
-
   async function prepareGithubData(value, uploadedImages) {
     if (typeof value === 'string' && value.startsWith('https://raw.githubusercontent.com/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/' + GITHUB_BRANCH + '/')) {
       const rawPrefix = 'https://raw.githubusercontent.com/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/' + GITHUB_BRANCH + '/';
@@ -5023,46 +4990,6 @@
         path: image.path || ''
       };
     });
-  }
-
-  async function loadLibraryManifestFromGithub() {
-    const cacheBust = Date.now();
-    const githubDataBase = 'https://github.com/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/raw/refs/heads/' + GITHUB_BRANCH + '/public/data';
-    const urls = [
-      githubDataBase + '/library.json?v=' + cacheBust,
-      './data/library.json?v=' + cacheBust,
-      './public/data/library.json?v=' + cacheBust,
-      './docs/data/library.json?v=' + cacheBust
-    ];
-
-    for (const url of urls) {
-      try {
-        const response = await fetch(url, { cache: 'no-store' });
-        if (!response.ok) continue;
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          if (data.length > 0 || customLibraryImages.length === 0) {
-            customLibraryImages = data;
-            persistCustomLibraryImages();
-            renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
-          }
-          return true;
-        }
-      } catch (e) {}
-    }
-    return false;
-  }
-
-  async function syncLibraryManifestToGithub() {
-    const manifest = getLibraryManifest();
-    const files = [
-      ['src/data/library.json', manifest],
-      ['public/data/library.json', manifest],
-      ['docs/data/library.json', manifest]
-    ];
-    for (const [path, data] of files) {
-      await syncGithubJson(path, data);
-    }
   }
 
   async function syncAllToGithub() {
