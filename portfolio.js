@@ -3384,17 +3384,32 @@
     const service=serviceInput?serviceInput.value.trim():'';
     const newFeedback={id:'feedback-'+Date.now(),name,role:role||'Cliente Verificado',service,project,year:new Date().getFullYear().toString(),rating,avatar,feedback,tags:tags.length?tags:['Feedback Verificado','Cliente Satisfecho']};
     satisfiedClients.unshift(newFeedback);
-    saveFeedbackCodesImmediately().catch(function () {});
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
     if(submitBtn)submitBtn.disabled=true;
+    setFeedbackLoading(true, 'Publicando tu feedback...');
     try{
-      await syncTestimonialsWithBackend(satisfiedClients);
-      if(statusMsg){statusMsg.className='p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs leading-relaxed';statusMsg.innerHTML='✓ <strong>¡Muchas gracias!</strong> Tu feedback ha sido verificado y guardado automáticamente en Google Sheets.';statusMsg.classList.remove('hidden');}
-      setTimeout(function(){closeFeedbackModal();},2500);
+      await Promise.all([
+        saveFeedbackCodesImmediately(),
+        syncTestimonialsWithBackend(satisfiedClients)
+      ]);
+      const loadingOverlay=document.getElementById('feedback-loading-overlay');
+      const loadingSpinner=loadingOverlay ? loadingOverlay.querySelector('.feedback-loading-spinner') : null;
+      const loadingText=document.getElementById('feedback-loading-text');
+      const loadingHint=document.getElementById('feedback-loading-hint');
+      const publishedAnimation=document.getElementById('feedback-published-animation');
+      if(loadingSpinner)loadingSpinner.classList.add('hidden');
+      if(loadingText)loadingText.classList.add('hidden');
+      if(loadingHint)loadingHint.classList.add('hidden');
+      if(publishedAnimation)publishedAnimation.classList.remove('hidden');
+      setTimeout(function(){closeFeedbackModal();},1800);
     }catch(error){
       satisfiedClients=satisfiedClients.filter(c=>c.id!==newFeedback.id);
+      foundCode.used=false;
+      foundCode.usedBy='';
+      foundCode.usedAt='';
       if(submitBtn)submitBtn.disabled=false;
+      setFeedbackLoading(false);
       renderTestimonialsPreview();
       renderSatisfiedClientsModalList();
       if(statusMsg){statusMsg.className='p-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-300 text-xs leading-relaxed';statusMsg.innerHTML='⚠️ <strong>No se pudo guardar el feedback.</strong> Inténtalo nuevamente.';statusMsg.classList.remove('hidden');}
