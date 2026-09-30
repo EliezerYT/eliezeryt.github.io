@@ -4350,6 +4350,7 @@
     } catch (e) {}
 
     renderExperiences();
+    syncExperiencesWithBackend(experiences);
     showStatusNotification({
       title: 'Cronología Reordenada',
       message: experienceSortOrder === 'asc' 
@@ -4664,21 +4665,20 @@
   }
 
   function syncExperiencesWithBackend(list) {
-    if (typeof fetch === 'function') {
-      fetch('/api/experiences', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ experiences: list })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.success) {
-          updateSyncModalCounters();
-          console.log('[EXPERIENCIAS GUARDADAS]', data.message);
-        }
-      })
-      .catch(function () {});
-    }
+    try { localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(list)); } catch (e) {}
+    return syncCardsInfoImmediately().then(function (result) {
+      updateSyncModalCounters();
+      return result;
+    }).catch(function (error) {
+      console.error('[EXPERIENCIAS SHEET SYNC ERROR]', error);
+      showStatusNotification({
+        title: 'Error al guardar experiencia',
+        message: 'El cambio quedó aplicado localmente, pero Google Sheets no pudo actualizarse: ' + (error.message || 'Error desconocido.'),
+        type: 'error',
+        icon: '⚠️'
+      });
+      return null;
+    });
   }
 
   async function syncTestimonialsWithBackend(list) {
