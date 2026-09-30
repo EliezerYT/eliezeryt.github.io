@@ -6627,15 +6627,15 @@
               '</div>' +
               '<div class="mt-2 text-[9px] text-slate-500 flex items-center gap-1.5"><span class="inline-block w-1.5 h-1.5 rounded-full" style="background:' + style.accent + '"></span>@' + escapeSocialText(item.instagramUsername || extractInstagramUsername(item.url)) + '</div>'
             : '<div class="mt-4 flex items-center justify-between rounded-xl border px-3 py-2.5" style="background:' + style.soft + ';border-color:' + style.border + '"><span class="text-[10px] text-slate-500">' + escapeSocialText(item.countLabel) + '</span><span class="font-mono text-sm font-bold" style="color:' + style.accent + '">' + formatSocialNumber(item.countValue) + '</span></div>';
-      return '<article draggable="' + (isModerator && !visitorPreviewMode ? 'true' : 'false') + '" data-social-id="' + escapeSocialAttr(item.id) + '" data-social-order="' + index + '" class="social-network-card rounded-2xl bg-[#0e1118] border p-4 transition-all ' + (isModerator && !visitorPreviewMode ? 'cursor-grab active:cursor-grabbing' : '') + '" style="border-color:' + style.border + '">' +
+      return '<article draggable="' + (isModerator && !visitorPreviewMode ? 'true' : 'false') + '" data-social-id="' + escapeSocialAttr(item.id) + '" data-social-order="' + index + '" class="social-network-card h-full flex flex-col rounded-2xl bg-[#0e1118] border p-4 transition-all ' + (isModerator && !visitorPreviewMode ? 'cursor-grab active:cursor-grabbing' : '') + '" style="border-color:' + style.border + '">' +
         '<div class="flex items-start justify-between gap-3">' +
           '<div class="flex items-center gap-3 min-w-0">' +
             '<div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl font-bold border" style="background:' + style.soft + ';border-color:' + style.border + ';color:' + style.accent + '">' + escapeSocialText(item.icon) + '</div>' +
             '<div class="min-w-0"><h4 class="font-bold text-white truncate">' + escapeSocialText(item.name) + '</h4><p class="text-[10px] uppercase tracking-wider font-semibold" style="color:' + style.accent + '">' + escapeSocialText(SOCIAL_NETWORK_TYPES[item.networkType]?.name || item.networkType) + '</p></div>' +
           '</div>' +
         '</div>' +
-        body +
-        '<div class="mt-4 flex gap-2">' +
+        '<div class="flex-1">' + body + '</div>' +
+        '<div class="mt-4 flex gap-2 items-stretch">' +
           (item.url ? '<a href="' + escapeSocialAttr(item.url) + '" target="_blank" rel="noopener noreferrer" class="flex-1 text-center px-3 py-2 rounded-lg text-[11px] font-bold transition-all" style="background:' + style.accent + ';color:#05070a">Visitar →</a>' : '<span class="flex-1 text-center px-3 py-2 rounded-lg bg-white/5 text-slate-500 text-[11px]">Sin enlace</span>') +
           (isModerator && !visitorPreviewMode ? '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.editSocialNetwork(\'' + safeId + '\')" class="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-[11px] font-bold hover:bg-white/10">Editar</button>' : '') +
         '</div>' +
