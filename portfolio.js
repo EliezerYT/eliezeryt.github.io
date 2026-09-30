@@ -1675,8 +1675,49 @@
     renderProjectsGrid(true);
   }
 
+  function isAssetsRoute() {
+    const params = new URLSearchParams(window.location.search || '');
+    return params.has('assets') || params.get('page') === 'assets' || (window.location.hash || '').toLowerCase() === '#assets';
+  }
+
   function isAssetsPage() {
-    return document.body && document.body.getAttribute('data-page') === 'assets';
+    return !!(document.body && document.body.getAttribute('data-page') === 'assets') || isAssetsRoute();
+  }
+
+  function applyAssetsRouteUI() {
+    const assetsRoute = isAssetsRoute();
+    if (document.body) document.body.setAttribute('data-page', assetsRoute ? 'assets' : 'portfolio');
+    const projectSection = document.getElementById('proyectos');
+    if (!projectSection) return;
+
+    document.querySelectorAll('main > section').forEach(function (section) {
+      section.classList.toggle('hidden', assetsRoute && section !== projectSection);
+    });
+
+    const portfolioHeader = document.getElementById('portfolio-projects-header');
+    const portfolioFilters = document.getElementById('portfolio-project-filters');
+    const assetsHeader = document.getElementById('assets-page-header');
+    if (portfolioHeader) portfolioHeader.classList.toggle('hidden', assetsRoute);
+    if (portfolioFilters) portfolioFilters.classList.toggle('hidden', assetsRoute);
+    if (assetsHeader) assetsHeader.classList.toggle('hidden', !assetsRoute);
+
+    document.querySelectorAll('a[href="./assets/"], a[href="../assets/"]').forEach(function (link) {
+      link.href = '?assets';
+    });
+
+    if (assetsRoute) {
+      selectedOrigin = 'assets';
+      addElyDevBackgroundMotion();
+      requestAnimationFrame(function () {
+        renderAssetsGrid();
+        initElyDevMotionEnhancements();
+        initAssetCardInteractions();
+      });
+    } else {
+      selectedOrigin = 'todos';
+      selectedCategory = 'todos';
+      renderProjectsGrid(true);
+    }
   }
 
   function refreshAssetsPageRuntime() {
@@ -6389,26 +6430,26 @@
 
   // 17. Event Listeners y arranque
   window.addEventListener('pageshow', function () {
-    if (isAssetsPage() && document.getElementById('projects-grid')) {
-      setTimeout(function () {
-        refreshAssetsPageRuntime();
-      }, 0);
-    }
+    setTimeout(function () {
+      applyAssetsRouteUI();
+    }, 0);
   });
 
   window.addEventListener('hashchange', function () {
+    applyAssetsRouteUI();
     checkAssetHashParam();
   });
 
+  window.addEventListener('popstate', function () {
+    applyAssetsRouteUI();
+  });
+
   document.addEventListener('visibilitychange', function () {
-    if (!document.hidden && isAssetsPage() && document.getElementById('projects-grid')) {
-      setTimeout(function () {
-        refreshAssetsPageRuntime();
-      }, 0);
-    }
+    if (!document.hidden) setTimeout(applyAssetsRouteUI, 0);
   });
 
   document.addEventListener('DOMContentLoaded', function () {
+    applyAssetsRouteUI();
     if (isAssetsPage()) selectedOrigin = 'assets';
     applyTheme(currentTheme);
     setupImageDropzones();
@@ -6502,8 +6543,15 @@
 
         selectedOrigin = btn.getAttribute('data-origin-filter');
         if (selectedOrigin === 'assets') {
-          if (selectedCategory !== 'script' && selectedCategory !== 'asset') selectedCategory = 'todos';
-        } else if (selectedCategory === 'script' || selectedCategory === 'asset') {
+          if (!isAssetsPage()) {
+            history.pushState(null, '', '?assets');
+            applyAssetsRouteUI();
+          } else {
+            renderAssetsGrid();
+          }
+          return;
+        }
+        if (selectedCategory !== 'script' && selectedCategory !== 'asset') {
           selectedCategory = 'todos';
         }
         renderProjectsGrid(true);
@@ -6522,7 +6570,8 @@
         btn.classList.remove('bg-white/5', 'text-slate-400');
 
         selectedCategory = btn.getAttribute('data-category-filter');
-        renderProjectsGrid(true);
+        if (isAssetsPage()) renderAssetsGrid();
+        else renderProjectsGrid(true);
       });
     });
 
@@ -6531,7 +6580,8 @@
     if (searchInput) {
       searchInput.addEventListener('input', function (e) {
         searchQuery = e.target.value;
-        renderProjectsGrid(true);
+        if (isAssetsPage()) renderAssetsGrid();
+        else renderProjectsGrid(true);
       });
     }
 
@@ -6540,7 +6590,78 @@
       searchClear.addEventListener('click', function () {
         searchInput.value = '';
         searchQuery = '';
-        renderProjectsGrid(true);
+        if (isAssetsPage()) renderAssetsGrid();
+        else renderProjectsGrid(true);
+      });
+    }
+
+    document.querySelectorAll('[data-asset-category-filter]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('[data-asset-category-filter]').forEach(function (b) {
+          b.classList.remove('bg-white/20', 'text-white', 'border-amber-400');
+          b.classList.add('bg-white/5', 'text-slate-400');
+        });
+        btn.classList.add('bg-white/20', 'text-white', 'border-amber-400');
+        btn.classList.remove('bg-white/5', 'text-slate-400');
+        selectedCategory = btn.getAttribute('data-asset-category-filter') || 'todos';
+        if (isAssetsPage()) renderAssetsGrid();
+      });
+    });
+
+    const assetsSearchInput = document.getElementById('assets-search-input');
+    if (assetsSearchInput) {
+      assetsSearchInput.addEventListener('input', function () {
+        searchQuery = this.value;
+        if (isAssetsPage()) renderAssetsGrid();
+      });
+    }
+
+    const assetsSortSelect = document.getElementById('asset-sort-select-assets');
+    if (assetsSortSelect) {
+      assetsSortSelect.addEventListener('change', function () {
+        selectedAssetSort = this.value || 'newest';
+        assetDiscoveryMode = 'all';
+        if (isAssetsPage()) renderAssetsGrid();
+      });
+    }
+
+    const assetsFavoritesFilter = document.getElementById('asset-favorites-filter-assets');
+    if (assetsFavoritesFilter) {
+      assetsFavoritesFilter.addEventListener('click', function () {
+        showOnlyFavoriteAssets = !showOnlyFavoriteAssets;
+        if (isAssetsPage()) renderAssetsGrid();
+      });
+    }
+
+    const assetsViewToggle = document.getElementById('asset-view-toggle-assets');
+    if (assetsViewToggle) {
+      assetsViewToggle.addEventListener('click', function () {
+        if (isAssetsPage()) toggleAssetViewMode();
+      });
+    }
+
+    const assetsResetFilters = document.getElementById('assets-reset-filters-btn');
+    if (assetsResetFilters) {
+      assetsResetFilters.addEventListener('click', function () {
+        selectedCategory = 'todos';
+        searchQuery = '';
+        selectedAssetSort = 'newest';
+        assetDiscoveryMode = 'trending';
+        showOnlyFavoriteAssets = false;
+        assetViewMode = 'cards';
+        if (assetsSearchInput) assetsSearchInput.value = '';
+        if (assetsSortSelect) assetsSortSelect.value = 'newest';
+        document.querySelectorAll('[data-asset-discovery]').forEach(function (b, i) {
+          b.classList.toggle('asset-discovery-active', i === 0);
+        });
+        document.querySelectorAll('[data-asset-category-filter]').forEach(function (b, i) {
+          b.classList.toggle('bg-white/20', i === 0);
+          b.classList.toggle('text-white', i === 0);
+          b.classList.toggle('border-amber-400', i === 0);
+          b.classList.toggle('bg-white/5', i !== 0);
+          b.classList.toggle('text-slate-400', i !== 0);
+        });
+        if (isAssetsPage()) renderAssetsGrid();
       });
     }
 
