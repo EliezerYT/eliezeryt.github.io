@@ -50,6 +50,8 @@
     ]
   };
 
+  try { const savedSocials = localStorage.getItem('portfolio_profile_socials_v1'); if (savedSocials) { const parsedSocials = JSON.parse(savedSocials); if (Array.isArray(parsedSocials)) initialProfile.socialNetworks = parsedSocials; } } catch (e) {}
+
   const initialProjects = [
     {
       id: 'overdrivers',
