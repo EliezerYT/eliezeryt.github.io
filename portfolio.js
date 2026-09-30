@@ -42,7 +42,12 @@
     youtube: 'https://www.youtube.com/channel/UCuiY3lZrlrbXsX-RR9v3Kbg',
     instagram: 'https://www.instagram.com/_elydev',
     github: 'https://github.com/eliezeryt',
-    linkedin: 'https://www.linkedin.com'
+    linkedin: 'https://www.linkedin.com',
+    socialNetworks: [
+      { id: 'youtube', name: 'YouTube', icon: '▶️', url: 'https://www.youtube.com/channel/UCuiY3lZrlrbXsX-RR9v3Kbg', count: 0, countLabel: 'suscriptores', autoCount: true, provider: 'youtube', channelId: 'UCuiY3lZrlrbXsX-RR9v3Kbg', apiKey: '', statsUrl: '', statsPath: 'count' },
+      { id: 'discord', name: 'Discord', icon: '💬', url: 'https://discord.gg/sqGUT7UjMr', count: 0, countLabel: 'usuarios', autoCount: true, provider: 'discord', serverId: '', apiKey: '', statsUrl: '', statsPath: 'count' },
+      { id: 'whatsapp', name: 'WhatsApp', icon: '🟢', url: '', count: 0, countLabel: 'usuarios', autoCount: false, provider: 'whatsapp', channelId: '', serverId: '', apiKey: '', statsUrl: '', statsPath: 'count' }
+    ]
   };
 
   const initialProjects = [
@@ -3714,6 +3719,18 @@
   }
 
   // 9. Modal de Contacto y Envío de Correo Directo desde la Web (FormSubmit AJAX + Fallback Mailto)
+  function getSocialNetworks() { if (!Array.isArray(initialProfile.socialNetworks)) initialProfile.socialNetworks = []; return initialProfile.socialNetworks; }
+  function escapeSocialHtml(value) { return String(value == null ? '' : value).replace(/[&<>"']/g, function (ch) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]; }); }
+  function getSocialCountPath(obj, path) { return String(path || 'count').split('.').reduce(function (v, key) { return v == null ? undefined : v[key]; }, obj); }
+  async function refreshSocialNetworkCount(network) { if (!network || !network.autoCount) return; try { let count = null; if (network.statsUrl) { const response = await fetch(network.statsUrl, { cache: 'no-store' }); const data = await response.json(); count = Number(getSocialCountPath(data, network.statsPath || 'count')); } else if (network.provider === 'youtube' && network.channelId && network.apiKey) { const response = await fetch('https://www.googleapis.com/youtube/v3/channels?part=statistics&id=' + encodeURIComponent(network.channelId) + '&key=' + encodeURIComponent(network.apiKey), { cache: 'no-store' }); const data = await response.json(); count = Number(data && data.items && data.items[0] && data.items[0].statistics && data.items[0].statistics.subscriberCount); } else if (network.provider === 'discord' && network.serverId) { const response = await fetch('https://discord.com/api/guilds/' + encodeURIComponent(network.serverId) + '/widget.json', { cache: 'no-store' }); const data = await response.json(); count = Number(data && data.presence_count); if (!Number.isFinite(count) && Array.isArray(data && data.members)) count = data.members.length; } if (Number.isFinite(count)) { network.count = count; renderSocialNetworks(); } } catch (e) {} }
+  function refreshAllSocialNetworkCounts() { getSocialNetworks().forEach(refreshSocialNetworkCount); }
+  function renderSocialNetworks() { const grid = document.getElementById('social-networks-grid'); if (!grid) return; const list = getSocialNetworks(); grid.innerHTML = list.length ? list.map(function (network) { const count = Number(network.count); const countText = Number.isFinite(count) ? count.toLocaleString('es-DO') : '—'; const edit = isModerator && !visitorPreviewMode ? '<button type="button" class="absolute top-2 right-2 rounded-lg bg-white/10 border border-white/10 px-2 py-1 text-[10px] text-slate-300 hover:text-white" onclick="event.stopPropagation(); window.ElyPortfolio.editSocialNetwork(\\'' + escapeSocialHtml(network.id) + '\\')">✏️</button>' : ''; return '<article class="relative rounded-2xl border border-[#232733] bg-[#0b0d11] p-4 text-center hover:border-cyan-400/50 transition-all">' + edit + '<div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-400/10 border border-cyan-400/20 text-2xl">' + escapeSocialHtml(network.icon || '🔗') + '</div><h4 class="font-bold text-white">' + escapeSocialHtml(network.name || 'Red social') + '</h4><div class="mt-2 text-2xl font-extrabold text-cyan-300">' + countText + '</div><div class="text-[10px] uppercase tracking-wider text-slate-500">' + escapeSocialHtml(network.countLabel || 'usuarios') + '</div><a href="' + escapeSocialHtml(network.url || '#') + '" target="_blank" rel="noopener noreferrer" class="mt-3 inline-flex items-center justify-center rounded-lg bg-cyan-400/10 border border-cyan-400/20 px-3 py-1.5 text-[11px] font-bold text-cyan-300 hover:bg-cyan-400/20">Visitar →</a></article>'; }).join('') : '<div class="col-span-full text-center text-sm text-slate-500 py-8">No hay redes configuradas.</div>'; }
+  function openSocialNetworksModal() { renderSocialNetworks(); const modal = document.getElementById('social-networks-modal'); if (modal) modal.classList.remove('hidden'); document.body.style.overflow = 'hidden'; refreshAllSocialNetworkCounts(); }
+  function closeSocialNetworksModal() { const modal = document.getElementById('social-networks-modal'); if (modal) modal.classList.add('hidden'); const form = document.getElementById('social-network-form'); if (form) form.classList.add('hidden'); document.body.style.overflow = ''; }
+  function editSocialNetwork(id) { if (!isModerator) return; const network = id ? getSocialNetworks().find(function (item) { return item.id === id; }) : null; document.getElementById('social-form-id').value = network ? network.id : ''; document.getElementById('social-form-name').value = network ? network.name || '' : ''; document.getElementById('social-form-icon').value = network ? network.icon || '🔗' : '🔗'; document.getElementById('social-form-url').value = network ? network.url || '' : ''; document.getElementById('social-form-count').value = network ? Number(network.count) || 0 : 0; document.getElementById('social-form-label').value = network ? network.countLabel || 'usuarios' : 'usuarios'; document.getElementById('social-form-provider').value = network ? network.provider || 'manual' : 'manual'; document.getElementById('social-form-auto').checked = !!(network && network.autoCount); document.getElementById('social-form-channel').value = network ? network.channelId || network.serverId || '' : ''; document.getElementById('social-form-api-key').value = network ? network.apiKey || '' : ''; document.getElementById('social-form-stats-url').value = network ? network.statsUrl || '' : ''; document.getElementById('social-form-stats-path').value = network ? network.statsPath || 'count' : 'count'; document.getElementById('social-form-title').textContent = network ? 'Editar red' : 'Agregar red'; document.getElementById('social-network-form').classList.remove('hidden'); }
+  function deleteSocialNetwork() { if (!isModerator) return; const id = document.getElementById('social-form-id').value; if (!id || !confirm('¿Eliminar esta red social?')) return; initialProfile.socialNetworks = getSocialNetworks().filter(function (item) { return item.id !== id; }); try { localStorage.setItem('portfolio_profile_socials_v1', JSON.stringify(initialProfile.socialNetworks)); } catch (e) {} renderSocialNetworks(); document.getElementById('social-network-form').classList.add('hidden'); syncLocalDataToGoogleSheets().catch(function () {}); }
+  function handleSocialNetworkSubmit(e) { e.preventDefault(); if (!isModerator) return; const provider = document.getElementById('social-form-provider').value; const channel = document.getElementById('social-form-channel').value.trim(); const network = { id: document.getElementById('social-form-id').value.trim() || 'social-' + Date.now(), name: document.getElementById('social-form-name').value.trim() || 'Red social', icon: document.getElementById('social-form-icon').value.trim() || '🔗', url: document.getElementById('social-form-url').value.trim(), count: Number(document.getElementById('social-form-count').value) || 0, countLabel: document.getElementById('social-form-label').value.trim() || 'usuarios', provider: provider, autoCount: document.getElementById('social-form-auto').checked, channelId: provider === 'youtube' ? channel : '', serverId: provider === 'discord' ? channel : '', apiKey: document.getElementById('social-form-api-key').value.trim(), statsUrl: document.getElementById('social-form-stats-url').value.trim(), statsPath: document.getElementById('social-form-stats-path').value.trim() || 'count' }; const list = getSocialNetworks(); const index = list.findIndex(function (item) { return item.id === network.id; }); if (index >= 0) list[index] = network; else list.push(network); initialProfile.socialNetworks = list; try { localStorage.setItem('portfolio_profile_socials_v1', JSON.stringify(list)); } catch (e) {} renderSocialNetworks(); document.getElementById('social-network-form').classList.add('hidden'); showStatusNotification({ title: 'Red guardada', message: 'La configuración de la red social fue actualizada.', type: 'success', icon: '🌐' }); syncLocalDataToGoogleSheets().catch(function () {}); refreshSocialNetworkCount(network); }
+
   function openContactModal(initialSubject) {
     const modal = document.getElementById('contact-modal');
     if (!modal) return;
@@ -3786,7 +3803,8 @@
         }
         document.getElementById('contact-form').reset();
         setTimeout(function () {
-          closeContactModal();
+          closeSocialNetworksModal();
+        closeContactModal();
         }, 3000);
       } else {
         throw new Error(result.message || 'Error al enviar');
@@ -6774,6 +6792,9 @@
     const contactForm = document.getElementById('contact-form');
     if (contactForm) contactForm.addEventListener('submit', handleContactSubmit);
 
+    const socialForm = document.getElementById('social-network-form');
+    if (socialForm) socialForm.addEventListener('submit', handleSocialNetworkSubmit);
+
     const authForm = document.getElementById('auth-form');
     if (authForm) authForm.addEventListener('submit', handleAuthSubmit);
 
@@ -7100,6 +7121,10 @@
     copyFeedbackLink: copyFeedbackLink,
     // Modales de contacto, auth, CV y utilidades
     showStatusNotification: showStatusNotification,
+    openSocialNetworksModal: openSocialNetworksModal,
+    closeSocialNetworksModal: closeSocialNetworksModal,
+    editSocialNetwork: editSocialNetwork,
+    deleteSocialNetwork: deleteSocialNetwork,
     openContactModal: openContactModal,
     closeContactModal: closeContactModal,
     openResumeModal: openResumeModal,
