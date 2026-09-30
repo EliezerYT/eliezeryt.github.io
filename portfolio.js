@@ -3250,7 +3250,7 @@
 
     [nameInput, roleInput, serviceInput, projInput, avatarInput, tagsInput].forEach(function (input) {
       if (!input) return;
-      if (input === nameInput) {
+      if (input === nameInput || input === projInput) {
         input.readOnly = false;
         input.disabled = false;
         input.classList.remove('opacity-70', 'cursor-not-allowed');
