@@ -7938,7 +7938,6 @@
     closeSyncFilesModal: closeSyncFilesModal,
     saveSheetsBackup: saveSheetsBackup,
     loadSheetsBackup: loadSheetsBackup,
-    saveAllDataToBackend: saveAllDataToBackend,
     loadAllDataFromBackend: loadAllDataFromBackend,
     // Proyectos
     openProjectModal: openProjectModal,
