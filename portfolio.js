@@ -44,7 +44,7 @@
     github: 'https://github.com/eliezeryt',
     linkedin: 'https://www.linkedin.com',
     socialNetworks: [
-      { id: 'youtube', name: 'YouTube', icon: '▶️', color: 'red', url: 'https://www.youtube.com/channel/UCuiY3lZrlrbXsX-RR9v3Kbg', countLabel: 'Suscriptores', countValue: 0, countMode: 'manual', countUrl: '', enabled: true },
+      { id: 'youtube', name: 'YouTube', icon: '▶️', color: 'red', url: 'https://www.youtube.com/channel/UCuiY3lZrlrbXsX-RR9v3Kbg', countLabel: 'Suscriptores', countValue: 0, countMode: 'livecounts', countUrl: 'https://livecounts.io/youtube-live-subscriber-counter/UCuiY3lZrlrbXsX-RR9v3Kbg', enabled: true },
       { id: 'discord', name: 'Discord', icon: '💬', color: 'indigo', url: 'https://discord.gg/sqGUT7UjMr', countLabel: 'Usuarios', countValue: 0, countMode: 'manual', countUrl: '', enabled: true },
       { id: 'whatsapp', name: 'WhatsApp', icon: '🟢', color: 'green', url: '', countLabel: 'Usuarios', countValue: 0, countMode: 'manual', countUrl: '', enabled: true }
     ],
@@ -6457,7 +6457,7 @@
       url: String(item.url || ''),
       countLabel: String(item.countLabel || 'Usuarios'),
       countValue: Number(item.countValue) || 0,
-      countMode: item.countMode === 'url' ? 'url' : 'manual',
+      countMode: item.countMode === 'livecounts' ? 'livecounts' : (item.countMode === 'url' ? 'url' : 'manual'),
       countUrl: String(item.countUrl || ''),
       enabled: item.enabled !== false
     };
@@ -6494,7 +6494,7 @@
         '</div>' +
         '<div class="mt-4 flex gap-2">' +
           (item.url ? '<a href="' + escapeSocialAttr(item.url) + '" target="_blank" rel="noopener noreferrer" class="flex-1 text-center px-3 py-2 rounded-lg bg-cyan-400 text-black text-[11px] font-bold hover:bg-cyan-300">Visitar →</a>' : '<span class="flex-1 text-center px-3 py-2 rounded-lg bg-white/5 text-slate-500 text-[11px]">Sin enlace</span>') +
-          (isModerator && !visitorPreviewMode ? '<button type="button" onclick="window.ElyPortfolio.editSocialNetwork(' + JSON.stringify(item.id) + ')" class="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-[11px] font-bold hover:bg-white/10">Editar</button>' : '') +
+          (isModerator && !visitorPreviewMode ? '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.editSocialNetwork(' + JSON.stringify(item.id) + ')" class="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-[11px] font-bold hover:bg-white/10">Editar</button>' : '') +
         '</div>' +
       '</article>';
     }).join('');
@@ -6527,15 +6527,18 @@
         const n = normalizeSocialNetwork(item, 0);
         return '<div class="flex items-center gap-3 p-3 rounded-xl bg-white/[.03] border border-white/5">' +
           '<span class="text-lg">' + n.icon + '</span><span class="flex-1 text-xs text-white font-semibold">' + escapeSocialText(n.name) + '</span>' +
-          '<span class="text-[10px] text-slate-500">' + (n.countMode === 'url' ? 'Automático' : 'Manual') + '</span>' +
-          '<button type="button" onclick="window.ElyPortfolio.editSocialNetwork(' + JSON.stringify(n.id) + ')" class="px-2.5 py-1.5 rounded-lg bg-white/5 text-[10px] text-slate-300">Editar</button>' +
-          '<button type="button" onclick="window.ElyPortfolio.deleteSocialNetwork(' + JSON.stringify(n.id) + ')" class="px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-300 text-[10px]">Eliminar</button>' +
+          '<span class="text-[10px] text-slate-500">' + (n.countMode === 'livecounts' ? 'Livecounts' : (n.countMode === 'url' ? 'Endpoint JSON' : 'Manual')) + '</span>' +
+          '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.editSocialNetwork(' + JSON.stringify(n.id) + ')" class="px-2.5 py-1.5 rounded-lg bg-white/5 text-[10px] text-slate-300">Editar</button>' +
+          '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.deleteSocialNetwork(' + JSON.stringify(n.id) + ')" class="px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-300 text-[10px]">Eliminar</button>' +
         '</div>';
       }).join('') : '<div class="text-xs text-slate-500 py-3">No hay redes configuradas.</div>') + '</div>';
   }
 
   function editSocialNetwork(id) {
-    if (!isModerator || visitorPreviewMode) return;
+    if (!isModerator || visitorPreviewMode) {
+      if (!isModerator) openAuthModal();
+      return;
+    }
     const item = id ? getSocialNetworks().find(function(x) { return String(x.id) === String(id); }) : null;
     const form = document.getElementById('social-network-form');
     if (!form) return;
@@ -6556,21 +6559,75 @@
     if (editor) editor.classList.add('hidden');
   }
 
+  function extractLiveCountsOdometerDocument(doc) {
+    if (!doc) return '';
+    const root = doc.querySelector('.odometer .odometer-inside') || doc.querySelector('.odometer-inside');
+    if (!root) return '';
+    const digits = Array.from(root.querySelectorAll('.odometer-digit, .odometer-digit-spacer'));
+    let value = '';
+    digits.forEach(function(el) {
+      const digitNode = el.querySelector('.odometer-digit-inner, .odometer-digit-value');
+      const raw = (digitNode ? digitNode.textContent : el.textContent || '').trim();
+      const match = raw.match(/\d/);
+      if (match) value += match[0];
+    });
+    return value;
+  }
+
+  function extractLiveCountsOdometerHtml(text) {
+    if (!text) return '';
+    const match = text.match(/odometer-inside[\\s\\S]*?<\\/div>/i);
+    if (!match) return '';
+    return (match[0].match(/\\d/g) || []).join('');
+  }
+
   async function refreshSocialNetworkCount(id, silent) {
     const item = getSocialNetworks().find(function(x) { return String(x.id) === String(id); });
-    if (!item || item.countMode !== 'url' || !item.countUrl) return;
+    if (!item) return;
+
+    if (item.countMode === 'manual') {
+      if (!silent) showStatusNotification({title:'Contador manual',message:item.name + ' usa un valor manual.',type:'info',icon:'ℹ️'});
+      return;
+    }
+
     try {
-      const response = await fetch(item.countUrl, { cache: 'no-store' });
-      if (!response.ok) throw new Error('Endpoint no disponible');
-      const data = await response.json();
-      const value = Number(data.count ?? data.subscribers ?? data.members ?? data.users ?? data.total);
-      if (!Number.isFinite(value)) throw new Error('El endpoint no devolvió un contador válido');
-      item.countValue = Math.max(0, Math.floor(value));
+      const response = await fetch(item.countUrl, { cache: 'no-store', mode: 'cors' });
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      const text = await response.text();
+
+      if (item.countMode === 'livecounts') {
+        const doc = new DOMParser().parseFromString(text, 'text/html');
+        let value = extractLiveCountsOdometerDocument(doc);
+        if (!value) value = extractLiveCountsOdometerHtml(text);
+        if (!value) throw new Error('No se encontró .odometer-inside / .odometer-digit.');
+        item.countValue = Math.max(0, parseInt(value, 10));
+      } else {
+        const data = JSON.parse(text);
+        const value = Number(data.count ?? data.subscribers ?? data.members ?? data.users ?? data.total);
+        if (!Number.isFinite(value)) throw new Error('El endpoint no devolvió un contador válido.');
+        item.countValue = Math.max(0, Math.floor(value));
+      }
+
+      initialProfile.socialNetworks = getSocialNetworks();
       try { localStorage.setItem(SOCIAL_NETWORKS_STORAGE_KEY, JSON.stringify(getSocialNetworks())); } catch (e) {}
       renderSocialNetworks();
-      if (!silent) showStatusNotification({title:'Contador actualizado',message:item.name + ': ' + item.countValue.toLocaleString('es-DO'),type:'success',icon:'✓'});
+      renderSocialNetworksManager();
+      if (!silent) showStatusNotification({
+        title:'Contador actualizado',
+        message:item.name + ': ' + item.countValue.toLocaleString('es-DO'),
+        type:'success',
+        icon:'✓'
+      });
     } catch (error) {
-      if (!silent) showStatusNotification({title:'No se pudo actualizar',message:error.message || 'Error consultando el contador.',type:'error',icon:'⚠️'});
+      console.error('[SOCIAL COUNT]', error);
+      if (!silent) showStatusNotification({
+        title:'No se pudo leer el contador',
+        message:item.countMode === 'livecounts'
+          ? 'Livecounts no permite la lectura directa desde este navegador o cambió su HTML. El valor manual sigue disponible.'
+          : (error.message || 'Error consultando el contador.'),
+        type:'error',
+        icon:'⚠️'
+      });
     }
   }
 
@@ -6647,6 +6704,9 @@
     if (isAssetsPage()) selectedOrigin = 'assets';
     applyTheme(currentTheme);
     setupImageDropzones();
+    const socialForm = document.getElementById('social-network-form');
+    if (socialForm) socialForm.addEventListener('submit', handleSocialNetworkSubmit);
+
     loadAllDataFromBackend();
     loadLibraryManifestFromGithub();
     loadImagesFromMainElyFolder();
