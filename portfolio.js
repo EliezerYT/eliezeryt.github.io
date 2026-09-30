@@ -9,7 +9,6 @@
 
   const STORAGE_KEY = 'portfolio_projects_elydev_v8';
   const EXPERIENCES_STORAGE_KEY = 'portfolio_experiences_v2';
-  const TESTIMONIALS_STORAGE_KEY = 'portfolio_satisfied_clients_v3';
   const FEEDBACK_CODES_STORAGE_KEY = 'portfolio_feedback_codes_v2';
   const ASSETS_STORAGE_KEY = 'portfolio_community_assets_v1';
   const ASSET_LIKES_KEY = 'portfolio_community_asset_likes_v1';
@@ -834,97 +833,6 @@
   ];
 
   // 1.2 Listado Oficial de Clientes Satisfechos
-  const initialSatisfiedClients = [
-    {
-      id: 'client-capricornio',
-      name: 'CapricornioTV & Capricornio Games',
-      role: 'Influencer Masivo & Productora',
-      project: 'MotoLoco | En Una Goma (Juego + Web + Backend)',
-      year: '2024 - 2025',
-      rating: 5,
-      avatar: './assets/images/ely/icon-enunagoma.png',
-      feedback: 'Desarrollo completo del juego y la plataforma web oficial. Eliezer manejó tanto la programación del videojuego en Unity como la web promocional con base de datos en tiempo récord para nuestra comunidad.',
-      tags: ['Videojuego Unity', 'Web PHP/MySQL', 'Audiencia Masiva']
-    },
-    {
-      id: 'client-dogame',
-      name: 'DoGame (Estudio de Videojuegos)',
-      role: 'Estudio de Videojuegos & Producción',
-      project: 'Dominican Power & Yun Online',
-      year: '2021 - 2022',
-      rating: 5,
-      avatar: './assets/images/ely/icon-dominicanpower.png',
-      feedback: 'Nos apoyó en un momento crucial realizando el remake integral de interfaz, corrigiendo bugs críticos de red y conectando el multijugador con Photon Network. Un profesional serio, ágil y con gran dominio de Unity.',
-      tags: ['Photon PUN 2', 'UI/UX Remake', 'Economía In-Game']
-    },
-    {
-      id: 'client-shl',
-      name: 'SHL (Empresa / Cliente Comercial)',
-      role: 'Cliente Comercial',
-      project: 'Dominoes Republic (Optimización & Reglas)',
-      year: '2022',
-      rating: 5,
-      avatar: './assets/images/ely/icon-dominoesrepublic.png',
-      feedback: 'Excelente diagnóstico para solucionar errores críticos de geolocalización y sincronización de reglas en partidas competitivas. Muy resolutivo en situaciones de alta presión.',
-      tags: ['Bug Fixing', 'Geolocalización', 'Reglas de Juego']
-    },
-    {
-      id: 'client-jobslaru',
-      name: 'Jobs Laru',
-      role: 'Estudio de Videojuegos / Colaborador Frecuente',
-      project: 'LEVA 3D, Simón, Fireball, Dark Castle, GUGO',
-      year: '2019 - 2021',
-      rating: 5,
-      avatar: './assets/images/ely/my-avatar.png',
-      feedback: 'Al principio deposité toda mi confianza en el trabajo de Eliezer y no pudo haber mejor persona. Tuve excelentes resultados de desarrollo en todos los proyectos. Rápido, accesible y con gran nivel técnico.',
-      tags: ['Multi-Juegos', 'Google Play', 'Monetización AdMob']
-    },
-    {
-      id: 'client-telesancris',
-      name: 'Telesancris (Canal de Televisión)',
-      role: 'Joselmin Carmona · Directiva Telesancris',
-      project: 'Telesancris Mobile Streaming App',
-      year: '2023',
-      rating: 5,
-      avatar: './assets/images/ely/icon-telesancris.png',
-      feedback: 'Me siento sumamente satisfecho de haber trabajado mi aplicación con Eliezer; los resultados fueron mucho mejores de lo que esperaba y con un trato muy profesional.',
-      tags: ['Streaming HLS', 'App Móvil', 'Android']
-    },
-    {
-      id: 'client-cifraslimk',
-      name: 'Cifra Slimk (Artista Musical)',
-      role: 'Artista Urbano / Producción Sonora',
-      project: 'OverDrivers Soundtrack ("Quieren Quitarme")',
-      year: '2024 - 2025',
-      rating: 5,
-      avatar: './assets/images/ely/overdrivers-teaser.jpg',
-      feedback: 'Increíble visión para sincronizar el ritmo de la música con las físicas de carreras del juego y crear los teasers cinematográficos oficiales con excelente calidad audiovisual.',
-      tags: ['Banda Sonora', 'Teasers YouTube', 'Colaboración']
-    },
-    {
-      id: 'client-moneyfight',
-      name: 'MoneyFight & Cesar',
-      role: 'Empresa / Desarrolladores Asociados',
-      project: 'Nuevo Título Interactivo Confidencial',
-      year: '2025 - Presente',
-      rating: 5,
-      avatar: './assets/images/ely/my-avatar.png',
-      feedback: 'Actualmente trabajando en un proyecto comercial interactivo de alto impacto. Gran rigurosidad técnica, cumplimiento de hitos y comunicación fluida en cada fase.',
-      tags: ['En Desarrollo Activo', 'Unity C#', 'Arquitectura']
-    },
-    {
-      id: 'client-students',
-      name: 'Alumnos de Clases Privadas Unity',
-      role: 'Comunidad de Alumnos & Desarrolladores Indie',
-      project: 'Mentorías Personalizadas en Unity, C# & Monetización',
-      year: '2024 - 2025',
-      rating: 5,
-      avatar: './assets/images/ely/icon-appads.png',
-      feedback: 'Las clases personalizadas 1 a 1 te ahorran meses de ensayo y error. Eliezer te enseña directamente en tu proyecto cómo implementar Ads, IAP, multijugador online y cómo compilar sin fallos para la tienda.',
-      tags: ['Mentoría 1 a 1', 'Unity & C#', 'Monetización']
-    }
-  ];
-
   // 1.3 Códigos Especiales Iniciales para Realizar Feedback (Uso Único)
   const initialCommunityAssets = [];
 
@@ -966,20 +874,8 @@
     experiences = JSON.parse(JSON.stringify(initialExperiences));
   }
 
-  // Clientes Satisfechos / Feedback
+  // Clientes Satisfechos / Feedback: Google Sheets es la única fuente de verdad.
   let satisfiedClients = [];
-  try {
-    const clientsSaved = localStorage.getItem(TESTIMONIALS_STORAGE_KEY);
-    if (clientsSaved) {
-      const parsedClients = JSON.parse(clientsSaved);
-      if (Array.isArray(parsedClients) && parsedClients.length > 0) {
-        satisfiedClients = parsedClients;
-      }
-    }
-  } catch (e) {}
-  if (!satisfiedClients || satisfiedClients.length === 0) {
-    satisfiedClients = JSON.parse(JSON.stringify(initialSatisfiedClients));
-  }
 
   // Códigos de Feedback
   let feedbackCodes = [];
@@ -3168,7 +3064,7 @@
     document.body.style.overflow = '';
   }
 
-  function moveTestimonialOrder(testimonialId, delta) {
+  async function moveTestimonialOrder(testimonialId, delta) {
     const index = satisfiedClients.findIndex(c => c.id === testimonialId);
     if (index < 0) return;
     const newIndex = index + delta;
@@ -3178,21 +3074,15 @@
     satisfiedClients[index] = satisfiedClients[newIndex];
     satisfiedClients[newIndex] = temp;
 
-    try {
-      localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients));
-    } catch (e) {}
-
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
-    showStatusNotification({
-      title: 'Posición Actualizada',
-      message: `Se reordenó la posición del feedback de "${satisfiedClients[newIndex].name}".`,
-      type: 'info',
-      icon: '⇅'
-    });
-  }
-
-  function duplicateTestimonial(testimonialId) {
+    try {
+      await syncTestimonialsWithBackend(satisfiedClients);
+      showStatusNotification({ title: 'Posición Actualizada', message: 'El orden del feedback se guardó en Google Sheets.', type: 'info', icon: '⇅' });
+    } catch (error) {
+      showStatusNotification({ title: 'Error al guardar', message: 'El cambio no pudo guardarse en Google Sheets.', type: 'error', icon: '⚠️' });
+    }
+  }  async function duplicateTestimonial(testimonialId) {
     const target = satisfiedClients.find(c => c.id === testimonialId);
     if (!target) return;
 
@@ -3207,21 +3097,15 @@
       satisfiedClients.unshift(copy);
     }
 
-    try {
-      localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients));
-    } catch (e) {}
-
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
-    showStatusNotification({
-      title: 'Feedback Duplicado',
-      message: `Se ha creado una copia del feedback de "${target.name}".`,
-      type: 'success',
-      icon: '📋'
-    });
-  }
-
-  function deleteTestimonial(testimonialId) {
+    try {
+      await syncTestimonialsWithBackend(satisfiedClients);
+      showStatusNotification({ title: 'Feedback Duplicado', message: 'La copia se guardó en Google Sheets.', type: 'success', icon: '📋' });
+    } catch (error) {
+      showStatusNotification({ title: 'Error al guardar', message: 'La copia no pudo guardarse en Google Sheets.', type: 'error', icon: '⚠️' });
+    }
+  }  function deleteTestimonial(testimonialId) {
     const target = satisfiedClients.find(c => c.id === testimonialId);
     if (!target) return;
     showConfirmModal({
@@ -3232,12 +3116,10 @@
       danger: true,
       onConfirm: function () {
         satisfiedClients = satisfiedClients.filter(c => c.id !== testimonialId);
-        try {
-          localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients));
-        } catch (e) {}
+
         renderTestimonialsPreview();
         renderSatisfiedClientsModalList();
-        syncTestimonialsWithBackend(satisfiedClients);
+        syncTestimonialsWithBackend(satisfiedClients).catch(function () { showStatusNotification({ title: 'Error al guardar', message: 'El cambio no pudo guardarse en Google Sheets.', type: 'error', icon: '⚠️' }); });
         showStatusNotification({
           title: 'Feedback Eliminado',
           message: `El feedback de "${target.name}" ha sido eliminado y guardado.`,
@@ -3312,7 +3194,7 @@
     editingTestimonialId = null;
   }
 
-  function handleTestimonialSubmit(e) {
+  async function handleTestimonialSubmit(e) {
     e.preventDefault();
     const name = document.getElementById('test-form-name').value.trim();
     const role = document.getElementById('test-form-role').value.trim();
@@ -3351,14 +3233,10 @@
       satisfiedClients.unshift(newTestimonial);
     }
 
-    try {
-      localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients));
-    } catch (err) {}
-
     closeTestimonialModal();
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
-    syncTestimonialsWithBackend(satisfiedClients);
+    try { await syncTestimonialsWithBackend(satisfiedClients); } catch (error) { showStatusNotification({ title: 'Error al guardar', message: 'El feedback no pudo guardarse en Google Sheets.', type: 'error', icon: '⚠️' }); return; }
     showStatusNotification({
       title: editingTestimonialId ? 'Feedback Actualizado' : 'Feedback Guardado',
       message: `El feedback de "${name}" se guardó exitosamente.`,
@@ -3391,7 +3269,7 @@
     document.body.style.overflow = '';
   }
 
-  function handleFeedbackSubmit(e) {
+  async function handleFeedbackSubmit(e) {
     e.preventDefault();
     const codeInput = document.getElementById('feedback-input-code');
     const nameInput = document.getElementById('feedback-input-name');
@@ -3464,12 +3342,26 @@
     satisfiedClients.unshift(newFeedback);
 
     try {
-      localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients));
       localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes));
     } catch (err) {}
 
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
+
+    try {
+      await syncTestimonialsWithBackend(satisfiedClients);
+    } catch (error) {
+      satisfiedClients = satisfiedClients.filter(function (item) { return item.id !== newFeedback.id; });
+      renderTestimonialsPreview();
+      renderSatisfiedClientsModalList();
+      if (statusMsg) {
+        statusMsg.className = 'p-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-300 text-xs leading-relaxed';
+        statusMsg.innerHTML = '❌ <strong>No se pudo guardar el feedback:</strong> Google Sheets no respondió correctamente.';
+        statusMsg.classList.remove('hidden');
+      }
+      if (submitBtn) submitBtn.disabled = false;
+      return;
+    }
 
     if (statusMsg) {
       statusMsg.className = 'p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs leading-relaxed';
@@ -4751,22 +4643,14 @@
     }
   }
 
-  function syncTestimonialsWithBackend(list) {
-    if (typeof fetch === 'function') {
-      fetch('/api/testimonials', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ testimonials: list })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.success) {
-          updateSyncModalCounters();
-          console.log('[TESTIMONIOS GUARDADOS]', data.message);
-        }
-      })
-      .catch(function () {});
-    }
+  async function syncTestimonialsWithBackend(list) {
+    const feedbackRecords = (Array.isArray(list) ? list : [])
+      .filter(function (item) { return item && item.id; })
+      .map(function (item) {
+        return { id: String(item.id), type: 'feedback', data: item };
+      });
+
+    return syncDataToGoogleSheet(FEEDBACKS_SHEET_NAME, feedbackRecords);
   }
 
   const CARDS_INFO_SHEET_NAME = 'CardsInfo';
@@ -5423,9 +5307,10 @@
         renderExperiences();
       }
 
-      if (feedbacksFromSheet.length > 0) {
-        satisfiedClients = feedbacksFromSheet;
-        try { localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients)); } catch (e) {}
+      satisfiedClients = feedbacksFromSheet;
+      renderTestimonialsPreview();
+      renderSatisfiedClientsModalList();
+
         renderTestimonialsPreview();
         renderSatisfiedClientsModalList();
       }
@@ -5492,7 +5377,7 @@
 
       await loadJson('testimonials', (list) => {
         satisfiedClients = list;
-        try { localStorage.setItem(TESTIMONIALS_STORAGE_KEY, JSON.stringify(satisfiedClients)); } catch (e) {}
+
         renderTestimonialsPreview();
         renderSatisfiedClientsModalList();
       });
