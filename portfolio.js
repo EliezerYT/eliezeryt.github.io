@@ -1014,8 +1014,23 @@
   let selectedAsset = null;
   let editingAssetId = null;
   let selectedAssetSort = 'newest';
+  let assetDiscoveryMode = 'trending';
   let showOnlyFavoriteAssets = false;
   let assetViewMode = 'cards';
+  const ASSET_RECENT_VIEWS_KEY = 'portfolio_community_asset_recent_views_v1';
+  let recentAssetViews = [];
+  try { recentAssetViews = JSON.parse(localStorage.getItem(ASSET_RECENT_VIEWS_KEY) || '[]'); } catch (e) { recentAssetViews = []; }
+  if (!Array.isArray(recentAssetViews)) recentAssetViews = [];
+  function rememberAssetView(assetId) {
+    recentAssetViews = [assetId].concat(recentAssetViews.filter(function (id) { return id !== assetId; })).slice(0, 20);
+    try { localStorage.setItem(ASSET_RECENT_VIEWS_KEY, JSON.stringify(recentAssetViews)); } catch (e) {}
+  }
+  function getAssetTrendScore(asset) {
+    const downloads = Number(globalAssetCounters[asset.id]?.downloads) || Number(asset.downloads) || 0;
+    const likes = getAssetLikes(asset.id);
+    const ageDays = Math.max(0, (Date.now() - (Number(asset.createdAt) || Date.now())) / 86400000);
+    return downloads * 3 + likes * 5 + Math.max(0, 30 - ageDays);
+  }
   let assetLikes = {};
   let assetComments = {};
   let assetDownloadDays = {};
@@ -1649,8 +1664,12 @@
 
   function sortAssetsList(list) {
     return list.sort(function (a, b) {
+      if (assetDiscoveryMode === 'trending') return getAssetTrendScore(b) - getAssetTrendScore(a);
+      if (assetDiscoveryMode === 'newest') return (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0);
+      if (assetDiscoveryMode === 'top') return (Number(globalAssetCounters[b.id]?.downloads) || Number(b.downloads) || 0) - (Number(globalAssetCounters[a.id]?.downloads) || Number(a.downloads) || 0);
+      if (assetDiscoveryMode === 'recent') return recentAssetViews.indexOf(a.id) - recentAssetViews.indexOf(b.id);
       if (a.pinned !== b.pinned) return a.pinned === true ? -1 : 1;
-      if (selectedAssetSort === 'downloads') return (Number(b.downloads) || 0) - (Number(a.downloads) || 0);
+      if (selectedAssetSort === 'downloads') return (Number(globalAssetCounters[b.id]?.downloads) || Number(b.downloads) || 0) - (Number(globalAssetCounters[a.id]?.downloads) || Number(a.downloads) || 0);
       if (selectedAssetSort === 'name') return String(a.name || '').localeCompare(String(b.name || ''), 'es', { sensitivity: 'base' });
       if (selectedAssetSort === 'oldest') return (Number(a.createdAt) || 0) - (Number(b.createdAt) || 0);
       if (selectedAssetSort === 'manual') return (Number(a.order) || 0) - (Number(b.order) || 0);
@@ -1674,6 +1693,12 @@
     });
   }
 
+  function getDiscoveryFilteredAssets() {
+    const visible = getFilteredAssets().slice();
+    if (assetDiscoveryMode !== 'recent') return visible;
+    return visible.filter(function (asset) { return recentAssetViews.indexOf(asset.id) !== -1; });
+  }
+
   function assetDirectLink(asset) {
     return window.location.origin + window.location.pathname + '#asset-' + encodeURIComponent(asset.id);
   }
@@ -1682,7 +1707,7 @@
     const container = document.getElementById('projects-grid');
     const emptyState = document.getElementById('projects-empty-state');
     if (!container) return;
-    const list = sortAssetsList(getFilteredAssets().slice());
+    const list = sortAssetsList(getDiscoveryFilteredAssets());
     filteredProjects = [];
     updateCatalogHeaders();
     const sortSelect = document.getElementById('asset-sort-select');
@@ -1718,7 +1743,7 @@
       const popularBadge = (Number(asset.downloads) || 0) >= 10 ? '<span class="asset-compact-badge asset-popular-badge">🔥 Popular</span>' : '';
       const favorite = isAssetFavorite(asset.id);
       const favoriteButton = '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.toggleAssetFavorite(\'' + safeId + '\')" class="absolute left-3 top-3 z-[121] h-7 w-7 rounded-lg bg-black/55 border border-white/10 text-sm hover:border-amber-400/50" title="' + (favorite ? 'Quitar de favoritos' : 'Agregar a favoritos') + '">' + (favorite ? '★' : '☆') + '</button>';
-      const image = asset.image ? '<div class="relative aspect-video w-full overflow-hidden bg-[#181d28] cursor-pointer"><img src="' + asset.image + '" alt="' + asset.name + '" class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105" onerror="this.style.display=\'none\'"><div class="absolute inset-0 bg-gradient-to-t from-[#12151d] via-transparent to-black/40"></div></div>' : '';
+      const image = asset.image ? '<div class="asset-card-media relative aspect-video w-full overflow-hidden bg-[#181d28] cursor-pointer"><img src="' + asset.image + '" alt="' + asset.name + '" class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105" onerror="this.style.display=\'none\'"><div class="absolute inset-0 bg-gradient-to-t from-[#12151d] via-transparent to-black/40"></div><div class="asset-quick-preview"><span class="asset-quick-preview-icon">◉</span><span>Preview rápida</span></div></div>' : '';
       const moderatorBar = (isModerator && !visitorPreviewMode) ? '<div class="flex items-center justify-between gap-2 p-2 bg-amber-400/10 border-b border-amber-400/20 text-[10px] relative z-[130]"><div class="flex items-center gap-1"><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.moveAssetOrder(\'' + safeId + '\',-1)" class="px-1.5 py-1 rounded bg-white/5 hover:bg-white/10">▲</button><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.moveAssetOrder(\'' + safeId + '\',1)" class="px-1.5 py-1 rounded bg-white/5 hover:bg-white/10">▼</button></div><div class="flex items-center gap-1"><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.duplicateAsset(\'' + safeId + '\')" class="px-2 py-1 rounded bg-white/5 hover:bg-white/10">📋</button><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.editAsset(\'' + safeId + '\')" class="px-2 py-1 rounded bg-amber-400 text-black font-bold">✏️</button><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.deleteAsset(\'' + safeId + '\')" class="px-2 py-1 rounded bg-red-600 text-white">🗑️</button></div></div>' : '';
       return '<article data-asset-id="' + safeId + '" onclick="window.ElyPortfolio.openAssetModal(\'' + safeId + '\')" class="card-fade-in group relative flex flex-col overflow-hidden rounded-2xl bg-[#12151d] border border-[#232733] hover:border-amber-400/60 transform hover:scale-105 transition-all duration-300 ease-out shadow-lg hover:shadow-2xl hover:shadow-amber-500/20 z-0 hover:z-10 cursor-pointer' + effectClasses + '"' + effectStyle + '>' +
         moderatorBar + pinnedBadge + favoriteButton +
@@ -1881,6 +1906,7 @@
     const asset = assets.find(function (a) { return a.id === assetId; });
     if (!asset || (asset.published === false && (!isModerator || visitorPreviewMode))) return;
     selectedAsset = asset;
+    rememberAssetView(asset.id);
     if (updateHash !== false) {
       history.replaceState(null, '', '#asset-' + encodeURIComponent(asset.id));
     }
@@ -6468,10 +6494,24 @@
       });
     }
 
+    const assetDiscoveryButtons = document.querySelectorAll('[data-asset-discovery]');
+    assetDiscoveryButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        assetDiscoveryButtons.forEach(function (b) { b.classList.remove('asset-discovery-active'); });
+        btn.classList.add('asset-discovery-active');
+        assetDiscoveryMode = btn.getAttribute('data-asset-discovery') || 'all';
+        if (assetDiscoveryMode === 'newest') selectedAssetSort = 'newest';
+        if (assetDiscoveryMode === 'top') selectedAssetSort = 'downloads';
+        renderAssetsGrid();
+      });
+    });
+
     const assetSortSelect = document.getElementById('asset-sort-select');
     if (assetSortSelect) {
       assetSortSelect.addEventListener('change', function () {
         selectedAssetSort = this.value || 'newest';
+        assetDiscoveryMode = 'all';
+        document.querySelectorAll('[data-asset-discovery]').forEach(function (b) { b.classList.remove('asset-discovery-active'); });
         renderAssetsGrid();
       });
     }
@@ -6497,6 +6537,7 @@
         selectedCategory = 'todos';
         searchQuery = '';
         selectedAssetSort = 'newest';
+        assetDiscoveryMode = 'trending';
         showOnlyFavoriteAssets = false;
         assetViewMode = 'cards';
         try { localStorage.setItem('portfolio_community_asset_view_v1', assetViewMode); } catch (e) {}
@@ -6622,6 +6663,24 @@
   // ELYDEV_MOTION_ENHANCEMENTS_V1
   function initElyDevMotionEnhancements() {
     const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!reduceMotion && document.getElementById('inicio') && !document.getElementById('ely-hero-particles')) {
+      const hero = document.getElementById('inicio');
+      hero.classList.add('ely-hero');
+      const particles = document.createElement('div');
+      particles.id = 'ely-hero-particles';
+      particles.setAttribute('aria-hidden', 'true');
+      for (let i = 0; i < 18; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'ely-hero-particle';
+        dot.style.setProperty('--particle-x', (Math.random() * 100) + '%');
+        dot.style.setProperty('--particle-y', (Math.random() * 100) + '%');
+        dot.style.setProperty('--particle-delay', (Math.random() * 5) + 's');
+        dot.style.setProperty('--particle-duration', (5 + Math.random() * 7) + 's');
+        particles.appendChild(dot);
+      }
+      hero.appendChild(particles);
+    }
     const grid = document.getElementById('projects-grid');
     const revealTargets = document.querySelectorAll('#projects-grid > article, section > div.grid > article, section > div.grid > div, .group.cursor-pointer');
     
@@ -6630,7 +6689,7 @@
       if (el.dataset.elyMagneticBound !== '1') {
         el.dataset.elyMagneticBound = '1';
         el.addEventListener('pointermove', function (e) {
-          if (reduceMotion) return;
+          if (reduceMotion || e.pointerType === 'touch' || window.innerWidth < 768) return;
           const rect = el.getBoundingClientRect();
           const dx = (e.clientX - (rect.left + rect.width / 2)) / Math.max(rect.width, 1);
           const dy = (e.clientY - (rect.top + rect.height / 2)) / Math.max(rect.height, 1);
@@ -6741,6 +6800,10 @@
     }, true);
     }
     
+    document.querySelectorAll('main > section').forEach(function (section) {
+      section.classList.add('ely-section-transition');
+    });
+
     const observer = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
