@@ -2171,11 +2171,12 @@
     document.body.style.overflow = 'hidden';
   }
 
-  function openAssetsManagerModal() {
+  async function openAssetsManagerModal() {
     if (!isModerator) {
       openAuthModal();
       return;
     }
+    await loadAllDataFromBackend();
     editingAssetId = null;
     renderAssetsManagerList();
     const form = document.getElementById('asset-form');
@@ -3156,11 +3157,14 @@
     }).join('');
   }
 
-  function openSatisfiedClientsModal() {
+  async function openSatisfiedClientsModal() {
     const modal = document.getElementById('satisfied-clients-modal');
     if (!modal) return;
-    renderSatisfiedClientsModalList();
     modal.classList.remove('hidden');
+    renderSatisfiedClientsModalList();
+    await loadAllDataFromBackend();
+    renderSatisfiedClientsModalList();
+    renderTestimonialsPreview();
     document.body.style.overflow = 'hidden';
   }
 
@@ -6665,12 +6669,16 @@
     }).join('');
   }
 
-  function openSocialNetworksModal() {
+  async function openSocialNetworksModal() {
     const modal = document.getElementById('social-networks-modal');
     if (!modal) return;
     modal.classList.remove('hidden');
     renderSocialNetworks();
     renderSocialNetworksManager();
+    await loadAllDataFromBackend();
+    renderSocialNetworks();
+    renderSocialNetworksManager();
+    refreshAllSocialNetworkCounts();
   }
 
   function closeSocialNetworksModal() {
