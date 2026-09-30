@@ -6443,17 +6443,31 @@
   // Redes sociales configurables
   const SOCIAL_NETWORKS_STORAGE_KEY = 'portfolio_social_networks_v1';
   const SOCIAL_NETWORK_TYPES = {
-    youtube: { name: 'YouTube', icon: '▶️', color: 'red' },
-    discord: { name: 'Discord', icon: '💬', color: 'indigo' },
-    instagram: { name: 'Instagram', icon: '◎', color: 'pink' },
-    tiktok: { name: 'TikTok', icon: '♪', color: 'black' },
-    twitch: { name: 'Twitch', icon: '◉', color: 'purple' },
-    facebook: { name: 'Facebook', icon: 'f', color: 'blue' },
-    twitter: { name: 'X / Twitter', icon: '𝕏', color: 'slate' },
-    linkedin: { name: 'LinkedIn', icon: 'in', color: 'sky' },
-    github: { name: 'GitHub', icon: '◖', color: 'slate' },
-    whatsapp: { name: 'WhatsApp', icon: '🟢', color: 'green' },
-    other: { name: 'Otra red', icon: '🌐', color: 'cyan' }
+    youtube: { name: 'YouTube', icon: '▶️', color: 'youtube' },
+    discord: { name: 'Discord', icon: '💬', color: 'discord' },
+    instagram: { name: 'Instagram', icon: '◎', color: 'instagram' },
+    tiktok: { name: 'TikTok', icon: '♪', color: 'tiktok' },
+    twitch: { name: 'Twitch', icon: '◉', color: 'twitch' },
+    facebook: { name: 'Facebook', icon: 'f', color: 'facebook' },
+    twitter: { name: 'X / Twitter', icon: '𝕏', color: 'twitter' },
+    linkedin: { name: 'LinkedIn', icon: 'in', color: 'linkedin' },
+    github: { name: 'GitHub', icon: '◖', color: 'github' },
+    whatsapp: { name: 'WhatsApp', icon: '🟢', color: 'whatsapp' },
+    other: { name: 'Otra red', icon: '🌐', color: 'other' }
+  };
+
+  const SOCIAL_NETWORK_STYLES = {
+    youtube: { accent: '#ff0033', soft: 'rgba(255,0,51,.12)', border: 'rgba(255,0,51,.32)', hover: 'rgba(255,0,51,.58)' },
+    discord: { accent: '#5865f2', soft: 'rgba(88,101,242,.14)', border: 'rgba(88,101,242,.34)', hover: 'rgba(88,101,242,.58)' },
+    instagram: { accent: '#e1306c', soft: 'rgba(225,48,108,.13)', border: 'rgba(225,48,108,.34)', hover: 'rgba(225,48,108,.58)' },
+    tiktok: { accent: '#25f4ee', soft: 'rgba(37,244,238,.10)', border: 'rgba(37,244,238,.30)', hover: 'rgba(254,44,85,.58)' },
+    twitch: { accent: '#9146ff', soft: 'rgba(145,70,255,.14)', border: 'rgba(145,70,255,.34)', hover: 'rgba(145,70,255,.58)' },
+    facebook: { accent: '#1877f2', soft: 'rgba(24,119,242,.14)', border: 'rgba(24,119,242,.34)', hover: 'rgba(24,119,242,.58)' },
+    twitter: { accent: '#e7e9ea', soft: 'rgba(231,233,234,.08)', border: 'rgba(231,233,234,.22)', hover: 'rgba(231,233,234,.45)' },
+    linkedin: { accent: '#0a66c2', soft: 'rgba(10,102,194,.14)', border: 'rgba(10,102,194,.34)', hover: 'rgba(10,102,194,.58)' },
+    github: { accent: '#f0f6fc', soft: 'rgba(240,246,252,.08)', border: 'rgba(240,246,252,.20)', hover: 'rgba(240,246,252,.42)' },
+    whatsapp: { accent: '#25d366', soft: 'rgba(37,211,102,.13)', border: 'rgba(37,211,102,.34)', hover: 'rgba(37,211,102,.58)' },
+    other: { accent: '#22d3ee', soft: 'rgba(34,211,238,.12)', border: 'rgba(34,211,238,.30)', hover: 'rgba(34,211,238,.55)' }
   };
 
   function getSocialNetworks() {
@@ -6529,6 +6543,14 @@
     return escapeSocialText(value).replace(/javascript:/gi, '');
   }
 
+  function escapeSocialJs(value) {
+    return String(value == null ? '' : value).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  }
+
+  function getSocialNetworkStyle(networkType) {
+    return SOCIAL_NETWORK_STYLES[networkType] || SOCIAL_NETWORK_STYLES.other;
+  }
+
   function formatSocialNumber(value) {
     return (Number(value) || 0).toLocaleString('es-DO');
   }
@@ -6543,6 +6565,8 @@
     }
     grid.innerHTML = list.map(function(item) {
       const stats = item.youtubeStats;
+      const style = getSocialNetworkStyle(item.networkType);
+      const safeId = escapeSocialJs(item.id);
       const body = item.networkType === 'youtube'
         ? '<div class="grid grid-cols-3 gap-2 mt-4">' +
             '<div class="rounded-xl bg-white/[.03] border border-white/5 p-2.5 text-center"><div class="text-[9px] uppercase tracking-wider text-slate-500">Subs</div><div class="text-sm font-bold text-cyan-300 font-mono mt-1">' + formatSocialNumber(stats.subscribers) + '</div></div>' +
@@ -6550,17 +6574,17 @@
             '<div class="rounded-xl bg-white/[.03] border border-white/5 p-2.5 text-center"><div class="text-[9px] uppercase tracking-wider text-slate-500">Views</div><div class="text-sm font-bold text-cyan-300 font-mono mt-1">' + formatSocialNumber(stats.views) + '</div></div>' +
           '</div>'
         : '<div class="mt-4 flex items-center justify-between rounded-xl bg-white/[.03] border border-white/5 px-3 py-2.5"><span class="text-[10px] text-slate-500">' + escapeSocialText(item.countLabel) + '</span><span class="text-cyan-300 font-mono text-sm font-bold">' + formatSocialNumber(item.countValue) + '</span></div>';
-      return '<article class="rounded-2xl bg-[#0e1118] border border-[#232733] p-4 hover:border-cyan-400/40 transition-all">' +
+      return '<article class="rounded-2xl bg-[#0e1118] border p-4 transition-all" style="border-color:' + style.border + '">' +
         '<div class="flex items-start justify-between gap-3">' +
           '<div class="flex items-center gap-3 min-w-0">' +
-            '<div class="w-11 h-11 rounded-xl bg-cyan-400/10 border border-cyan-400/20 flex items-center justify-center text-xl font-bold">' + escapeSocialText(item.icon) + '</div>' +
-            '<div class="min-w-0"><h4 class="font-bold text-white truncate">' + escapeSocialText(item.name) + '</h4><p class="text-[10px] text-slate-500">' + escapeSocialText(SOCIAL_NETWORK_TYPES[item.networkType]?.name || item.networkType) + '</p></div>' +
+            '<div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl font-bold border" style="background:' + style.soft + ';border-color:' + style.border + ';color:' + style.accent + '">' + escapeSocialText(item.icon) + '</div>' +
+            '<div class="min-w-0"><h4 class="font-bold text-white truncate">' + escapeSocialText(item.name) + '</h4><p class="text-[10px] uppercase tracking-wider font-semibold" style="color:' + style.accent + '">' + escapeSocialText(SOCIAL_NETWORK_TYPES[item.networkType]?.name || item.networkType) + '</p></div>' +
           '</div>' +
         '</div>' +
         body +
         '<div class="mt-4 flex gap-2">' +
-          (item.url ? '<a href="' + escapeSocialAttr(item.url) + '" target="_blank" rel="noopener noreferrer" class="flex-1 text-center px-3 py-2 rounded-lg bg-cyan-400 text-black text-[11px] font-bold hover:bg-cyan-300">Visitar →</a>' : '<span class="flex-1 text-center px-3 py-2 rounded-lg bg-white/5 text-slate-500 text-[11px]">Sin enlace</span>') +
-          (isModerator && !visitorPreviewMode ? '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.editSocialNetwork(' + JSON.stringify(item.id) + ')" class="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-[11px] font-bold hover:bg-white/10">Editar</button>' : '') +
+          (item.url ? '<a href="' + escapeSocialAttr(item.url) + '" target="_blank" rel="noopener noreferrer" class="flex-1 text-center px-3 py-2 rounded-lg text-[11px] font-bold transition-all" style="background:' + style.accent + ';color:#05070a">Visitar →</a>' : '<span class="flex-1 text-center px-3 py-2 rounded-lg bg-white/5 text-slate-500 text-[11px]">Sin enlace</span>') +
+          (isModerator && !visitorPreviewMode ? '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.editSocialNetwork(\'' + safeId + '\')" class="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-[11px] font-bold hover:bg-white/10">Editar</button>' : '') +
         '</div>' +
       '</article>';
     }).join('');
@@ -6595,8 +6619,8 @@
           '<span class="text-lg">' + escapeSocialText(n.icon) + '</span><span class="flex-1 text-xs text-white font-semibold">' + escapeSocialText(n.name) + '</span>' +
           '<span class="text-[10px] text-slate-500">' + escapeSocialText(SOCIAL_NETWORK_TYPES[n.networkType]?.name || n.networkType) + '</span>' +
           (n.networkType === 'youtube' ? '<span class="text-[10px] text-cyan-300">Subs / Videos / Views</span>' : '<span class="text-[10px] text-slate-500">' + (n.countMode === 'url' ? 'Endpoint JSON' : (n.countMode === 'livecounts' ? 'Livecounts' : 'Manual')) + '</span>') +
-          '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.editSocialNetwork(' + JSON.stringify(n.id) + ')" class="px-2.5 py-1.5 rounded-lg bg-white/5 text-[10px] text-slate-300">Editar</button>' +
-          '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.deleteSocialNetwork(' + JSON.stringify(n.id) + ')" class="px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-300 text-[10px]">Eliminar</button>' +
+          '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.editSocialNetwork(\'' + escapeSocialJs(n.id) + '\')" class="px-2.5 py-1.5 rounded-lg bg-white/5 text-[10px] text-slate-300">Editar</button>' +
+          '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.deleteSocialNetwork(\'' + escapeSocialJs(n.id) + '\')" class="px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-300 text-[10px]">Eliminar</button>' +
         '</div>';
       }).join('') : '<div class="text-xs text-slate-500 py-3">No hay redes configuradas.</div>') + '</div>';
   }
