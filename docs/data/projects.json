@@ -368,19 +368,21 @@
     "origin": "trabajado",
     "clientOrTeam": "SHL (Cliente Comercial)",
     "year": "2022",
-    "role": "Freelance Game Developer",
+    "role": "Bug Diagnostic & Fixer",
     "featured": false,
     "coverImage": "./assets/images/ely/icon-dominoesrepublic.png",
     "galleryImages": [
       "./assets/images/ely/icon-dominoesrepublic.png"
     ],
-    "youtubeVideo": "",
+    "youtubeVideo": "https://www.youtube.com/watch?v=C9SqA8JIwUc",
     "technologies": [
       "Unity",
       "C#",
       "Geolocation Services",
       "Dominican",
-      "Domino"
+      "Domino",
+      "BugFix",
+      "Diagnostic"
     ],
     "metrics": [
       {
