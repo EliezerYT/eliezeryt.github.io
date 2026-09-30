@@ -4793,6 +4793,13 @@
         data: item
       });
     });
+    getSocialNetworks().forEach(function (item, index) {
+      if (item) records.push({
+        id: 'social-' + String(item.id || ('network-' + index)),
+        type: 'social_network',
+        data: normalizeSocialNetwork(item, index)
+      });
+    });
     return records;
   }
 
@@ -5385,9 +5392,20 @@
         .filter(function(record) { return record && record.type === 'feedback_code' && record.data; })
         .map(function(record) { return record.data; });
 
+      const socialNetworksFromSheet = cards
+        .filter(function(record) { return record && record.type === 'social_network' && record.data; })
+        .map(function(record) { return normalizeSocialNetwork(record.data, 0); });
+
       const profileRecord = cardMap.profile;
       if (profileRecord && profileRecord.data && typeof profileRecord.data === 'object') {
         Object.assign(initialProfile, profileRecord.data);
+      }
+
+      if (socialNetworksFromSheet.length > 0) {
+        initialProfile.socialNetworks = socialNetworksFromSheet;
+        try { localStorage.setItem(SOCIAL_NETWORKS_STORAGE_KEY, JSON.stringify(socialNetworksFromSheet)); } catch (e) {}
+        renderSocialNetworks();
+        renderSocialNetworksManager();
       }
 
       const feedbacksFromSheet = feedbacks
