@@ -3398,7 +3398,6 @@
     const newFeedback={id:'feedback-'+Date.now(),name,role:role||'Cliente Verificado',service,project,year:new Date().getFullYear().toString(),rating,avatar,feedback,tags:tags.length?tags:['Feedback Verificado','Cliente Satisfecho']};
     satisfiedClients.unshift(newFeedback);
     try{localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY,JSON.stringify(feedbackCodes));}catch(err){}
-    syncLocalDataToGoogleSheets().catch(function () {});
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
     if(submitBtn)submitBtn.disabled=true;
@@ -3546,7 +3545,9 @@
     if (serviceInput) serviceInput.value = '';
     if (projectInput) projectInput.value = '';
     renderFeedbackCodesList();
-    syncLocalDataToGoogleSheets().catch(function () {});
+    saveFeedbackCodesImmediately().catch(function () {
+      showStatusNotification({ title: 'Error al guardar el código', message: 'Google Sheets no confirmó el guardado.', type: 'error', icon: '⚠️' });
+    });
     showStatusNotification({
       title: 'Código de Feedback Generado',
       message: `Código "${rawCode}" creado con éxito para ${label || 'cliente'}. Puedes enviárselo para su feedback.`,
@@ -3572,9 +3573,9 @@
     const target = feedbackCodes.find(c => c.code.toUpperCase() === codeStr.toUpperCase());
     if (!target) return;
     target.disabled = !target.disabled;
-    try {
-      localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes));
-    } catch (err) {}
+    saveFeedbackCodesImmediately().catch(function () {
+      showStatusNotification({ title: 'Error al guardar el cambio', message: 'Google Sheets no confirmó la actualización.', type: 'error', icon: '⚠️' });
+    });
     renderFeedbackCodesList();
     showStatusNotification({
       title: target.disabled ? 'Código Deshabilitado' : 'Código Habilitado',
@@ -4665,6 +4666,12 @@
       return syncDataToGoogleSheet(CARDS_INFO_SHEET_NAME, getCardsInfoSheetRecords());
     });
     return cardsInfoSyncQueue;
+  }
+  function saveFeedbackCodesImmediately() {
+    try {
+      localStorage.setItem(FEEDBACK_CODES_STORAGE_KEY, JSON.stringify(feedbackCodes));
+    } catch (err) {}
+    return syncCardsInfoImmediately();
   }
   function syncProjectsWithBackend(list) { return syncCardsInfoImmediately(); }
 
