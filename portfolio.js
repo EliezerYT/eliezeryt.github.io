@@ -5274,7 +5274,7 @@
     if (typeof fetch !== 'function') return;
 
     const loadFromGoogleSheets = async () => {
-      socialNetworksState = [];
+      const previousSocialNetworks = Array.isArray(socialNetworksState) ? socialNetworksState.slice() : [];
       const url = GLOBAL_COUNTER_URL + '?action=loadSheetData&cacheBust=' + Date.now();
       const response = await fetch(url, { cache: 'no-store' });
       if (!response.ok) throw new Error('Google Sheets HTTP ' + response.status);
@@ -5335,7 +5335,16 @@
         Object.assign(initialProfile, profileData);
       }
 
-      socialNetworksState = socialNetworksFromSheet;
+      if (socialNetworksFromSheet.length > 0 || previousSocialNetworks.length === 0) {
+        socialNetworksState = socialNetworksFromSheet
+          .map(function(item, index) {
+            item.order = Number.isFinite(Number(item.order)) ? Number(item.order) : index;
+            return item;
+          })
+          .sort(function(a, b) { return Number(a.order) - Number(b.order); });
+      } else {
+        socialNetworksState = previousSocialNetworks;
+      }
       renderSocialNetworks();
       renderSocialNetworksManager();
 
@@ -6487,6 +6496,7 @@
     const instagramStats = item && item.instagramStats && typeof item.instagramStats === 'object' ? item.instagramStats : {};
     return {
       id: String(item && item.id || ('social-' + Date.now() + '-' + index)),
+      order: Number.isFinite(Number(item && item.order)) ? Number(item.order) : index,
       networkType: networkType,
       name: String(item && item.name || defaults.name),
       icon: String(item && item.icon || defaults.icon),
@@ -6558,7 +6568,7 @@
       grid.innerHTML = '<div class="col-span-full text-center py-10 text-sm text-slate-500">No hay redes configuradas.</div>';
       return;
     }
-    grid.innerHTML = list.map(function(item) {
+    grid.innerHTML = list.map(function(item, index) {
       const stats = item.youtubeStats;
       const style = getSocialNetworkStyle(item.networkType);
       const safeId = escapeSocialJs(item.id);
@@ -6581,7 +6591,7 @@
               '</div>' +
               '<div class="mt-2 text-[9px] text-slate-500 flex items-center gap-1.5"><span class="inline-block w-1.5 h-1.5 rounded-full" style="background:' + style.accent + '"></span>@' + escapeSocialText(item.instagramUsername || extractInstagramUsername(item.url)) + '</div>'
             : '<div class="mt-4 flex items-center justify-between rounded-xl border px-3 py-2.5" style="background:' + style.soft + ';border-color:' + style.border + '"><span class="text-[10px] text-slate-500">' + escapeSocialText(item.countLabel) + '</span><span class="font-mono text-sm font-bold" style="color:' + style.accent + '">' + formatSocialNumber(item.countValue) + '</span></div>';
-      return '<article class="rounded-2xl bg-[#0e1118] border p-4 transition-all" style="border-color:' + style.border + '">' +
+      return '<article draggable="' + (isModerator && !visitorPreviewMode ? 'true' : 'false') + '" data-social-id="' + escapeSocialAttr(item.id) + '" data-social-order="' + index + '" class="social-network-card rounded-2xl bg-[#0e1118] border p-4 transition-all ' + (isModerator && !visitorPreviewMode ? 'cursor-grab active:cursor-grabbing' : '') + '" style="border-color:' + style.border + '">' +
         '<div class="flex items-start justify-between gap-3">' +
           '<div class="flex items-center gap-3 min-w-0">' +
             '<div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl font-bold border" style="background:' + style.soft + ';border-color:' + style.border + ';color:' + style.accent + '">' + escapeSocialText(item.icon) + '</div>' +
@@ -6595,6 +6605,80 @@
         '</div>' +
       '</article>';
     }).join('');
+    setupSocialNetworkDragAndDrop();
+  }
+
+  function setupSocialNetworkDragAndDrop() {
+    const grid = document.getElementById('social-networks-grid');
+    if (!grid || !isModerator || visitorPreviewMode) return;
+
+    const cards = Array.from(grid.querySelectorAll('.social-network-card[draggable="true"]'));
+    cards.forEach(function(card) {
+      if (card.dataset.dragBound === '1') return;
+      card.dataset.dragBound = '1';
+
+      card.addEventListener('dragstart', function(event) {
+        card.classList.add('opacity-50', 'scale-[0.98]');
+        if (event.dataTransfer) {
+          event.dataTransfer.effectAllowed = 'move';
+          event.dataTransfer.setData('text/plain', card.getAttribute('data-social-id') || '');
+        }
+      });
+
+      card.addEventListener('dragend', function() {
+        card.classList.remove('opacity-50', 'scale-[0.98]');
+        cards.forEach(function(item) { item.classList.remove('border-cyan-400', 'bg-cyan-400/5'); });
+      });
+
+      card.addEventListener('dragover', function(event) {
+        event.preventDefault();
+        if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+        card.classList.add('border-cyan-400', 'bg-cyan-400/5');
+      });
+
+      card.addEventListener('dragleave', function() {
+        card.classList.remove('border-cyan-400', 'bg-cyan-400/5');
+      });
+
+      card.addEventListener('drop', function(event) {
+        event.preventDefault();
+        card.classList.remove('border-cyan-400', 'bg-cyan-400/5');
+
+        const draggedId = event.dataTransfer ? event.dataTransfer.getData('text/plain') : '';
+        const targetId = card.getAttribute('data-social-id') || '';
+        if (!draggedId || !targetId || draggedId === targetId) return;
+
+        const current = getSocialNetworks().slice();
+        const from = current.findIndex(function(item) { return String(item.id) === String(draggedId); });
+        const to = current.findIndex(function(item) { return String(item.id) === String(targetId); });
+        if (from < 0 || to < 0 || from === to) return;
+
+        const moved = current.splice(from, 1)[0];
+        current.splice(to, 0, moved);
+        current.forEach(function(item, itemIndex) { item.order = itemIndex; });
+        socialNetworksState = current;
+
+        renderSocialNetworks();
+        renderSocialNetworksManager();
+
+        syncLocalDataToGoogleSheets().then(function() {
+          showStatusNotification({
+            title: 'Orden guardado',
+            message: 'El orden de las redes se guardó en Google Sheets.',
+            type: 'success',
+            icon: '↕'
+          });
+        }).catch(function(error) {
+          console.error('[SOCIAL ORDER]', error);
+          showStatusNotification({
+            title: 'Orden actualizado',
+            message: 'El nuevo orden quedó aplicado en pantalla, pero Google Sheets no respondió.',
+            type: 'warning',
+            icon: '⚠️'
+          });
+        });
+      });
+    });
   }
 
   async function openSocialNetworksModal() {
@@ -7007,6 +7091,7 @@
     const instagramUsername = extractInstagramUsername(document.getElementById('social-form-url').value.trim());
     const item = {
       id: id || networkType + '-' + Date.now(),
+      order: existing && Number.isFinite(Number(existing.order)) ? Number(existing.order) : getSocialNetworks().length,
       networkType: networkType,
       name: document.getElementById('social-form-name').value.trim() || defaults.name,
       icon: document.getElementById('social-form-icon').value.trim() || defaults.icon,
@@ -7031,6 +7116,9 @@
     const list = getSocialNetworks();
     const index = list.findIndex(function(x) { return String(x.id) === String(item.id); });
     if (index >= 0) list[index] = item; else list.push(item);
+    list.forEach(function(item, itemIndex) {
+      item.order = itemIndex;
+    });
     socialNetworksState = list;
     closeSocialNetworkEditor();
     renderSocialNetworks();
