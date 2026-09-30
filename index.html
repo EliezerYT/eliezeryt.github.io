@@ -683,47 +683,9 @@
           <h2 class="text-2xl font-extrabold text-white tracking-tight font-display">Habilidades & Especialidades</h2>
           <p class="text-xs text-slate-400 mt-0.5">Tecnologías y áreas en las que trabajo habitualmente.</p>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-3">
-            <h4 class="text-sm font-bold text-amber-400">Desarrollo Videojuegos 2D/3D</h4>
-            <ul class="space-y-1.5 text-xs text-slate-300">
-              <li>• Unity Engine (Especialista C#)</li>
-              <li>• Físicas 2D & 3D (Rigidbody, Colisiones)</li>
-              <li>• Diseño de Niveles & Mecánicas</li>
-              <li>• Animación & Controladores de Estado</li>
-              <li>• Optimización Móvil (Draw Calls)</li>
-              <li>• Publicación en Google Play Store</li>
-            </ul>
-          </div>
-
-          <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-3">
-            <h4 class="text-sm font-bold text-cyan-400">Multijugador & Red</h4>
-            <ul class="space-y-1.5 text-xs text-slate-300">
-              <li>• Photon Network & Photon PUN 2</li>
-              <li>• Sincronización de Salas & Matchmaking</li>
-              <li>• Replicación de Estados en Tiempo Real</li>
-              <li>• Economía Dentro del Juego & Tiendas</li>
-              <li>• Personalización de Avatares / Skins</li>
-              <li>• WebSockets & Cliente-Servidor</li>
-            </ul>
-          </div>
-
-          <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-5 space-y-3">
-            <h4 class="text-sm font-bold text-emerald-400">Monetización & Backend</h4>
-            <ul class="space-y-1.5 text-xs text-slate-300">
-              <li>• Anuncios (Banner, Interstitial, Rewarded)</li>
-              <li>• Compras Integradas (IAP Billing)</li>
-              <li>• PHP & Bases de Datos MySQL</li>
-              <li>• Desarrollo Web (HTML5, CSS3, JS)</li>
-              <li>• Arquitectura de Audio & Sound FX</li>
-              <li>• Git & GitHub Version Control</li>
-            </ul>
-          </div>
-        </div>
+        <div id="skill-cards-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
       </section>
 
-      <!-- ========================================== -->
       <!-- 5. FEEDBACK DE CLIENTES                    -->
       <!-- ========================================== -->
       <section id="feedback" class="space-y-4 pt-8 border-t border-[#1c212c]">
@@ -2300,6 +2262,26 @@
     </div>
 
 
+    <!-- EDITOR DE HABILIDADES & ESPECIALIDADES -->
+    <div id="skill-card-editor-modal" class="hidden fixed inset-0 z-[99980] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+      <div class="relative w-full max-w-2xl rounded-2xl bg-[#12151d] border border-amber-400/25 shadow-2xl p-5 sm:p-6">
+        <div class="flex items-center justify-between gap-3 border-b border-[#1e2330] pb-4">
+          <div>
+            <h3 id="skill-editor-title" class="text-lg font-bold text-amber-300 font-display">Editar Especialidad</h3>
+            <p class="text-xs text-slate-500">Modifica las 6 líneas de este cuadro. Se guardan automáticamente en CardsInfo.</p>
+          </div>
+          <button type="button" onclick="window.ElyPortfolio.closeSkillCardEditor()" class="text-slate-400 hover:text-white text-lg">✕</button>
+        </div>
+        <form id="skill-card-editor-form" class="space-y-3 pt-5">
+          <div id="skill-editor-fields" class="grid grid-cols-1 gap-3"></div>
+          <div class="flex justify-end gap-2 pt-3 border-t border-[#1e2330]">
+            <button type="button" onclick="window.ElyPortfolio.closeSkillCardEditor()" class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-slate-300">Cancelar</button>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold">Guardar cambios</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- MODAL DE REDES SOCIALES -->
     <div id="social-networks-modal" class="hidden fixed inset-0 z-[99970] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 overflow-y-auto">
       <div class="relative w-full max-w-3xl rounded-2xl bg-[#12151d] border border-cyan-400/25 shadow-2xl p-5 sm:p-6 max-h-[90vh] overflow-y-auto">
@@ -2367,6 +2349,40 @@
       aria-atomic="true"
       class="fixed top-5 right-5 z-[99999] pointer-events-none flex flex-col gap-2.5 max-w-sm sm:max-w-md w-full px-4 sm:px-0"
     ></aside>
+
+    <style>
+      .skill-line {
+        opacity: 0;
+        transform: translateY(7px) scale(.97);
+        animation: skillLineReveal .55s cubic-bezier(.2,.8,.2,1) forwards;
+        animation-delay: var(--skill-delay, 0ms);
+      }
+      .skill-line::first-letter {
+        color: rgb(251 191 36);
+      }
+      @keyframes skillLineReveal {
+        0% { opacity: 0; transform: translateY(7px) scale(.97); text-shadow: 0 0 0 transparent; }
+        45% { opacity: 1; transform: translateY(0) scale(1.025); text-shadow: 0 0 12px rgba(251,191,36,.55); }
+        100% { opacity: 1; transform: translateY(0) scale(1); text-shadow: 0 0 0 transparent; }
+      }
+      .skill-card {
+        transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+      }
+      .skill-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 35px rgba(0,0,0,.2);
+      }
+    </style>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var form = document.getElementById('skill-card-editor-form');
+        if (form) form.addEventListener('submit', function (event) {
+          event.preventDefault();
+          window.ElyPortfolio.saveSkillCardEditor();
+        });
+      });
+    </script>
 
     <!-- Script Principal NATIVO (Sin Node.js en tiempo de ejecución) -->
     <script src="./portfolio.js"></script>
