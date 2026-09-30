@@ -2433,7 +2433,7 @@
               src="${project.coverImage || './assets/images/ely/my-avatar.png'}"
               alt="${project.title}"
               class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
-              onerror="this.src='./assets/images/ely/my-avatar.png'"
+              onerror="this.removeAttribute('src'); this.style.display='none'"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-[#12151d] via-transparent to-black/40"></div>
             
@@ -4722,6 +4722,11 @@
     skillCards.forEach(function (item) {
       if (item && item.id) records.push({ id: String(item.id), type: 'skill_card', data: item });
     });
+    records.push({
+      id: 'library-json',
+      type: 'library_json',
+      data: getLibraryManifest()
+    });
     return records;
   }
 
@@ -4992,7 +4997,7 @@
 
   function getGithubSyncFingerprint() {
     try {
-      return JSON.stringify({ projects: projects, experiences: experiences, testimonials: satisfiedClients, assets: assets, library: customLibraryImages });
+      return JSON.stringify({ projects: projects, experiences: experiences, testimonials: satisfiedClients, assets: assets });
     } catch (e) {
       return '';
     }
@@ -5127,13 +5132,10 @@
     try {
       const uploadedImages = new Map();
 
-      await prepareLibraryImagesForGithub(uploadedImages);
-
       const syncedProjects = await prepareGithubData(projects, uploadedImages);
       const syncedExperiences = await prepareGithubData(experiences, uploadedImages);
       const syncedTestimonials = await prepareGithubData(satisfiedClients, uploadedImages);
       const syncedAssets = await prepareGithubData(assets, uploadedImages);
-      const syncedLibrary = await prepareGithubData(getLibraryManifest(), uploadedImages);
 
       const files = [
         ['src/data/projects.json', syncedProjects],
@@ -5147,10 +5149,7 @@
         ['docs/data/testimonials.json', syncedTestimonials],
         ['src/data/assets.json', syncedAssets],
         ['public/data/assets.json', syncedAssets],
-        ['docs/data/assets.json', syncedAssets],
-        ['src/data/library.json', syncedLibrary],
-        ['public/data/library.json', syncedLibrary],
-        ['docs/data/library.json', syncedLibrary]
+        ['docs/data/assets.json', syncedAssets]
       ];
 
       let commits = 0;
@@ -5319,6 +5318,13 @@
         .filter(function(record) { return record && record.type === 'skill_card' && record.data; })
         .map(function(record) { return record.data; });
 
+      const libraryRecordFromSheet = cards.find(function(record) {
+        return record && record.type === 'library_json' && record.data;
+      });
+      const libraryFromSheet = libraryRecordFromSheet && Array.isArray(libraryRecordFromSheet.data)
+        ? libraryRecordFromSheet.data
+        : [];
+
       if (skillCardsFromSheet.length) {
         const byId = {};
         skillCardsFromSheet.forEach(function(item) { if (item && item.id) byId[String(item.id)] = item; });
@@ -5330,6 +5336,22 @@
         skillCards = JSON.parse(JSON.stringify(initialSkillCards));
       }
       renderSkillCards();
+
+      if (libraryRecordFromSheet) {
+        customLibraryImages = libraryFromSheet
+          .filter(function(item) { return item && item.id && item.path; })
+          .map(function(item) {
+            return {
+              id: String(item.id),
+              name: item.name || 'Imagen',
+              category: item.category || item.folder || 'Profile',
+              folder: item.folder || item.category || 'Profile',
+              path: item.path || ''
+            };
+          });
+        persistCustomLibraryImages();
+        renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
+      }
 
       const socialNetworkRecordsFromSheet = cards
         .filter(function(record) { return record && record.type === 'social_network' && record.data; });
@@ -5919,7 +5941,29 @@
     } catch (e) {}
   }
 
-  function moveCustomLibraryImageOrder(imageId, delta) {
+  function persistLibraryImmediately(action, imageName) {
+    persistCustomLibraryImages();
+    return syncCardsInfoImmediately().then(function () {
+      showStatusNotification({
+        title: 'Biblioteca guardada',
+        message: (imageName ? '"' + imageName + '" ' : '') + 'se guardó inmediatamente en Google Sheets.',
+        type: 'success',
+        icon: '🖼️'
+      });
+      return true;
+    }).catch(function (error) {
+      console.error('[LIBRARY SHEET SYNC ERROR]', error);
+      showStatusNotification({
+        title: 'Error al guardar biblioteca',
+        message: 'El cambio quedó aplicado localmente, pero Google Sheets no pudo actualizarse: ' + (error.message || 'Error desconocido.'),
+        type: 'error',
+        icon: '⚠️'
+      });
+      return false;
+    });
+  }
+
+  async function moveCustomLibraryImageOrder(imageId, delta) {
     const index = customLibraryImages.findIndex(item => item.id === imageId);
     if (index < 0) return;
     const newIndex = index + delta;
@@ -5927,19 +5971,19 @@
     const temp = customLibraryImages[index];
     customLibraryImages[index] = customLibraryImages[newIndex];
     customLibraryImages[newIndex] = temp;
-    persistCustomLibraryImages();
     renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
+    await persistLibraryImmediately('reorder', temp.name || 'Imagen');
   }
 
-  function moveCustomLibraryImageTo(imageId, targetId) {
+  async function moveCustomLibraryImageTo(imageId, targetId) {
     if (!imageId || !targetId || imageId === targetId) return;
     const from = customLibraryImages.findIndex(item => item.id === imageId);
     const to = customLibraryImages.findIndex(item => item.id === targetId);
     if (from < 0 || to < 0 || from === to) return;
     const item = customLibraryImages.splice(from, 1)[0];
     customLibraryImages.splice(to, 0, item);
-    persistCustomLibraryImages();
     renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
+    await persistLibraryImmediately('reorder', item.name || 'Imagen');
   }
 
   function openLibraryImagePreview(imagePath, imageName) {
@@ -6182,7 +6226,7 @@
       thumb.draggable = true;
       thumb.style.width = size + 'px';
       thumb.style.height = size + 'px';
-      thumb.innerHTML = '<img src="' + src + '" alt="Screenshot ' + (idx + 1) + '" class="w-full h-full object-cover" onerror="this.src=\'./assets/images/ely/my-avatar.png\'" /><span class="absolute top-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[9px] text-white font-mono">' + (idx + 1) + '</span><button type="button" title="Eliminar de galería" class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center text-red-400 font-bold text-xs transition-opacity cursor-pointer">✕</button>';
+      thumb.innerHTML = '<img src="' + src + '" alt="Screenshot ' + (idx + 1) + '" class="w-full h-full object-cover" onerror="this.removeAttribute(\'src\'); this.style.display=\'none\'" /><span class="absolute top-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[9px] text-white font-mono">' + (idx + 1) + '</span><button type="button" title="Eliminar de galería" class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center text-red-400 font-bold text-xs transition-opacity cursor-pointer">✕</button>';
       thumb.querySelector('button').addEventListener('click', function(e) {
         e.stopPropagation();
         items.splice(idx, 1);
@@ -6211,8 +6255,13 @@
     const folder = getLibraryFolderConfig();
     const normalizedName = String(name || 'Imagen Subida').trim().toLowerCase();
     const duplicate = customLibraryImages.find(function (item) {
-      return String(item.name || '').trim().toLowerCase() === normalizedName &&
-        normalizeLibraryFolder(item.folder || item.category || '') === normalizeLibraryFolder(folder);
+      return (
+        (typeof item.path === 'string' && item.path === dataUrl) ||
+        (
+          String(item.name || '').trim().toLowerCase() === normalizedName &&
+          normalizeLibraryFolder(item.folder || item.category || '') === normalizeLibraryFolder(folder)
+        )
+      );
     });
     if (duplicate) {
       if (typeof onUploaded === 'function') onUploaded(duplicate, dataUrl);
@@ -6260,16 +6309,15 @@
   }
 
   async function uploadCustomImageImmediately(image, dataUrl) {
-    if (!image || !dataUrl || !dataUrl.startsWith('data:image/')) return;
-    if (!getGithubToken()) return;
-
-    const prepared = await prepareLibraryUploadDataUrl(dataUrl, image.name);
-    const extension = imageExtension(prepared);
-    const folder = normalizeLibraryFolder(image.folder || getLibraryFolderConfig());
-    const filename = sanitizeGithubImageName(image.name, extension);
-    const githubPath = 'assets/images/ely/' + folder + '/' + filename;
+    if (!image || !dataUrl || !dataUrl.startsWith('data:image/')) return false;
 
     try {
+      if (!getGithubToken()) throw new Error('No se configuró el token de GitHub para guardar el archivo de imagen.');
+      const prepared = await prepareLibraryUploadDataUrl(dataUrl, image.name);
+      const extension = imageExtension(prepared);
+      const folder = normalizeLibraryFolder(image.folder || getLibraryFolderConfig());
+      const filename = sanitizeGithubImageName(image.name, extension);
+      const githubPath = 'assets/images/ely/' + folder + '/' + filename;
       showStatusNotification({
         title: 'Subiendo imagen',
         message: '"' + (image.name || 'Imagen') + '" se está subiendo a GitHub...',
@@ -6281,7 +6329,6 @@
 
       const previousPath = image.path;
       image.path = './' + githubPath;
-      persistCustomLibraryImages();
 
       if (currentLibraryTarget && currentLibraryTarget.type === 'gallery') {
         const galleryInput = document.getElementById(currentLibraryTarget.hiddenInputId);
@@ -6297,20 +6344,23 @@
       }
 
       renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
+      await persistLibraryImmediately('upload', image.name || 'Imagen');
       showStatusNotification({
         title: 'Imagen subida',
-        message: '"' + (image.name || 'Imagen') + '" ya está disponible en GitHub.',
+        message: '"' + (image.name || 'Imagen') + '" ya está disponible y su referencia quedó guardada en Google Sheets.',
         type: 'success',
         icon: '☁️'
       });
+      return true;
     } catch (error) {
       console.error('[LIBRARY UPLOAD ERROR]', error);
       showStatusNotification({
         title: 'No se pudo subir',
-        message: '"' + (image.name || 'Imagen') + '" quedó disponible localmente. Puedes sincronizarla después.',
+        message: '"' + (image.name || 'Imagen') + '" quedó disponible localmente. No se publicó en Google Sheets porque el archivo todavía no tiene una ruta permanente.',
         type: 'error',
         icon: '⚠️'
       });
+      return false;
     }
   }
 
@@ -7478,7 +7528,6 @@
       refreshAllSocialNetworkCounts();
       startCatalogBackgroundRefresh();
     });
-    loadLibraryManifestFromGithub();
     loadImagesFromMainElyFolder();
 
     const socialNetworkForm = document.getElementById('social-network-form');
