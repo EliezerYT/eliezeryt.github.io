@@ -6591,7 +6591,7 @@
     }
 
     try {
-      const response = await fetch(item.countUrl, { cache: 'no-store', mode: 'cors' });
+      const response = await fetch(item.countMode === 'livecounts' ? GLOBAL_COUNTER_URL + '?action=' + 'livesubscribers' : item.countUrl, { cache: 'no-store', mode: 'cors' });
       if (!response.ok) throw new Error('HTTP ' + response.status);
       const text = await response.text();
 
