@@ -8,7 +8,6 @@
     "icon-retopolis.jpg",
     "icon-soundsystempng.png",
     "icon-telesancris.png",
-    "icon-yunonline.png",
     "my-avatar.png",
     "picon-Rball.png",
     "picon-aworld.png",
@@ -84,7 +83,8 @@
     "Proyectos/Telesancris/Screenshots/2.png",
     "Proyectos/Telesancris/Screenshots/3.png",
     "Proyectos/TheSpider/picon-Pitf.png",
-    "Proyectos/YunOnline/Yun-Online.png"
+    "Proyectos/YunOnline/Yun-Online.png",
+    "Proyectos/YunOnline/yunonline.png"
   ],
   "folders": [
     "Proyectos",
