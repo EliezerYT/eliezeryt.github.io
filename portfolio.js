@@ -3073,7 +3073,14 @@
 
   function closeSatisfiedClientsModal() {
     const modal = document.getElementById('satisfied-clients-modal');
-    if (modal) modal.classList.add('hidden');
+    if (modal) {
+      modal.classList.add('hidden');
+      delete modal.dataset.clientName;
+    }
+    const title = document.getElementById('modal-client-title');
+    if (title) title.classList.add('hidden');
+    const header = modal ? modal.querySelector('[data-testimonials-main-title]') : null;
+    if (header) header.classList.remove('hidden');
     document.body.style.overflow = '';
   }
 
@@ -3196,7 +3203,7 @@
       const target=satisfiedClients.find(c=>c.id===editingTestimonialId);
       if(target) Object.assign(target,{name,role,project,year,rating,avatar,feedback,tags});
     }else{
-      satisfiedClients.unshift({id:'client-'+Date.now(),name,role,project,year:year||'2025',rating,avatar,feedback,tags});
+      satisfiedClients.unshift({id:'client-'+Date.now(),name,role,project,year:year||'2025',rating,avatar,feedback,tags,createdAt:new Date().toISOString()});
     }
     closeTestimonialModal();
     renderTestimonialsPreview();
