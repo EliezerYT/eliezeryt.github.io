@@ -5610,47 +5610,114 @@
   async function loadImagesFromMainElyFolder(showNotification = false) {
     if (githubElyFolderLoading) return;
     githubElyFolderLoading = true;
-    const imageExtensions = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'avif', 'bmp', 'svg', 'mp4', 'webm', 'mov', 'm4v', 'ogv'];
-
+    const mediaExtensions = ['png','jpg','jpeg','webp','gif','avif','bmp','svg','mp4','webm','mov','m4v','ogv','mkv'];
+    const isMedia = function(path) {
+      return mediaExtensions.includes(String(path).split('.').pop().toLowerCase());
+    };
     try {
       githubElyFolderPaths = [];
-      let manifestLoaded = false;
-      const urls = [
-        './assets/images/ely/manifest.json?cache=' + Date.now(),
-        'assets/images/ely/manifest.json?cache=' + Date.now(),
-        '/assets/images/ely/manifest.json?cache=' + Date.now()
-      ];
-      let imagePaths = [];
-      let source = 'manifest.json';
+      let foundImages = [];
+      let source = 'GitHub';
 
-      for (const url of urls) {
-        try {
-          const response = await fetch(url, { cache: 'no-store' });
-          if (!response.ok) continue;
-          const manifest = await response.json();
-          const parsed = Array.isArray(manifest) ? manifest : (Array.isArray(manifest.images) ? manifest.images : []);
-          const folders = !Array.isArray(manifest) && Array.isArray(manifest.folders) ? manifest.folders : [];
-          if (Array.isArray(parsed)) {
-            imagePaths = parsed;
-            githubElyFolderPaths = folders.filter(folder => typeof folder === 'string').map(normalizeLibraryFolder);
-            manifestLoaded = true;
-            break;
-          }
-        } catch (e) {}
+      // Read the repository tree directly so manually added files and every nested
+      // subfolder are detected immediately, without waiting for manifest.json.
+      try {
+        const apiUrl = GITHUB_API_BASE + '/repos/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/git/trees/' + GITHUB_BRANCH + '?recursive=1';
+        const headers = {};
+        const token = getGithubToken();
+        if (token) headers.Authorization = 'Bearer ' + token;
+        const response = await fetch(apiUrl, { cache: 'no-store', headers: headers });
+        if (response.ok) {
+          const treeData = await response.json();
+          const prefix = 'assets/images/ely/';
+          const folderSet = new Set();
+          const files = Array.isArray(treeData.tree) ? treeData.tree : [];
+
+          files.forEach(function(entry) {
+            if (!entry || entry.type !== 'blob' || typeof entry.path !== 'string' || !entry.path.startsWith(prefix)) return;
+            const relativePath = entry.path.substring(prefix.length).replace(/^\/+/, '');
+            if (!relativePath || !isMedia(relativePath)) return;
+
+            const parts = relativePath.split('/').filter(Boolean);
+            const fileName = parts.pop();
+            const folder = parts.join('/');
+            let folderPath = '';
+            parts.forEach(function(part) {
+              folderPath = folderPath ? folderPath + '/' + part : part;
+              folderSet.add(folderPath);
+            });
+
+            const extension = fileName.split('.').pop().toLowerCase();
+            foundImages.push({
+              id: 'ely-folder-' + relativePath,
+              name: fileName.replace(/\.[^.]+$/, ''),
+              category: folder || 'Ely',
+              folder: folder || 'Ely',
+              path: './assets/images/ely/' + relativePath,
+              isVideo: ['mp4','webm','mov','m4v','ogv','mkv'].includes(extension)
+            });
+          });
+
+          // Git trees include explicit tree entries, so add folders even when
+          // they contain only files that are not media.
+          files.forEach(function(entry) {
+            if (!entry || entry.type !== 'tree' || typeof entry.path !== 'string' || !entry.path.startsWith(prefix)) return;
+            const relativeFolder = entry.path.substring(prefix.length).replace(/^\/+|\/+$/g, '');
+            if (!relativeFolder) return;
+            let folderPath = '';
+            relativeFolder.split('/').filter(Boolean).forEach(function(part) {
+              folderPath = folderPath ? folderPath + '/' + part : part;
+              folderSet.add(folderPath);
+            });
+          });
+
+          githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
+            return a.localeCompare(b, undefined, {numeric:true, sensitivity:'base'});
+          });
+        } else {
+          throw new Error('GitHub tree HTTP ' + response.status);
+        }
+      } catch (treeError) {
+        console.warn('[LIBRARY] GitHub tree scan failed, trying manifest:', treeError);
+        source = 'manifest.json';
+        const urls = [
+          './assets/images/ely/manifest.json?cache=' + Date.now(),
+          'assets/images/ely/manifest.json?cache=' + Date.now(),
+          '/assets/images/ely/manifest.json?cache=' + Date.now()
+        ];
+        for (const url of urls) {
+          try {
+            const response = await fetch(url, { cache: 'no-store' });
+            if (!response.ok) continue;
+            const manifest = await response.json();
+            const parsed = Array.isArray(manifest) ? manifest : (Array.isArray(manifest.images) ? manifest.images : []);
+            const folders = !Array.isArray(manifest) && Array.isArray(manifest.folders) ? manifest.folders : [];
+            if (Array.isArray(parsed)) {
+              githubElyFolderPaths = folders.filter(folder => typeof folder === 'string').map(normalizeLibraryFolder);
+              foundImages = parsed.filter(isMedia).map(function(relativePath) {
+                const cleanPath = String(relativePath).replace(/^\/+/, '').replace(/\\/g, '/');
+                const fileName = cleanPath.split('/').pop();
+                const folder = cleanPath.includes('/') ? cleanPath.substring(0, cleanPath.lastIndexOf('/')) : 'Ely';
+                const extension = fileName.split('.').pop().toLowerCase();
+                return {
+                  id: 'ely-folder-' + cleanPath,
+                  name: fileName.replace(/\.[^.]+$/, ''),
+                  category: folder,
+                  folder: folder,
+                  path: './assets/images/ely/' + cleanPath,
+                  isVideo: ['mp4','webm','mov','m4v','ogv','mkv'].includes(extension)
+                };
+              });
+              break;
+            }
+          } catch (e) {}
+        }
       }
 
-      if (!manifestLoaded) {
-        imagePaths = FALLBACK_ELY_IMAGE_MANIFEST.slice();
-        source = 'respaldo local';
-      }
-
-      const foundImages = imagePaths
-        .filter(function (item) {
-          return typeof item === 'string' && imageExtensions.includes(item.split('.').pop().toLowerCase());
-        })
-        .map(function (relativePath) {
-          const cleanPath = relativePath.replace(/^\/+/, '').replace(/\\/g, '/');
-          const fullPath = './assets/images/ely/' + cleanPath;
+      if (!foundImages.length) {
+        source = source === 'GitHub' ? 'respaldo local' : source;
+        foundImages = FALLBACK_ELY_IMAGE_MANIFEST.filter(isMedia).map(function(relativePath) {
+          const cleanPath = String(relativePath).replace(/^\/+/, '').replace(/\\/g, '/');
           const fileName = cleanPath.split('/').pop();
           const folder = cleanPath.includes('/') ? cleanPath.substring(0, cleanPath.lastIndexOf('/')) : 'Ely';
           return {
@@ -5658,28 +5725,43 @@
             name: fileName.replace(/\.[^.]+$/, ''),
             category: folder,
             folder: folder,
-            path: fullPath,
-            isVideo: ['mp4', 'webm', 'mov', 'm4v', 'ogv'].includes(cleanPath.split('.').pop().toLowerCase())
+            path: './assets/images/ely/' + cleanPath,
+            isVideo: ['mp4','webm','mov','m4v','ogv','mkv'].includes(fileName.split('.').pop().toLowerCase())
           };
         });
+      }
 
       githubElyFolderImages = foundImages;
+      // Rebuild all folder paths from the actual files too, covering every depth.
+      const discoveredFolders = new Set(githubElyFolderPaths);
+      foundImages.forEach(function(image) {
+        const folder = getLibraryImageFolder(image);
+        let current = '';
+        folder.split('/').filter(Boolean).forEach(function(part) {
+          current = current ? current + '/' + part : part;
+          discoveredFolders.add(current);
+        });
+      });
+      githubElyFolderPaths = Array.from(discoveredFolders).sort(function(a,b) {
+        return a.localeCompare(b, undefined, {numeric:true, sensitivity:'base'});
+      });
+
       renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
 
       if (showNotification) {
         showStatusNotification({
-          title: 'Manifest reconstruido',
-          message: 'Se cargaron ' + foundImages.length + ' imágenes de ely y todas sus subcarpetas (' + source + ').',
+          title: 'Biblioteca actualizada',
+          message: 'Se detectaron ' + foundImages.length + ' archivos multimedia y ' + githubElyFolderPaths.length + ' carpetas en assets/images/ely (' + source + ').',
           type: 'success',
           icon: '🔄'
         });
       }
     } catch (error) {
-      console.warn('[LIBRARY] Error reconstruyendo el manifest de imágenes de ely:', error);
+      console.warn('[LIBRARY] Error escaneando assets/images/ely:', error);
       if (showNotification) {
         showStatusNotification({
           title: 'Error al recargar',
-          message: 'No se pudo reconstruir la lista de imágenes de ely.',
+          message: 'No se pudo escanear assets/images/ely.',
           type: 'error',
           icon: '⚠️'
         });
