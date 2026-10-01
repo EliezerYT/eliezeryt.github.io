@@ -19,7 +19,7 @@
     name: 'Eliezer Terrero',
     brandName: 'ElyDev',
     title: 'Game Developer & Unity Specialist',
-    avatar: './assets/images/ely/my-avatar.png',
+    avatar: '../assets/images/ely/my-avatar.png',
     bio: 'Desarrollador apasionado de videojuegos enfocado en aprovechar el máximo potencial de tecnologías avanzadas como Unity, Photon Network y desarrollo full-stack para crear proyectos innovadores y experiencias inmersivas.',
     summaryParagraphs: [
       'Mi compromiso es consolidarme como un desarrollador vanguardista, ampliando constantemente los límites de lo posible y construyendo una sólida reputación en la industria de los videojuegos.',
@@ -47,10 +47,10 @@
       year: '2024 - 2025',
       role: 'Lead Game Designer & Programador Principal',
       featured: true,
-      coverImage: './assets/images/ely/overdrivers-teaser.jpg',
+      coverImage: '../assets/images/ely/overdrivers-teaser.jpg',
       galleryImages: [
-        './assets/images/ely/overdrivers-teaser.jpg',
-        './assets/images/ely/my-avatar.png'
+        '../assets/images/ely/overdrivers-teaser.jpg',
+        '../assets/images/ely/my-avatar.png'
       ],
       youtubeVideo: 'https://www.youtube.com/watch?v=PH6cK45nkto',
       technologies: ['Unity 3D', 'C#', 'Vehicle Physics', 'FMOD Audio', 'Cinemachine', 'Custom Shaders'],
@@ -82,10 +82,10 @@
       year: '2024 - 2025',
       role: 'Freelance Lead Game Developer & Web Full-Stack',
       featured: true,
-      coverImage: './assets/images/ely/icon-enunagoma.png',
+      coverImage: '../assets/images/ely/icon-enunagoma.png',
       galleryImages: [
-        './assets/images/ely/icon-enunagoma.png',
-        './assets/images/ely/overdrivers-teaser.jpg'
+        '../assets/images/ely/icon-enunagoma.png',
+        '../assets/images/ely/overdrivers-teaser.jpg'
       ],
       youtubeVideo: '',
       technologies: ['Unity', 'C#', 'PHP', 'MySQL', 'Web Development', 'Physics Tuning'],
@@ -116,10 +116,10 @@
       year: '2021 - 2022',
       role: 'Freelance Game Developer (UI, Red & Gameplay)',
       featured: true,
-      coverImage: './assets/images/ely/icon-dominicanpower.png',
+      coverImage: '../assets/images/ely/icon-dominicanpower.png',
       galleryImages: [
-        './assets/images/ely/icon-dominicanpower.png',
-        './assets/images/ely/icon-yunonline.png'
+        '../assets/images/ely/icon-dominicanpower.png',
+        '../assets/images/ely/icon-yunonline.png'
       ],
       youtubeVideo: '',
       technologies: ['Unity', 'C#', 'Photon Network', 'Photon PUN 2', 'UI/UX Redesign', 'In-Game Economy'],
@@ -150,8 +150,8 @@
       year: '2023',
       role: 'Desarrollador de Aplicación Móvil',
       featured: true,
-      coverImage: './assets/images/ely/icon-telesancris.png',
-      galleryImages: ['./assets/images/ely/icon-telesancris.png'],
+      coverImage: '../assets/images/ely/icon-telesancris.png',
+      galleryImages: ['../assets/images/ely/icon-telesancris.png'],
       youtubeVideo: '',
       technologies: ['C# / Unity Mobile Tools', 'HLS Video Streaming', 'UI/UX Design', 'Android Deployment'],
       metrics: [
@@ -180,8 +180,8 @@
       year: '2022',
       role: 'Programador de Juego & Reskin',
       featured: false,
-      coverImage: './assets/images/ely/icon-yunonline.png',
-      galleryImages: ['./assets/images/ely/icon-yunonline.png'],
+      coverImage: '../assets/images/ely/icon-yunonline.png',
+      galleryImages: ['../assets/images/ely/icon-yunonline.png'],
       youtubeVideo: '',
       technologies: ['Unity', 'C#', 'Photon Network', 'Sprite Pipeline', 'Mobile Controls'],
       metrics: [
@@ -209,8 +209,8 @@
       year: '2023',
       role: 'Desarrollador Integral de Juego',
       featured: false,
-      coverImage: './assets/images/ely/icon-retopolis.jpg',
-      galleryImages: ['./assets/images/ely/icon-retopolis.jpg'],
+      coverImage: '../assets/images/ely/icon-retopolis.jpg',
+      galleryImages: ['../assets/images/ely/icon-retopolis.jpg'],
       youtubeVideo: '',
       technologies: ['Unity', 'C#', 'Modular Gameplay Architecture', 'Mobile UI', 'Audio Manager'],
       metrics: [
@@ -237,8 +237,8 @@
       year: '2023',
       role: 'Creador & Desarrollador Principal',
       featured: false,
-      coverImage: './assets/images/ely/icon-helptuber.jpg',
-      galleryImages: ['./assets/images/ely/icon-helptuber.jpg'],
+      coverImage: '../assets/images/ely/icon-helptuber.jpg',
+      galleryImages: ['../assets/images/ely/icon-helptuber.jpg'],
       youtubeVideo: '',
       technologies: ['Unity UI / C#', 'REST API Integration', 'Data Serialization', 'Productivity UX'],
       metrics: [
@@ -266,8 +266,8 @@
       year: '2022',
       role: 'Freelance Game Developer (Bug Fixer & Optimization)',
       featured: false,
-      coverImage: './assets/images/ely/icon-dominoesrepublic.png',
-      galleryImages: ['./assets/images/ely/icon-dominoesrepublic.png'],
+      coverImage: '../assets/images/ely/icon-dominoesrepublic.png',
+      galleryImages: ['../assets/images/ely/icon-dominoesrepublic.png'],
       youtubeVideo: '',
       technologies: ['Unity', 'C#', 'Geolocation Services', 'Board Game Logic', 'Profiling'],
       metrics: [
@@ -293,8 +293,8 @@
       year: '2022',
       role: 'Desarrollador & Diseñador de Niveles',
       featured: false,
-      coverImage: './assets/images/ely/picon-aworld.png',
-      galleryImages: ['./assets/images/ely/picon-aworld.png'],
+      coverImage: '../assets/images/ely/picon-aworld.png',
+      galleryImages: ['../assets/images/ely/picon-aworld.png'],
       youtubeVideo: '',
       technologies: ['Unity 2D', 'C#', '2D Tilemaps', 'Player Controller', 'Sound Effects'],
       metrics: [
@@ -320,8 +320,8 @@
       year: '2022',
       role: 'Creador & Programador de Jugabilidad',
       featured: false,
-      coverImage: './assets/images/ely/picon-hellishF.png',
-      galleryImages: ['./assets/images/ely/picon-hellishF.png'],
+      coverImage: '../assets/images/ely/picon-hellishF.png',
+      galleryImages: ['../assets/images/ely/picon-hellishF.png'],
       youtubeVideo: '',
       technologies: ['Unity', 'C#', 'Particle Systems', 'Score Management', 'Arcade Loop'],
       metrics: [
@@ -348,8 +348,8 @@
       year: '2022',
       role: 'Creador & Desarrollador de Red',
       featured: false,
-      coverImage: './assets/images/ely/picon-thespider.png',
-      galleryImages: ['./assets/images/ely/picon-thespider.png'],
+      coverImage: '../assets/images/ely/picon-thespider.png',
+      galleryImages: ['../assets/images/ely/picon-thespider.png'],
       youtubeVideo: '',
       technologies: ['Unity', 'Photon PUN 2', 'C#', 'Multiplayer Sync', 'Lobby System'],
       metrics: [
@@ -375,8 +375,8 @@
       year: '2021',
       role: 'Diseñador de Físicas & Programador',
       featured: false,
-      coverImage: './assets/images/ely/picon-Rball.png',
-      galleryImages: ['./assets/images/ely/picon-Rball.png'],
+      coverImage: '../assets/images/ely/picon-Rball.png',
+      galleryImages: ['../assets/images/ely/picon-Rball.png'],
       youtubeVideo: '',
       technologies: ['Unity 3D', 'C#', 'Rigidbody & Physics Materials', 'Dynamic Camera'],
       metrics: [
@@ -402,8 +402,8 @@
       year: '2021',
       role: 'Desarrollador Integral',
       featured: false,
-      coverImage: './assets/images/ely/picon-maddys.png',
-      galleryImages: ['./assets/images/ely/picon-maddys.png'],
+      coverImage: '../assets/images/ely/picon-maddys.png',
+      galleryImages: ['../assets/images/ely/picon-maddys.png'],
       youtubeVideo: '',
       technologies: ['Unity 2D', 'C#', 'Animation Controllers', 'Tilemap Design'],
       metrics: [
@@ -429,8 +429,8 @@
       year: '2021',
       role: 'Programador & Diseñador',
       featured: false,
-      coverImage: './assets/images/ely/picon-snakes.png',
-      galleryImages: ['./assets/images/ely/picon-snakes.png'],
+      coverImage: '../assets/images/ely/picon-snakes.png',
+      galleryImages: ['../assets/images/ely/picon-snakes.png'],
       youtubeVideo: '',
       technologies: ['Unity', 'C#', 'Grid Logic', 'AI Pathfinding', 'Power-ups'],
       metrics: [
@@ -456,8 +456,8 @@
       year: '2020',
       role: 'Desarrollador',
       featured: false,
-      coverImage: './assets/images/ely/picon-peace.png',
-      galleryImages: ['./assets/images/ely/picon-peace.png'],
+      coverImage: '../assets/images/ely/picon-peace.png',
+      galleryImages: ['../assets/images/ely/picon-peace.png'],
       youtubeVideo: '',
       technologies: ['Unity', 'C#', 'Atmospheric Lighting', 'Touch Controls'],
       metrics: [
@@ -485,8 +485,8 @@
       deliveryTime: '2 - 4 días hábiles',
       role: 'Especialista en Monetización & SDKs',
       featured: true,
-      coverImage: './assets/images/ely/icon-appads.png',
-      galleryImages: ['./assets/images/ely/icon-appads.png'],
+      coverImage: '../assets/images/ely/icon-appads.png',
+      galleryImages: ['../assets/images/ely/icon-appads.png'],
       youtubeVideo: '',
       technologies: ['Google AdMob', 'Unity Ads', 'Mediation SDKs', 'C# Event Callbacks', 'Google Play Policy'],
       metrics: [
@@ -524,8 +524,8 @@
       deliveryTime: '2 - 3 días hábiles',
       role: 'Ingeniero de Integración IAP & Billing',
       featured: true,
-      coverImage: './assets/images/ely/icon-inapppurchase.png',
-      galleryImages: ['./assets/images/ely/icon-inapppurchase.png'],
+      coverImage: '../assets/images/ely/icon-inapppurchase.png',
+      galleryImages: ['../assets/images/ely/icon-inapppurchase.png'],
       youtubeVideo: '',
       technologies: ['Unity IAP', 'Google Play Billing', 'Apple StoreKit', 'C# State Manager', 'Data Encryption'],
       metrics: [
@@ -563,8 +563,8 @@
       deliveryTime: '1 - 2 días hábiles',
       role: 'Arquitecto de Audio & Sound Design',
       featured: false,
-      coverImage: './assets/images/ely/icon-soundsystempng.png',
-      galleryImages: ['./assets/images/ely/icon-soundsystempng.png'],
+      coverImage: '../assets/images/ely/icon-soundsystempng.png',
+      galleryImages: ['../assets/images/ely/icon-soundsystempng.png'],
       youtubeVideo: '',
       technologies: ['Unity AudioSource', 'AudioMixer', 'FMOD Integration', 'PlayerPrefs Sound Persistence', 'C#'],
       metrics: [
@@ -601,8 +601,8 @@
       deliveryTime: '4 - 7 días hábiles',
       role: 'Ingeniero de Redes & Multijugador',
       featured: false,
-      coverImage: './assets/images/ely/icon-dominicanpower.png',
-      galleryImages: ['./assets/images/ely/icon-dominicanpower.png'],
+      coverImage: '../assets/images/ely/icon-dominicanpower.png',
+      galleryImages: ['../assets/images/ely/icon-dominicanpower.png'],
       youtubeVideo: '',
       technologies: ['Photon PUN 2', 'Photon Voice', 'C# Network Streams', 'Multiplayer Interpolation', 'Lobby System'],
       metrics: [
@@ -639,8 +639,8 @@
       deliveryTime: 'Horarios Flexibles a Convenir',
       role: 'Tutor & Desarrollador Senior',
       featured: true,
-      coverImage: './assets/images/ely/my-avatar.png',
-      galleryImages: ['./assets/images/ely/my-avatar.png'],
+      coverImage: '../assets/images/ely/my-avatar.png',
+      galleryImages: ['../assets/images/ely/my-avatar.png'],
       youtubeVideo: '',
       technologies: ['Unity 2D & 3D', 'C# Programming', 'Game Architecture', 'Debugging', 'Live Screen Share'],
       metrics: [
@@ -678,8 +678,8 @@
       deliveryTime: 'Sesión en Vivo con Pantalla Compartida',
       role: 'Mentor de Publicación & Monetización',
       featured: false,
-      coverImage: './assets/images/ely/icon-appads.png',
-      galleryImages: ['./assets/images/ely/icon-appads.png'],
+      coverImage: '../assets/images/ely/icon-appads.png',
+      galleryImages: ['../assets/images/ely/icon-appads.png'],
       youtubeVideo: '',
       technologies: ['Google Play Console', 'Unity IAP', 'Google AdMob', 'Android App Bundles (.aab)', 'Keystore Security'],
       metrics: [
@@ -716,8 +716,8 @@
       deliveryTime: 'Sesión en Vivo con Pantalla Compartida',
       role: 'Mentor de Multijugador & Networking',
       featured: false,
-      coverImage: './assets/images/ely/icon-dominicanpower.png',
-      galleryImages: ['./assets/images/ely/icon-dominicanpower.png'],
+      coverImage: '../assets/images/ely/icon-dominicanpower.png',
+      galleryImages: ['../assets/images/ely/icon-dominicanpower.png'],
       youtubeVideo: '',
       technologies: ['Photon PUN 2', 'Unity C#', 'Network RPCs', 'Lobby & Room Management', 'Smooth Interpolation'],
       metrics: [
@@ -832,7 +832,7 @@
       project: 'MotoLoco | En Una Goma (Juego + Web + Backend)',
       year: '2024 - 2025',
       rating: 5,
-      avatar: './assets/images/ely/icon-enunagoma.png',
+      avatar: '../assets/images/ely/icon-enunagoma.png',
       feedback: 'Desarrollo completo del juego y la plataforma web oficial. Eliezer manejó tanto la programación del videojuego en Unity como la web promocional con base de datos en tiempo récord para nuestra comunidad.',
       tags: ['Videojuego Unity', 'Web PHP/MySQL', 'Audiencia Masiva']
     },
@@ -843,7 +843,7 @@
       project: 'Dominican Power & Yun Online',
       year: '2021 - 2022',
       rating: 5,
-      avatar: './assets/images/ely/icon-dominicanpower.png',
+      avatar: '../assets/images/ely/icon-dominicanpower.png',
       feedback: 'Nos apoyó en un momento crucial realizando el remake integral de interfaz, corrigiendo bugs críticos de red y conectando el multijugador con Photon Network. Un profesional serio, ágil y con gran dominio de Unity.',
       tags: ['Photon PUN 2', 'UI/UX Remake', 'Economía In-Game']
     },
@@ -854,7 +854,7 @@
       project: 'Dominoes Republic (Optimización & Reglas)',
       year: '2022',
       rating: 5,
-      avatar: './assets/images/ely/icon-dominoesrepublic.png',
+      avatar: '../assets/images/ely/icon-dominoesrepublic.png',
       feedback: 'Excelente diagnóstico para solucionar errores críticos de geolocalización y sincronización de reglas en partidas competitivas. Muy resolutivo en situaciones de alta presión.',
       tags: ['Bug Fixing', 'Geolocalización', 'Reglas de Juego']
     },
@@ -865,7 +865,7 @@
       project: 'LEVA 3D, Simón, Fireball, Dark Castle, GUGO',
       year: '2019 - 2021',
       rating: 5,
-      avatar: './assets/images/ely/my-avatar.png',
+      avatar: '../assets/images/ely/my-avatar.png',
       feedback: 'Al principio deposité toda mi confianza en el trabajo de Eliezer y no pudo haber mejor persona. Tuve excelentes resultados de desarrollo en todos los proyectos. Rápido, accesible y con gran nivel técnico.',
       tags: ['Multi-Juegos', 'Google Play', 'Monetización AdMob']
     },
@@ -876,7 +876,7 @@
       project: 'Telesancris Mobile Streaming App',
       year: '2023',
       rating: 5,
-      avatar: './assets/images/ely/icon-telesancris.png',
+      avatar: '../assets/images/ely/icon-telesancris.png',
       feedback: 'Me siento sumamente satisfecho de haber trabajado mi aplicación con Eliezer; los resultados fueron mucho mejores de lo que esperaba y con un trato muy profesional.',
       tags: ['Streaming HLS', 'App Móvil', 'Android']
     },
@@ -887,7 +887,7 @@
       project: 'OverDrivers Soundtrack ("Quieren Quitarme")',
       year: '2024 - 2025',
       rating: 5,
-      avatar: './assets/images/ely/overdrivers-teaser.jpg',
+      avatar: '../assets/images/ely/overdrivers-teaser.jpg',
       feedback: 'Increíble visión para sincronizar el ritmo de la música con las físicas de carreras del juego y crear los teasers cinematográficos oficiales con excelente calidad audiovisual.',
       tags: ['Banda Sonora', 'Teasers YouTube', 'Colaboración']
     },
@@ -898,7 +898,7 @@
       project: 'Nuevo Título Interactivo Confidencial',
       year: '2025 - Presente',
       rating: 5,
-      avatar: './assets/images/ely/my-avatar.png',
+      avatar: '../assets/images/ely/my-avatar.png',
       feedback: 'Actualmente trabajando en un proyecto comercial interactivo de alto impacto. Gran rigurosidad técnica, cumplimiento de hitos y comunicación fluida en cada fase.',
       tags: ['En Desarrollo Activo', 'Unity C#', 'Arquitectura']
     },
@@ -909,7 +909,7 @@
       project: 'Mentorías Personalizadas en Unity, C# & Monetización',
       year: '2024 - 2025',
       rating: 5,
-      avatar: './assets/images/ely/icon-appads.png',
+      avatar: '../assets/images/ely/icon-appads.png',
       feedback: 'Las clases personalizadas 1 a 1 te ahorran meses de ensayo y error. Eliezer te enseña directamente en tu proyecto cómo implementar Ads, IAP, multijugador online y cómo compilar sin fallos para la tienda.',
       tags: ['Mentoría 1 a 1', 'Unity & C#', 'Monetización']
     }
@@ -1461,10 +1461,10 @@
           <!-- Imagen de Cabecera (Soporta 16:9 y cliqueable) -->
           <div class="relative aspect-16-9 w-full overflow-hidden bg-[#181d28] cursor-pointer" onclick="window.ElyPortfolio.openProjectModal('${project.id}')">
             <img
-              src="${project.coverImage || './assets/images/ely/my-avatar.png'}"
+              src="${project.coverImage || '../assets/images/ely/my-avatar.png'}"
               alt="${project.title}"
               class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
-              onerror="this.src='./assets/images/ely/my-avatar.png'"
+              onerror="this.src='../assets/images/ely/my-avatar.png'"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-[#12151d] via-transparent to-black/40"></div>
             
@@ -1692,7 +1692,7 @@
     } else if (selectedProject.coverImage) {
       images = [selectedProject.coverImage];
     } else {
-      images = ['./assets/images/ely/my-avatar.png'];
+      images = ['../assets/images/ely/my-avatar.png'];
     }
 
     // Pestañas superiores (si tiene video y fotos a la vez)
@@ -1746,7 +1746,7 @@
               src="${currentImgSrc}"
               alt="${selectedProject.title}"
               class="w-full h-full object-cover object-center transition-all duration-300"
-              onerror="this.src='./assets/images/ely/my-avatar.png'"
+              onerror="this.src='../assets/images/ely/my-avatar.png'"
             />
             
             ${images.length > 1 ? `
@@ -1783,7 +1783,7 @@
               onclick="window.ElyPortfolio.selectModalImage(${idx})"
               class="h-16 w-24 shrink-0 rounded-lg overflow-hidden border-2 transition-all ${isActive ? 'border-amber-400 scale-105 shadow-md' : 'border-transparent opacity-60 hover:opacity-100'}"
             >
-              <img src="${src}" class="w-full h-full object-cover" onerror="this.src='./assets/images/ely/my-avatar.png'" />
+              <img src="${src}" class="w-full h-full object-cover" onerror="this.src='../assets/images/ely/my-avatar.png'" />
             </button>
           `;
         }).join('');
@@ -1915,7 +1915,7 @@
           <div class="pt-3 border-t border-[#1e2330] flex items-center justify-between gap-3">
             <div class="flex items-center gap-2.5">
               <div class="h-9 w-9 rounded-lg overflow-hidden bg-black/40 border border-[#232733] shrink-0">
-                <img src="${c.avatar || './assets/images/ely/my-avatar.png'}" alt="${c.name}" class="h-full w-full object-cover" onerror="this.src='./assets/images/ely/my-avatar.png'" />
+                <img src="${c.avatar || '../assets/images/ely/my-avatar.png'}" alt="${c.name}" class="h-full w-full object-cover" onerror="this.src='../assets/images/ely/my-avatar.png'" />
               </div>
               <div>
                 <div class="text-xs font-bold text-white">${c.name}</div>
@@ -2001,7 +2001,7 @@
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div class="flex items-center gap-3">
               <div class="h-12 w-12 rounded-xl overflow-hidden bg-black/40 border border-[#232733] shrink-0">
-                <img src="${c.avatar || './assets/images/ely/my-avatar.png'}" alt="${c.name}" class="h-full w-full object-cover" onerror="this.src='./assets/images/ely/my-avatar.png'" />
+                <img src="${c.avatar || '../assets/images/ely/my-avatar.png'}" alt="${c.name}" class="h-full w-full object-cover" onerror="this.src='../assets/images/ely/my-avatar.png'" />
               </div>
               <div>
                 <h4 class="text-sm font-bold text-white font-display">${c.name}</h4>
@@ -2139,7 +2139,7 @@
     document.getElementById('test-form-project').value = '';
     document.getElementById('test-form-year').value = '2025';
     document.getElementById('test-form-rating').value = '5';
-    document.getElementById('test-form-avatar').value = './assets/images/ely/my-avatar.png';
+    document.getElementById('test-form-avatar').value = '../assets/images/ely/my-avatar.png';
     document.getElementById('test-form-feedback').value = '';
     document.getElementById('test-form-tags').value = 'Videojuego Unity, Colaboración';
 
@@ -2168,7 +2168,7 @@
     document.getElementById('test-form-project').value = target.project || '';
     document.getElementById('test-form-year').value = target.year || '';
     document.getElementById('test-form-rating').value = String(target.rating || 5);
-    document.getElementById('test-form-avatar').value = target.avatar || './assets/images/ely/my-avatar.png';
+    document.getElementById('test-form-avatar').value = target.avatar || '../assets/images/ely/my-avatar.png';
     document.getElementById('test-form-feedback').value = target.feedback || '';
     document.getElementById('test-form-tags').value = (target.tags || []).join(', ');
 
@@ -2192,7 +2192,7 @@
     const project = document.getElementById('test-form-project').value.trim();
     const year = document.getElementById('test-form-year').value.trim();
     const rating = parseInt(document.getElementById('test-form-rating').value, 10) || 5;
-    const avatar = document.getElementById('test-form-avatar').value.trim() || './assets/images/ely/my-avatar.png';
+    const avatar = document.getElementById('test-form-avatar').value.trim() || '../assets/images/ely/my-avatar.png';
     const feedback = document.getElementById('test-form-feedback').value.trim();
     const tagsRaw = document.getElementById('test-form-tags').value;
     const tags = tagsRaw.split(',').map(s => s.trim()).filter(Boolean);
@@ -2283,7 +2283,7 @@
     const project = projInput.value.trim();
     const rating = parseInt(ratingInput.value, 10) || 5;
     const feedback = textInput.value.trim();
-    const avatar = avatarInput.value.trim() || './assets/images/ely/my-avatar.png';
+    const avatar = avatarInput.value.trim() || '../assets/images/ely/my-avatar.png';
     const tags = tagsInput.value.split(',').map(s => s.trim()).filter(Boolean);
 
     // Validar código
@@ -2931,11 +2931,11 @@
     document.getElementById('edit-proj-gallery').value = galleryImgs;
 
     const iconPrev = document.getElementById('edit-proj-icon-preview');
-    if (iconPrev) iconPrev.src = project.coverImage || './assets/images/ely/my-avatar.png';
+    if (iconPrev) iconPrev.src = project.coverImage || '../assets/images/ely/my-avatar.png';
     const iconInp = document.getElementById('edit-proj-icon');
     if (iconInp) iconInp.value = project.coverImage || '';
     const coverPrev = document.getElementById('edit-proj-cover-preview');
-    if (coverPrev) coverPrev.src = project.coverImage || './assets/images/ely/overdrivers-teaser.jpg';
+    if (coverPrev) coverPrev.src = project.coverImage || '../assets/images/ely/overdrivers-teaser.jpg';
     renderGalleryThumbnails('edit-proj-gallery-thumbs', 'edit-proj-gallery');
 
     // Video de YouTube en grande
@@ -2972,7 +2972,7 @@
     project.role = document.getElementById('edit-proj-role').value.trim();
     project.clientOrTeam = document.getElementById('edit-proj-client').value.trim() || undefined;
     project.year = document.getElementById('edit-proj-year').value.trim();
-    project.coverImage = document.getElementById('edit-proj-cover').value.trim() || './assets/images/ely/my-avatar.png';
+    project.coverImage = document.getElementById('edit-proj-cover').value.trim() || '../assets/images/ely/my-avatar.png';
 
     // Parsear galería de imágenes (una por línea o por coma)
     const galleryRaw = document.getElementById('edit-proj-gallery').value;
@@ -3021,13 +3021,13 @@
     const modal = document.getElementById('add-project-modal');
     if (modal) {
       const iconPrev = document.getElementById('new-proj-icon-preview');
-      if (iconPrev) iconPrev.src = './assets/images/ely/my-avatar.png';
+      if (iconPrev) iconPrev.src = '../assets/images/ely/my-avatar.png';
       const iconInp = document.getElementById('new-proj-icon');
-      if (iconInp) iconInp.value = './assets/images/ely/my-avatar.png';
+      if (iconInp) iconInp.value = '../assets/images/ely/my-avatar.png';
       const coverPrev = document.getElementById('new-proj-cover-preview');
-      if (coverPrev) coverPrev.src = './assets/images/ely/overdrivers-teaser.jpg';
+      if (coverPrev) coverPrev.src = '../assets/images/ely/overdrivers-teaser.jpg';
       const coverInp = document.getElementById('new-proj-cover');
-      if (coverInp) coverInp.value = './assets/images/ely/overdrivers-teaser.jpg';
+      if (coverInp) coverInp.value = '../assets/images/ely/overdrivers-teaser.jpg';
       const galleryInp = document.getElementById('new-proj-gallery');
       if (galleryInp) galleryInp.value = '';
       renderGalleryThumbnails('new-proj-gallery-thumbs', 'new-proj-gallery');
@@ -3052,7 +3052,7 @@
     const origin = document.getElementById('new-proj-origin').value;
     const category = document.getElementById('new-proj-category').value;
     const priceTag = document.getElementById('new-proj-price').value.trim();
-    const coverImage = document.getElementById('new-proj-cover').value.trim() || './assets/images/ely/my-avatar.png';
+    const coverImage = document.getElementById('new-proj-cover').value.trim() || '../assets/images/ely/my-avatar.png';
     const galleryRaw = document.getElementById('new-proj-gallery').value;
     const videoUrl = document.getElementById('new-proj-video').value.trim();
     const desc = document.getElementById('new-proj-desc').value.trim();
@@ -3728,26 +3728,26 @@
   // 16.1 Biblioteca de Imágenes & Drag and Drop Multimedia
   const CUSTOM_IMAGES_KEY = 'portfolio_custom_images_v2';
   const DEFAULT_LIBRARY_IMAGES = [
-    { id: 'overdrivers', name: 'OverDrivers Teaser', category: 'Juegos', path: './assets/images/ely/overdrivers-teaser.jpg' },
-    { id: 'enunagoma', name: 'MotoLoco (En Una Goma)', category: 'Juegos', path: './assets/images/ely/icon-enunagoma.png' },
-    { id: 'dominicanpower', name: 'Dominican Power', category: 'Juegos', path: './assets/images/ely/icon-dominicanpower.png' },
-    { id: 'telesancris', name: 'Telesancris Mobile App', category: 'Apps', path: './assets/images/ely/icon-telesancris.png' },
-    { id: 'yunonline', name: 'Yun Online', category: 'Juegos', path: './assets/images/ely/icon-yunonline.png' },
-    { id: 'retopolis', name: 'Retopolis Hub', category: 'Juegos', path: './assets/images/ely/icon-retopolis.jpg' },
-    { id: 'helptuber', name: 'HELPTUBER Suite', category: 'Apps', path: './assets/images/ely/icon-helptuber.jpg' },
-    { id: 'dominoesrepublic', name: 'Dominoes Republic', category: 'Juegos', path: './assets/images/ely/icon-dominoesrepublic.png' },
-    { id: 'adventureworld', name: 'Adventure World', category: 'Juegos', path: './assets/images/ely/picon-aworld.png' },
-    { id: 'hellishflash', name: 'Hellish Flash', category: 'Juegos', path: './assets/images/ely/picon-hellishF.png' },
-    { id: 'thespider', name: 'La Arañita Online', category: 'Juegos', path: './assets/images/ely/picon-thespider.png' },
-    { id: 'rollingball', name: 'Rolling Ball 3D', category: 'Juegos', path: './assets/images/ely/picon-Rball.png' },
-    { id: 'maddys', name: 'Maddys Adventures', category: 'Juegos', path: './assets/images/ely/picon-maddys.png' },
-    { id: 'snakes', name: 'Snakes Battles', category: 'Juegos', path: './assets/images/ely/picon-snakes.png' },
-    { id: 'peace', name: 'Peace In The Forest', category: 'Juegos', path: './assets/images/ely/picon-peace.png' },
-    { id: 'wallball', name: 'Wall Ball Reflex', category: 'Juegos', path: './assets/images/ely/picon-wallball.png' },
-    { id: 'adsmonetization', name: 'Ads Monetization System', category: 'Servicios', path: './assets/images/ely/icon-appads.png' },
-    { id: 'inapppurchases', name: 'In-App Purchases System', category: 'Servicios', path: './assets/images/ely/icon-inapppurchase.png' },
-    { id: 'soundsfx', name: 'Sounds FX & Music System', category: 'Servicios', path: './assets/images/ely/icon-soundsystempng.png' },
-    { id: 'avatar', name: 'Avatar Eliezer (ElyDev)', category: 'Perfil', path: './assets/images/ely/my-avatar.png' }
+    { id: 'overdrivers', name: 'OverDrivers Teaser', category: 'Juegos', path: '../assets/images/ely/overdrivers-teaser.jpg' },
+    { id: 'enunagoma', name: 'MotoLoco (En Una Goma)', category: 'Juegos', path: '../assets/images/ely/icon-enunagoma.png' },
+    { id: 'dominicanpower', name: 'Dominican Power', category: 'Juegos', path: '../assets/images/ely/icon-dominicanpower.png' },
+    { id: 'telesancris', name: 'Telesancris Mobile App', category: 'Apps', path: '../assets/images/ely/icon-telesancris.png' },
+    { id: 'yunonline', name: 'Yun Online', category: 'Juegos', path: '../assets/images/ely/icon-yunonline.png' },
+    { id: 'retopolis', name: 'Retopolis Hub', category: 'Juegos', path: '../assets/images/ely/icon-retopolis.jpg' },
+    { id: 'helptuber', name: 'HELPTUBER Suite', category: 'Apps', path: '../assets/images/ely/icon-helptuber.jpg' },
+    { id: 'dominoesrepublic', name: 'Dominoes Republic', category: 'Juegos', path: '../assets/images/ely/icon-dominoesrepublic.png' },
+    { id: 'adventureworld', name: 'Adventure World', category: 'Juegos', path: '../assets/images/ely/picon-aworld.png' },
+    { id: 'hellishflash', name: 'Hellish Flash', category: 'Juegos', path: '../assets/images/ely/picon-hellishF.png' },
+    { id: 'thespider', name: 'La Arañita Online', category: 'Juegos', path: '../assets/images/ely/picon-thespider.png' },
+    { id: 'rollingball', name: 'Rolling Ball 3D', category: 'Juegos', path: '../assets/images/ely/picon-Rball.png' },
+    { id: 'maddys', name: 'Maddys Adventures', category: 'Juegos', path: '../assets/images/ely/picon-maddys.png' },
+    { id: 'snakes', name: 'Snakes Battles', category: 'Juegos', path: '../assets/images/ely/picon-snakes.png' },
+    { id: 'peace', name: 'Peace In The Forest', category: 'Juegos', path: '../assets/images/ely/picon-peace.png' },
+    { id: 'wallball', name: 'Wall Ball Reflex', category: 'Juegos', path: '../assets/images/ely/picon-wallball.png' },
+    { id: 'adsmonetization', name: 'Ads Monetization System', category: 'Servicios', path: '../assets/images/ely/icon-appads.png' },
+    { id: 'inapppurchases', name: 'In-App Purchases System', category: 'Servicios', path: '../assets/images/ely/icon-inapppurchase.png' },
+    { id: 'soundsfx', name: 'Sounds FX & Music System', category: 'Servicios', path: '../assets/images/ely/icon-soundsystempng.png' },
+    { id: 'avatar', name: 'Avatar Eliezer (ElyDev)', category: 'Perfil', path: '../assets/images/ely/my-avatar.png' }
   ];
 
   let customLibraryImages = [];
@@ -3797,7 +3797,7 @@
     grid.innerHTML = filtered.map(img => `
       <div class="group relative flex flex-col overflow-hidden rounded-xl border border-[#232733] bg-[#0d1017] hover:border-amber-400/50 hover:shadow-lg hover:shadow-amber-500/5 transition-all p-2.5 text-left cursor-pointer" data-library-img-path="${img.path}" data-library-img-name="${img.name || ''}">
         <div class="relative aspect-video w-full overflow-hidden rounded-lg bg-[#141822] mb-2 border border-white/5">
-          <img src="${img.path}" alt="${img.name || 'Imagen'}" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" onerror="this.src='./assets/images/ely/my-avatar.png'" />
+          <img src="${img.path}" alt="${img.name || 'Imagen'}" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" onerror="this.src='../assets/images/ely/my-avatar.png'" />
           <span class="absolute top-1 left-1 rounded bg-black/80 px-1.5 py-0.5 text-[9px] font-mono text-amber-400 border border-amber-400/20 backdrop-blur-sm">
             ${img.category || 'Asset'}
           </span>
@@ -3933,7 +3933,7 @@
       const thumb = document.createElement('div');
       thumb.className = 'relative group w-14 h-14 rounded-lg overflow-hidden border border-[#2c3345] bg-[#0c0e14] shrink-0';
       thumb.innerHTML = `
-        <img src="${src}" alt="Screenshot ${idx + 1}" class="w-full h-full object-cover" onerror="this.src='./assets/images/ely/my-avatar.png'" />
+        <img src="${src}" alt="Screenshot ${idx + 1}" class="w-full h-full object-cover" onerror="this.src='../assets/images/ely/my-avatar.png'" />
         <button type="button" title="Eliminar de galería" class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center text-red-400 font-bold text-xs transition-opacity cursor-pointer">
           ✕
         </button>
