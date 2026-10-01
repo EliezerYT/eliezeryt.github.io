@@ -42,16 +42,21 @@ jobs:
           root = "assets/images/ely"
           extensions = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".avif", ".bmp", ".svg"}
           images = []
+          folders = []
 
           for current_root, dirs, files in os.walk(root):
               dirs.sort()
+              relative_dir = os.path.relpath(current_root, root)
+              if relative_dir != ".":
+                  folders.append(relative_dir.replace(os.sep, "/"))
               for filename in sorted(files):
                   if os.path.splitext(filename)[1].lower() in extensions:
                       full_path = os.path.join(current_root, filename)
                       images.append(os.path.relpath(full_path, root).replace(os.sep, "/"))
 
+          manifest = {"images": images, "folders": sorted(set(folders))}
           with open(os.path.join(root, "manifest.json"), "w", encoding="utf-8") as file:
-              json.dump(images, file, ensure_ascii=False, indent=2)
+              json.dump(manifest, file, ensure_ascii=False, indent=2)
               file.write("\\n")
           PY
 
