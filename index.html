@@ -778,8 +778,15 @@
             </div>
             <div>
               <div class="flex items-center gap-2">
-                <h3 class="text-lg font-bold text-white font-display">Clientes Satisfechos & Colaboraciones</h3>
-                <span id="modal-clients-count-badge" class="rounded bg-amber-400 px-2 py-0.5 text-xs font-extrabold text-black">8+ Clientes</span>
+                <div data-testimonials-main-title class="flex items-center gap-2">
+                  <h3 class="text-lg font-bold text-white font-display">Clientes Satisfechos & Colaboraciones</h3>
+                  <span id="modal-clients-count-badge" class="rounded bg-amber-400 px-2 py-0.5 text-xs font-extrabold text-black">8+ Clientes</span>
+                </div>
+                <div class="hidden flex-1 items-center justify-center gap-3" id="modal-client-title-wrap">
+                  <button type="button" onclick="window.ElyPortfolio.openSatisfiedClientsModal()" class="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-slate-300">← Clientes</button>
+                  <h3 id="modal-client-title" class="text-lg font-bold text-white font-display text-center"></h3>
+                  <span id="modal-client-title-spacer" class="w-[62px]"></span>
+                </div>
               </div>
               <p class="text-xs text-slate-400">Feedback directo de influencers, empresas y desarrolladores con calificación 5 estrellas.</p>
             </div>
