@@ -40,7 +40,7 @@ jobs:
           import os
 
           root = "assets/images/ely"
-          extensions = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".avif", ".bmp", ".svg"}
+          extensions = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".avif", ".bmp", ".svg", ".mp4", ".webm", ".mov", ".m4v", ".ogv"}
           images = []
           folders = []
 
