@@ -5550,6 +5550,7 @@
   let currentLibraryTarget = null;
   let selectedGalleryLibraryImages = new Set();
   let githubElyFolderImages = [];
+  let selectedLibraryFolder = '';
   let githubElyFolderLoading = false;
   const libraryUploadInFlight = new Map();
 
@@ -5723,8 +5724,7 @@
     const existing = await getGithubFile(keepPath);
     if (existing) return;
     await putGithubFile(keepPath, btoa(''), 'Create library folder ' + folder);
-    const created = await getGithubFile(keepPath);
-    if (created && created.sha) await deleteGithubImageFile(keepPath);
+    // Keep .gitkeep so empty folders remain visible in GitHub.
   }
 
   async function moveCustomLibraryImageFolder(imageId, card) {
@@ -5779,14 +5779,58 @@
     if (!grid) return;
 
     const allImages = getAllLibraryImages();
+    grid.className = 'flex flex-1 min-h-0 overflow-hidden rounded-xl border border-[#252b38] bg-[#0b0d12]';
+    grid.style.display = 'flex';
+    grid.style.gridTemplateColumns = '';
+    grid.innerHTML = '<aside class="w-44 sm:w-60 shrink-0 border-r border-[#252b38] flex flex-col min-h-0 bg-[#0d1017]"><div class="px-3 py-3 border-b border-[#252b38] text-xs font-bold text-slate-300 flex items-center justify-between"><span>📁 Carpetas</span><button type="button" id="library-create-folder-btn" class="text-amber-400 hover:text-amber-300" title="Crear carpeta">＋</button></div><div id="library-folder-tree" class="flex-1 min-h-0 overflow-y-auto p-2 text-xs"></div></aside><section class="flex-1 min-w-0 min-h-0 flex flex-col"><div class="px-3 py-2 border-b border-[#252b38] flex items-center justify-between gap-2"><div id="library-folder-breadcrumb" class="text-[11px] text-slate-400 truncate">📁 Todas las imágenes</div><span id="library-folder-count" class="text-[10px] text-slate-500 shrink-0"></span></div><div id="library-file-items" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 overflow-y-auto flex-1 min-h-0 p-3 content-start"></div></section></div>';
+    const imageGrid = document.getElementById('library-file-items');
+    const folderTree = document.getElementById('library-folder-tree');
+    const folderPaths = new Set(['']);
+    allImages.forEach(function(image) {
+      const folder = getLibraryImageFolder(image);
+      const parts = folder.split('/').filter(Boolean);
+      let path = '';
+      parts.forEach(function(part) { path = path ? path + '/' + part : part; folderPaths.add(path); });
+    });
+    const childFolders = function(parent) {
+      const prefix = parent ? parent + '/' : '';
+      return Array.from(folderPaths).filter(path => path && path.startsWith(prefix) && path.slice(prefix.length).length > 0 && !path.slice(prefix.length).includes('/')).sort((x,y)=>x.localeCompare(y));
+    };
+    const folderButton = function(path) {
+      const name = path ? path.split('/').pop() : 'Todas las imágenes';
+      const active = path === selectedLibraryFolder;
+      const children = childFolders(path);
+      return '<div class="library-tree-node"><button type="button" data-library-folder="' + path.replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '" class="w-full text-left px-2 py-1.5 rounded-md flex items-center gap-1.5 ' + (active ? 'bg-amber-400/15 text-amber-300' : 'text-slate-400 hover:bg-white/5 hover:text-white') + '"><span class="text-[10px]">' + (children.length ? '▸' : '·') + '</span><span>📁</span><span class="truncate">' + name.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</span></button>' + (children.length && path && (selectedLibraryFolder === path || selectedLibraryFolder.startsWith(path + '/')) ? '<div class="ml-3 pl-1 border-l border-white/10">' + children.map(folderButton).join('') + '</div>' : '') + '</div>';
+    };
+    if (folderTree) folderTree.innerHTML = folderButton('');
+    const crumb = document.getElementById('library-folder-breadcrumb');
+    if (crumb) crumb.textContent = selectedLibraryFolder ? '📁 ' + selectedLibraryFolder : '📁 Todas las imágenes';
+    if (!grid.dataset.treeBound) {
+      grid.dataset.treeBound = 'true';
+      grid.addEventListener('click', function(e) {
+        const folderButton = e.target.closest('[data-library-folder]');
+        if (folderButton) { selectedLibraryFolder = folderButton.getAttribute('data-library-folder') || ''; renderLibraryGrid(document.getElementById('library-search-input')?.value || ''); return; }
+        if (e.target.closest('#library-create-folder-btn')) {
+          const parent = selectedLibraryFolder;
+          const folderName = window.prompt('Nombre de la nueva carpeta o subcarpeta:');
+          if (!folderName || !folderName.trim()) return;
+          const clean = normalizeLibraryFolder((parent ? parent + '/' : '') + folderName).split('/').filter(part => part && part !== '.' && part !== '..').join('/');
+          if (!clean) return;
+          ensureGithubImageFolder(clean).then(() => { selectedLibraryFolder = clean; renderLibraryGrid(document.getElementById('library-search-input')?.value || ''); showStatusNotification({title:'Carpeta creada',message:clean,type:'success',icon:'📁'}); }).catch(error => showStatusNotification({title:'No se pudo crear',message:error.message || 'Error creando carpeta.',type:'error',icon:'⚠️'}));
+        }
+      });
+    }
     const librarySizeSlider = document.getElementById('library-size-slider');
     const librarySize = Math.max(120, Math.min(300, parseInt((librarySizeSlider && librarySizeSlider.value) || '190', 10) || 190));
     const librarySizeValue = document.getElementById('library-size-value');
     if (librarySizeValue) librarySizeValue.textContent = librarySize + 'px';
-    grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(' + librarySize + 'px, 1fr))';
+    if (imageGrid) imageGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(' + librarySize + 'px, 1fr))';
     const query = (searchFilter || '').toLowerCase().trim();
 
     const filtered = allImages.filter(img => {
+      const folder = getLibraryImageFolder(img);
+      const inFolder = !selectedLibraryFolder || folder === selectedLibraryFolder || folder.startsWith(selectedLibraryFolder + '/');
+      if (!inFolder) return false;
       if (!query) return true;
       return (img.name && img.name.toLowerCase().includes(query)) ||
              (img.category && img.category.toLowerCase().includes(query)) ||
@@ -5796,9 +5840,11 @@
     if (countEl) {
       countEl.textContent = filtered.length;
     }
+    const folderCount = document.getElementById('library-folder-count');
+    if (folderCount) folderCount.textContent = filtered.length + ' elemento(s)';
 
     if (filtered.length === 0) {
-      grid.innerHTML = `
+      imageGrid.innerHTML = `
         <div class="col-span-full py-8 text-center text-slate-500">
           <p class="text-sm">No se encontraron imágenes que coincidan con la búsqueda.</p>
         </div>
@@ -5806,7 +5852,7 @@
       return;
     }
 
-    grid.innerHTML = filtered.map((img, filteredIndex) => {
+    imageGrid.innerHTML = filtered.map((img, filteredIndex) => {
       const isCustom = String(img.id || '').startsWith('custom-');
       const allIndex = allImages.findIndex(item => item.id === img.id);
       const customIndex = customLibraryImages.findIndex(item => item.id === img.id);
