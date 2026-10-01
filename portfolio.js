@@ -3077,8 +3077,8 @@
       modal.classList.add('hidden');
       delete modal.dataset.clientName;
     }
-    const title = document.getElementById('modal-client-title');
-    if (title) title.classList.add('hidden');
+    const titleWrap = document.getElementById('modal-client-title-wrap');
+    if (titleWrap) titleWrap.classList.add('hidden');
     const header = modal ? modal.querySelector('[data-testimonials-main-title]') : null;
     if (header) header.classList.remove('hidden');
     document.body.style.overflow = '';
