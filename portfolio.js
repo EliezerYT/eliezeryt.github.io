@@ -5303,8 +5303,17 @@
   }
 
 
-  async function loadAllDataFromBackend() {
+  let backendLoadPromise = null;
+  let backendLastLoadAt = 0;
+  const BACKEND_LOAD_TTL_MS = 10000;
+
+  async function loadAllDataFromBackend(force) {
     if (typeof fetch !== 'function') return;
+    const now = Date.now();
+    if (!force && backendLoadPromise) return backendLoadPromise;
+    if (!force && backendLastLoadAt && now - backendLastLoadAt < BACKEND_LOAD_TTL_MS) return;
+
+    backendLoadPromise = (async function () {
     // Si hay un guardado pendiente o en progreso, primero se termina.
     // Así "Cargar cambios" nunca puede traer una versión anterior y borrar
     // lo que acaba de guardarse.
@@ -5489,6 +5498,7 @@
 
     try {
       await loadFromGoogleSheets();
+      backendLastLoadAt = Date.now();
     } catch (error) {
       console.warn('[GOOGLE SHEETS LOAD ERROR]', error);
       showStatusNotification({
@@ -5497,7 +5507,12 @@
         type: 'error',
         icon: '⚠️'
       });
+    } finally {
+      backendLoadPromise = null;
     }
+    })();
+
+    return backendLoadPromise;
   }
 
   // 16.1 Biblioteca de Imágenes & Drag and Drop Multimedia
