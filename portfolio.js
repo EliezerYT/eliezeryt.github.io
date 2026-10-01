@@ -5650,6 +5650,7 @@
       githubElyFolderPaths = [];
       let foundImages = [];
       let source = 'GitHub';
+      let githubTreeLoaded = false;
 
       // Read the repository tree directly so manually added files and every nested
       // subfolder are detected immediately, without waiting for manifest.json.
@@ -5661,6 +5662,7 @@
         const response = await fetch(apiUrl, { cache: 'no-store', headers: headers });
         if (response.ok) {
           const treeData = await response.json();
+          githubTreeLoaded = true;
           const prefix = 'assets/images/ely/';
           const folderSet = new Set();
           const files = Array.isArray(treeData.tree) ? treeData.tree : [];
@@ -5733,7 +5735,7 @@ tree          githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
         }
       }
 
-      if (!foundImages.length) {
+      if (!foundImages.length && !githubTreeLoaded) {
         source = source === 'GitHub' ? 'respaldo local' : source;
         foundImages = FALLBACK_ELY_IMAGE_MANIFEST.filter(isMedia).map(function(relativePath) {
           const cleanPath = String(relativePath).replace(/^\/+/, '').replace(/\\/g, '/');
