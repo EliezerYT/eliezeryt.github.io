@@ -5557,7 +5557,7 @@
             <span class="absolute top-2 left-2 rounded bg-black/80 px-2 py-1 text-[10px] font-mono text-amber-400 border border-amber-400/20 backdrop-blur-sm">
               ${img.category || 'Asset'}
             </span>
-            <button type="button" class="absolute top-2 right-2 z-10 h-7 w-7 rounded-md bg-black/75 hover:bg-black/90 border border-white/15 text-sm flex items-center justify-center transition-all library-preview-btn" title="Ver imagen grande" aria-label="Ver imagen grande">🔍</button>
+            <button type="button" class="absolute top-2 right-2 z-10 h-8 w-8 aspect-square rounded-md bg-black/75 hover:bg-black/90 border border-white/15 text-sm flex items-center justify-center transition-all library-preview-btn" title="Ver imagen grande" aria-label="Ver imagen grande">🔍</button>
             ${canMove ? `<span class="absolute top-2 right-11 rounded bg-black/80 px-2 py-1 text-[10px] text-slate-300 border border-white/10">↕ Arrastra</span>` : ''}
           </div>
           <div class="flex-1 min-w-0">
@@ -5574,6 +5574,21 @@
               <button type="button" class="rounded-md bg-white/5 hover:bg-white/10 border border-white/10 py-1 text-[10px] font-bold text-slate-300 library-move-down-btn">▼ Bajar</button>
             </div>
           ` : ''}
+          ${canMove ? `
+            <div class="mt-2 rounded-lg border border-white/10 bg-black/20 p-2">
+              <label class="block text-[9px] uppercase tracking-wider text-slate-500 mb-1">Mover carpeta</label>
+              <div class="flex gap-1.5">
+                <select class="library-folder-move-select flex-1 min-w-0 rounded-md bg-[#0d1017] border border-[#262c3b] px-2 py-1 text-[10px] text-white focus:border-amber-400 focus:outline-none">
+                  <option value="Profile">Profile</option>
+                  <option value="Screenshot">Screenshot</option>
+                  <option value="AppLogo">AppLogo</option>
+                  <option value="Custom">Custom</option>
+                </select>
+                <button type="button" class="library-move-folder-btn rounded-md bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/20 px-2 py-1 text-[10px] font-bold text-amber-400">Mover</button>
+              </div>
+              <input type="text" class="library-folder-move-custom hidden mt-1.5 w-full rounded-md bg-[#0d1017] border border-[#262c3b] px-2 py-1 text-[10px] text-white placeholder-slate-600 focus:border-amber-400 focus:outline-none" placeholder="Nombre de carpeta..." />
+            </div>
+          ` : ''}
           ${isCustom ? `
             <button type="button" class="mt-1.5 rounded-md bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 py-1 text-[11px] font-bold text-red-400 transition-colors delete-library-image-btn">Eliminar</button>
           ` : ''}
@@ -5581,7 +5596,7 @@
       `;
     }).join('');
 
-    grid.querySelectorAll('.library-preview-btn').forEach(el => { el.style.height = Math.max(90, Math.round(librarySize * 0.78)) + 'px'; });
+    grid.querySelectorAll('.library-preview-btn').forEach(el => { el.style.width = '32px'; el.style.height = '32px'; });
 
     grid.querySelectorAll('.select-image-btn').forEach(button => {
       button.addEventListener('click', function (e) {
