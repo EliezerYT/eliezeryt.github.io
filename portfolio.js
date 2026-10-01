@@ -2074,7 +2074,6 @@
       openAuthModal();
       return;
     }
-    await loadAllDataFromBackend();
     editingAssetId = null;
     renderAssetsManagerList();
     const form = document.getElementById('asset-form');
@@ -3079,7 +3078,6 @@
     if (!modal) return;
     modal.classList.remove('hidden');
     renderSatisfiedClientsModalList();
-    await loadAllDataFromBackend();
     renderSatisfiedClientsModalList();
     renderTestimonialsPreview();
     document.body.style.overflow = 'hidden';
@@ -6987,8 +6985,6 @@
     const manager = document.getElementById('social-networks-manager');
     if (manager) manager.innerHTML = '';
 
-    await loadAllDataFromBackend();
-
     renderSocialNetworks();
     renderSocialNetworksManager();
     refreshAllSocialNetworkCounts();
@@ -7535,24 +7531,20 @@
   }
 
   // 17. Event Listeners y arranque
-  window.addEventListener('pageshow', function () {
-    setTimeout(function () {
-      applyAssetsRouteUI();
-      applySocialQueryRoute();
-      refreshCatalogFromSheet(true);
-    }, 0);
+  window.addEventListener('pageshow', function (event) {
+    applyAssetsRouteUI();
+    applySocialQueryRoute();
+    if (event.persisted) refreshCatalogFromSheet(true);
   });
 
   window.addEventListener('hashchange', function () {
     applyAssetsRouteUI();
     checkAssetHashParam();
-    refreshCatalogFromSheet(true);
   });
 
   window.addEventListener('popstate', function () {
     applyAssetsRouteUI();
     applySocialQueryRoute();
-    refreshCatalogFromSheet(true);
   });
 
   document.addEventListener('visibilitychange', function () {
@@ -7588,12 +7580,7 @@
   }
 
   function startCatalogBackgroundRefresh() {
-    if (catalogBackgroundRefreshTimer) clearInterval(catalogBackgroundRefreshTimer);
-
-    catalogBackgroundRefreshTimer = setInterval(function () {
-      if (document.hidden) return;
-      refreshCatalogFromSheet(true);
-    }, CATALOG_BACKGROUND_REFRESH_MS);
+    stopCatalogBackgroundRefresh();
   }
 
   function stopCatalogBackgroundRefresh() {
@@ -7608,8 +7595,8 @@
     if (window.location.search || window.location.hash) history.replaceState(null, '', window.location.pathname);
     if (section) requestAnimationFrame(function () { section.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
     applyAssetsRouteUI();
-    // Al volver a Inicio/Catálogo se consulta Sheets inmediatamente.
-    refreshCatalogFromSheet(true);
+    // Solo Inicio y Proyectos solicitan una actualización explícita.
+    if (sectionId === 'inicio' || sectionId === 'proyectos') refreshCatalogFromSheet(true);
   }
 
   function applySocialQueryRoute() {
