@@ -5728,7 +5728,7 @@
   }
 
   async function moveCustomLibraryImageFolder(imageId, card) {
-    const image = customLibraryImages.find(item => item.id === imageId);
+    const image = getAllLibraryImages().find(item => item.id === imageId);
     if (!image) return;
     const newFolder = getLibraryMoveConfig(card);
     if (newFolder === getLibraryImageFolder(image)) return;
@@ -5752,6 +5752,9 @@
         replaceImageReferenceEverywhere(previousPath, image.path);
         image.previewPath = image.path + '?v=' + Date.now();
         await deleteGithubImageFile(oldPath);
+        customLibraryImages = customLibraryImages.filter(item => item.id !== imageId);
+        if (!customLibraryImages.some(item => item.path === image.path)) customLibraryImages.push(image);
+        githubElyFolderImages = githubElyFolderImages.filter(item => item.id !== imageId);
       } else if (typeof image.path === 'string' && image.path.startsWith('data:image/') && getGithubToken()) {
         await putGithubFile(newPath, dataUrlToBase64(image.path), 'Move library image to ' + newFolder);
         const previousPath = image.path;
@@ -5807,7 +5810,7 @@
       const isCustom = String(img.id || '').startsWith('custom-');
       const allIndex = allImages.findIndex(item => item.id === img.id);
       const customIndex = customLibraryImages.findIndex(item => item.id === img.id);
-      const canMove = isCustom && customIndex >= 0;
+      const canMove = typeof img.path === 'string' && (img.path.startsWith('./assets/images/ely/') || img.path.startsWith('data:image/'));
       return `
         <div class="group relative flex h-max min-h-0 flex-col overflow-visible rounded-xl border border-[#232733] bg-[#0d1017] hover:border-amber-400/50 hover:shadow-lg hover:shadow-amber-500/5 transition-all p-3 text-left self-start library-card"
              draggable="${canMove ? 'true' : 'false'}"
@@ -5851,9 +5854,7 @@
               <input type="text" class="library-folder-move-custom hidden mt-1.5 w-full rounded-md bg-[#0d1017] border border-[#262c3b] px-2 py-1 text-[10px] text-white placeholder-slate-600 focus:border-amber-400 focus:outline-none" placeholder="Nombre de carpeta..." />
             </div>
           ` : ''}
-          ${isCustom ? `
-            <button type="button" class="mt-1.5 rounded-md bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 py-1 text-[11px] font-bold text-red-400 transition-colors delete-library-image-btn">Eliminar</button>
-          ` : ''}
+          <button type="button" class="mt-1.5 rounded-md bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 py-1 text-[11px] font-bold text-red-400 transition-colors delete-library-image-btn">Eliminar</button>
         </div>
       `;
     }).join('');
@@ -6101,7 +6102,7 @@
   }
 
   function deleteCustomLibraryImage(imageId) {
-    const image = customLibraryImages.find(item => item.id === imageId);
+    const image = getAllLibraryImages().find(item => item.id === imageId);
     if (!image) return;
     showConfirmModal({
       title: '¿Eliminar imagen de la biblioteca?',
@@ -6111,12 +6112,15 @@
       danger: true,
       onConfirm: async function () {
         const previous = customLibraryImages.slice();
+        const previousRemote = githubElyFolderImages.slice();
         customLibraryImages = customLibraryImages.filter(item => item.id !== imageId);
+        githubElyFolderImages = githubElyFolderImages.filter(item => item.id !== imageId);
         renderLibraryGrid();
         try {
           const token = getGithubToken();
-          if (token && typeof image.path === 'string' && image.path.startsWith('./assets/images/ely/')) {
-            await deleteGithubImageFile(image.path.substring(2));
+          if (typeof image.path === 'string' && image.path.startsWith('./assets/images/ely/')) {
+            if (!token) throw new Error('Configura tu token de GitHub para eliminar esta imagen del repositorio.');
+            await deleteGithubImageFile(image.path.substring(2).split('?')[0]);
             await persistLibraryImmediately('delete', image.name || 'Imagen');
             showStatusNotification({
               title: 'Imagen Eliminada',
@@ -6135,6 +6139,7 @@
           }
         } catch (error) {
           customLibraryImages = previous;
+          githubElyFolderImages = previousRemote;
           try {
             localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages));
           } catch (e) {}
