@@ -4981,7 +4981,8 @@
         name: image.name || '',
         category: image.category || getLibraryImageFolder(image),
         folder: getLibraryImageFolder(image),
-        path: image.path || ''
+        path: image.path || '',
+        imageId: String(image.id || '')
       };
     });
   }
@@ -5169,16 +5170,18 @@
 
       if (libraryRecordFromSheet) {
         customLibraryImages = libraryFromSheet
-          .filter(function(item) { return item && item.id && item.path; })
-          .map(function(item) {
+          .filter(function(item) { return item && item.path; })
+          .map(function(item, index) {
             return {
-              id: String(item.id),
+              id: String(item.id || ('img-' + Date.now() + '-' + index + '-' + Math.random().toString(36).slice(2, 8))),
               name: item.name || 'Imagen',
               category: item.category || item.folder || 'Profile',
               folder: item.folder || item.category || 'Profile',
-              path: item.path || ''
+              path: item.path || '',
+              previewPath: ''
             };
           });
+        persistCustomLibraryImages();
         persistCustomLibraryImages();
         renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
       }
@@ -5333,6 +5336,7 @@
   const libraryUploadInFlight = new Map();
 
   function getAllLibraryImages() {
+    ensureLibraryImageIds();
     const customKeys = new Set();
     const getImageKey = function (image) {
       if (!image) return '';
@@ -5517,19 +5521,25 @@
     }
     try {
       const extension = image.path && image.path.startsWith('data:image/') ? imageExtension(image.path) : ((image.name || '').match(/\.([a-z0-9]{2,5})$/i) || [, 'png'])[1];
-      const filename = sanitizeGithubImageName(image.name, extension);
+      const filename = sanitizeGithubImageName(String(image.id) + '.' + extension, extension);
       const newPath = 'assets/images/ely/' + newFolder + '/' + filename;
       await ensureGithubImageFolder(newFolder);
       if (oldPath) {
         const existing = await getGithubFile(oldPath);
         if (!existing || !existing.content) throw new Error('No se encontró la imagen actual en GitHub.');
         await putGithubFile(newPath, existing.content.replace(/\s/g, ''), 'Move library image to ' + newFolder);
+        const previousPath = image.path;
         image.path = './' + newPath;
+        image.previewPath = image.path + '?v=' + Date.now();
+        replaceImageReferenceEverywhere(previousPath, image.path);
         image.previewPath = image.path + '?v=' + Date.now();
         await deleteGithubImageFile(oldPath);
       } else if (typeof image.path === 'string' && image.path.startsWith('data:image/') && getGithubToken()) {
         await putGithubFile(newPath, dataUrlToBase64(image.path), 'Move library image to ' + newFolder);
+        const previousPath = image.path;
         image.path = './' + newPath;
+        image.previewPath = image.path + '?v=' + Date.now();
+        replaceImageReferenceEverywhere(previousPath, image.path);
         image.previewPath = image.path + '?v=' + Date.now();
       }
       image.folder = newFolder;
@@ -5737,6 +5747,60 @@
     try {
       localStorage.setItem(CUSTOM_IMAGES_KEY, JSON.stringify(customLibraryImages));
     } catch (e) {}
+  }
+
+  function ensureLibraryImageIds() {
+    let changed = false;
+    customLibraryImages.forEach(function (image, index) {
+      if (!image) return;
+      if (!image.id) {
+        image.id = 'img-' + Date.now() + '-' + index + '-' + Math.random().toString(36).slice(2, 8);
+        changed = true;
+      }
+      if (!image.folder) {
+        image.folder = image.category || getLibraryImageFolder(image);
+        changed = true;
+      }
+      if (!image.category) {
+        image.category = image.folder;
+        changed = true;
+      }
+    });
+    if (changed) persistCustomLibraryImages();
+    return changed;
+  }
+
+  function replaceImageReferenceEverywhere(oldPath, newPath, oldDataUrl) {
+    if (!oldPath || !newPath || oldPath === newPath) return;
+    const values = new Set([String(oldPath), String(newPath)]);
+    if (oldDataUrl) values.add(String(oldDataUrl));
+    const replaceValue = function (value) {
+      return values.has(String(value)) ? newPath : value;
+    };
+    const visit = function (value) {
+      if (!value || typeof value !== 'object') return;
+      if (Array.isArray(value)) {
+        value.forEach(function (item, index) {
+          if (typeof item === 'string') value[index] = replaceValue(item);
+          else visit(item);
+        });
+        return;
+      }
+      Object.keys(value).forEach(function (key) {
+        if (typeof value[key] === 'string') value[key] = replaceValue(value[key]);
+        else visit(value[key]);
+      });
+    };
+    visit(projects);
+    visit(experiences);
+    visit(assets);
+    visit(satisfiedClients);
+    visit(feedbackCodes);
+    visit(initialProfile);
+    visit(socialNetworksState);
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (e) {}
+    try { localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(experiences)); } catch (e) {}
+    try { localStorage.setItem(ASSETS_STORAGE_KEY, JSON.stringify(assets)); } catch (e) {}
   }
 
   function persistLibraryImmediately(action, imageName) {
@@ -6053,11 +6117,7 @@
     const normalizedName = String(name || 'Imagen Subida').trim().toLowerCase();
     const normalizedFolder = normalizeLibraryFolder(folder);
     const duplicate = customLibraryImages.find(function (item) {
-      const itemPath = typeof item.path === 'string' ? item.path : '';
-      const itemName = String(item.name || '').trim().toLowerCase();
-      const itemFolder = normalizeLibraryFolder(item.folder || item.category || '');
-      return itemPath === dataUrl ||
-        (itemName === normalizedName && itemFolder === normalizedFolder);
+      return typeof item.path === 'string' && item.path === dataUrl;
     });
     if (duplicate) {
       if (typeof onUploaded === 'function') onUploaded(duplicate, dataUrl);
@@ -6066,7 +6126,7 @@
     }
 
     const newImg = {
-      id: 'custom-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+      id: 'img-' + Date.now() + '-' + Math.random().toString(36).substring(2, 10),
       name: name || 'Imagen Subida',
       category: folder,
       folder: folder,
@@ -6136,6 +6196,8 @@
 
       const previousPath = image.path;
       image.path = './' + githubPath;
+      image.previewPath = prepared;
+      replaceImageReferenceEverywhere(previousPath, image.path, dataUrl);
       image.previewPath = prepared;
 
       if (currentLibraryTarget) {
