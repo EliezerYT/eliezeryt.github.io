@@ -57,7 +57,7 @@ jobs:
           manifest = {"images": images, "folders": sorted(set(folders))}
           with open(os.path.join(root, "manifest.json"), "w", encoding="utf-8") as file:
               json.dump(manifest, file, ensure_ascii=False, indent=2)
-              file.write("\\n")
+              file.write("\n")
           PY
 
             git add assets/images/ely/manifest.json
