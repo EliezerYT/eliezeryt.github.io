@@ -4652,6 +4652,118 @@
   // reemplace datos mientras otra operación todavía está trabajando.
   let backendSyncQueue = Promise.resolve();
   let backendSyncBusy = false;
+  let backendCardsSnapshot = [];
+  let backendFeedbackSnapshot = [];
+  let backendCardsSnapshotReady = false;
+  let backendFeedbackSnapshotReady = false;
+
+  function cloneBackendRecords(records) {
+    try { return JSON.parse(JSON.stringify(Array.isArray(records) ? records : [])); }
+    catch (e) { return Array.isArray(records) ? records.slice() : []; }
+  }
+
+  function backendRecordSignature(record) {
+    if (!record) return '';
+    try { return JSON.stringify({ id: String(record.id || ''), type: record.type || '', data: record.data }); }
+    catch (e) { return String(record.id || '') + '|' + String(record.type || ''); }
+  }
+
+  async function loadCurrentSheetRecords(sheetName) {
+    const url = GLOBAL_COUNTER_URL + '?action=loadSheetData&cacheBust=' + Date.now();
+    const response = await fetch(url, { cache: 'no-store' });
+    if (!response.ok) throw new Error('Google Sheets HTTP ' + response.status);
+    const result = await response.json();
+    if (!result || !result.success) {
+      throw new Error(result && result.error ? result.error : 'Google Sheets no devolvió datos.');
+    }
+    return Array.isArray(result[sheetName === FEEDBACKS_SHEET_NAME ? 'feedbacks' : 'cards'])
+      ? result[sheetName === FEEDBACKS_SHEET_NAME ? 'feedbacks' : 'cards']
+      : [];
+  }
+
+  async function syncOnlyChangedRecords(sheetName, localRecords, snapshotRecords, snapshotReady, explicitRecords) {
+    if (!snapshotReady && (!Array.isArray(explicitRecords) || !explicitRecords.length)) {
+      throw new Error('Google Sheets todavía no terminó de cargar. Se canceló el guardado para evitar borrar tarjetas.');
+    }
+
+    const current = Array.isArray(localRecords) ? localRecords.filter(Boolean) : [];
+    const previous = Array.isArray(snapshotRecords) ? snapshotRecords.filter(Boolean) : [];
+    const previousMap = new Map(previous.map(function (record) { return [String(record.id || ''), record]; }));
+    const currentMap = new Map(current.map(function (record) { return [String(record.id || ''), record]; }));
+
+    let changes = [];
+    let deletedIds = [];
+
+    if (Array.isArray(explicitRecords) && explicitRecords.length) {
+      changes = explicitRecords.filter(function (record) { return record && record.id; });
+    } else {
+      current.forEach(function (record) {
+        const id = String(record.id || '');
+        const oldRecord = previousMap.get(id);
+        if (!oldRecord || backendRecordSignature(oldRecord) !== backendRecordSignature(record)) {
+          changes.push(record);
+        }
+      });
+      previous.forEach(function (record) {
+        const id = String(record.id || '');
+        if (id && !currentMap.has(id)) deletedIds.push(id);
+      });
+    }
+
+    if (!changes.length && !deletedIds.length) {
+      return { changed: 0, records: cloneBackendRecords(previous) };
+    }
+
+    const remote = await loadCurrentSheetRecords(sheetName);
+    const remoteMap = new Map(remote.map(function (record) { return [String(record.id || ''), record]; }));
+
+    // Si la hoja remota quedó vacía mientras nosotros conocíamos datos existentes,
+    // jamás usamos ese vacío como base para guardar y borrar todo.
+    if (!remote.length && previous.length) {
+      const hasOnlyNewRecords = changes.length > 0 && changes.every(function (record) {
+        return !previousMap.has(String(record.id || ''));
+      }) && !deletedIds.length;
+      if (!hasOnlyNewRecords) {
+        throw new Error('Google Sheets devolvió 0 tarjetas mientras existían datos guardados. Guardado cancelado para proteger el catálogo.');
+      }
+    }
+
+    // Si una tarjeta que estamos editando desapareció remotamente sin que la hayamos
+    // eliminado nosotros, no la recreamos ni reemplazamos el resto de la hoja.
+    changes.forEach(function (record) {
+      const id = String(record.id || '');
+      if (previousMap.has(id) && !remoteMap.has(id)) {
+        throw new Error('La tarjeta "' + id + '" ya no existe en Google Sheets. Guardado cancelado para evitar sobrescribir otros datos.');
+      }
+    });
+
+    const merged = remote.slice();
+    const mergedMap = new Map(merged.map(function (record, index) {
+      return [String(record.id || ''), index];
+    }));
+
+    changes.forEach(function (record) {
+      const id = String(record.id || '');
+      if (!id) return;
+      const index = mergedMap.get(id);
+      if (index == null) {
+        mergedMap.set(id, merged.length);
+        merged.push(record);
+      } else {
+        merged[index] = record;
+      }
+    });
+
+    if (deletedIds.length) {
+      for (let i = merged.length - 1; i >= 0; i--) {
+        if (deletedIds.includes(String(merged[i] && merged[i].id || ''))) merged.splice(i, 1);
+      }
+    }
+
+    await syncDataToGoogleSheet(sheetName, merged);
+    return { changed: changes.length + deletedIds.length, records: merged };
+  }
+
 
   function queueBackendSync(operation) {
     const run = backendSyncQueue.catch(function () {}).then(async function () {
@@ -4666,20 +4778,46 @@
     return run;
   }
 
-  function syncCardsInfoImmediately() {
-    return queueBackendSync(function () {
-      // Los registros se generan cuando la operación realmente comienza,
-      // nunca antes. Así no se guarda un snapshot viejo que estaba esperando en cola.
-      return syncDataToGoogleSheet(CARDS_INFO_SHEET_NAME, getCardsInfoSheetRecords());
+  function syncCardsInfoImmediately(explicitRecords) {
+    return queueBackendSync(async function () {
+      const localRecords = getCardsInfoSheetRecords();
+      const result = await syncOnlyChangedRecords(
+        CARDS_INFO_SHEET_NAME,
+        localRecords,
+        backendCardsSnapshot,
+        backendCardsSnapshotReady,
+        Array.isArray(explicitRecords) ? explicitRecords : null
+      );
+      backendCardsSnapshot = cloneBackendRecords(result.records);
+      backendCardsSnapshotReady = true;
+      return result;
     });
   }
 
-  function saveFeedbackCodesImmediately() {
-    return syncCardsInfoImmediately();
+  function saveFeedbackCodesImmediately(explicitRecord) {
+    return queueBackendSync(async function () {
+      const localRecords = satisfiedClients ? [] : [];
+      const cardRecords = getCardsInfoSheetRecords();
+      const target = explicitRecord ? [explicitRecord] : null;
+      const result = await syncOnlyChangedRecords(
+        CARDS_INFO_SHEET_NAME,
+        cardRecords,
+        backendCardsSnapshot,
+        backendCardsSnapshotReady,
+        target
+      );
+      backendCardsSnapshot = cloneBackendRecords(result.records);
+      backendCardsSnapshotReady = true;
+      return result;
+    });
   }
-  function syncProjectsWithBackend(list) {
+
+  function syncProjectsWithBackend(list, changedProject) {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); } catch (err) {}
-    return syncCardsInfoImmediately();
+    const target = changedProject && changedProject.id
+      ? [{ id: String(changedProject.id), type: 'project', data: changedProject }]
+      : null;
+    return syncCardsInfoImmediately(target);
   }
 
   async function persistProjectsImmediately(action, projectTitle) {
@@ -4704,9 +4842,12 @@
     }
   }
 
-  function syncExperiencesWithBackend(list) {
+  function syncExperiencesWithBackend(list, changedExperience) {
     try { localStorage.setItem(EXPERIENCES_STORAGE_KEY, JSON.stringify(list)); } catch (e) {}
-    return syncCardsInfoImmediately().then(function (result) {
+    const target = changedExperience && changedExperience.id
+      ? [{ id: String(changedExperience.id), type: 'experience', data: changedExperience }]
+      : null;
+    return syncCardsInfoImmediately(target).then(function (result) {
       updateSyncModalCounters();
       return result;
     }).catch(function (error) {
