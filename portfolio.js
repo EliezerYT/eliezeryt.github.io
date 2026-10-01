@@ -8001,6 +8001,8 @@
     renderTestimonialsPreview: renderTestimonialsPreview,
     renderSatisfiedClientsModalList: renderSatisfiedClientsModalList,
     openSatisfiedClientsModal: openSatisfiedClientsModal,
+    openClientTestimonials: openClientTestimonials,
+    toggleTestimonialMore: toggleTestimonialMore,
     closeSatisfiedClientsModal: closeSatisfiedClientsModal,
     moveTestimonialOrder: moveTestimonialOrder,
     duplicateTestimonial: duplicateTestimonial,
