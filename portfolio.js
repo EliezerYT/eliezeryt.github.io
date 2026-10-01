@@ -5613,6 +5613,8 @@
     const imageExtensions = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'avif', 'bmp', 'svg', 'mp4', 'webm', 'mov', 'm4v', 'ogv'];
 
     try {
+      githubElyFolderPaths = [];
+      let manifestLoaded = false;
       const urls = [
         './assets/images/ely/manifest.json?cache=' + Date.now(),
         'assets/images/ely/manifest.json?cache=' + Date.now(),
@@ -5627,15 +5629,17 @@
           if (!response.ok) continue;
           const manifest = await response.json();
           const parsed = Array.isArray(manifest) ? manifest : (Array.isArray(manifest.images) ? manifest.images : []);
-          if (!Array.isArray(manifest) && Array.isArray(manifest.folders)) githubElyFolderPaths = manifest.folders;
-          if (parsed.length || githubElyFolderPaths.length) {
+          const folders = !Array.isArray(manifest) && Array.isArray(manifest.folders) ? manifest.folders : [];
+          if (Array.isArray(parsed)) {
             imagePaths = parsed;
+            githubElyFolderPaths = folders.filter(folder => typeof folder === 'string').map(normalizeLibraryFolder);
+            manifestLoaded = true;
             break;
           }
         } catch (e) {}
       }
 
-      if (!imagePaths.length) {
+      if (!manifestLoaded) {
         imagePaths = FALLBACK_ELY_IMAGE_MANIFEST.slice();
         source = 'respaldo local';
       }
