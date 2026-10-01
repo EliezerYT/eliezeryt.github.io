@@ -5550,6 +5550,7 @@
   let currentLibraryTarget = null;
   let selectedGalleryLibraryImages = new Set();
   let githubElyFolderImages = [];
+  let githubElyFolderPaths = [];
   let selectedLibraryFolder = '';
   let githubElyFolderLoading = false;
   const libraryUploadInFlight = new Map();
@@ -5626,7 +5627,8 @@
           if (!response.ok) continue;
           const manifest = await response.json();
           const parsed = Array.isArray(manifest) ? manifest : (Array.isArray(manifest.images) ? manifest.images : []);
-          if (parsed.length) {
+          if (!Array.isArray(manifest) && Array.isArray(manifest.folders)) githubElyFolderPaths = manifest.folders;
+          if (parsed.length || githubElyFolderPaths.length) {
             imagePaths = parsed;
             break;
           }
@@ -5786,6 +5788,7 @@
     const imageGrid = document.getElementById('library-file-items');
     const folderTree = document.getElementById('library-folder-tree');
     const folderPaths = new Set(['']);
+    githubElyFolderPaths.forEach(function(folder) { const clean = normalizeLibraryFolder(folder); let path = ''; clean.split('/').filter(Boolean).forEach(part => { path = path ? path + '/' + part : part; folderPaths.add(path); }); });
     allImages.forEach(function(image) {
       const folder = getLibraryImageFolder(image);
       const parts = folder.split('/').filter(Boolean);
