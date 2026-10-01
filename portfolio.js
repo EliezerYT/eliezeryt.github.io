@@ -5252,12 +5252,35 @@
 
   async function saveSheetsBackup() {
     try {
-      showStatusNotification({title:'Creando backup',message:'Leyendo CardsInfo y Feedbacks desde Google Sheets...',type:'info',icon:'⏳',duration:15000});
+      showStatusNotification({
+        title:'Creando backup',
+        message:'Leyendo CardsInfo y Feedbacks desde Google Sheets...',
+        type:'info',
+        icon:'⏳',
+        duration:15000
+      });
+
       await backendSyncQueue.catch(function () {});
-      const response = await fetch(GLOBAL_COUNTER_URL + '?action=loadSheetData&cacheBust=' + Date.now(), {cache:'no-store'});
-      if (!response.ok) throw new Error('Google Sheets HTTP ' + response.status);
+
+      const response = await fetch(
+        GLOBAL_COUNTER_URL + '?action=loadSheetData&cacheBust=' + Date.now(),
+        {cache:'no-store'}
+      );
+
+      if (!response.ok) {
+        throw new Error('Google Sheets HTTP ' + response.status);
+      }
+
       const result = await response.json();
-      if (!result || !result.success) throw new Error(result && result.error ? result.error : 'Google Sheets no devolvió datos.');
+
+      if (!result || !result.success) {
+        throw new Error(
+          result && result.error
+            ? result.error
+            : 'Google Sheets no devolvió datos.'
+        );
+      }
+
       const backup = {
         version: 1,
         createdAt: new Date().toISOString(),
@@ -5265,65 +5288,158 @@
         cards: Array.isArray(result.cards) ? result.cards : [],
         feedbacks: Array.isArray(result.feedbacks) ? result.feedbacks : []
       };
-      const blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'elydev-sheets-backup-' + new Date().toISOString().replace(/[:.]/g,'-') + '.json';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showStatusNotification({title:'Backup guardado',message:'Se descargó una copia completa de CardsInfo y Feedbacks desde Google Sheets.',type:'success',icon:'💾'});
+
+      const body = new URLSearchParams();
+      body.set('action', 'saveBackup');
+      body.set('payload', JSON.stringify(backup));
+
+      const saveResponse = await fetch(
+        GLOBAL_COUNTER_URL,
+        {
+          method:'POST',
+          body:body,
+          cache:'no-store'
+        }
+      );
+
+      const saveResult = await saveResponse.json().catch(function () {
+        return null;
+      });
+
+      if (!saveResponse.ok || !saveResult || !saveResult.success) {
+        throw new Error(
+          saveResult && saveResult.error
+            ? saveResult.error
+            : 'Google Sheets no pudo guardar el backup.'
+        );
+      }
+
+      showStatusNotification({
+        title:'Backup guardado',
+        message:'Backup guardado en la hoja Backup. Se agregó una nueva fila con la fecha.',
+        type:'success',
+        icon:'💾'
+      });
+
     } catch (error) {
       console.error('[SHEETS BACKUP SAVE ERROR]',error);
-      showStatusNotification({title:'Error al crear backup',message:error.message || 'No se pudo leer Google Sheets.',type:'error',icon:'⚠️'});
+      showStatusNotification({
+        title:'Error al crear backup',
+        message:error.message || 'No se pudo guardar el backup.',
+        type:'error',
+        icon:'⚠️'
+      });
     }
   }
 
-  function loadSheetsBackup() {
-    const input = document.getElementById('sheets-backup-file-input');
-    if (!input) return;
-    input.value = '';
-    input.click();
-  }
-
-  async function handleSheetsBackupFile(file) {
-    if (!file) return;
+  async function loadSheetsBackup() {
     try {
-      const backup = JSON.parse(await file.text());
-      const cards = Array.isArray(backup.cards) ? backup.cards : null;
-      const feedbacks = Array.isArray(backup.feedbacks) ? backup.feedbacks : null;
-      if (!cards || !feedbacks) throw new Error('El backup no contiene las listas "cards" y "feedbacks".');
       const confirmed = await new Promise(function(resolve) {
-        showConfirmModal('Restaurar backup','Esto reemplazará CardsInfo y Feedbacks en Google Sheets con el contenido del archivo seleccionado.','⚠️','Sí, Restaurar');
-        const actionBtn=document.getElementById('confirm-modal-action-btn');
-        const cancelBtn=document.getElementById('confirm-modal-cancel-btn');
-        const onAction=function(){cleanup(true);};
-        const onCancel=function(){cleanup(false);};
-        const cleanup=function(value){
-          if(actionBtn) actionBtn.removeEventListener('click',onAction);
-          if(cancelBtn) cancelBtn.removeEventListener('click',onCancel);
+        showConfirmModal(
+          'Cargar último backup',
+          'Esto reemplazará CardsInfo y Feedbacks con el último backup guardado en la hoja Backup.',
+          '⚠️',
+          'Sí, Restaurar'
+        );
+
+        const actionBtn = document.getElementById('confirm-modal-action-btn');
+        const cancelBtn = document.getElementById('confirm-modal-cancel-btn');
+
+        const onAction = function() {
+          cleanup(true);
+        };
+
+        const onCancel = function() {
+          cleanup(false);
+        };
+
+        const cleanup = function(value) {
+          if (actionBtn) actionBtn.removeEventListener('click',onAction);
+          if (cancelBtn) cancelBtn.removeEventListener('click',onCancel);
           closeConfirmModal();
           resolve(value);
         };
-        if(actionBtn) actionBtn.addEventListener('click',onAction);
-        if(cancelBtn) cancelBtn.addEventListener('click',onCancel);
+
+        if (actionBtn) actionBtn.addEventListener('click',onAction);
+        if (cancelBtn) cancelBtn.addEventListener('click',onCancel);
       });
+
       if (!confirmed) return;
-      showStatusNotification({title:'Restaurando backup',message:'Subiendo CardsInfo y Feedbacks a Google Sheets...',type:'info',icon:'⏳',duration:15000});
+
+      showStatusNotification({
+        title:'Cargando backup',
+        message:'Buscando el último backup guardado en Google Sheets...',
+        type:'info',
+        icon:'⏳',
+        duration:15000
+      });
+
+      const response = await fetch(
+        GLOBAL_COUNTER_URL + '?action=loadBackup&cacheBust=' + Date.now(),
+        {cache:'no-store'}
+      );
+
+      if (!response.ok) {
+        throw new Error('Google Sheets HTTP ' + response.status);
+      }
+
+      const result = await response.json();
+
+      if (!result || !result.success) {
+        throw new Error(
+          result && result.error
+            ? result.error
+            : 'No se encontró ningún backup.'
+        );
+      }
+
+      const backup = result.backup;
+
+      if (!backup) {
+        throw new Error('El último backup no contiene datos.');
+      }
+
+      const cards = Array.isArray(backup.cards) ? backup.cards : null;
+      const feedbacks = Array.isArray(backup.feedbacks) ? backup.feedbacks : null;
+
+      if (!cards || !feedbacks) {
+        throw new Error(
+          'El backup no contiene las listas "cards" y "feedbacks".'
+        );
+      }
+
+      showStatusNotification({
+        title:'Restaurando backup',
+        message:'Restaurando el backup del ' + new Date(result.createdAt).toLocaleString() + '...',
+        type:'info',
+        icon:'⏳',
+        duration:15000
+      });
+
       await queueBackendSync(async function() {
         await syncDataToGoogleSheet(CARDS_INFO_SHEET_NAME,cards);
         await syncDataToGoogleSheet(FEEDBACKS_SHEET_NAME,feedbacks);
       });
-      showStatusNotification({title:'Backup restaurado',message:'CardsInfo y Feedbacks fueron restaurados en Google Sheets.',type:'success',icon:'✓'});
-      await loadAllDataFromBackend();
+
+      showStatusNotification({
+        title:'Backup restaurado',
+        message:'Se cargó el último backup de la hoja Backup y se restauraron CardsInfo y Feedbacks.',
+        type:'success',
+        icon:'✓'
+      });
+
+      await loadAllDataFromBackend(true);
+
     } catch (error) {
       console.error('[SHEETS BACKUP LOAD ERROR]',error);
-      showStatusNotification({title:'Error al restaurar backup',message:error.message || 'No se pudo cargar el backup en Google Sheets.',type:'error',icon:'⚠️'});
+      showStatusNotification({
+        title:'Error al restaurar backup',
+        message:error.message || 'No se pudo cargar el backup desde Google Sheets.',
+        type:'error',
+        icon:'⚠️'
+      });
     }
   }
-
 
   let backendLoadPromise = null;
   let backendLastLoadAt = 0;
