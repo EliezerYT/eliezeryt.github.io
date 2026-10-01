@@ -5250,6 +5250,25 @@
     document.body.style.overflow = '';
   }
 
+  async function compressBackupToBase64(value) {
+    if (typeof CompressionStream !== 'function') {
+      throw new Error('Este navegador no soporta compresión GZIP. Actualiza el navegador para guardar backups comprimidos.');
+    }
+    const bytes = new TextEncoder().encode(JSON.stringify(value));
+    const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'));
+    const compressed = new Uint8Array(await new Response(stream).arrayBuffer());
+    let binary = '';
+    const chunkSize = 0x8000;
+    for (let i = 0; i < compressed.length; i += chunkSize) {
+      binary += String.fromCharCode.apply(null, compressed.subarray(i, i + chunkSize));
+    }
+    return {
+      data: btoa(binary),
+      originalBytes: bytes.length,
+      compressedBytes: compressed.length
+    };
+  }
+
   async function saveSheetsBackup() {
     try {
       showStatusNotification({
@@ -5289,9 +5308,11 @@
         feedbacks: Array.isArray(result.feedbacks) ? result.feedbacks : []
       };
 
+      const compressed = await compressBackupToBase64(backup);
       const body = new URLSearchParams();
       body.set('action', 'saveBackup');
-      body.set('payload', JSON.stringify(backup));
+      body.set('encoding', 'gzip-base64');
+      body.set('payload', compressed.data);
 
       const saveResponse = await fetch(
         GLOBAL_COUNTER_URL,
@@ -5316,7 +5337,7 @@
 
       showStatusNotification({
         title:'Backup guardado',
-        message:'Backup guardado en la hoja Backup. Se agregó una nueva fila con la fecha.',
+        message:'Backup comprimido guardado en la hoja Backup (' + Math.round((1 - compressed.compressedBytes / Math.max(1, compressed.originalBytes)) * 100) + '% menos datos).',
         type:'success',
         icon:'💾'
       });
