@@ -5610,7 +5610,7 @@
   async function loadImagesFromMainElyFolder(showNotification = false) {
     if (githubElyFolderLoading) return;
     githubElyFolderLoading = true;
-    const imageExtensions = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'avif', 'bmp', 'svg'];
+    const imageExtensions = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'avif', 'bmp', 'svg', 'mp4', 'webm', 'mov', 'm4v', 'ogv'];
 
     try {
       const urls = [
@@ -5654,7 +5654,8 @@
             name: fileName.replace(/\.[^.]+$/, ''),
             category: folder,
             folder: folder,
-            path: fullPath
+            path: fullPath,
+            isVideo: ['mp4', 'webm', 'mov', 'm4v', 'ogv'].includes(cleanPath.split('.').pop().toLowerCase())
           };
         });
 
@@ -5867,7 +5868,7 @@
              data-library-img-path="${img.path}"
              data-library-img-name="${img.name || ''}">
           <div class="relative h-44 sm:h-52 w-full shrink-0 overflow-hidden rounded-xl bg-[#141822] mb-3 border border-white/5 cursor-pointer library-image-area">
-            <img src="${img.previewPath || img.path}" alt="${img.name || 'Imagen'}" class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105" onerror="if(this.src !== this.dataset.fallback){this.src=this.dataset.fallback;}else{this.removeAttribute('src'); this.classList.add('opacity-20');}" data-fallback="${img.path}" />
+            ${img.isVideo || /\.(mp4|webm|mov|m4v|ogv)(?:\?.*)?$/i.test(img.path || img.name || "") ? '<video src="' + (img.previewPath || img.path) + '" class="h-full w-full object-contain p-2" muted playsinline preload="metadata"></video><span class="absolute bottom-2 left-2 rounded bg-black/80 px-2 py-1 text-[10px] text-white">▶ VIDEO</span>' : '<img src="' + (img.previewPath || img.path) + '" alt="' + (img.name || "Imagen") + '" class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105" data-fallback="' + img.path + '" />'}
             <span class="absolute top-2 left-2 rounded bg-black/80 px-2 py-1 text-[10px] font-mono text-amber-400 border border-amber-400/20 backdrop-blur-sm">
               ${img.category || 'Asset'}
             </span>
@@ -6116,11 +6117,14 @@
 
   function openLibraryImagePreview(imagePath, imageName, previewPath) {
     const modal = document.getElementById('library-image-preview-modal');
-    const image = document.getElementById('library-image-preview');
+    let image = document.getElementById('library-image-preview');
     const title = document.getElementById('library-image-preview-title');
     if (!modal || !image) return;
+    const isVideo = /\\.(mp4|webm|mov|m4v|ogv)(?:\\?.*)?$/i.test(imagePath || imageName || '');
+    if (isVideo && image.tagName.toLowerCase() !== 'video') { const video = document.createElement('video'); video.id = 'library-image-preview'; video.className = 'max-w-full max-h-[78vh] object-contain rounded-lg'; video.controls = true; image.replaceWith(video); image = video; }
+    if (!isVideo && image.tagName.toLowerCase() !== 'img') { const img = document.createElement('img'); img.id = 'library-image-preview'; img.className = 'max-w-full max-h-[78vh] object-contain rounded-lg'; image.replaceWith(img); image = img; }
     image.src = previewPath || imagePath;
-    image.alt = imageName || 'Imagen';
+    if (isVideo) { image.controls = true; image.autoplay = true; image.playsInline = true; } else image.alt = imageName || 'Imagen';
     if (title) title.textContent = imageName || 'Vista previa';
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
