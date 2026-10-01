@@ -4728,12 +4728,14 @@
       }
     }
 
-    // Si una tarjeta que estamos editando desapareció remotamente sin que la hayamos
-    // eliminado nosotros, no la recreamos ni reemplazamos el resto de la hoja.
-    changes.forEach(function (record) {
+    // Nunca aceptamos una respuesta remota incompleta. Si falta cualquier
+    // registro que existía en el snapshot anterior, cancelar es más seguro
+    // que guardar una hoja parcial y borrar datos accidentalmente.
+    previous.forEach(function (record) {
       const id = String(record.id || '');
-      if (previousMap.has(id) && !remoteMap.has(id)) {
-        throw new Error('La tarjeta "' + id + '" ya no existe en Google Sheets. Guardado cancelado para evitar sobrescribir otros datos.');
+      if (!id || deletedIds.includes(id)) return;
+      if (!remoteMap.has(id)) {
+        throw new Error('Google Sheets devolvió una lista incompleta. Guardado cancelado para proteger los demás cards.');
       }
     });
 
