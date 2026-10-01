@@ -1227,6 +1227,10 @@
     setVisitorPreviewMode(!visitorPreviewMode);
   }
 
+  function isLocalVideoMedia(path) {
+    return /\.(mp4|webm|mov|m4v|ogv)(?:[?#].*)?$/i.test(String(path || ''));
+  }
+
   // Helper para extraer ID de video de YouTube
   function getYouTubeEmbedUrl(url) {
     if (!url || typeof url !== 'string') return null;
@@ -1715,7 +1719,7 @@
       const favorite = isAssetFavorite(asset.id);
       const favoriteButton = '<button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.toggleAssetFavorite(\'' + safeId + '\')" class="absolute left-3 top-3 z-[121] h-7 w-7 rounded-lg bg-black/55 border border-white/10 text-sm hover:border-amber-400/50" title="' + (favorite ? 'Quitar de favoritos' : 'Agregar a favoritos') + '">' + (favorite ? '★' : '☆') + '</button>';
       const quickPreviewText = String(asset.previewText || 'Preview rápida').replace(/[&<>"']/g, function(ch) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]; });
-      const image = asset.image ? '<div class="asset-card-media relative aspect-video w-full overflow-hidden bg-[#181d28] cursor-pointer"><img src="' + asset.image + '" alt="' + asset.name + '" class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105" onerror="this.style.display=\'none\'"><div class="absolute inset-0 bg-gradient-to-t from-[#12151d] via-transparent to-black/40"></div><div class="asset-quick-preview"><span class="asset-quick-preview-icon">◉</span><span>' + quickPreviewText + '</span></div></div>' : '';
+      const image = asset.image ? (isLocalVideoMedia(asset.image) ? '<div class="asset-card-media relative aspect-video w-full overflow-hidden bg-[#080a0f]" onclick="event.stopPropagation()"><video src="' + asset.image + '" class="h-full w-full object-cover" controls playsinline preload="metadata" onclick="event.stopPropagation()"></video></div>' : '<div class="asset-card-media relative aspect-video w-full overflow-hidden bg-[#181d28] cursor-pointer"><img src="' + asset.image + '" alt="' + asset.name + '" class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105" onerror="this.style.display=\'none\'"><div class="absolute inset-0 bg-gradient-to-t from-[#12151d] via-transparent to-black/40"></div><div class="asset-quick-preview"><span class="asset-quick-preview-icon">◉</span><span>' + quickPreviewText + '</span></div></div>') : '';
       const moderatorBar = (isModerator && !visitorPreviewMode) ? '<div class="flex items-center justify-between gap-2 p-2 bg-amber-400/10 border-b border-amber-400/20 text-[10px] relative z-[130]"><div class="flex items-center gap-1"><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.moveAssetOrder(\'' + safeId + '\',-1)" class="px-1.5 py-1 rounded bg-white/5 hover:bg-white/10">▲</button><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.moveAssetOrder(\'' + safeId + '\',1)" class="px-1.5 py-1 rounded bg-white/5 hover:bg-white/10">▼</button></div><div class="flex items-center gap-1"><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.duplicateAsset(\'' + safeId + '\')" class="px-2 py-1 rounded bg-white/5 hover:bg-white/10">📋</button><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.editAsset(\'' + safeId + '\')" class="px-2 py-1 rounded bg-amber-400 text-black font-bold">✏️</button><button type="button" onclick="event.stopPropagation(); window.ElyPortfolio.deleteAsset(\'' + safeId + '\')" class="px-2 py-1 rounded bg-red-600 text-white">🗑️</button></div></div>' : '';
       return '<article data-asset-id="' + safeId + '" onclick="window.ElyPortfolio.openAssetModal(\'' + safeId + '\')" class="card-fade-in group relative flex flex-col overflow-hidden rounded-2xl bg-[#12151d] border border-[#232733] hover:border-amber-400/60 transform hover:scale-105 transition-all duration-300 ease-out shadow-lg hover:shadow-2xl hover:shadow-amber-500/20 z-0 hover:z-10 cursor-pointer' + effectClasses + '"' + effectStyle + '>' +
         moderatorBar + pinnedBadge + favoriteButton +
@@ -2428,12 +2432,7 @@
 
           <!-- Portada principal 16:9 del proyecto -->
           <div class="relative aspect-video w-full overflow-hidden bg-[#181d28] cursor-pointer" onclick="window.ElyPortfolio.openProjectModal('${project.id}')">
-            <img
-              src="${project.coverImage || './assets/images/ely/my-avatar.png'}"
-              alt="${project.title}"
-              class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
-              onerror="this.removeAttribute('src'); this.style.display='none'"
-            />
+            ${isLocalVideoMedia(project.coverImage) ? '<video src="' + project.coverImage + '" class="h-full w-full object-cover" controls playsinline preload="metadata" onclick="event.stopPropagation()"></video>' : '<img src="' + (project.coverImage || './assets/images/ely/my-avatar.png') + '" alt="' + project.title + '" class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105" onerror="this.removeAttribute(\'src\'); this.style.display=\'none\'" />'}
             <div class="absolute inset-0 bg-gradient-to-t from-[#12151d] via-transparent to-black/40"></div>
             
             <div class="absolute top-3 left-3 flex flex-wrap items-center gap-1.5 z-10">
@@ -5550,6 +5549,8 @@
   let currentLibraryTarget = null;
   let selectedGalleryLibraryImages = new Set();
   let githubElyFolderImages = [];
+  let githubElyFolderPaths = [];
+  let selectedLibraryFolder = '';
   let githubElyFolderLoading = false;
   const libraryUploadInFlight = new Map();
 
@@ -5608,42 +5609,114 @@
   async function loadImagesFromMainElyFolder(showNotification = false) {
     if (githubElyFolderLoading) return;
     githubElyFolderLoading = true;
-    const imageExtensions = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'avif', 'bmp', 'svg'];
-
+    const mediaExtensions = ['png','jpg','jpeg','webp','gif','avif','bmp','svg','mp4','webm','mov','m4v','ogv','mkv'];
+    const isMedia = function(path) {
+      return mediaExtensions.includes(String(path).split('.').pop().toLowerCase());
+    };
     try {
-      const urls = [
-        './assets/images/ely/manifest.json?cache=' + Date.now(),
-        'assets/images/ely/manifest.json?cache=' + Date.now(),
-        '/assets/images/ely/manifest.json?cache=' + Date.now()
-      ];
-      let imagePaths = [];
-      let source = 'manifest.json';
+      githubElyFolderPaths = [];
+      let foundImages = [];
+      let source = 'GitHub';
 
-      for (const url of urls) {
-        try {
-          const response = await fetch(url, { cache: 'no-store' });
-          if (!response.ok) continue;
-          const manifest = await response.json();
-          const parsed = Array.isArray(manifest) ? manifest : (Array.isArray(manifest.images) ? manifest.images : []);
-          if (parsed.length) {
-            imagePaths = parsed;
-            break;
-          }
-        } catch (e) {}
+      // Read the repository tree directly so manually added files and every nested
+      // subfolder are detected immediately, without waiting for manifest.json.
+      try {
+        const apiUrl = GITHUB_API_BASE + '/repos/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/git/trees/' + GITHUB_BRANCH + '?recursive=1';
+        const headers = {};
+        const token = getGithubToken();
+        if (token) headers.Authorization = 'Bearer ' + token;
+        const response = await fetch(apiUrl, { cache: 'no-store', headers: headers });
+        if (response.ok) {
+          const treeData = await response.json();
+          const prefix = 'assets/images/ely/';
+          const folderSet = new Set();
+          const files = Array.isArray(treeData.tree) ? treeData.tree : [];
+
+          files.forEach(function(entry) {
+            if (!entry || entry.type !== 'blob' || typeof entry.path !== 'string' || !entry.path.startsWith(prefix)) return;
+            const relativePath = entry.path.substring(prefix.length).replace(/^\/+/, '');
+            if (!relativePath || !isMedia(relativePath)) return;
+
+            const parts = relativePath.split('/').filter(Boolean);
+            const fileName = parts.pop();
+            const folder = parts.join('/');
+            let folderPath = '';
+            parts.forEach(function(part) {
+              folderPath = folderPath ? folderPath + '/' + part : part;
+              folderSet.add(folderPath);
+            });
+
+            const extension = fileName.split('.').pop().toLowerCase();
+            foundImages.push({
+              id: 'ely-folder-' + relativePath,
+              name: fileName.replace(/\.[^.]+$/, ''),
+              category: folder || 'Ely',
+              folder: folder || 'Ely',
+              path: './assets/images/ely/' + relativePath,
+              isVideo: ['mp4','webm','mov','m4v','ogv','mkv'].includes(extension)
+            });
+          });
+
+          // Git trees include explicit tree entries, so add folders even when
+          // they contain only files that are not media.
+          files.forEach(function(entry) {
+            if (!entry || entry.type !== 'tree' || typeof entry.path !== 'string' || !entry.path.startsWith(prefix)) return;
+            const relativeFolder = entry.path.substring(prefix.length).replace(/^\/+|\/+$/g, '');
+            if (!relativeFolder) return;
+            let folderPath = '';
+            relativeFolder.split('/').filter(Boolean).forEach(function(part) {
+              folderPath = folderPath ? folderPath + '/' + part : part;
+              folderSet.add(folderPath);
+            });
+          });
+
+          githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
+            return a.localeCompare(b, undefined, {numeric:true, sensitivity:'base'});
+          });
+        } else {
+          throw new Error('GitHub tree HTTP ' + response.status);
+        }
+      } catch (treeError) {
+        console.warn('[LIBRARY] GitHub tree scan failed, trying manifest:', treeError);
+        source = 'manifest.json';
+        const urls = [
+          './assets/images/ely/manifest.json?cache=' + Date.now(),
+          'assets/images/ely/manifest.json?cache=' + Date.now(),
+          '/assets/images/ely/manifest.json?cache=' + Date.now()
+        ];
+        for (const url of urls) {
+          try {
+            const response = await fetch(url, { cache: 'no-store' });
+            if (!response.ok) continue;
+            const manifest = await response.json();
+            const parsed = Array.isArray(manifest) ? manifest : (Array.isArray(manifest.images) ? manifest.images : []);
+            const folders = !Array.isArray(manifest) && Array.isArray(manifest.folders) ? manifest.folders : [];
+            if (Array.isArray(parsed)) {
+              githubElyFolderPaths = folders.filter(folder => typeof folder === 'string').map(normalizeLibraryFolder);
+              foundImages = parsed.filter(isMedia).map(function(relativePath) {
+                const cleanPath = String(relativePath).replace(/^\/+/, '').replace(/\\/g, '/');
+                const fileName = cleanPath.split('/').pop();
+                const folder = cleanPath.includes('/') ? cleanPath.substring(0, cleanPath.lastIndexOf('/')) : 'Ely';
+                const extension = fileName.split('.').pop().toLowerCase();
+                return {
+                  id: 'ely-folder-' + cleanPath,
+                  name: fileName.replace(/\.[^.]+$/, ''),
+                  category: folder,
+                  folder: folder,
+                  path: './assets/images/ely/' + cleanPath,
+                  isVideo: ['mp4','webm','mov','m4v','ogv','mkv'].includes(extension)
+                };
+              });
+              break;
+            }
+          } catch (e) {}
+        }
       }
 
-      if (!imagePaths.length) {
-        imagePaths = FALLBACK_ELY_IMAGE_MANIFEST.slice();
-        source = 'respaldo local';
-      }
-
-      const foundImages = imagePaths
-        .filter(function (item) {
-          return typeof item === 'string' && imageExtensions.includes(item.split('.').pop().toLowerCase());
-        })
-        .map(function (relativePath) {
-          const cleanPath = relativePath.replace(/^\/+/, '').replace(/\\/g, '/');
-          const fullPath = './assets/images/ely/' + cleanPath;
+      if (!foundImages.length) {
+        source = source === 'GitHub' ? 'respaldo local' : source;
+        foundImages = FALLBACK_ELY_IMAGE_MANIFEST.filter(isMedia).map(function(relativePath) {
+          const cleanPath = String(relativePath).replace(/^\/+/, '').replace(/\\/g, '/');
           const fileName = cleanPath.split('/').pop();
           const folder = cleanPath.includes('/') ? cleanPath.substring(0, cleanPath.lastIndexOf('/')) : 'Ely';
           return {
@@ -5651,27 +5724,43 @@
             name: fileName.replace(/\.[^.]+$/, ''),
             category: folder,
             folder: folder,
-            path: fullPath
+            path: './assets/images/ely/' + cleanPath,
+            isVideo: ['mp4','webm','mov','m4v','ogv','mkv'].includes(fileName.split('.').pop().toLowerCase())
           };
         });
+      }
 
       githubElyFolderImages = foundImages;
+      // Rebuild all folder paths from the actual files too, covering every depth.
+      const discoveredFolders = new Set(githubElyFolderPaths);
+      foundImages.forEach(function(image) {
+        const folder = getLibraryImageFolder(image);
+        let current = '';
+        folder.split('/').filter(Boolean).forEach(function(part) {
+          current = current ? current + '/' + part : part;
+          discoveredFolders.add(current);
+        });
+      });
+      githubElyFolderPaths = Array.from(discoveredFolders).sort(function(a,b) {
+        return a.localeCompare(b, undefined, {numeric:true, sensitivity:'base'});
+      });
+
       renderLibraryGrid(document.getElementById('library-search-input')?.value || '');
 
       if (showNotification) {
         showStatusNotification({
-          title: 'Manifest reconstruido',
-          message: 'Se cargaron ' + foundImages.length + ' imágenes de ely y todas sus subcarpetas (' + source + ').',
+          title: 'Biblioteca actualizada',
+          message: 'Se detectaron ' + foundImages.length + ' archivos multimedia y ' + githubElyFolderPaths.length + ' carpetas en assets/images/ely (' + source + ').',
           type: 'success',
           icon: '🔄'
         });
       }
     } catch (error) {
-      console.warn('[LIBRARY] Error reconstruyendo el manifest de imágenes de ely:', error);
+      console.warn('[LIBRARY] Error escaneando assets/images/ely:', error);
       if (showNotification) {
         showStatusNotification({
           title: 'Error al recargar',
-          message: 'No se pudo reconstruir la lista de imágenes de ely.',
+          message: 'No se pudo escanear assets/images/ely.',
           type: 'error',
           icon: '⚠️'
         });
@@ -5723,8 +5812,7 @@
     const existing = await getGithubFile(keepPath);
     if (existing) return;
     await putGithubFile(keepPath, btoa(''), 'Create library folder ' + folder);
-    const created = await getGithubFile(keepPath);
-    if (created && created.sha) await deleteGithubImageFile(keepPath);
+    // Keep .gitkeep so empty folders remain visible in GitHub.
   }
 
   async function moveCustomLibraryImageFolder(imageId, card) {
@@ -5779,14 +5867,59 @@
     if (!grid) return;
 
     const allImages = getAllLibraryImages();
+    grid.className = 'flex flex-1 min-h-0 overflow-hidden rounded-xl border border-[#252b38] bg-[#0b0d12]';
+    grid.style.display = 'flex';
+    grid.style.gridTemplateColumns = '';
+    grid.innerHTML = '<aside class="w-44 sm:w-60 shrink-0 border-r border-[#252b38] flex flex-col min-h-0 bg-[#0d1017]"><div class="px-3 py-3 border-b border-[#252b38] text-xs font-bold text-slate-300 flex items-center justify-between"><span>📁 Carpetas</span><button type="button" id="library-create-folder-btn" class="text-amber-400 hover:text-amber-300" title="Crear carpeta">＋</button></div><div id="library-folder-tree" class="flex-1 min-h-0 overflow-y-auto p-2 text-xs"></div></aside><section class="flex-1 min-w-0 min-h-0 flex flex-col"><div class="px-3 py-2 border-b border-[#252b38] flex items-center justify-between gap-2"><div id="library-folder-breadcrumb" class="text-[11px] text-slate-400 truncate">📁 Todas las imágenes</div><span id="library-folder-count" class="text-[10px] text-slate-500 shrink-0"></span></div><div id="library-file-items" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 overflow-y-auto flex-1 min-h-0 p-3 content-start"></div></section></div>';
+    const imageGrid = document.getElementById('library-file-items');
+    const folderTree = document.getElementById('library-folder-tree');
+    const folderPaths = new Set(['']);
+    githubElyFolderPaths.forEach(function(folder) { const clean = normalizeLibraryFolder(folder); let path = ''; clean.split('/').filter(Boolean).forEach(part => { path = path ? path + '/' + part : part; folderPaths.add(path); }); });
+    allImages.forEach(function(image) {
+      const folder = getLibraryImageFolder(image);
+      const parts = folder.split('/').filter(Boolean);
+      let path = '';
+      parts.forEach(function(part) { path = path ? path + '/' + part : part; folderPaths.add(path); });
+    });
+    const childFolders = function(parent) {
+      const prefix = parent ? parent + '/' : '';
+      return Array.from(folderPaths).filter(path => path && path.startsWith(prefix) && path.slice(prefix.length).length > 0 && !path.slice(prefix.length).includes('/')).sort((x,y)=>x.localeCompare(y));
+    };
+    const folderButton = function(path) {
+      const name = path ? path.split('/').pop() : 'Todas las imágenes';
+      const active = path === selectedLibraryFolder;
+      const children = childFolders(path);
+      return '<div class="library-tree-node"><button type="button" data-library-folder="' + path.replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '" class="w-full text-left px-2 py-1.5 rounded-md flex items-center gap-1.5 ' + (active ? 'bg-amber-400/15 text-amber-300' : 'text-slate-400 hover:bg-white/5 hover:text-white') + '"><span class="text-[10px]">' + (children.length ? '▸' : '·') + '</span><span>📁</span><span class="truncate">' + name.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</span></button>' + (children.length && (!path || selectedLibraryFolder === path || selectedLibraryFolder.startsWith(path + '/')) ? '<div class="ml-3 pl-1 border-l border-white/10">' + children.map(folderButton).join('') + '</div>' : '') + '</div>';
+    };
+    if (folderTree) folderTree.innerHTML = folderButton('');
+    const crumb = document.getElementById('library-folder-breadcrumb');
+    if (crumb) crumb.textContent = selectedLibraryFolder ? '📁 ' + selectedLibraryFolder : '📁 Todas las imágenes';
+    if (!grid.dataset.treeBound) {
+      grid.dataset.treeBound = 'true';
+      grid.addEventListener('click', function(e) {
+        const folderButton = e.target.closest('[data-library-folder]');
+        if (folderButton) { selectedLibraryFolder = folderButton.getAttribute('data-library-folder') || ''; renderLibraryGrid(document.getElementById('library-search-input')?.value || ''); return; }
+        if (e.target.closest('#library-create-folder-btn')) {
+          const parent = selectedLibraryFolder;
+          const folderName = window.prompt('Nombre de la nueva carpeta o subcarpeta:');
+          if (!folderName || !folderName.trim()) return;
+          const clean = normalizeLibraryFolder((parent ? parent + '/' : '') + folderName).split('/').filter(part => part && part !== '.' && part !== '..').join('/');
+          if (!clean) return;
+          ensureGithubImageFolder(clean).then(() => { selectedLibraryFolder = clean; renderLibraryGrid(document.getElementById('library-search-input')?.value || ''); showStatusNotification({title:'Carpeta creada',message:clean,type:'success',icon:'📁'}); }).catch(error => showStatusNotification({title:'No se pudo crear',message:error.message || 'Error creando carpeta.',type:'error',icon:'⚠️'}));
+        }
+      });
+    }
     const librarySizeSlider = document.getElementById('library-size-slider');
     const librarySize = Math.max(120, Math.min(300, parseInt((librarySizeSlider && librarySizeSlider.value) || '190', 10) || 190));
     const librarySizeValue = document.getElementById('library-size-value');
     if (librarySizeValue) librarySizeValue.textContent = librarySize + 'px';
-    grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(' + librarySize + 'px, 1fr))';
+    if (imageGrid) imageGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(' + librarySize + 'px, 1fr))';
     const query = (searchFilter || '').toLowerCase().trim();
 
     const filtered = allImages.filter(img => {
+      const folder = getLibraryImageFolder(img);
+      const inFolder = !selectedLibraryFolder || folder === selectedLibraryFolder || folder.startsWith(selectedLibraryFolder + '/');
+      if (!inFolder) return false;
       if (!query) return true;
       return (img.name && img.name.toLowerCase().includes(query)) ||
              (img.category && img.category.toLowerCase().includes(query)) ||
@@ -5796,9 +5929,11 @@
     if (countEl) {
       countEl.textContent = filtered.length;
     }
+    const folderCount = document.getElementById('library-folder-count');
+    if (folderCount) folderCount.textContent = filtered.length + ' elemento(s)';
 
     if (filtered.length === 0) {
-      grid.innerHTML = `
+      imageGrid.innerHTML = `
         <div class="col-span-full py-8 text-center text-slate-500">
           <p class="text-sm">No se encontraron imágenes que coincidan con la búsqueda.</p>
         </div>
@@ -5806,7 +5941,7 @@
       return;
     }
 
-    grid.innerHTML = filtered.map((img, filteredIndex) => {
+    imageGrid.innerHTML = filtered.map((img, filteredIndex) => {
       const isCustom = String(img.id || '').startsWith('custom-');
       const allIndex = allImages.findIndex(item => item.id === img.id);
       const customIndex = customLibraryImages.findIndex(item => item.id === img.id);
@@ -5818,7 +5953,7 @@
              data-library-img-path="${img.path}"
              data-library-img-name="${img.name || ''}">
           <div class="relative h-44 sm:h-52 w-full shrink-0 overflow-hidden rounded-xl bg-[#141822] mb-3 border border-white/5 cursor-pointer library-image-area">
-            <img src="${img.previewPath || img.path}" alt="${img.name || 'Imagen'}" class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105" onerror="if(this.src !== this.dataset.fallback){this.src=this.dataset.fallback;}else{this.removeAttribute('src'); this.classList.add('opacity-20');}" data-fallback="${img.path}" />
+            ${img.isVideo || /\.(mp4|webm|mov|m4v|ogv)(?:\?.*)?$/i.test(img.path || img.name || "") ? '<video src="' + (img.previewPath || img.path) + '" class="h-full w-full object-contain p-2" muted playsinline preload="metadata"></video><span class="absolute bottom-2 left-2 rounded bg-black/80 px-2 py-1 text-[10px] text-white">▶ VIDEO</span>' : '<img src="' + (img.previewPath || img.path) + '" alt="' + (img.name || "Imagen") + '" class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105" data-fallback="' + img.path + '" />'}
             <span class="absolute top-2 left-2 rounded bg-black/80 px-2 py-1 text-[10px] font-mono text-amber-400 border border-amber-400/20 backdrop-blur-sm">
               ${img.category || 'Asset'}
             </span>
@@ -5844,10 +5979,8 @@
               <label class="block text-[9px] uppercase tracking-wider text-slate-500 mb-1">Mover carpeta</label>
               <div class="flex gap-1.5">
                 <select class="library-folder-move-select flex-1 min-w-0 rounded-md bg-[#0d1017] border border-[#262c3b] px-2 py-1 text-[10px] text-white focus:border-amber-400 focus:outline-none">
-                  <option value="Profile">Profile</option>
-                  <option value="Screenshot">Screenshot</option>
-                  <option value="AppLogo">AppLogo</option>
-                  <option value="Custom">Custom</option>
+                  ${Array.from(folderPaths).filter(Boolean).sort((a,b)=>a.localeCompare(b)).map(folder => '<option value="' + folder.replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '"' + (folder === getLibraryImageFolder(img) ? ' selected' : '') + '>' + folder.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</option>').join('')}
+                  <option value="Custom">＋ Nueva ruta...</option>
                 </select>
                 <button type="button" class="library-move-folder-btn rounded-md bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/20 px-2 py-1 text-[10px] font-bold text-amber-400">Mover</button>
               </div>
@@ -6069,11 +6202,14 @@
 
   function openLibraryImagePreview(imagePath, imageName, previewPath) {
     const modal = document.getElementById('library-image-preview-modal');
-    const image = document.getElementById('library-image-preview');
+    let image = document.getElementById('library-image-preview');
     const title = document.getElementById('library-image-preview-title');
     if (!modal || !image) return;
+    const isVideo = /\.(mp4|webm|mov|m4v|ogv)(?:\?.*)?$/i.test(imagePath || imageName || '');
+    if (isVideo && image.tagName.toLowerCase() !== 'video') { const video = document.createElement('video'); video.id = 'library-image-preview'; video.className = 'max-w-full max-h-[78vh] object-contain rounded-lg'; video.controls = true; image.replaceWith(video); image = video; }
+    if (!isVideo && image.tagName.toLowerCase() !== 'img') { const img = document.createElement('img'); img.id = 'library-image-preview'; img.className = 'max-w-full max-h-[78vh] object-contain rounded-lg'; image.replaceWith(img); image = img; }
     image.src = previewPath || imagePath;
-    image.alt = imageName || 'Imagen';
+    if (isVideo) { image.controls = true; image.autoplay = true; image.playsInline = true; } else image.alt = imageName || 'Imagen';
     if (title) title.textContent = imageName || 'Vista previa';
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
