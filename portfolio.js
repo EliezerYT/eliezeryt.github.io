@@ -3078,7 +3078,6 @@
     if (!modal) return;
     modal.classList.remove('hidden');
     renderSatisfiedClientsModalList();
-    renderSatisfiedClientsModalList();
     renderTestimonialsPreview();
     document.body.style.overflow = 'hidden';
   }
@@ -6977,8 +6976,8 @@
     if (grid) {
       grid.innerHTML = '<div class="col-span-full flex flex-col items-center justify-center py-12 text-center">' +
         '<div class="w-10 h-10 rounded-full border-2 border-cyan-400/20 border-t-cyan-400 animate-spin mb-4"></div>' +
-        '<div class="text-sm font-semibold text-white">Cargando redes...</div>' +
-        '<div class="text-[11px] text-slate-500 mt-1">Obteniendo información desde Google Sheets</div>' +
+        '<div class="text-sm font-semibold text-white">Redes sociales</div>' +
+        '<div class="text-[11px] text-slate-500 mt-1">Información cargada del portafolio</div>' +
       '</div>';
     }
 
