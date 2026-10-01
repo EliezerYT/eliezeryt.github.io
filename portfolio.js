@@ -5606,7 +5606,14 @@
       seen.add(uniqueKey);
       result.push(image);
     };
-    customLibraryImages.forEach(addUnique);
+    const liveElyPaths = new Set(githubElyFolderImages.map(function(image) {
+      return String(image.path || '').replace(/^\.\//, '').toLowerCase();
+    }));
+    const isStaleElyPath = function(image) {
+      const path = String(image && image.path || '').replace(/^\.\//, '').toLowerCase();
+      return path.startsWith('assets/images/ely/') && liveElyPaths.size > 0 && !liveElyPaths.has(path);
+    };
+    customLibraryImages.filter(function(image) { return !isStaleElyPath(image); }).forEach(addUnique);
     githubElyFolderImages.forEach(function (remoteImage) {
       const remoteKey = getImageKey(remoteImage);
       if (DEFAULT_LIBRARY_IMAGES.some(function (defaultImage) {
@@ -5615,7 +5622,7 @@
       if (customKeys.has(remoteKey)) return;
       addUnique(remoteImage);
     });
-    DEFAULT_LIBRARY_IMAGES.forEach(addUnique);
+    DEFAULT_LIBRARY_IMAGES.filter(function(image) { return !isStaleElyPath(image); }).forEach(addUnique);
     return result;
   }
 
@@ -5683,20 +5690,7 @@
             });
           });
 
-          // Git trees include explicit tree entries, so add folders even when
-          // they contain only files that are not media.
-          files.forEach(function(entry) {
-            if (!entry || entry.type !== 'tree' || typeof entry.path !== 'string' || !entry.path.startsWith(prefix)) return;
-            const relativeFolder = entry.path.substring(prefix.length).replace(/^\/+|\/+$/g, '');
-            if (!relativeFolder) return;
-            let folderPath = '';
-            relativeFolder.split('/').filter(Boolean).forEach(function(part) {
-              folderPath = folderPath ? folderPath + '/' + part : part;
-              folderSet.add(folderPath);
-            });
-          });
-
-          githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
+tree          githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
             return a.localeCompare(b, undefined, {numeric:true, sensitivity:'base'});
           });
         } else {
@@ -5900,13 +5894,15 @@
     const imageGrid = document.getElementById('library-file-items');
     const folderTree = document.getElementById('library-folder-tree');
     const folderPaths = new Set(['']);
-    githubElyFolderPaths.forEach(function(folder) { const clean = normalizeLibraryFolder(folder); let path = ''; clean.split('/').filter(Boolean).forEach(part => { path = path ? path + '/' + part : part; folderPaths.add(path); }); });
     allImages.forEach(function(image) {
       const folder = getLibraryImageFolder(image);
       const parts = folder.split('/').filter(Boolean);
       let path = '';
       parts.forEach(function(part) { path = path ? path + '/' + part : part; folderPaths.add(path); });
     });
+    if (selectedLibraryFolder && !Array.from(folderPaths).some(function(path) {
+      return path === selectedLibraryFolder || path.startsWith(selectedLibraryFolder + '/');
+    })) selectedLibraryFolder = '';
     const childFolders = function(parent) {
       const prefix = parent ? parent + '/' : '';
       return Array.from(folderPaths).filter(path => path && path.startsWith(prefix) && path.slice(prefix.length).length > 0 && !path.slice(prefix.length).includes('/')).sort((x,y)=>x.localeCompare(y));
@@ -5978,7 +5974,7 @@
              data-library-img-id="${img.id || ''}"
              data-library-img-path="${img.path}"
              data-library-img-name="${img.name || ''}">
-          <div class="relative h-44 sm:h-52 w-full shrink-0 overflow-hidden rounded-xl bg-[#141822] mb-3 border border-white/5 cursor-pointer library-image-area">
+          <div class="relative w-full shrink-0 overflow-hidden rounded-xl bg-[#141822] mb-3 border border-white/5 cursor-pointer library-image-area" style="height:${Math.round(librarySize * 0.78)}px">
             ${img.isVideo || /\.(mp4|webm|mov|m4v|ogv)(?:\?.*)?$/i.test(img.path || img.name || "") ? '<video src="' + (img.previewPath || img.path) + '" class="h-full w-full object-contain p-2" muted playsinline preload="metadata"></video><span class="absolute bottom-2 left-2 rounded bg-black/80 px-2 py-1 text-[10px] text-white">▶ VIDEO</span>' : '<img src="' + (img.previewPath || img.path) + '" alt="' + (img.name || "Imagen") + '" class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105" data-fallback="' + img.path + '" />'}
             <span class="absolute top-2 left-2 rounded bg-black/80 px-2 py-1 text-[10px] font-mono text-amber-400 border border-amber-400/20 backdrop-blur-sm">
               ${img.category || 'Asset'}
