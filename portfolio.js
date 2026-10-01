@@ -1227,6 +1227,32 @@
     setVisitorPreviewMode(!visitorPreviewMode);
   }
 
+  function setMediaPreviewElement(element, path, altText) {
+    if (!element || !path) return element;
+    const isVideo = isLocalVideoMedia(path);
+    const wantedTag = isVideo ? 'video' : 'img';
+    let preview = element;
+    if (element.tagName.toLowerCase() !== wantedTag) {
+      preview = document.createElement(wantedTag);
+      preview.id = element.id;
+      preview.className = element.className;
+      element.replaceWith(preview);
+    }
+    preview.onerror = null;
+    preview.removeAttribute('onerror');
+    preview.src = path;
+    if (isVideo) {
+      preview.controls = true;
+      preview.playsInline = true;
+      preview.preload = 'metadata';
+      preview.removeAttribute('autoplay');
+    } else {
+      preview.alt = altText || 'Imagen';
+      preview.onerror = function() { this.onerror = null; this.src = './assets/images/ely/my-avatar.png'; };
+    }
+    return preview;
+  }
+
   function isLocalVideoMedia(path) {
     return /\.(mp4|webm|mov|m4v|ogv)(?:[?#].*)?$/i.test(String(path || ''));
   }
@@ -4048,11 +4074,11 @@
 
     const iconPrev = document.getElementById('edit-proj-icon-preview');
     const savedIcon = project.icon || project.coverImage || './assets/images/ely/my-avatar.png';
-    if (iconPrev) iconPrev.src = savedIcon;
+    if (iconPrev) setMediaPreviewElement(iconPrev, savedIcon, project.title || 'Icono');
     const iconInp = document.getElementById('edit-proj-icon');
     if (iconInp) iconInp.value = savedIcon;
     const coverPrev = document.getElementById('edit-proj-cover-preview');
-    if (coverPrev) coverPrev.src = project.coverImage || './assets/images/ely/overdrivers-teaser.jpg';
+    if (coverPrev) setMediaPreviewElement(coverPrev, project.coverImage || './assets/images/ely/overdrivers-teaser.jpg', project.title || 'Portada');
     renderGalleryThumbnails('edit-proj-gallery-thumbs', 'edit-proj-gallery');
 
     // Video de YouTube en grande
@@ -6401,7 +6427,7 @@
       if (inputEl) inputEl.value = imagePath;
       if (currentLibraryTarget.previewId) {
         const previewEl = document.getElementById(currentLibraryTarget.previewId);
-        if (previewEl) previewEl.src = imagePath;
+        if (previewEl) setMediaPreviewElement(previewEl, imagePath, imageName || 'Vista previa');
       }
       showStatusNotification({ title: 'Imagen Asignada', message: 'Se asignó "' + (imageName || imagePath) + '" correctamente.', type: 'success', icon: '🖼️' });
       closeImageLibraryModal();
@@ -6446,7 +6472,7 @@
       thumb.draggable = true;
       thumb.style.width = size + 'px';
       thumb.style.height = size + 'px';
-      thumb.innerHTML = '<img src="' + src + '" alt="Screenshot ' + (idx + 1) + '" class="w-full h-full object-cover" onerror="this.removeAttribute(\'src\'); this.style.display=\'none\'" /><span class="absolute top-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[9px] text-white font-mono">' + (idx + 1) + '</span><button type="button" title="Eliminar de galería" class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center text-red-400 font-bold text-xs transition-opacity cursor-pointer">✕</button>';
+      thumb.innerHTML = (isLocalVideoMedia(src) ? '<video src="' + src + '" class="w-full h-full object-cover" muted playsinline preload="metadata"></video><span class="absolute bottom-1 left-1 rounded bg-black/80 px-1 py-0.5 text-[8px] text-white">▶ VIDEO</span>' : '<img src="' + src + '" alt="Screenshot ' + (idx + 1) + '" class="w-full h-full object-cover" onerror="this.removeAttribute(\'src\'); this.style.display=\'none\'" />') + '<span class="absolute top-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[9px] text-white font-mono">' + (idx + 1) + '</span><button type="button" title="Eliminar de galería" class="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center text-red-400 font-bold text-xs transition-opacity cursor-pointer">✕</button>';
       thumb.querySelector('button').addEventListener('click', function(e) {
         e.stopPropagation();
         items.splice(idx, 1);
