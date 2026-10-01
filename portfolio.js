@@ -2864,12 +2864,98 @@
   }
 
   // 8. Feedback & Clientes Satisfechos
+  function getTestimonialClientKey(testimonial) {
+    return String(testimonial && testimonial.name || '').trim().toLowerCase();
+  }
+
+  function getGroupedTestimonials() {
+    const groups = new Map();
+    satisfiedClients.forEach(function (testimonial, index) {
+      const key = getTestimonialClientKey(testimonial);
+      if (!key) return;
+      if (!groups.has(key)) groups.set(key, { name: String(testimonial.name || '').trim(), items: [] });
+      groups.get(key).items.push({ item: testimonial, index: index });
+    });
+
+    groups.forEach(function (group) {
+      group.items.sort(function (a, b) {
+        const aTime = Date.parse(a.item.createdAt || '') || 0;
+        const bTime = Date.parse(b.item.createdAt || '') || 0;
+        if (aTime && bTime && aTime !== bTime) return bTime - aTime;
+        if (aTime && !bTime) return -1;
+        if (!aTime && bTime) return 1;
+        return a.index - b.index;
+      });
+      group.items = group.items.map(function (entry) { return entry.item; });
+      group.latest = group.items[0] || null;
+    });
+
+    return Array.from(groups.values());
+  }
+
+  function getTestimonialsForClient(clientName) {
+    const key = String(clientName || '').trim().toLowerCase();
+    const group = getGroupedTestimonials().find(function (entry) {
+      return entry.name.trim().toLowerCase() === key;
+    });
+    return group ? group.items : [];
+  }
+
+  function truncateTestimonialFeedback(text, limit) {
+    const value = String(text || '');
+    if (value.length <= limit) return { text: value, truncated: false };
+    return { text: value.slice(0, limit).trimEnd() + '…', truncated: true };
+  }
+
+  function renderTestimonialFeedback(testimonial, uniqueId, compact) {
+    const full = String(testimonial.feedback || '');
+    const limit = compact ? 150 : 280;
+    const preview = truncateTestimonialFeedback(full, limit);
+    const feedbackId = 'testimonial-feedback-' + uniqueId;
+    const buttonId = 'testimonial-more-' + uniqueId;
+
+    return '<div class="pt-3 border-t border-[#1e2330]">' +
+      '<p id="' + feedbackId + '" class="text-xs text-slate-300 italic leading-relaxed whitespace-pre-line">' +
+      '“' + (preview.truncated ? preview.text : full) + '”' +
+      '</p>' +
+      (preview.truncated
+        ? '<button id="' + buttonId + '" type="button" onclick="window.ElyPortfolio.toggleTestimonialMore(\'' + uniqueId + '\')" class="mt-2 text-[10px] font-bold text-amber-400 hover:text-amber-300 hover:underline cursor-pointer">Ver más...</button>'
+        : '') +
+      '</div>';
+  }
+
+  function toggleTestimonialMore(uniqueId) {
+    const testimonial = satisfiedClients.find(function (item) { return String(item.id) === String(uniqueId); });
+    if (!testimonial) return;
+    const p = document.getElementById('testimonial-feedback-' + uniqueId);
+    const button = document.getElementById('testimonial-more-' + uniqueId);
+    if (!p || !button) return;
+    const expanded = button.dataset.expanded === 'true';
+    p.textContent = '“' + (expanded ? truncateTestimonialFeedback(testimonial.feedback || '', 150).text : String(testimonial.feedback || '')) + '”';
+    button.textContent = expanded ? 'Ver más...' : 'Ver menos';
+    button.dataset.expanded = expanded ? 'false' : 'true';
+  }
+
+  function getTestimonialModeratorBar(c) {
+    if (!isModerator || visitorPreviewMode) return '';
+    return '<div class="flex items-center justify-between p-2 mb-2 bg-[#171c26] rounded-xl border border-amber-400/30 text-xs">' +
+      '<div class="flex items-center gap-1">' +
+      '<button type="button" onclick="window.ElyPortfolio.moveTestimonialOrder(\'' + c.id + '\', -1)" class="px-2 py-0.5 rounded bg-[#10131a] text-amber-400 hover:bg-amber-400 hover:text-black font-bold cursor-pointer">▲ Subir</button>' +
+      '<button type="button" onclick="window.ElyPortfolio.moveTestimonialOrder(\'' + c.id + '\', 1)" class="px-2 py-0.5 rounded bg-[#10131a] text-amber-400 hover:bg-amber-400 hover:text-black font-bold cursor-pointer">▼ Bajar</button>' +
+      '</div>' +
+      '<div class="flex items-center gap-1.5">' +
+      '<button type="button" onclick="window.ElyPortfolio.duplicateTestimonial(\'' + c.id + '\')" class="px-2 py-0.5 rounded bg-[#202738] text-amber-300 hover:bg-amber-400 hover:text-black font-bold cursor-pointer">📋 Duplicar</button>' +
+      '<button type="button" onclick="window.ElyPortfolio.openEditTestimonialModal(\'' + c.id + '\')" class="px-2.5 py-0.5 rounded bg-amber-400 text-black font-bold hover:bg-amber-300 cursor-pointer">✏️ Editar</button>' +
+      '<button type="button" onclick="window.ElyPortfolio.deleteTestimonial(\'' + c.id + '\')" class="px-2.5 py-0.5 rounded bg-red-600 text-white font-bold hover:bg-red-500 cursor-pointer">🗑️ Eliminar</button>' +
+      '</div></div>';
+  }
+
   function renderTestimonialsPreview() {
     const container = document.getElementById('testimonials-preview-grid');
     const badge = document.getElementById('testimonials-count-badge');
-    if (badge) {
-      badge.textContent = satisfiedClients.length + ' Feedbacks';
-    }
+    const groups = getGroupedTestimonials();
+    if (badge) badge.textContent = satisfiedClients.length + ' Feedbacks';
+
     const heroFeedbackCount = document.getElementById('hero-feedback-count');
     animateCounterElement(heroFeedbackCount, satisfiedClients.length, function (value) {
       return value + ' Feedbacks';
@@ -2877,187 +2963,99 @@
     renderFeedbackStats();
     if (!container) return;
 
-    // Mostrar los primeros feedbacks en la página principal
-    const previewList = satisfiedClients.slice(0, 4);
-
-    container.innerHTML = previewList.map(function (c) {
+    container.innerHTML = groups.slice(0, 4).map(function (group, groupIndex) {
+      const c = group.latest;
+      if (!c) return '';
       const starIcons = '★'.repeat(c.rating || 5);
       const tagBadges = (c.tags || []).map(function (t) {
-        return `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400 border border-white/10">${t}</span>`;
+        return '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-400 border border-white/10">' + t + '</span>';
       }).join('');
+      const countLabel = group.items.length === 1 ? '1 testimonio' : group.items.length + ' testimonios';
+      const countButton = '<button type="button" onclick="window.ElyPortfolio.openClientTestimonials(\'' + String(c.name || '').replace(/'/g, "\\'") + '\')" class="text-[10px] font-bold text-cyan-300 hover:text-cyan-200 hover:underline cursor-pointer whitespace-nowrap">' + countLabel + ' →</button>';
 
-      const moderatorBar = (isModerator && !visitorPreviewMode) ? `
-        <div class="flex items-center justify-between p-2 mb-2 bg-[#171c26] rounded-xl border border-amber-400/30 text-xs">
-          <div class="flex items-center gap-1">
-            <button
-              type="button"
-              onclick="window.ElyPortfolio.moveTestimonialOrder('${c.id}', -1)"
-              class="px-2 py-0.5 rounded bg-[#10131a] text-amber-400 hover:bg-amber-400 hover:text-black font-bold cursor-pointer"
-              title="Mover arriba"
-            >
-              ▲ Subir
-            </button>
-            <button
-              type="button"
-              onclick="window.ElyPortfolio.moveTestimonialOrder('${c.id}', 1)"
-              class="px-2 py-0.5 rounded bg-[#10131a] text-amber-400 hover:bg-amber-400 hover:text-black font-bold cursor-pointer"
-              title="Mover abajo"
-            >
-              ▼ Bajar
-            </button>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <button
-              type="button"
-              onclick="window.ElyPortfolio.duplicateTestimonial('${c.id}')"
-              class="px-2 py-0.5 rounded bg-[#202738] text-amber-300 hover:bg-amber-400 hover:text-black font-bold cursor-pointer"
-              title="Duplicar feedback"
-            >
-              📋 Duplicar
-            </button>
-            <button
-              type="button"
-              onclick="window.ElyPortfolio.openEditTestimonialModal('${c.id}')"
-              class="px-2.5 py-0.5 rounded bg-amber-400 text-black font-bold hover:bg-amber-300 cursor-pointer"
-              title="Editar feedback"
-            >
-              ✏️ Editar
-            </button>
-            <button
-              type="button"
-              onclick="window.ElyPortfolio.deleteTestimonial('${c.id}')"
-              class="px-2.5 py-0.5 rounded bg-red-600 text-white font-bold hover:bg-red-500 cursor-pointer"
-              title="Eliminar feedback"
-            >
-              🗑️ Eliminar
-            </button>
-          </div>
-        </div>
-      ` : '';
-
-      return `
-        <div class="rounded-2xl bg-[#12151d] border border-[#232733] p-6 space-y-3 hover:border-amber-400/40 transition-colors">
-          ${moderatorBar}
-          <div class="relative h-0">
-            <span class="absolute right-0 -top-1 text-[9px] font-mono text-slate-500">${c.year || '2025'}</span>
-          </div>
-          <div class="flex items-center gap-2.5">
-            <div class="h-9 w-9 rounded-lg overflow-hidden bg-black/40 border border-[#232733] shrink-0">
-              <img src="${c.avatar || './assets/images/ely/my-avatar.png'}" alt="${c.name}" class="h-full w-full object-cover" onerror="this.src='./assets/images/ely/my-avatar.png'" />
-            </div>
-            <div class="min-w-0">
-              <div class="text-xs font-bold text-white">${c.name}</div>
-              <div class="text-[11px] text-amber-400/90 truncate">${c.project}</div>
-              <div class="text-[10px] text-slate-500">${c.role}</div>
-            </div>
-          </div>
-          <div class="pt-3 border-t border-[#1e2330]">
-            <p class="text-xs text-slate-300 italic leading-relaxed whitespace-pre-line">
-              “${c.feedback}”
-            </p>
-          </div>
-          <div class="flex items-end justify-between gap-3 pt-1">
-            <div class="flex flex-wrap gap-1">${tagBadges}</div>
-            <div class="text-amber-400 text-sm font-bold tracking-wider shrink-0">${starIcons} <span class="text-xs text-slate-400 font-mono">${(c.rating || 5).toFixed(1)}</span></div>
-          </div>
-        </div>
-      `;
+      return '<div class="rounded-2xl bg-[#12151d] border border-[#232733] p-6 space-y-3 hover:border-amber-400/40 transition-colors">' +
+        getTestimonialModeratorBar(c) +
+        '<div class="relative h-0"><span class="absolute right-0 -top-1 text-[9px] font-mono text-slate-500">' + (c.year || '2025') + '</span></div>' +
+        '<div class="flex items-center gap-2.5">' +
+        '<div class="h-9 w-9 rounded-lg overflow-hidden bg-black/40 border border-[#232733] shrink-0"><img src="' + (c.avatar || './assets/images/ely/my-avatar.png') + '" alt="' + (c.name || '') + '" class="h-full w-full object-cover" onerror="this.src=\'./assets/images/ely/my-avatar.png\'" /></div>' +
+        '<div class="min-w-0 flex-1"><div class="flex items-center gap-2 flex-wrap"><div class="text-xs font-bold text-white">' + (c.name || '') + '</div>' + countButton + '</div>' +
+        '<div class="text-[11px] text-amber-400/90 truncate">' + (c.project || '') + '</div><div class="text-[10px] text-slate-500">' + (c.role || '') + '</div></div>' +
+        '</div>' +
+        renderTestimonialFeedback(c, String(c.id || groupIndex), true) +
+        '<div class="flex items-end justify-between gap-3 pt-1"><div class="flex flex-wrap gap-1">' + tagBadges + '</div><div class="text-amber-400 text-sm font-bold tracking-wider shrink-0">' + starIcons + ' <span class="text-xs text-slate-400 font-mono">' + Number(c.rating || 5).toFixed(1) + '</span></div></div>' +
+        '</div>';
     }).join('');
   }
 
-  function renderSatisfiedClientsModalList() {
+  function renderSatisfiedClientsModalList(clientName) {
     const container = document.getElementById('satisfied-clients-list');
     const badge = document.getElementById('modal-clients-count-badge');
-    if (badge) {
-      badge.textContent = satisfiedClients.length + ' Feedbacks';
-    }
+    const groups = getGroupedTestimonials();
+    const modal = document.getElementById('satisfied-clients-modal');
     if (!container) return;
 
-    container.innerHTML = satisfiedClients.map(function (c) {
-      const starIcons = '★'.repeat(c.rating || 5);
-      const tagBadges = (c.tags || []).map(function (t) {
-        return `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300 border border-white/10">${t}</span>`;
+    if (clientName) {
+      const items = getTestimonialsForClient(clientName);
+      if (badge) badge.textContent = items.length + (items.length === 1 ? ' Testimonio' : ' Testimonios');
+      container.innerHTML = items.map(function (c, index) {
+        const starIcons = '★'.repeat(c.rating || 5);
+        const tagBadges = (c.tags || []).map(function (t) {
+          return '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300 border border-white/10">' + t + '</span>';
+        }).join('');
+        return '<div class="rounded-2xl bg-[#0e1118] border border-[#232733] p-5 space-y-3 hover:border-amber-400/40 transition-colors">' +
+          getTestimonialModeratorBar(c) +
+          '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">' +
+          '<div class="flex items-center gap-3"><div class="h-12 w-12 rounded-xl overflow-hidden bg-black/40 border border-[#232733] shrink-0"><img src="' + (c.avatar || './assets/images/ely/my-avatar.png') + '" alt="' + (c.name || '') + '" class="h-full w-full object-cover" onerror="this.src=\'./assets/images/ely/my-avatar.png\'" /></div>' +
+          '<div><h4 class="text-sm font-bold text-white font-display">' + (c.name || '') + '</h4><div class="text-xs text-amber-400 font-medium">' + (c.project || '') + '</div><div class="text-[11px] text-slate-400">' + (c.role || '') + '</div></div></div>' +
+          '<div class="flex flex-col sm:items-end gap-1 shrink-0"><div class="star-rating text-sm font-bold text-amber-400">' + starIcons + ' <span class="text-xs text-slate-300">' + Number(c.rating || 5).toFixed(1) + '</span></div><div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2 py-0.5 rounded">' + (c.year || '2025') + '</div></div>' +
+          '</div>' +
+          '<div class="rounded-xl bg-[#141822] p-3 border border-[#1f2534]">' + renderTestimonialFeedback(c, String(c.id || index), false) + '</div>' +
+          '<div class="flex flex-wrap items-center gap-1.5 pt-1">' + tagBadges + '</div>' +
+          '</div>';
       }).join('');
 
-      const moderatorBar = (isModerator && !visitorPreviewMode) ? `
-        <div class="flex items-center justify-between p-2 mb-2 bg-[#171c26] rounded-xl border border-amber-400/30 text-xs">
-          <div class="flex items-center gap-1">
-            <button
-              type="button"
-              onclick="window.ElyPortfolio.moveTestimonialOrder('${c.id}', -1)"
-              class="px-2 py-0.5 rounded bg-[#10131a] text-amber-400 hover:bg-amber-400 hover:text-black font-bold cursor-pointer"
-              title="Mover arriba"
-            >
-              ▲ Subir
-            </button>
-            <button
-              type="button"
-              onclick="window.ElyPortfolio.moveTestimonialOrder('${c.id}', 1)"
-              class="px-2 py-0.5 rounded bg-[#10131a] text-amber-400 hover:bg-amber-400 hover:text-black font-bold cursor-pointer"
-              title="Mover abajo"
-            >
-              ▼ Bajar
-            </button>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <button
-              type="button"
-              onclick="window.ElyPortfolio.duplicateTestimonial('${c.id}')"
-              class="px-2 py-0.5 rounded bg-[#202738] text-amber-300 hover:bg-amber-400 hover:text-black font-bold cursor-pointer"
-              title="Duplicar feedback"
-            >
-              📋 Duplicar
-            </button>
-            <button
-              type="button"
-              onclick="window.ElyPortfolio.openEditTestimonialModal('${c.id}')"
-              class="px-2.5 py-0.5 rounded bg-amber-400 text-black font-bold hover:bg-amber-300 cursor-pointer"
-              title="Editar feedback"
-            >
-              ✏️ Editar
-            </button>
-            <button
-              type="button"
-              onclick="window.ElyPortfolio.deleteTestimonial('${c.id}')"
-              class="px-2.5 py-0.5 rounded bg-red-600 text-white font-bold hover:bg-red-500 cursor-pointer"
-              title="Eliminar feedback"
-            >
-              🗑️ Eliminar
-            </button>
-          </div>
-        </div>
-      ` : '';
+      const titleWrap = document.getElementById('modal-client-title-wrap');
+      const title = document.getElementById('modal-client-title');
+      const mainTitle = modal ? modal.querySelector('[data-testimonials-main-title]') : null;
+      if (mainTitle) mainTitle.classList.add('hidden');
+      if (titleWrap) titleWrap.classList.remove('hidden');
+      if (title) title.textContent = String(clientName || '');
+      if (modal) modal.dataset.clientName = String(clientName || '');
+      return;
+    }
 
-      return `
-        <div class="rounded-2xl bg-[#0e1118] border border-[#232733] p-5 space-y-3 hover:border-amber-400/40 transition-colors">
-          ${moderatorBar}
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-              <div class="h-12 w-12 rounded-xl overflow-hidden bg-black/40 border border-[#232733] shrink-0">
-                <img src="${c.avatar || './assets/images/ely/my-avatar.png'}" alt="${c.name}" class="h-full w-full object-cover" onerror="this.src='./assets/images/ely/my-avatar.png'" />
-              </div>
-              <div>
-                <h4 class="text-sm font-bold text-white font-display">${c.name}</h4>
-                <div class="text-xs text-amber-400 font-medium">${c.project}</div>
-                <div class="text-[11px] text-slate-400">${c.role}</div>
-              </div>
-            </div>
-            <div class="flex flex-col sm:items-end gap-1 shrink-0">
-              <div class="star-rating text-sm font-bold text-amber-400">${starIcons} <span class="text-xs text-slate-300">${(c.rating || 5).toFixed(1)}</span></div>
-              <div class="text-[11px] font-mono text-slate-400 bg-black/40 px-2 py-0.5 rounded">${c.year || '2025'}</div>
-            </div>
-          </div>
-
-          <div class="rounded-xl bg-[#141822] p-3 border border-[#1f2534] text-xs text-slate-300 italic leading-relaxed whitespace-pre-line">
-            “${c.feedback}”
-          </div>
-
-          <div class="flex flex-wrap items-center gap-1.5 pt-1">
-            ${tagBadges}
-          </div>
-        </div>
-      `;
+    if (badge) badge.textContent = groups.length + (groups.length === 1 ? ' Cliente' : ' Clientes');
+    container.innerHTML = groups.map(function (group, index) {
+      const c = group.latest;
+      const countLabel = group.items.length === 1 ? '1 testimonio' : group.items.length + ' testimonios';
+      return '<div class="rounded-2xl bg-[#0e1118] border border-[#232733] p-5 space-y-3 hover:border-amber-400/40 transition-colors">' +
+        getTestimonialModeratorBar(c) +
+        '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">' +
+        '<div class="flex items-center gap-3">' +
+        '<div class="h-12 w-12 rounded-xl overflow-hidden bg-black/40 border border-[#232733] shrink-0"><img src="' + (c.avatar || './assets/images/ely/my-avatar.png') + '" alt="' + (c.name || '') + '" class="h-full w-full object-cover" onerror="this.src=\'./assets/images/ely/my-avatar.png\'" /></div>' +
+        '<div><h4 class="text-sm font-bold text-white font-display">' + (c.name || '') + '</h4><div class="text-xs text-amber-400 font-medium">' + (c.project || '') + '</div><div class="text-[11px] text-slate-400">' + (c.role || '') + '</div></div>' +
+        '</div>' +
+        '<div class="flex flex-col sm:items-end gap-1 shrink-0">' +
+        '<div class="star-rating text-sm font-bold text-amber-400">' + '★'.repeat(c.rating || 5) + ' <span class="text-xs text-slate-300">' + Number(c.rating || 5).toFixed(1) + '</span></div>' +
+        '<button type="button" onclick="window.ElyPortfolio.openClientTestimonials(\'' + String(c.name || '').replace(/'/g, "\\'") + '\')" class="text-[10px] font-bold text-cyan-300 hover:text-cyan-200 hover:underline cursor-pointer">' + countLabel + ' →</button>' +
+        '</div></div>' +
+        renderTestimonialFeedback(c, String(c.id || index), false) +
+        '</div>';
     }).join('');
+
+    const titleWrap = document.getElementById('modal-client-title-wrap');
+    const mainTitle = modal ? modal.querySelector('[data-testimonials-main-title]') : null;
+    if (titleWrap) titleWrap.classList.add('hidden');
+    if (mainTitle) mainTitle.classList.remove('hidden');
+    if (modal) delete modal.dataset.clientName;
+  }
+
+  function openClientTestimonials(clientName) {
+    const modal = document.getElementById('satisfied-clients-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    renderSatisfiedClientsModalList(clientName);
+    document.body.style.overflow = 'hidden';
   }
 
   async function openSatisfiedClientsModal() {
