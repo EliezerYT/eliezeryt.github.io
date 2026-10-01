@@ -5705,7 +5705,7 @@
     if (image && image.folder) return normalizeLibraryFolder(image.folder);
     if (image && image.category) return normalizeLibraryFolder(image.category);
     if (image && typeof image.path === 'string') {
-      const match = image.path.match(/^\.\/assets\/images\/ely\/(.+)\/[^/]+$/i);
+      const match = image.path.match(/^\.\/assets\/images\/(?:ely|moderator)\/(.+)\/[^/]+$/i);
       if (match) return normalizeLibraryFolder(match[1]);
     }
     return 'Profile';
@@ -5732,7 +5732,7 @@
     if (!image) return;
     const newFolder = getLibraryMoveConfig(card);
     if (newFolder === getLibraryImageFolder(image)) return;
-    const oldPath = typeof image.path === 'string' && image.path.startsWith('./assets/images/ely/') ? image.path.substring(2) : '';
+    const oldPath = typeof image.path === 'string' && /^\.\/assets\/images\/(?:ely|moderator)\//.test(image.path) ? image.path.substring(2) : '';
     if (oldPath && !getGithubToken()) {
       showStatusNotification({ title: 'GitHub requerido', message: 'Configura tu token de GitHub para mover una imagen ya sincronizada.', type: 'error', icon: '⚠️' });
       return;
@@ -5810,7 +5810,7 @@
       const isCustom = String(img.id || '').startsWith('custom-');
       const allIndex = allImages.findIndex(item => item.id === img.id);
       const customIndex = customLibraryImages.findIndex(item => item.id === img.id);
-      const canMove = typeof img.path === 'string' && (img.path.startsWith('./assets/images/ely/') || img.path.startsWith('data:image/'));
+      const canMove = typeof img.path === 'string' && (/^\.\/assets\/images\/(?:ely|moderator)\//.test(img.path) || img.path.startsWith('data:image/'));
       return `
         <div class="group relative flex h-max min-h-0 flex-col overflow-visible rounded-xl border border-[#232733] bg-[#0d1017] hover:border-amber-400/50 hover:shadow-lg hover:shadow-amber-500/5 transition-all p-3 text-left self-start library-card"
              draggable="${canMove ? 'true' : 'false'}"
@@ -6088,7 +6088,7 @@
   }
 
   async function deleteGithubImageFile(path) {
-    if (!path || !path.startsWith('assets/images/ely/')) return;
+    if (!path || !/^assets\/images\/(?:ely|moderator)\//.test(path)) return;
     const file = await getGithubFile(path);
     if (!file) return;
     await githubApiRequest('/repos/' + GITHUB_OWNER + '/' + GITHUB_REPOSITORY + '/contents/' + path.split('/').map(encodeURIComponent).join('/'), {
@@ -6118,7 +6118,7 @@
         renderLibraryGrid();
         try {
           const token = getGithubToken();
-          if (typeof image.path === 'string' && image.path.startsWith('./assets/images/ely/')) {
+          if (typeof image.path === 'string' && /^\.\/assets\/images\/(?:ely|moderator)\//.test(image.path)) {
             if (!token) throw new Error('Configura tu token de GitHub para eliminar esta imagen del repositorio.');
             await deleteGithubImageFile(image.path.substring(2).split('?')[0]);
             await persistLibraryImmediately('delete', image.name || 'Imagen');
