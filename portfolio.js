@@ -953,8 +953,8 @@
   // Evita peticiones duplicadas cuando navegación, hash y click ocurren casi al mismo tiempo.
   let catalogRefreshPromise = null;
   let catalogLastRefreshAt = 0;
-  const CATALOG_REFRESH_TTL_MS = 1500;
-  const CATALOG_BACKGROUND_REFRESH_MS = 15000;
+  const CATALOG_REFRESH_TTL_MS = 10000;
+  const CATALOG_BACKGROUND_REFRESH_MS = 60000;
   let catalogBackgroundRefreshTimer = null;
 
   try {
@@ -4668,7 +4668,30 @@
     catch (e) { return String(record.id || '') + '|' + String(record.type || ''); }
   }
 
-  async function loadCurrentSheetRecords(sheetName) {
+  const SHEETS_REMOTE_CACHE_MS = 10000;
+  const SHEETS_WRITE_MIN_INTERVAL_MS = 2500;
+  let sheetsRemoteCache = {};
+  let sheetsRemoteCacheAt = {};
+  let sheetsLastWriteAt = 0;
+  let sheetsWritePromise = Promise.resolve();
+
+  function waitForSheetsWriteSlot() {
+    const run = sheetsWritePromise.then(async function () {
+      const wait = Math.max(0, sheetsLastWriteAt + SHEETS_WRITE_MIN_INTERVAL_MS - Date.now());
+      if (wait > 0) await new Promise(function (resolve) { setTimeout(resolve, wait); });
+      return true;
+    });
+    sheetsWritePromise = run.catch(function () {});
+    return run;
+  }
+
+  async function loadCurrentSheetRecords(sheetName, force) {
+    const key = sheetName === FEEDBACKS_SHEET_NAME ? 'feedbacks' : 'cards';
+    const now = Date.now();
+    if (!force && sheetsRemoteCache[key] && now - (sheetsRemoteCacheAt[key] || 0) < SHEETS_REMOTE_CACHE_MS) {
+      return cloneBackendRecords(sheetsRemoteCache[key]);
+    }
+
     const url = GLOBAL_COUNTER_URL + '?action=loadSheetData&cacheBust=' + Date.now();
     const response = await fetch(url, { cache: 'no-store' });
     if (!response.ok) throw new Error('Google Sheets HTTP ' + response.status);
@@ -4676,9 +4699,11 @@
     if (!result || !result.success) {
       throw new Error(result && result.error ? result.error : 'Google Sheets no devolvió datos.');
     }
-    return Array.isArray(result[sheetName === FEEDBACKS_SHEET_NAME ? 'feedbacks' : 'cards'])
-      ? result[sheetName === FEEDBACKS_SHEET_NAME ? 'feedbacks' : 'cards']
-      : [];
+
+    const records = Array.isArray(result[key]) ? result[key] : [];
+    sheetsRemoteCache[key] = cloneBackendRecords(records);
+    sheetsRemoteCacheAt[key] = Date.now();
+    return records;
   }
 
   async function syncOnlyChangedRecords(sheetName, localRecords, snapshotRecords, snapshotReady, explicitRecords) {
@@ -4762,7 +4787,11 @@
       }
     }
 
+    await waitForSheetsWriteSlot();
     await syncDataToGoogleSheet(sheetName, merged);
+    sheetsLastWriteAt = Date.now();
+    sheetsRemoteCache[sheetName === FEEDBACKS_SHEET_NAME ? 'feedbacks' : 'cards'] = cloneBackendRecords(merged);
+    sheetsRemoteCacheAt[sheetName === FEEDBACKS_SHEET_NAME ? 'feedbacks' : 'cards'] = Date.now();
     return { changed: changes.length + deletedIds.length, records: merged };
   }
 
