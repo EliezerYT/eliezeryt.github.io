@@ -5800,7 +5800,7 @@
       const name = path ? path.split('/').pop() : 'Todas las imágenes';
       const active = path === selectedLibraryFolder;
       const children = childFolders(path);
-      return '<div class="library-tree-node"><button type="button" data-library-folder="' + path.replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '" class="w-full text-left px-2 py-1.5 rounded-md flex items-center gap-1.5 ' + (active ? 'bg-amber-400/15 text-amber-300' : 'text-slate-400 hover:bg-white/5 hover:text-white') + '"><span class="text-[10px]">' + (children.length ? '▸' : '·') + '</span><span>📁</span><span class="truncate">' + name.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</span></button>' + (children.length && path && (selectedLibraryFolder === path || selectedLibraryFolder.startsWith(path + '/')) ? '<div class="ml-3 pl-1 border-l border-white/10">' + children.map(folderButton).join('') + '</div>' : '') + '</div>';
+      return '<div class="library-tree-node"><button type="button" data-library-folder="' + path.replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '" class="w-full text-left px-2 py-1.5 rounded-md flex items-center gap-1.5 ' + (active ? 'bg-amber-400/15 text-amber-300' : 'text-slate-400 hover:bg-white/5 hover:text-white') + '"><span class="text-[10px]">' + (children.length ? '▸' : '·') + '</span><span>📁</span><span class="truncate">' + name.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</span></button>' + (children.length && (!path || selectedLibraryFolder === path || selectedLibraryFolder.startsWith(path + '/')) ? '<div class="ml-3 pl-1 border-l border-white/10">' + children.map(folderButton).join('') + '</div>' : '') + '</div>';
     };
     if (folderTree) folderTree.innerHTML = folderButton('');
     const crumb = document.getElementById('library-folder-breadcrumb');
@@ -5890,10 +5890,8 @@
               <label class="block text-[9px] uppercase tracking-wider text-slate-500 mb-1">Mover carpeta</label>
               <div class="flex gap-1.5">
                 <select class="library-folder-move-select flex-1 min-w-0 rounded-md bg-[#0d1017] border border-[#262c3b] px-2 py-1 text-[10px] text-white focus:border-amber-400 focus:outline-none">
-                  <option value="Profile">Profile</option>
-                  <option value="Screenshot">Screenshot</option>
-                  <option value="AppLogo">AppLogo</option>
-                  <option value="Custom">Custom</option>
+                  ${Array.from(folderPaths).filter(Boolean).sort((a,b)=>a.localeCompare(b)).map(folder => '<option value="' + folder.replace(/&/g,'&amp;').replace(/"/g,'&quot;') + '"' + (folder === getLibraryImageFolder(img) ? ' selected' : '') + '>' + folder.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</option>').join('')}
+                  <option value="Custom">＋ Nueva ruta...</option>
                 </select>
                 <button type="button" class="library-move-folder-btn rounded-md bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/20 px-2 py-1 text-[10px] font-bold text-amber-400">Mover</button>
               </div>
