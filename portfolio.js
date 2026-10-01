@@ -4862,14 +4862,26 @@
     });
   }
 
-  async function syncTestimonialsWithBackend(list) {
-    return queueBackendSync(function () {
+  async function syncTestimonialsWithBackend(list, changedFeedback) {
+    return queueBackendSync(async function () {
       const feedbackRecords = (Array.isArray(list) ? list : [])
         .filter(function (item) { return item && item.id; })
         .map(function (item) {
           return { id: String(item.id), type: 'feedback', data: item };
         });
-      return syncDataToGoogleSheet(FEEDBACKS_SHEET_NAME, feedbackRecords);
+      const target = changedFeedback && changedFeedback.id
+        ? [{ id: String(changedFeedback.id), type: 'feedback', data: changedFeedback }]
+        : null;
+      const result = await syncOnlyChangedRecords(
+        FEEDBACKS_SHEET_NAME,
+        feedbackRecords,
+        backendFeedbackSnapshot,
+        backendFeedbackSnapshotReady,
+        target
+      );
+      backendFeedbackSnapshot = cloneBackendRecords(result.records);
+      backendFeedbackSnapshotReady = true;
+      return result;
     });
   }
 
@@ -5264,6 +5276,13 @@
 
       const cards = Array.isArray(result.cards) ? result.cards : [];
       const feedbacks = Array.isArray(result.feedbacks) ? result.feedbacks : [];
+
+      // Snapshot confirmado de Sheets. Los guardados posteriores comparan contra
+      // este estado y solo modifican los registros que realmente cambiaron.
+      backendCardsSnapshot = cloneBackendRecords(cards);
+      backendFeedbackSnapshot = cloneBackendRecords(feedbacks);
+      backendCardsSnapshotReady = true;
+      backendFeedbackSnapshotReady = true;
 
       const cardMap = {};
       cards.forEach(function(record) {
