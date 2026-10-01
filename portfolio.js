@@ -5474,6 +5474,16 @@
     return select && select.value === 'Custom' ? normalizeLibraryFolder(custom ? custom.value : 'Custom') : normalizeLibraryFolder(select ? select.value : 'Profile');
   }
 
+  async function ensureGithubImageFolder(folder) {
+    const folderPath = 'assets/images/ely/' + normalizeLibraryFolder(folder);
+    const keepPath = folderPath + '/.gitkeep';
+    const existing = await getGithubFile(keepPath);
+    if (existing) return;
+    await putGithubFile(keepPath, btoa(''), 'Create library folder ' + folder);
+    const created = await getGithubFile(keepPath);
+    if (created && created.sha) await deleteGithubImageFile(keepPath);
+  }
+
   async function moveCustomLibraryImageFolder(imageId, card) {
     const image = customLibraryImages.find(item => item.id === imageId);
     if (!image) return;
@@ -5488,6 +5498,7 @@
       const extension = image.path && image.path.startsWith('data:image/') ? imageExtension(image.path) : ((image.name || '').match(/\.([a-z0-9]{2,5})$/i) || [, 'png'])[1];
       const filename = sanitizeGithubImageName(image.name, extension);
       const newPath = 'assets/images/ely/' + newFolder + '/' + filename;
+      await ensureGithubImageFolder(newFolder);
       if (oldPath) {
         const existing = await getGithubFile(oldPath);
         if (!existing || !existing.content) throw new Error('No se encontró la imagen actual en GitHub.');
