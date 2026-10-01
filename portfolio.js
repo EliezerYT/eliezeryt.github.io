@@ -5576,7 +5576,6 @@
   let selectedGalleryLibraryImages = new Set();
   let githubElyFolderImages = [];
   let githubElyFolderPaths = [];
-  let githubElyScanAuthoritative = false;
   let selectedLibraryFolder = '';
   let githubElyFolderLoading = false;
   const libraryUploadInFlight = new Map();
@@ -5652,7 +5651,6 @@
       let foundImages = [];
       let source = 'GitHub';
       let githubTreeLoaded = false;
-      githubElyScanAuthoritative = false;
 
       // Read the repository tree directly so manually added files and every nested
       // subfolder are detected immediately, without waiting for manifest.json.
@@ -5665,7 +5663,6 @@
         if (response.ok) {
           const treeData = await response.json();
           githubTreeLoaded = true;
-          githubElyScanAuthoritative = true;
           const prefix = 'assets/images/ely/';
           const folderSet = new Set();
           const files = Array.isArray(treeData.tree) ? treeData.tree : [];
@@ -5717,7 +5714,7 @@ tree          githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
             const parsed = Array.isArray(manifest) ? manifest : (Array.isArray(manifest.images) ? manifest.images : []);
             const folders = !Array.isArray(manifest) && Array.isArray(manifest.folders) ? manifest.folders : [];
             if (Array.isArray(parsed)) {
-              githubElyFolderPaths = [];
+              githubElyFolderPaths = folders.filter(folder => typeof folder === 'string').map(normalizeLibraryFolder);
               foundImages = parsed.filter(isMedia).map(function(relativePath) {
                 const cleanPath = String(relativePath).replace(/^\/+/, '').replace(/\\/g, '/');
                 const fileName = cleanPath.split('/').pop();
@@ -5900,23 +5897,10 @@ tree          githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
     const folderTree = document.getElementById('library-folder-tree');
     const folderPaths = new Set(['']);
     allImages.forEach(function(image) {
-      const rawPath = String(image.path || '').replace(/^\.\//, '');
-      const isElyRepositoryFile = rawPath.startsWith('assets/images/ely/');
-      const isOtherRepositoryFile = rawPath.startsWith('assets/images/moderator/');
-      const isVirtualImage = rawPath.startsWith('data:image/');
-      if (githubElyScanAuthoritative && isElyRepositoryFile) {
-        const relativePath = rawPath.substring('assets/images/ely/'.length).toLowerCase();
-        if (!githubElyFolderImages.some(function(remote) { return String(remote.path || '').replace(/^\.\//, '').substring('assets/images/ely/'.length).toLowerCase() === relativePath; })) return;
-        const dir = relativePath.includes('/') ? relativePath.substring(0, relativePath.lastIndexOf('/')) : '';
-        let path = '';
-        dir.split('/').filter(Boolean).forEach(function(part) { path = path ? path + '/' + part : part; folderPaths.add(path); });
-        return;
-      }
-      if (isOtherRepositoryFile || isVirtualImage || !githubElyScanAuthoritative) {
-        const folder = getLibraryImageFolder(image);
-        let path = '';
-        folder.split('/').filter(Boolean).forEach(function(part) { path = path ? path + '/' + part : part; folderPaths.add(path); });
-      }
+      const folder = getLibraryImageFolder(image);
+      const parts = folder.split('/').filter(Boolean);
+      let path = '';
+      parts.forEach(function(part) { path = path ? path + '/' + part : part; folderPaths.add(path); });
     });
     if (selectedLibraryFolder && !Array.from(folderPaths).some(function(path) {
       return path === selectedLibraryFolder || path.startsWith(selectedLibraryFolder + '/');
