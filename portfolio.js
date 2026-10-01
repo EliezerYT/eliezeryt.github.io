@@ -3002,7 +3002,7 @@
         const tagBadges = (c.tags || []).map(function (t) {
           return '<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-slate-300 border border-white/10">' + t + '</span>';
         }).join('');
-        return '<div class="rounded-2xl bg-[#0e1118] border border-[#232733] p-5 space-y-3 hover:border-amber-400/40 transition-colors">' +
+        return '<div class="rounded-2xl bg-[#101b2d] border border-cyan-400/40 p-5 space-y-3 shadow-lg shadow-cyan-500/10 hover:border-cyan-300/70 transition-colors">' +
           getTestimonialModeratorBar(c) +
           '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">' +
           '<div class="flex items-center gap-3"><div class="h-12 w-12 rounded-xl overflow-hidden bg-black/40 border border-[#232733] shrink-0"><img src="' + (c.avatar || './assets/images/ely/my-avatar.png') + '" alt="' + (c.name || '') + '" class="h-full w-full object-cover" onerror="this.src=\'./assets/images/ely/my-avatar.png\'" /></div>' +
@@ -3020,7 +3020,15 @@
       if (mainTitle) mainTitle.classList.add('hidden');
       if (titleWrap) titleWrap.classList.remove('hidden');
       if (title) title.textContent = String(clientName || '');
-      if (modal) modal.dataset.clientName = String(clientName || '');
+      if (modal) {
+        modal.dataset.clientName = String(clientName || '');
+        modal.classList.add('testimonial-detail-mode');
+      }
+      const modalPanel = modal ? modal.querySelector('.relative.w-full.max-w-3xl') : null;
+      if (modalPanel) {
+        modalPanel.classList.add('border-cyan-400/50', 'bg-[#0b1320]', 'shadow-cyan-500/20');
+        modalPanel.classList.remove('border-[#232733]', 'bg-[#12151d]');
+      }
       return;
     }
 
@@ -3047,7 +3055,15 @@
     const mainTitle = modal ? modal.querySelector('[data-testimonials-main-title]') : null;
     if (titleWrap) titleWrap.classList.add('hidden');
     if (mainTitle) mainTitle.classList.remove('hidden');
-    if (modal) delete modal.dataset.clientName;
+    if (modal) {
+      delete modal.dataset.clientName;
+      modal.classList.remove('testimonial-detail-mode');
+      const modalPanel = modal.querySelector('.relative.w-full.max-w-3xl');
+      if (modalPanel) {
+        modalPanel.classList.remove('border-cyan-400/50', 'bg-[#0b1320]', 'shadow-cyan-500/20');
+        modalPanel.classList.add('border-[#232733]', 'bg-[#12151d]');
+      }
+    }
   }
 
   function openClientTestimonials(clientName) {
