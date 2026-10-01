@@ -5692,7 +5692,7 @@
             });
           });
 
-tree          githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
+githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
             return a.localeCompare(b, undefined, {numeric:true, sensitivity:'base'});
           });
         } else {
