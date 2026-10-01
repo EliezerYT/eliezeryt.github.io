@@ -4947,7 +4947,6 @@
 
   async function syncLocalDataToGoogleSheets() {
     return queueBackendSync(async function () {
-      // Snapshot tomado justo al comenzar la operación.
       const cardsRecords = getCardsInfoSheetRecords();
       const feedbackRecords = satisfiedClients
         .filter(function (item) { return item && item.id; })
@@ -4955,15 +4954,31 @@
           return { id: String(item.id), type: 'feedback', data: item };
         });
 
-      const results = await Promise.all([
-        syncDataToGoogleSheet(CARDS_INFO_SHEET_NAME, cardsRecords),
-        syncDataToGoogleSheet(FEEDBACKS_SHEET_NAME, feedbackRecords)
-      ]);
+      const cardsResult = await syncOnlyChangedRecords(
+        CARDS_INFO_SHEET_NAME,
+        cardsRecords,
+        backendCardsSnapshot,
+        backendCardsSnapshotReady,
+        null
+      );
+      backendCardsSnapshot = cloneBackendRecords(cardsResult.records);
+      backendCardsSnapshotReady = true;
+
+      const feedbackResult = await syncOnlyChangedRecords(
+        FEEDBACKS_SHEET_NAME,
+        feedbackRecords,
+        backendFeedbackSnapshot,
+        backendFeedbackSnapshotReady,
+        null
+      );
+      backendFeedbackSnapshot = cloneBackendRecords(feedbackResult.records);
+      backendFeedbackSnapshotReady = true;
 
       return {
-        cards: cardsRecords.length,
-        feedbacks: feedbackRecords.length,
-        results: results
+        cards: cardsResult.records.length,
+        feedbacks: feedbackResult.records.length,
+        changedCards: cardsResult.changed,
+        changedFeedbacks: feedbackResult.changed
       };
     });
   }
