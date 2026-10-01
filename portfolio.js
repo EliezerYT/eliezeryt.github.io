@@ -5524,11 +5524,13 @@
         const existing = await getGithubFile(oldPath);
         if (!existing || !existing.content) throw new Error('No se encontró la imagen actual en GitHub.');
         await putGithubFile(newPath, existing.content.replace(/\s/g, ''), 'Move library image to ' + newFolder);
-        await deleteGithubImageFile(oldPath);
         image.path = './' + newPath;
+        image.previewPath = image.path + '?v=' + Date.now();
+        await deleteGithubImageFile(oldPath);
       } else if (typeof image.path === 'string' && image.path.startsWith('data:image/') && getGithubToken()) {
         await putGithubFile(newPath, dataUrlToBase64(image.path), 'Move library image to ' + newFolder);
         image.path = './' + newPath;
+        image.previewPath = image.path + '?v=' + Date.now();
       }
       image.folder = newFolder;
       image.category = newFolder;
@@ -5585,7 +5587,7 @@
              data-library-img-path="${img.path}"
              data-library-img-name="${img.name || ''}">
           <div class="relative h-44 sm:h-52 w-full shrink-0 overflow-hidden rounded-xl bg-[#141822] mb-3 border border-white/5 cursor-pointer library-image-area">
-            <img src="${img.path}" alt="${img.name || 'Imagen'}" class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105" onerror="this.removeAttribute('src'); this.classList.add('opacity-20');" />
+            <img src="${img.previewPath || img.path}" alt="${img.name || 'Imagen'}" class="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105" onerror="if(this.src !== this.dataset.fallback){this.src=this.dataset.fallback;}else{this.removeAttribute('src'); this.classList.add('opacity-20');}" data-fallback="${img.path}" />
             <span class="absolute top-2 left-2 rounded bg-black/80 px-2 py-1 text-[10px] font-mono text-amber-400 border border-amber-400/20 backdrop-blur-sm">
               ${img.category || 'Asset'}
             </span>
@@ -5658,7 +5660,8 @@
       button.addEventListener('click', function (e) {
         e.stopPropagation();
         const card = this.closest('[data-library-img-path]');
-        openLibraryImagePreview(card.getAttribute('data-library-img-path'), card.getAttribute('data-library-img-name'));
+        const previewRecord = customLibraryImages.find(function (item) { return item.id === card.getAttribute('data-library-img-id'); }) || githubElyFolderImages.find(function (item) { return item.id === card.getAttribute('data-library-img-id'); });
+        openLibraryImagePreview(card.getAttribute('data-library-img-path'), card.getAttribute('data-library-img-name'), previewRecord && previewRecord.previewPath ? previewRecord.previewPath : '');
       });
     });
 
@@ -5781,12 +5784,12 @@
     await persistLibraryImmediately('reorder', item.name || 'Imagen');
   }
 
-  function openLibraryImagePreview(imagePath, imageName) {
+  function openLibraryImagePreview(imagePath, imageName, previewPath) {
     const modal = document.getElementById('library-image-preview-modal');
     const image = document.getElementById('library-image-preview');
     const title = document.getElementById('library-image-preview-title');
     if (!modal || !image) return;
-    image.src = imagePath;
+    image.src = previewPath || imagePath;
     image.alt = imageName || 'Imagen';
     if (title) title.textContent = imageName || 'Vista previa';
     modal.classList.remove('hidden');
@@ -6133,6 +6136,7 @@
 
       const previousPath = image.path;
       image.path = './' + githubPath;
+      image.previewPath = prepared;
 
       if (currentLibraryTarget) {
         if (currentLibraryTarget.type === 'input') {
