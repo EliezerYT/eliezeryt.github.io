@@ -6120,7 +6120,7 @@
     let image = document.getElementById('library-image-preview');
     const title = document.getElementById('library-image-preview-title');
     if (!modal || !image) return;
-    const isVideo = /\\.(mp4|webm|mov|m4v|ogv)(?:\\?.*)?$/i.test(imagePath || imageName || '');
+    const isVideo = /\.(mp4|webm|mov|m4v|ogv)(?:\?.*)?$/i.test(imagePath || imageName || '');
     if (isVideo && image.tagName.toLowerCase() !== 'video') { const video = document.createElement('video'); video.id = 'library-image-preview'; video.className = 'max-w-full max-h-[78vh] object-contain rounded-lg'; video.controls = true; image.replaceWith(video); image = video; }
     if (!isVideo && image.tagName.toLowerCase() !== 'img') { const img = document.createElement('img'); img.id = 'library-image-preview'; img.className = 'max-w-full max-h-[78vh] object-contain rounded-lg'; image.replaceWith(img); image = img; }
     image.src = previewPath || imagePath;
