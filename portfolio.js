@@ -4148,9 +4148,9 @@
     if (editSteamUrl) editSteamUrl.value = project.steamUrl || '';
     
     // Múltiples imágenes (galería) separadas por salto de línea
-    const galleryImgs = Array.isArray(project.galleryImages) ? project.galleryImages.join('\\n') : (project.coverImage || '');
+    const galleryImgs = Array.isArray(project.galleryImages) ? project.galleryImages.join('\n') : (project.coverImage || '');
     const linksInput = document.getElementById('edit-proj-links');
-    if (linksInput) linksInput.value = (project.links || []).map(link => `${link.label || ''} | ${link.url || ''}`).join('\\n');
+    if (linksInput) linksInput.value = (project.links || []).map(link => `${link.label || ''} | ${link.url || ''}`).join('\n');
     document.getElementById('edit-proj-gallery').value = galleryImgs;
 
     const iconPrev = document.getElementById('edit-proj-icon-preview');
@@ -4168,8 +4168,8 @@
     document.getElementById('edit-proj-desc').value = project.description || '';
     document.getElementById('edit-proj-story').value = project.fullStory || project.description || '';
     document.getElementById('edit-proj-techs').value = (project.technologies || []).join(', ');
-    document.getElementById('edit-proj-contribs').value = (project.keyContributions || []).join('\\n');
-    document.getElementById('edit-proj-reqs').value = (project.requirements || []).join('\\n');
+    document.getElementById('edit-proj-contribs').value = (project.keyContributions || []).join('\n');
+    document.getElementById('edit-proj-reqs').value = (project.requirements || []).join('\n');
 
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -4226,8 +4226,7 @@
     // Parsear galería de imágenes (una por línea o por coma)
     const galleryRaw = document.getElementById('edit-proj-gallery').value;
     const parsedGallery = galleryRaw
-      .split(/[
-,]+/)
+      .split(/[\n,]+/)
       .map(s => s.trim())
       .filter(Boolean);
     project.galleryImages = parsedGallery.length > 0 ? parsedGallery : [project.coverImage];
@@ -4235,7 +4234,7 @@
     // Video de YouTube en grande
     project.youtubeVideo = document.getElementById('edit-proj-video').value.trim();
     const linksRaw = document.getElementById('edit-proj-links') ? document.getElementById('edit-proj-links').value : '';
-    project.links = linksRaw.split('\\n').map(line => { const parts = line.split('|'); const url = parts.slice(1).join('|').trim(); return { label: (parts[0] || '').trim(), url: url, type: /canva\.com/i.test(url) ? 'canva' : 'external' }; }).filter(link => link.label && link.url);
+    project.links = linksRaw.split('\n').map(line => { const parts = line.split('|'); const url = parts.slice(1).join('|').trim(); return { label: (parts[0] || '').trim(), url: url, type: /canva\.com/i.test(url) ? 'canva' : 'external' }; }).filter(link => link.label && link.url);
 
     project.description = document.getElementById('edit-proj-desc').value.trim();
     project.fullStory = document.getElementById('edit-proj-story').value.trim() || project.description;
@@ -4244,10 +4243,10 @@
     project.technologies = techsRaw.split(',').map(s => s.trim()).filter(Boolean);
 
     const contribsRaw = document.getElementById('edit-proj-contribs').value;
-    project.keyContributions = contribsRaw.split('\\n').map(s => s.trim()).filter(Boolean);
+    project.keyContributions = contribsRaw.split('\n').map(s => s.trim()).filter(Boolean);
 
     const reqsRaw = document.getElementById('edit-proj-reqs').value;
-    project.requirements = reqsRaw.split('\\n').map(s => s.trim()).filter(Boolean);
+    project.requirements = reqsRaw.split('\n').map(s => s.trim()).filter(Boolean);
 
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
@@ -4325,12 +4324,11 @@
     const itchStoreUrl = itchCheck && itchCheck.checked && itchUrl ? itchUrl.value.trim() : '';
     const steamStoreUrl = steamCheck && steamCheck.checked && steamUrl ? steamUrl.value.trim() : '';
     const linksRaw = document.getElementById('new-proj-links') ? document.getElementById('new-proj-links').value : '';
-    const links = linksRaw.split('\\n').map(line => { const parts = line.split('|'); const url = parts.slice(1).join('|').trim(); return { label: (parts[0] || '').trim(), url: url, type: /canva\.com/i.test(url) ? 'canva' : 'external' }; }).filter(link => link.label && link.url);
+    const links = linksRaw.split('\n').map(line => { const parts = line.split('|'); const url = parts.slice(1).join('|').trim(); return { label: (parts[0] || '').trim(), url: url, type: /canva\.com/i.test(url) ? 'canva' : 'external' }; }).filter(link => link.label && link.url);
     const desc = document.getElementById('new-proj-desc').value.trim();
     const techs = document.getElementById('new-proj-techs').value.split(',').map(s => s.trim()).filter(Boolean);
 
-    const parsedGallery = galleryRaw.split(/[
-,]+/).map(s => s.trim()).filter(Boolean);
+    const parsedGallery = galleryRaw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
 
     const newProject = {
       id: 'proj-' + Date.now(),
@@ -6623,10 +6621,9 @@ githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
     if (!currentLibraryTarget || currentLibraryTarget.type !== 'gallery' || selectedGalleryLibraryImages.size === 0) return;
     const inputEl = document.getElementById(currentLibraryTarget.hiddenInputId);
     if (!inputEl) return;
-    const items = inputEl.value ? inputEl.value.split(/[
-,]+/).map(s => s.trim()).filter(Boolean) : [];
+    const items = inputEl.value ? inputEl.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
     selectedGalleryLibraryImages.forEach(path => { if (!items.includes(path)) items.push(path); });
-    inputEl.value = items.join('\\n');
+    inputEl.value = items.join('\n');
     renderGalleryThumbnails(currentLibraryTarget.thumbsContainerId, currentLibraryTarget.hiddenInputId);
     const count = selectedGalleryLibraryImages.size;
     selectedGalleryLibraryImages.clear();
@@ -6663,8 +6660,7 @@ githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
     const container = document.getElementById(containerId);
     const input = document.getElementById(inputId);
     if (!container || !input) return;
-    const items = input.value ? input.value.split(/[
-,]+/).map(s => s.trim()).filter(Boolean) : [];
+    const items = input.value ? input.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
     container.innerHTML = '';
     const parent = container.parentElement;
     const slider = parent ? parent.querySelector('.gallery-size-slider') : null;
@@ -6696,7 +6692,7 @@ githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
       thumb.querySelector('button').addEventListener('click', function(e) {
         e.stopPropagation();
         items.splice(idx, 1);
-        input.value = items.join('\\n');
+        input.value = items.join('\n');
         renderGalleryThumbnails(containerId, inputId);
       });
       thumb.addEventListener('dragstart', function(e) { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(idx)); thumb.classList.add('opacity-50'); });
@@ -6710,7 +6706,7 @@ githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
         if (Number.isNaN(from) || from === idx) return;
         const moved = items.splice(from, 1)[0];
         items.splice(idx, 0, moved);
-        input.value = items.join('\\n');
+        input.value = items.join('\n');
         renderGalleryThumbnails(containerId, inputId);
       });
       container.appendChild(thumb);
@@ -6817,12 +6813,11 @@ githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
         } else if (currentLibraryTarget.type === 'gallery') {
           const galleryInput = document.getElementById(currentLibraryTarget.hiddenInputId);
           if (galleryInput) {
-            const current = galleryInput.value ? galleryInput.value.split(/[
-,]+/).map(s => s.trim()).filter(Boolean) : [];
+            const current = galleryInput.value ? galleryInput.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
             const replaced = current.map(function (item) {
               return item === previousPath || item === dataUrl ? image.path : item;
             });
-            galleryInput.value = Array.from(new Set(replaced)).join('\\n');
+            galleryInput.value = Array.from(new Set(replaced)).join('\n');
             renderGalleryThumbnails(currentLibraryTarget.thumbsContainerId, currentLibraryTarget.hiddenInputId);
           }
           if (selectedGalleryLibraryImages.has(previousPath) || selectedGalleryLibraryImages.has(dataUrl)) {
@@ -7037,20 +7032,18 @@ githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
             const dataUrl = event.target.result;
             const added = addCustomImageToLibrary(file.name, dataUrl, function(uploadedImage) {
               if (!hiddenInput || !uploadedImage || !uploadedImage.path || uploadedImage.path.startsWith('data:image/')) return;
-              const current = hiddenInput.value ? hiddenInput.value.split(/[
-,]+/).map(s => s.trim()).filter(Boolean) : [];
+              const current = hiddenInput.value ? hiddenInput.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
               const replaced = current.map(function(item) {
                 return item === dataUrl ? uploadedImage.path : item;
               });
-              hiddenInput.value = Array.from(new Set(replaced)).join('\\n');
+              hiddenInput.value = Array.from(new Set(replaced)).join('\n');
               renderGalleryThumbnails(containerId, hiddenInputId);
             });
             if (hiddenInput) {
-              const current = hiddenInput.value ? hiddenInput.value.split(/[
-,]+/).map(s => s.trim()).filter(Boolean) : [];
+              const current = hiddenInput.value ? hiddenInput.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean) : [];
               const resolvedPath = added && added.path && !added.path.startsWith('data:image/') ? added.path : dataUrl;
               if (!current.includes(resolvedPath)) current.push(resolvedPath);
-              hiddenInput.value = Array.from(new Set(current)).join('\\n');
+              hiddenInput.value = Array.from(new Set(current)).join('\n');
               renderGalleryThumbnails(containerId, hiddenInputId);
             }
           };
