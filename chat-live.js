@@ -12,6 +12,7 @@
   let user = null;
   let messages = [];
   let moderatorOnline = false;
+  let moderatorChatEnabled = false;
   let pollTimer = null;
   let presenceTimer = null;
   let lastMessageSignature = '';
@@ -249,6 +250,10 @@
       const p = res && res.data ? res.data : {};
       const stamp = p.timestamp ? new Date(p.timestamp).getTime() : 0;
       moderatorOnline = !!p.online && stamp > 0 && Date.now() - stamp < PRESENCE_TTL;
+      if (isModerator()) {
+        moderatorChatEnabled = moderatorOnline;
+        updatePresenceToggle();
+      }
       setFabVisible(isModerator() ? true : moderatorOnline);
       const win = document.getElementById('ely-live-chat-window');
       if (win && win.classList.contains('open')) renderChat();
@@ -275,17 +280,51 @@
   }
 
   function sendPresence() {
-    if (!isModerator()) return;
+    if (!isModerator() || !moderatorChatEnabled) return;
     setPresenceState(true).catch(function(){});
+  }
+
+  function updatePresenceToggle() {
+    const btn = document.getElementById('ely-mod-presence-toggle');
+    if (!btn) return;
+    btn.textContent = moderatorChatEnabled ? 'Desactivar chat en vivo' : 'Activar chat en vivo';
+    btn.style.background = moderatorChatEnabled ? 'rgba(52,211,153,.13)' : 'rgba(34,211,238,.08)';
+    btn.style.borderColor = moderatorChatEnabled ? 'rgba(52,211,153,.4)' : 'rgba(34,211,238,.25)';
+    btn.style.color = moderatorChatEnabled ? '#6ee7b7' : '#67e8f9';
+    btn.setAttribute('aria-pressed', moderatorChatEnabled ? 'true' : 'false');
+  }
+
+  function toggleModeratorPresence() {
+    if (!isModerator()) return;
+    const next = !moderatorChatEnabled;
+    const btn = document.getElementById('ely-mod-presence-toggle');
+    if (btn) btn.disabled = true;
+    setPresenceState(next).then(function(){
+      moderatorChatEnabled = next;
+      moderatorOnline = next;
+      updatePresenceToggle();
+      setFabVisible(true);
+      const win = document.getElementById('ely-live-chat-window');
+      if (win && win.classList.contains('open')) renderChat();
+      hookContactModal();
+      if (next && !presenceTimer) presenceTimer = setInterval(sendPresence, PRESENCE_MS);
+      if (!next && presenceTimer) { clearInterval(presenceTimer); presenceTimer = null; }
+    }).catch(function(){
+      if (btn) btn.textContent = 'Error al actualizar disponibilidad';
+    }).finally(function(){ if (btn) btn.disabled = false; });
   }
 
   function startModeratorPresence() {
     if (!isModerator()) return;
-    sendPresence();
-    presenceTimer = setInterval(sendPresence, PRESENCE_MS);
-    const markOffline = function(){ setPresenceState(false).catch(function(){}); };
-    window.addEventListener('beforeunload', markOffline);
-    window.addEventListener('pagehide', markOffline);
+    jsonGet('getModeratorPresence').then(function(res){
+      const p = res && res.data ? res.data : {};
+      const stamp = p.timestamp ? new Date(p.timestamp).getTime() : 0;
+      moderatorChatEnabled = !!p.online && stamp > 0 && Date.now() - stamp < PRESENCE_TTL;
+      moderatorOnline = moderatorChatEnabled;
+      updatePresenceToggle();
+      if (moderatorChatEnabled && !presenceTimer) presenceTimer = setInterval(sendPresence, PRESENCE_MS);
+      setFabVisible(true);
+    }).catch(function(){});
   }
 
   function formatTime(v) {
@@ -302,7 +341,7 @@
     const panel = document.createElement('div');
     panel.id = 'ely-moderator-chat-tools';
     panel.innerHTML = `
-      <div class="ely-mod-chat-head"><strong>💬 Chat en vivo</strong><span id="ely-mod-chat-count">0 conversaciones</span></div>
+      <div class="ely-mod-chat-head"><strong>💬 Chat en vivo</strong><button type="button" id="ely-mod-presence-toggle">Activar chat en vivo</button><span id="ely-mod-chat-count">0 conversaciones</span></div>
       <div id="ely-mod-chat-list" class="ely-mod-chat-list"><div class="ely-live-empty" style="height:70px">Cargando chats...</div></div>
       <div id="ely-mod-chat-view" class="ely-mod-chat-view">
         <div id="ely-mod-chat-title" class="ely-mod-chat-title"></div>
@@ -312,6 +351,8 @@
       </div>
     `;
     content.prepend(panel);
+    document.getElementById('ely-mod-presence-toggle').onclick = toggleModeratorPresence;
+    updatePresenceToggle();
     document.getElementById('ely-mod-chat-send').onclick = function(){ sendModeratorMessage(); };
     document.getElementById('ely-mod-chat-input').addEventListener('keydown', function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendModeratorMessage();}});
     document.getElementById('ely-mod-chat-activate').onclick = function(){ setSelectedChatStatus('active'); };
