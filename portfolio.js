@@ -2548,6 +2548,38 @@
   }
 
   // 6. Modal de detalle del proyecto (Soporta 16:9, Múltiples Imágenes y Videos de YouTube en Grande)
+  function cardDirectLink(project) {
+    if (!project || !project.id) return window.location.origin + window.location.pathname;
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.hash = '';
+    url.searchParams.set('card', project.id);
+    return url.toString();
+  }
+
+  function copyProjectCardLink(projectId) {
+    const project = projects.find(function (p) { return String(p.id) === String(projectId); });
+    if (!project) return;
+    const link = cardDirectLink(project);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(link).then(function () {
+        showStatusNotification({ title: 'Enlace copiado', message: 'Enlace directo a "' + project.title + '".', type: 'success', icon: '🔗' });
+      }).catch(function () { window.prompt('Copia este enlace:', link); });
+    } else {
+      window.prompt('Copia este enlace:', link);
+    }
+  }
+
+  function applyCardQueryRoute() {
+    const params = new URLSearchParams(window.location.search || '');
+    const cardId = params.get('card');
+    if (!cardId) return false;
+    const target = projects.find(function (project) { return String(project.id) === String(cardId); });
+    if (!target) return false;
+    setTimeout(function () { openProjectModal(target.id, true); }, 0);
+    return true;
+  }
+
   function openProjectModal(projectId, skipRefresh) {
     // La información ya fue cargada al entrar. Abrimos inmediatamente con el estado actual.
     // Las actualizaciones de Sheets ocurren en segundo plano y no bloquean el click.
@@ -2555,6 +2587,14 @@
     if (!project) return;
     selectedProject = project;
     activeMediaIndex = 0;
+
+    if (!skipRefresh) {
+      const url = new URL(window.location.href);
+      url.search = '';
+      url.hash = '';
+      url.searchParams.set('card', project.id);
+      history.replaceState(null, '', url.toString());
+    }
     
     // Si tiene video de YouTube configurado, activarlo por defecto o permitir alternar
     activeMediaMode = (project.youtubeVideo && getYouTubeEmbedUrl(project.youtubeVideo)) ? 'video' : 'image';
@@ -2873,6 +2913,13 @@
     // Detener reproducción de iframes al cerrar
     const mediaContainer = document.getElementById('modal-media-viewport');
     if (mediaContainer) mediaContainer.innerHTML = '';
+
+    const params = new URLSearchParams(window.location.search || '');
+    if (params.has('card')) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('card');
+      history.replaceState(null, '', url.pathname + (url.searchParams.toString() ? '?' + url.searchParams.toString() : '') + url.hash);
+    }
   }
 
   // 7. Navegación Anterior / Siguiente en Modal
@@ -7835,6 +7882,7 @@ githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
   window.addEventListener('pageshow', function (event) {
     applyAssetsRouteUI();
     applySocialQueryRoute();
+    applyCardQueryRoute();
     if (event.persisted) refreshCatalogFromSheet(true);
   });
 
@@ -7846,6 +7894,7 @@ githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
   window.addEventListener('popstate', function () {
     applyAssetsRouteUI();
     applySocialQueryRoute();
+    applyCardQueryRoute();
   });
 
   document.addEventListener('visibilitychange', function () {
@@ -7871,6 +7920,7 @@ githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
         catalogLastRefreshAt = Date.now();
         if (isAssetsPage()) refreshAssetsPageRuntime();
         else renderProjectsGrid(true);
+        applyCardQueryRoute();
       })
       .catch(function () {})
       .finally(function () {
@@ -7925,6 +7975,7 @@ githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
     renderSkillCards();
     Promise.resolve(refreshCatalogFromSheet(true)).finally(function () {
       renderSkillCards();
+      applyCardQueryRoute();
       refreshAllSocialNetworkCounts();
       startCatalogBackgroundRefresh();
     });
@@ -8564,6 +8615,7 @@ githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
     // Proyectos
     openProjectModal: openProjectModal,
     closeProjectModal: closeProjectModal,
+    copyProjectCardLink: copyProjectCardLink,
     navigateProjectModal: navigateProjectModal,
     setModalMediaMode: setModalMediaMode,
     selectModalImage: selectModalImage,
