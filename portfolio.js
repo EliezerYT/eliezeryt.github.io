@@ -5125,7 +5125,7 @@
       throw new Error(result && result.error ? result.error : 'Google Sheets no devolvió datos.');
     }
 
-    const records = Array.isArray(result[key]) ? result[key] : (sheetName === CONTACT_REQUEST_SHEET_NAME && Array.isArray(result.records) ? result.records : []);
+    const records = Array.isArray(result[key]) ? result[key] : (sheetName === CONTACT_REQUEST_SHEET_NAME ? (Array.isArray(result.contactRequests) ? result.contactRequests : (Array.isArray(result.records) ? result.records : [])) : []);
     sheetsRemoteCache[key] = cloneBackendRecords(records);
     sheetsRemoteCacheAt[key] = Date.now();
     return records;
