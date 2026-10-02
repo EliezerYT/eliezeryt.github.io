@@ -4006,11 +4006,12 @@
 
     if (button) {
       button.disabled = true;
-      button.textContent = 'Enviando...';
+      button.classList.add('opacity-80', 'cursor-wait');
+      button.innerHTML = '<span class="inline-block h-3 w-3 animate-spin rounded-full border-2 border-black/25 border-t-black"></span><span>Enviando...</span>';
     }
     if (status) {
-      status.className = 'text-[10px] text-cyan-300';
-      status.textContent = 'Enviando respuesta...';
+      status.className = 'text-[10px] text-cyan-300 flex items-center gap-1.5';
+      status.innerHTML = '<span class="inline-block h-2.5 w-2.5 animate-spin rounded-full border-2 border-cyan-300/30 border-t-cyan-300"></span><span>Enviando respuesta...</span>';
     }
 
     try {
@@ -4051,7 +4052,8 @@
     } finally {
       if (button) {
         button.disabled = false;
-        button.textContent = 'Enviar respuesta ✉';
+        button.classList.remove('opacity-80', 'cursor-wait');
+        button.innerHTML = 'Enviar respuesta ✉';
       }
     }
   }
@@ -4075,7 +4077,8 @@
 
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span>Enviando mensaje... ⏳</span>';
+      submitBtn.classList.add('opacity-80', 'cursor-wait');
+      submitBtn.innerHTML = '<span class="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-black/25 border-t-black"></span><span>Enviando mensaje...</span>';
     }
     if (successMsg) successMsg.classList.add('hidden');
     if (errorMsg) errorMsg.classList.add('hidden');
@@ -4143,6 +4146,7 @@
 
     if (submitBtn) {
       submitBtn.disabled = false;
+      submitBtn.classList.remove('opacity-80', 'cursor-wait');
       submitBtn.innerHTML = '<span>Enviar Mensaje</span>';
     }
   }
