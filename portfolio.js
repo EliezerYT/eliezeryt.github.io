@@ -887,6 +887,7 @@
 
   // Códigos de Feedback: la única fuente es Google Sheets.
   let feedbackCodes = [];
+  let contactMessages = [];
   let assets = [];
 
   try {
@@ -3799,19 +3800,20 @@
     } catch (e) {}
   }
 
-  // 9. Modal de Contacto y Envío de Correo Directo desde la Web (FormSubmit AJAX + Fallback Mailto)
+  // 9. Modal de Contacto y Bandeja de Mensajes
+  const CONTACT_MESSAGES_SHEET_TYPE = 'contact_message';
+  const OWNER_EMAIL = 'eliezerterrero275@gmail.com';
+  let activeMessageReplyId = null;
+
   function openContactModal(initialSubject) {
     const modal = document.getElementById('contact-modal');
     if (!modal) return;
     const subjInput = document.getElementById('contact-subject');
-    if (subjInput && initialSubject) {
-      subjInput.value = initialSubject;
-    }
+    if (subjInput) subjInput.value = initialSubject || '';
     const successMsg = document.getElementById('contact-success-msg');
     const errorMsg = document.getElementById('contact-error-msg');
     if (successMsg) successMsg.classList.add('hidden');
     if (errorMsg) errorMsg.classList.add('hidden');
-
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
   }
@@ -3822,10 +3824,244 @@
     document.body.style.overflow = '';
   }
 
+  function formatMessageRelativeTime(timestamp) {
+    const value = Number(timestamp) || Date.parse(timestamp) || Date.now();
+    const diff = Math.max(0, Date.now() - value);
+    const minute = 60 * 1000;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+    const month = 30 * day;
+    const year = 365 * day;
+
+    if (diff < minute) return 'Hace unos segundos';
+    if (diff < hour) {
+      const minutes = Math.floor(diff / minute);
+      return 'Hace ' + minutes + ' ' + (minutes === 1 ? 'minuto' : 'minutos');
+    }
+    if (diff < day) {
+      const hours = Math.floor(diff / hour);
+      const minutes = Math.floor((diff % hour) / minute);
+      return 'Hace ' + hours + ' ' + (hours === 1 ? 'hora' : 'horas') + (minutes ? ' y ' + minutes + ' ' + (minutes === 1 ? 'minuto' : 'minutos') : '');
+    }
+    if (diff < month) {
+      const days = Math.floor(diff / day);
+      const minutes = Math.floor((diff % day) / minute);
+      return 'Hace ' + days + ' ' + (days === 1 ? 'día' : 'días') + (minutes ? ' y ' + minutes + ' ' + (minutes === 1 ? 'minuto' : 'minutos') : '');
+    }
+    if (diff < year) {
+      const months = Math.floor(diff / month);
+      const days = Math.floor((diff % month) / day);
+      return 'Hace ' + months + ' ' + (months === 1 ? 'mes' : 'meses') + (days ? ', ' + days + ' ' + (days === 1 ? 'día' : 'días') : '');
+    }
+    const years = Math.floor(diff / year);
+    const months = Math.floor((diff % year) / month);
+    return 'Hace ' + years + ' ' + (years === 1 ? 'año' : 'años') + (months ? ', ' + months + ' ' + (months === 1 ? 'mes' : 'meses') : '');
+  }
+
+  function getUnreadContactMessagesCount() {
+    return contactMessages.filter(function(item) {
+      return item && !item.read;
+    }).length;
+  }
+
+  function updateMessagesButtonBadge() {
+    const count = getUnreadContactMessagesCount();
+    const badge = document.getElementById('messages-unread-count');
+    if (badge) badge.textContent = String(count);
+    const modalCount = document.getElementById('messages-modal-count');
+    if (modalCount) modalCount.textContent = count + (count === 1 ? ' sin leer' : ' sin leer');
+  }
+
+  function renderMessagesModal() {
+    const listEl = document.getElementById('messages-list');
+    if (!listEl) return;
+    const sorted = contactMessages.slice().sort(function(a, b) {
+      return (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0);
+    });
+
+    if (!sorted.length) {
+      listEl.innerHTML = '<div class="rounded-xl border border-dashed border-white/10 p-8 text-center text-xs text-slate-500">No hay mensajes todavía.</div>';
+      updateMessagesButtonBadge();
+      return;
+    }
+
+    listEl.innerHTML = sorted.map(function(item) {
+      const id = String(item.id || '');
+      const safeId = escapeSocialAttr(id);
+      const name = escapeSocialText(item.name || 'Sin nombre');
+      const email = escapeSocialText(item.email || '');
+      const whatsapp = escapeSocialText(item.whatsapp || '');
+      const instagram = escapeSocialText(item.instagram || '');
+      const service = escapeSocialText(item.service || 'Consulta general');
+      const message = escapeSocialText(item.message || '');
+      const replies = Array.isArray(item.replies) ? item.replies : [];
+      const lastReply = replies.length ? replies[replies.length - 1] : null;
+      return '<article class="rounded-xl border ' + (item.read ? 'border-white/5 bg-white/[.025]' : 'border-violet-400/25 bg-violet-500/[.045]') + ' p-2.5 sm:p-3">' +
+        '<div class="flex flex-col sm:flex-row sm:items-start gap-2.5">' +
+          '<div class="min-w-0 flex-1">' +
+            '<div class="flex flex-wrap items-center gap-1.5">' +
+              '<span class="text-[11px] font-bold text-white">' + name + '</span>' +
+              (!item.read ? '<span class="px-1.5 py-0.5 rounded bg-violet-400 text-black text-[8px] font-black uppercase">Nuevo</span>' : '') +
+              '<span class="px-1.5 py-0.5 rounded bg-amber-400/10 border border-amber-400/15 text-amber-300 text-[8px] font-bold">' + service + '</span>' +
+            '</div>' +
+            '<div class="mt-1 text-[10px] text-slate-500 break-all">' + email +
+              (whatsapp ? ' · WhatsApp: ' + whatsapp : '') +
+              (instagram ? ' · Instagram: ' + instagram : '') +
+            '</div>' +
+            '<div class="mt-1.5 text-[11px] text-slate-300 leading-relaxed whitespace-pre-line">' + message + '</div>' +
+            (lastReply ? '<div class="mt-2 rounded-lg bg-cyan-400/5 border border-cyan-400/10 px-2 py-1.5 text-[9px] text-cyan-200"><span class="font-bold">Última respuesta:</span> ' + escapeSocialText(lastReply.body || '') + '</div>' : '') +
+          '</div>' +
+          '<div class="shrink-0 flex sm:flex-col items-end gap-1.5">' +
+            '<span class="text-[9px] text-slate-500 whitespace-nowrap">' + formatMessageRelativeTime(item.createdAt) + '</span>' +
+            '<div class="flex items-center gap-1">' +
+              '<button type="button" onclick="window.ElyPortfolio.toggleMessageRead(\'' + safeId + '\')" class="px-2 py-1 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 text-[9px] text-slate-300">' + (item.read ? 'No leído' : 'Leído') + '</button>' +
+              '<button type="button" onclick="window.ElyPortfolio.openMessageReply(\'' + safeId + '\')" class="px-2 py-1 rounded-md bg-cyan-400/10 border border-cyan-400/20 hover:bg-cyan-400/20 text-[9px] text-cyan-300 font-bold">Responder</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</article>';
+    }).join('');
+
+    updateMessagesButtonBadge();
+  }
+
+  function openMessagesModal() {
+    if (!isModerator || visitorPreviewMode) return;
+    const modal = document.getElementById('messages-modal');
+    if (!modal) return;
+    closeMessageReply();
+    renderMessagesModal();
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMessagesModal() {
+    const modal = document.getElementById('messages-modal');
+    if (modal) modal.classList.add('hidden');
+    closeMessageReply();
+    document.body.style.overflow = '';
+  }
+
+  async function saveContactMessage(message) {
+    if (!message || !message.id) return false;
+    if (!backendCardsSnapshotReady) await loadAllDataFromBackend(true);
+    const existingIndex = contactMessages.findIndex(function(item) { return String(item.id) === String(message.id); });
+    if (existingIndex >= 0) contactMessages[existingIndex] = message;
+    else contactMessages.push(message);
+    try { localStorage.setItem('portfolio_contact_messages_v1', JSON.stringify(contactMessages)); } catch (e) {}
+    try {
+      await syncCardsInfoImmediately([{ id: String(message.id), type: CONTACT_MESSAGES_SHEET_TYPE, data: message }]);
+      return true;
+    } catch (error) {
+      console.error('[CONTACT MESSAGE SAVE ERROR]', error);
+      return false;
+    }
+  }
+
+  async function toggleMessageRead(messageId) {
+    if (!isModerator) return;
+    const item = contactMessages.find(function(message) { return String(message.id) === String(messageId); });
+    if (!item) return;
+    item.read = !item.read;
+    await saveContactMessage(item);
+    renderMessagesModal();
+  }
+
+  function openMessageReply(messageId) {
+    if (!isModerator) return;
+    const item = contactMessages.find(function(message) { return String(message.id) === String(messageId); });
+    if (!item) return;
+    activeMessageReplyId = String(item.id);
+    const panel = document.getElementById('message-reply-panel');
+    const recipient = document.getElementById('message-reply-recipient');
+    const textarea = document.getElementById('message-reply-text');
+    const status = document.getElementById('message-reply-status');
+    if (recipient) recipient.textContent = (item.name || 'Visitante') + ' · ' + (item.email || '');
+    if (textarea) textarea.value = '';
+    if (status) {
+      status.className = 'hidden text-[10px] leading-relaxed';
+      status.textContent = '';
+    }
+    if (panel) panel.classList.remove('hidden');
+    if (textarea) {
+      textarea.focus();
+      panel && panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  function closeMessageReply() {
+    activeMessageReplyId = null;
+    const panel = document.getElementById('message-reply-panel');
+    if (panel) panel.classList.add('hidden');
+  }
+
+  async function sendMessageReply() {
+    if (!isModerator || !activeMessageReplyId) return;
+    const item = contactMessages.find(function(message) { return String(message.id) === String(activeMessageReplyId); });
+    const textarea = document.getElementById('message-reply-text');
+    const button = document.getElementById('message-reply-send-btn');
+    const status = document.getElementById('message-reply-status');
+    const body = textarea ? textarea.value.trim() : '';
+    if (!item || !item.email || !body) return;
+
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Enviando...';
+    }
+    if (status) {
+      status.className = 'text-[10px] text-cyan-300';
+      status.textContent = 'Enviando respuesta...';
+    }
+
+    try {
+      const response = await fetch('https://formsubmit.co/ajax/' + encodeURIComponent(item.email), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          Nombre: 'Eliezer Terrero (ElyDev)',
+          Correo: OWNER_EMAIL,
+          Mensaje: body,
+          _subject: 'Re: ' + (item.service || 'Consulta desde Portafolio ElyDev'),
+          _replyto: OWNER_EMAIL,
+          _template: 'table'
+        })
+      });
+      const result = await response.json().catch(function() { return {}; });
+      if (!response.ok || !(result.success === 'true' || result.success === true || result.message)) {
+        throw new Error(result.message || 'No se pudo enviar la respuesta.');
+      }
+
+      if (!Array.isArray(item.replies)) item.replies = [];
+      item.replies.push({ body: body, sentAt: Date.now() });
+      item.read = true;
+      const saved = await saveContactMessage(item);
+      if (!saved) throw new Error('El correo se envió, pero no se pudo guardar la respuesta en Google Sheets.');
+      if (status) {
+        status.className = 'text-[10px] text-emerald-300';
+        status.textContent = '✓ Respuesta enviada y guardada.';
+      }
+      if (textarea) textarea.value = '';
+      renderMessagesModal();
+    } catch (error) {
+      console.error('[CONTACT REPLY ERROR]', error);
+      if (status) {
+        status.className = 'text-[10px] text-red-300';
+        status.textContent = 'No se pudo enviar: ' + (error.message || 'Error desconocido.');
+      }
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = 'Enviar respuesta ✉';
+      }
+    }
+  }
+
   async function handleContactSubmit(e) {
     e.preventDefault();
     const name = document.getElementById('contact-name').value.trim();
     const email = document.getElementById('contact-email').value.trim();
+    const whatsapp = (document.getElementById('contact-whatsapp')?.value || '').trim();
+    const instagram = (document.getElementById('contact-instagram')?.value || '').trim();
     const subject = document.getElementById('contact-subject').value.trim();
     const message = document.getElementById('contact-message').value.trim();
     const submitBtn = document.getElementById('contact-submit-btn');
@@ -3837,7 +4073,6 @@
       return;
     }
 
-    // Estado cargando en el botón
     if (submitBtn) {
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<span>Enviando mensaje... ⏳</span>';
@@ -3845,56 +4080,70 @@
     if (successMsg) successMsg.classList.add('hidden');
     if (errorMsg) errorMsg.classList.add('hidden');
 
+    const contactMessage = {
+      id: 'contact-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+      name: name,
+      email: email,
+      whatsapp: whatsapp,
+      instagram: instagram,
+      service: subject || 'Consulta general',
+      message: message,
+      createdAt: Date.now(),
+      read: false,
+      replies: []
+    };
+
+    let savedToSheet = false;
     try {
-      // 1. Envío AJAX directo sin recargar página (FormSubmit API hacia el correo de Eliezer)
-      const response = await fetch('https://formsubmit.co/ajax/eliezerterrero275@gmail.com', {
+      savedToSheet = await saveContactMessage(contactMessage);
+    } catch (error) {
+      console.error('[CONTACT MESSAGE PERSIST ERROR]', error);
+    }
+
+    let emailSent = false;
+    try {
+      const response = await fetch('https://formsubmit.co/ajax/' + OWNER_EMAIL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({
           Nombre: name,
           Correo: email,
-          Asunto: subject || 'Consulta desde Portafolio ElyDev',
+          WhatsApp: whatsapp || 'No proporcionado',
+          Instagram: instagram || 'No proporcionado',
+          Servicio: subject || 'Consulta general',
           Mensaje: message,
           _subject: '[Portafolio ElyDev] ' + (subject || 'Nuevo Mensaje de Contacto'),
+          _replyto: email,
           _template: 'table'
         })
       });
+      const result = await response.json().catch(function() { return {}; });
+      emailSent = response.ok && (result.success === 'true' || result.success === true || result.message);
+      if (!emailSent) throw new Error(result.message || 'FormSubmit rechazó el envío.');
+    } catch (error) {
+      console.warn('[CONTACT EMAIL ERROR]', error);
+    }
 
-      const result = await response.json();
-
-      if (response.ok && (result.success === 'true' || result.success === true || result.message)) {
-        if (successMsg) {
-          successMsg.innerHTML = '✓ ¡Mensaje enviado con éxito directamente a Eliezer Terrero! Recibirás respuesta pronto a tu correo.';
-          successMsg.classList.remove('hidden');
-        }
-        document.getElementById('contact-form').reset();
-        setTimeout(function () {
-          closeContactModal();
-        }, 3000);
-      } else {
-        throw new Error(result.message || 'Error al enviar');
-      }
-    } catch (err) {
-      console.warn('Fallo envío AJAX, intentando vía mailto o contact.php...', err);
-      // Fallback automático para que el mensaje NUNCA se pierda
-      const mailto = `mailto:eliezerterrero275@gmail.com?subject=${encodeURIComponent(subject || 'Consulta Portafolio ElyDev')}&body=${encodeURIComponent('De: ' + name + ' (' + email + ')\n\n' + message)}`;
-      window.location.href = mailto;
-
+    if (emailSent || savedToSheet) {
       if (successMsg) {
-        successMsg.innerHTML = '✓ Abriendo tu gestor de correo para enviar mensaje a eliezerterrero275@gmail.com...';
+        successMsg.innerHTML = emailSent
+          ? '✓ Mensaje enviado. Tu solicitud quedó registrada y podrás recibir respuesta por correo.'
+          : '✓ Tu solicitud quedó registrada. El correo de notificación no pudo enviarse, pero el mensaje no se perdió.';
         successMsg.classList.remove('hidden');
       }
-      setTimeout(function () {
-        closeContactModal();
-      }, 3000);
-    } finally {
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Enviar Mensaje</span>';
+      const form = document.getElementById('contact-form');
+      if (form) form.reset();
+      setTimeout(function() { closeContactModal(); }, 2500);
+    } else {
+      if (errorMsg) {
+        errorMsg.textContent = 'No se pudo guardar ni enviar el mensaje. Inténtalo nuevamente.';
+        errorMsg.classList.remove('hidden');
       }
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span>Enviar Mensaje</span>';
     }
   }
 
@@ -4001,6 +4250,10 @@
     renderExperiences();
     renderTestimonialsPreview();
     renderSatisfiedClientsModalList();
+    updateMessagesButtonBadge();
+    if (document.getElementById('messages-modal') && !document.getElementById('messages-modal').classList.contains('hidden')) {
+      renderMessagesModal();
+    }
   }
 
   // 12. Reordenar Proyectos (Subir o Bajar orden)
@@ -5063,6 +5316,9 @@
     skillCards.forEach(function (item) {
       if (item && item.id) records.push({ id: String(item.id), type: 'skill_card', data: item });
     });
+    contactMessages.forEach(function (item) {
+      if (item && item.id) records.push({ id: String(item.id), type: CONTACT_MESSAGES_SHEET_TYPE, data: item });
+    });
     // La biblioteca se guarda como un único registro JSON dentro de CardsInfo.
     // Esto permite reconstruirla desde Google Sheets sin depender de GitHub Sync.
     records.push({
@@ -5612,6 +5868,10 @@
         .filter(function(record) { return record && record.type === 'feedback_code' && record.data; })
         .map(function(record) { return record.data; });
 
+      const contactMessagesFromSheet = cards
+        .filter(function(record) { return record && record.type === CONTACT_MESSAGES_SHEET_TYPE && record.data; })
+        .map(function(record) { return record.data; });
+
       const skillCardsFromSheet = cards
         .filter(function(record) { return record && record.type === 'skill_card' && record.data; })
         .map(function(record) { return record.data; });
@@ -5738,6 +5998,12 @@
       checkAssetHashParam();
 
       feedbackCodes = Array.isArray(codesFromSheet) ? codesFromSheet : [];
+      contactMessages = Array.isArray(contactMessagesFromSheet) ? contactMessagesFromSheet : [];
+      try { localStorage.setItem('portfolio_contact_messages_v1', JSON.stringify(contactMessages)); } catch (e) {}
+      updateMessagesButtonBadge();
+      if (document.getElementById('messages-modal') && !document.getElementById('messages-modal').classList.contains('hidden')) {
+        renderMessagesModal();
+      }
 
       return {
         projects: projectsFromSheet.length,
@@ -8425,6 +8691,7 @@ githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
       if (e.key === 'Escape') {
         closeProjectModal();
         closeContactModal();
+        closeMessagesModal();
         closeResumeModal();
         closeAuthModal();
         closeAddProjectModal();
@@ -8739,6 +9006,13 @@ githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
     showStatusNotification: showStatusNotification,
     openContactModal: openContactModal,
     closeContactModal: closeContactModal,
+    openMessagesModal: openMessagesModal,
+    closeMessagesModal: closeMessagesModal,
+    renderMessagesModal: renderMessagesModal,
+    toggleMessageRead: toggleMessageRead,
+    openMessageReply: openMessageReply,
+    closeMessageReply: closeMessageReply,
+    sendMessageReply: sendMessageReply,
     openResumeModal: openResumeModal,
     closeResumeModal: closeResumeModal,
     openAuthModal: openAuthModal,
