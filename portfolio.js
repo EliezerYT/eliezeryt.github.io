@@ -1278,7 +1278,7 @@
       if (selectedOrigin === 'more') {
         if (project.origin !== 'more') return false;
       } else if (selectedOrigin === 'todos') {
-        if (project.origin === 'servicios' || project.origin === 'clases') {
+        if (project.origin === 'servicios' || project.origin === 'clases' || project.origin === 'more') {
           return false;
         }
       } else if (project.origin !== selectedOrigin) {
@@ -1348,7 +1348,7 @@
       const count = selectedOrigin === 'assets'
         ? getFilteredAssets().length
         : filteredProjects.length;
-      const total = selectedOrigin === 'assets' ? assets.length : projects.length;
+      const total = selectedOrigin === 'assets' ? assets.length : projects.filter(function(p) { return p.origin !== 'more'; }).length;
       countDisplay.textContent = 'Mostrando ' + count + ' de ' + total + ' elementos';
     }
 
