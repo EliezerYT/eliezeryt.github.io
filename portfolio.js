@@ -1353,7 +1353,7 @@
       badgeLabel.textContent =
         selectedOrigin === 'assets' ? 'Biblioteca de Scripts / Assets' :
         selectedOrigin === 'servicios' ? 'Catálogo de Servicios Comunes' :
-        selectedOrigin === 'clases' ? 'Clases Privadas Personalizadas' :\n        selectedOrigin === 'more' ? 'Sistemas & Desarrollo' :
+        selectedOrigin === 'clases' ? 'Clases Privadas Personalizadas' :\n        selectedOrigin === 'more' ? 'Sistemas & Desarrollo' :\n        selectedOrigin === 'more' ? 'Sistemas & Desarrollo' :
         selectedOrigin === 'propio' ? 'Proyectos Propios (Indie)' :
         selectedOrigin === 'trabajado' ? 'Proyectos Trabajados para Clientes' :
         'Catálogo de Proyectos (Todos)';
@@ -1363,7 +1363,7 @@
       headerTitle.textContent =
         selectedOrigin === 'assets' ? 'ElyDev Community' :
         selectedOrigin === 'servicios' ? 'Servicios Técnicos Especializados' :
-        selectedOrigin === 'clases' ? 'Clases & Asesorías Privadas' :\n        selectedOrigin === 'more' ? 'Sistemas en Desarrollo' :
+        selectedOrigin === 'clases' ? 'Clases & Asesorías Privadas' :\n        selectedOrigin === 'more' ? 'Sistemas en Desarrollo' :\n        selectedOrigin === 'more' ? 'Sistemas en Desarrollo' :
         'Proyectos Trabajados & Propios';
     }
 
@@ -1371,7 +1371,7 @@
       headerSub.textContent =
         selectedOrigin === 'assets' ? 'Scripts, Assets y herramientas de la comunidad. Busca, guarda y descarga.' :
         selectedOrigin === 'servicios' ? 'Sistemas llave en mano de monetización publicitaria, compras in-app, audio y multiplayer.' :
-        selectedOrigin === 'clases' ? 'Aprende Unity, programación C#, monetización y multijugador online con sesiones 1 a 1 en vivo.' :\n        selectedOrigin === 'more' ? 'Videos cortos, demostraciones y etiquetas de sistemas desarrollados por ElyDev.' :
+        selectedOrigin === 'clases' ? 'Aprende Unity, programación C#, monetización y multijugador online con sesiones 1 a 1 en vivo.' :\n        selectedOrigin === 'more' ? 'Videos cortos, demostraciones y etiquetas de sistemas desarrollados por ElyDev.' :\n        selectedOrigin === 'more' ? 'Videos cortos, demostraciones y etiquetas de sistemas desarrollados por ElyDev.' :
         'Filtra por Propios, Trabajados o explora Servicios Comunes y Clases Privadas.';
     }
 
