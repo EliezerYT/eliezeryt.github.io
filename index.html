@@ -1309,6 +1309,10 @@
           </div>
         </div>
         <div class="p-3 sm:p-4 max-h-[78vh] overflow-y-auto space-y-3">
+          <div class="flex items-center gap-2 border-b border-[#1e2330] pb-2" role="tablist" aria-label="Filtrar mensajes">
+            <button id="messages-tab-unread" type="button" role="tab" aria-selected="true" onclick="window.ElyPortfolio.setMessagesFilter('unread')" class="px-3 py-1.5 rounded-lg bg-violet-400 text-black text-[10px] font-bold transition-colors">No leídos <span id="messages-unread-tab-count" class="ml-1">0</span></button>
+            <button id="messages-tab-read" type="button" role="tab" aria-selected="false" onclick="window.ElyPortfolio.setMessagesFilter('read')" class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-[10px] font-semibold hover:bg-white/10 transition-colors">Leídos <span id="messages-read-tab-count" class="ml-1">0</span></button>
+          </div>
           <div id="messages-list" class="space-y-2"></div>
           <div id="message-reply-panel" class="hidden rounded-xl border border-cyan-400/20 bg-cyan-500/5 p-3 space-y-2">
             <div class="flex items-center justify-between gap-2">
