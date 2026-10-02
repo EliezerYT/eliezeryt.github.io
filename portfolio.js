@@ -1668,8 +1668,20 @@
       if (searchInput) searchInput.value = '';
       renderProjectsGrid(true);
     } else {
-      selectedOrigin = 'todos';
-      selectedCategory = 'todos';
+      // En la página principal no reiniciamos el filtro al refrescar datos, volver a la pestaña o restaurar la página.
+      // El estado seleccionado por el visitante debe mantenerse mientras se actualizan los datos de Sheets.
+      const validOrigins = ['todos', 'propio', 'trabajado', 'servicios', 'clases', 'more'];
+      if (!validOrigins.includes(selectedOrigin)) selectedOrigin = 'todos';
+      if (!selectedCategory) selectedCategory = 'todos';
+
+      document.querySelectorAll('[data-origin-filter]').forEach(function (button) {
+        const active = button.getAttribute('data-origin-filter') === selectedOrigin;
+        button.classList.toggle('bg-amber-400', active);
+        button.classList.toggle('text-black', active);
+        button.classList.toggle('font-bold', active);
+        button.classList.toggle('bg-[#141822]', !active);
+        button.classList.toggle('text-slate-300', !active);
+      });
       renderProjectsGrid(true);
     }
   }
