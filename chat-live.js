@@ -260,17 +260,32 @@
     });
   }
 
+  function setPresenceState(online) {
+    if (!isModerator() && online) return;
+    const params = new URLSearchParams({
+      action: 'setModeratorPresence',
+      online: online ? 'true' : 'false',
+      cacheBust: String(Date.now())
+    });
+    return fetch(API + '?' + params.toString(), {
+      method: 'GET',
+      cache: 'no-store',
+      keepalive: true
+    }).then(function(r){ return r.json().catch(function(){ return null; }); });
+  }
+
   function sendPresence() {
     if (!isModerator()) return;
-    jsonPost({ action:'setModeratorPresence', online:true }).catch(function(){});
+    setPresenceState(true).catch(function(){});
   }
 
   function startModeratorPresence() {
     if (!isModerator()) return;
     sendPresence();
     presenceTimer = setInterval(sendPresence, PRESENCE_MS);
-    window.addEventListener('beforeunload', function(){ navigator.sendBeacon && navigator.sendBeacon(API, JSON.stringify({action:'setModeratorPresence',online:false})); });
-    window.addEventListener('pagehide', function(){ navigator.sendBeacon && navigator.sendBeacon(API, JSON.stringify({action:'setModeratorPresence',online:false})); });
+    const markOffline = function(){ setPresenceState(false).catch(function(){}); };
+    window.addEventListener('beforeunload', markOffline);
+    window.addEventListener('pagehide', markOffline);
   }
 
   function formatTime(v) {
