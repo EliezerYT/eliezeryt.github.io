@@ -7972,7 +7972,7 @@ githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
       return Promise.resolve();
     }
 
-    catalogRefreshPromise = loadAllDataFromBackend()
+    catalogRefreshPromise = loadAllDataFromBackend(shouldForce)
       .then(function () {
         catalogLastRefreshAt = Date.now();
         if (isAssetsPage()) refreshAssetsPageRuntime();
@@ -8027,6 +8027,7 @@ githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
   document.addEventListener('DOMContentLoaded', function () {
     applyAssetsRouteUI();
     if (isAssetsPage()) selectedOrigin = 'assets';
+    else renderProjectsGrid(true);
     applyTheme(currentTheme);
     setupImageDropzones();
     renderSkillCards();
