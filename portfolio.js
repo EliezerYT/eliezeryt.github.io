@@ -2728,6 +2728,20 @@
       }
     }
 
+    if (linksContainer) {
+      const shareButton = document.createElement('button');
+      shareButton.type = 'button';
+      shareButton.className = 'inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/20 text-cyan-300 transition-colors';
+      shareButton.title = 'Copiar enlace directo de esta ficha';
+      shareButton.textContent = '🔗 Compartir ficha';
+      shareButton.addEventListener('click', function (event) {
+        event.stopPropagation();
+        copyProjectCardLink(project.id);
+      });
+      linksContainer.appendChild(shareButton);
+      linksContainer.classList.remove('hidden');
+    }
+
     // Botón de solicitar servicio / contactar
     const contactCta = document.getElementById('modal-project-contact-btn');
     if (contactCta) {
