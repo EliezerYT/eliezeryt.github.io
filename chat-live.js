@@ -162,6 +162,20 @@
     if (!body || !form) return;
     status.innerHTML = moderatorOnline ? '<span class="ely-chat-online">Moderador conectado</span>' : 'El moderador no está disponible';
 
+    if (isModerator() && (!chat || chat.status === 'closed')) {
+      body.innerHTML = '<div class="ely-live-start"><p>Estás conectado como moderador. Los chats de los visitantes aparecen en el panel de <b>Mensajes → Chat en vivo</b>.</p><button id="ely-live-open-messages" class="ely-live-primary" type="button">Abrir Chat en vivo</button></div>';
+      form.innerHTML = '';
+      const openMessages = document.getElementById('ely-live-open-messages');
+      openMessages.onclick = function(){
+        closeChat();
+        const modal = document.getElementById('messages-modal');
+        if (modal) modal.classList.remove('hidden');
+        const panel = document.getElementById('ely-moderator-chat-tools');
+        if (panel) panel.scrollIntoView({behavior:'smooth',block:'start'});
+      };
+      return;
+    }
+
     if (!chat || chat.status === 'closed') {
       body.innerHTML = '<div class="ely-live-start"><p>Habla directamente conmigo mientras estoy conectado. Tu conversación quedará guardada para continuar el soporte.</p>' +
         '<input id="ely-live-name" class="ely-live-input" placeholder="Tu nombre" value="' + esc(user.userName || getContactValues().name) + '">' +
@@ -235,7 +249,7 @@
       const p = res && res.data ? res.data : {};
       const stamp = p.timestamp ? new Date(p.timestamp).getTime() : 0;
       moderatorOnline = !!p.online && stamp > 0 && Date.now() - stamp < PRESENCE_TTL;
-      setFabVisible(moderatorOnline && !isModerator());
+      setFabVisible(isModerator() ? true : moderatorOnline);
       const win = document.getElementById('ely-live-chat-window');
       if (win && win.classList.contains('open')) renderChat();
       return moderatorOnline;
