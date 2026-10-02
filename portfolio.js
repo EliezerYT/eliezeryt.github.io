@@ -1274,7 +1274,7 @@
   function getFilteredProjects() {
     if (selectedOrigin === 'assets') return [];
     return projects.filter(function (project) {
-      if (selectedOrigin === 'todos') {
+      if (selectedOrigin === 'more') {\n        if (project.origin !== 'more') return false;\n      } else if (selectedOrigin === 'todos') {
         if (project.origin === 'servicios' || project.origin === 'clases') {
           return false;
         }
@@ -1353,7 +1353,7 @@
       badgeLabel.textContent =
         selectedOrigin === 'assets' ? 'Biblioteca de Scripts / Assets' :
         selectedOrigin === 'servicios' ? 'Catálogo de Servicios Comunes' :
-        selectedOrigin === 'clases' ? 'Clases Privadas Personalizadas' :
+        selectedOrigin === 'clases' ? 'Clases Privadas Personalizadas' :\n        selectedOrigin === 'more' ? 'Sistemas & Desarrollo' :
         selectedOrigin === 'propio' ? 'Proyectos Propios (Indie)' :
         selectedOrigin === 'trabajado' ? 'Proyectos Trabajados para Clientes' :
         'Catálogo de Proyectos (Todos)';
@@ -1363,7 +1363,7 @@
       headerTitle.textContent =
         selectedOrigin === 'assets' ? 'ElyDev Community' :
         selectedOrigin === 'servicios' ? 'Servicios Técnicos Especializados' :
-        selectedOrigin === 'clases' ? 'Clases & Asesorías Privadas' :
+        selectedOrigin === 'clases' ? 'Clases & Asesorías Privadas' :\n        selectedOrigin === 'more' ? 'Sistemas en Desarrollo' :
         'Proyectos Trabajados & Propios';
     }
 
@@ -1371,7 +1371,7 @@
       headerSub.textContent =
         selectedOrigin === 'assets' ? 'Scripts, Assets y herramientas de la comunidad. Busca, guarda y descarga.' :
         selectedOrigin === 'servicios' ? 'Sistemas llave en mano de monetización publicitaria, compras in-app, audio y multiplayer.' :
-        selectedOrigin === 'clases' ? 'Aprende Unity, programación C#, monetización y multijugador online con sesiones 1 a 1 en vivo.' :
+        selectedOrigin === 'clases' ? 'Aprende Unity, programación C#, monetización y multijugador online con sesiones 1 a 1 en vivo.' :\n        selectedOrigin === 'more' ? 'Videos cortos, demostraciones y etiquetas de sistemas desarrollados por ElyDev.' :
         'Filtra por Propios, Trabajados o explora Servicios Comunes y Clases Privadas.';
     }
 
@@ -1610,26 +1610,35 @@
     return params.has('assets') || params.get('page') === 'assets' || (window.location.hash || '').toLowerCase() === '#assets';
   }
 
+  function isMoreRoute() {
+    const params = new URLSearchParams(window.location.search || '');
+    return params.has('more') || params.get('page') === 'more';
+  }
+
   function isAssetsPage() {
     return !!(document.body && document.body.getAttribute('data-page') === 'assets') || isAssetsRoute();
   }
 
   function applyAssetsRouteUI() {
     const assetsRoute = isAssetsRoute();
-    if (document.body) document.body.setAttribute('data-page', assetsRoute ? 'assets' : 'portfolio');
+    const moreRoute = !assetsRoute && isMoreRoute();
+    const specialRoute = assetsRoute || moreRoute;
+    if (document.body) document.body.setAttribute('data-page', assetsRoute ? 'assets' : moreRoute ? 'more' : 'portfolio');
     const projectSection = document.getElementById('proyectos');
     if (!projectSection) return;
 
     document.querySelectorAll('main > section').forEach(function (section) {
-      section.classList.toggle('hidden', assetsRoute && section !== projectSection);
+      section.classList.toggle('hidden', specialRoute && section !== projectSection);
     });
 
     const portfolioHeader = document.getElementById('portfolio-projects-header');
     const portfolioFilters = document.getElementById('portfolio-project-filters');
     const assetsHeader = document.getElementById('assets-page-header');
-    if (portfolioHeader) portfolioHeader.classList.toggle('hidden', assetsRoute);
-    if (portfolioFilters) portfolioFilters.classList.toggle('hidden', assetsRoute);
+    const moreHeader = document.getElementById('more-page-header');
+    if (portfolioHeader) portfolioHeader.classList.toggle('hidden', specialRoute);
+    if (portfolioFilters) portfolioFilters.classList.toggle('hidden', specialRoute);
     if (assetsHeader) assetsHeader.classList.toggle('hidden', !assetsRoute);
+    if (moreHeader) moreHeader.classList.toggle('hidden', !moreRoute);
 
     document.querySelectorAll('a[href="./assets/"], a[href="../assets/"]').forEach(function (link) {
       link.href = '?assets';
@@ -1643,6 +1652,13 @@
         initElyDevMotionEnhancements();
         initAssetCardInteractions();
       });
+    } else if (moreRoute) {
+      selectedOrigin = 'more';
+      selectedCategory = 'todos';
+      searchQuery = '';
+      const searchInput = document.getElementById('projects-search-input');
+      if (searchInput) searchInput.value = '';
+      renderProjectsGrid(true);
     } else {
       selectedOrigin = 'todos';
       selectedCategory = 'todos';
