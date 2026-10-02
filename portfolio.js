@@ -3417,7 +3417,7 @@
     }
 
     try {
-      const url = GLOBAL_COUNTER_URL + '?action=loadSheetData&cacheBust=' + Date.now();
+      const url = GLOBAL_COUNTER_URL + '?action=loadSheetData&sheet=' + encodeURIComponent(sheetName) + '&cacheBust=' + Date.now();
       const response = await fetch(url, { cache: 'no-store' });
       if (!response.ok) throw new Error('Google Sheets HTTP ' + response.status);
       const result = await response.json();
@@ -3802,9 +3802,12 @@
 
   // 9. Modal de Contacto y Bandeja de Mensajes
   const CONTACT_MESSAGES_SHEET_TYPE = 'contact_message';
+  const CONTACT_REQUEST_SHEET_NAME = 'ContactRequest';
   const OWNER_EMAIL = 'eliezerterrero275@gmail.com';
   let activeMessageReplyId = null;
   let activeMessagesFilter = 'unread';
+  let backendContactSnapshot = [];
+  let backendContactSnapshotReady = false;
 
   function openContactModal(initialSubject) {
     const modal = document.getElementById('contact-modal');
@@ -3970,15 +3973,37 @@
     document.body.style.overflow = '';
   }
 
+  async function syncContactMessagesImmediately(explicitRecord) {
+    return queueBackendSync(async function () {
+      const localRecords = contactMessages.filter(function (item) {
+        return item && item.id;
+      }).map(function (item) {
+        return { id: String(item.id), type: CONTACT_MESSAGES_SHEET_TYPE, data: item };
+      });
+      const target = explicitRecord && explicitRecord.id
+        ? [{ id: String(explicitRecord.id), type: CONTACT_MESSAGES_SHEET_TYPE, data: explicitRecord }]
+        : null;
+      const result = await syncOnlyChangedRecords(
+        CONTACT_REQUEST_SHEET_NAME,
+        localRecords,
+        backendContactSnapshot,
+        backendContactSnapshotReady,
+        target
+      );
+      backendContactSnapshot = cloneBackendRecords(result.records);
+      backendContactSnapshotReady = true;
+      return result;
+    });
+  }
+
   async function saveContactMessage(message) {
     if (!message || !message.id) return false;
-    if (!backendCardsSnapshotReady) await loadAllDataFromBackend(true);
     const existingIndex = contactMessages.findIndex(function(item) { return String(item.id) === String(message.id); });
     if (existingIndex >= 0) contactMessages[existingIndex] = message;
     else contactMessages.push(message);
     try { localStorage.setItem('portfolio_contact_messages_v1', JSON.stringify(contactMessages)); } catch (e) {}
     try {
-      await syncCardsInfoImmediately([{ id: String(message.id), type: CONTACT_MESSAGES_SHEET_TYPE, data: message }]);
+      await syncContactMessagesImmediately(message);
       return true;
     } catch (error) {
       console.error('[CONTACT MESSAGE SAVE ERROR]', error);
@@ -5086,7 +5111,7 @@
   }
 
   async function loadCurrentSheetRecords(sheetName, force) {
-    const key = sheetName === FEEDBACKS_SHEET_NAME ? 'feedbacks' : 'cards';
+    const key = sheetName === FEEDBACKS_SHEET_NAME ? 'feedbacks' : (sheetName === CONTACT_REQUEST_SHEET_NAME ? 'contactRequests' : 'cards');
     const now = Date.now();
     if (!force && sheetsRemoteCache[key] && now - (sheetsRemoteCacheAt[key] || 0) < SHEETS_REMOTE_CACHE_MS) {
       return cloneBackendRecords(sheetsRemoteCache[key]);
@@ -5100,7 +5125,7 @@
       throw new Error(result && result.error ? result.error : 'Google Sheets no devolvió datos.');
     }
 
-    const records = Array.isArray(result[key]) ? result[key] : [];
+    const records = Array.isArray(result[key]) ? result[key] : (sheetName === CONTACT_REQUEST_SHEET_NAME && Array.isArray(result.records) ? result.records : []);
     sheetsRemoteCache[key] = cloneBackendRecords(records);
     sheetsRemoteCacheAt[key] = Date.now();
     return records;
@@ -5190,8 +5215,8 @@
     await waitForSheetsWriteSlot();
     await syncDataToGoogleSheet(sheetName, merged);
     sheetsLastWriteAt = Date.now();
-    sheetsRemoteCache[sheetName === FEEDBACKS_SHEET_NAME ? 'feedbacks' : 'cards'] = cloneBackendRecords(merged);
-    sheetsRemoteCacheAt[sheetName === FEEDBACKS_SHEET_NAME ? 'feedbacks' : 'cards'] = Date.now();
+    sheetsRemoteCache[sheetName === FEEDBACKS_SHEET_NAME ? 'feedbacks' : (sheetName === CONTACT_REQUEST_SHEET_NAME ? 'contactRequests' : 'cards')] = cloneBackendRecords(merged);
+    sheetsRemoteCacheAt[sheetName === FEEDBACKS_SHEET_NAME ? 'feedbacks' : (sheetName === CONTACT_REQUEST_SHEET_NAME ? 'contactRequests' : 'cards')] = Date.now();
     return { changed: changes.length + deletedIds.length, records: merged };
   }
 
@@ -5347,9 +5372,6 @@
     });
     skillCards.forEach(function (item) {
       if (item && item.id) records.push({ id: String(item.id), type: 'skill_card', data: item });
-    });
-    contactMessages.forEach(function (item) {
-      if (item && item.id) records.push({ id: String(item.id), type: CONTACT_MESSAGES_SHEET_TYPE, data: item });
     });
     // La biblioteca se guarda como un único registro JSON dentro de CardsInfo.
     // Esto permite reconstruirla desde Google Sheets sin depender de GitHub Sync.
@@ -5871,6 +5893,14 @@
 
       const cards = Array.isArray(result.cards) ? result.cards : [];
       const feedbacks = Array.isArray(result.feedbacks) ? result.feedbacks : [];
+      let contactRequests = [];
+      try {
+        contactRequests = await loadCurrentSheetRecords(CONTACT_REQUEST_SHEET_NAME, true);
+      } catch (contactError) {
+        console.warn('[CONTACT REQUESTS LOAD ERROR]', contactError);
+      }
+      backendContactSnapshot = cloneBackendRecords(contactRequests);
+      backendContactSnapshotReady = true;
 
       // Snapshot confirmado de Sheets. Los guardados posteriores comparan contra
       // este estado y solo modifican los registros que realmente cambiaron.
@@ -5900,7 +5930,7 @@
         .filter(function(record) { return record && record.type === 'feedback_code' && record.data; })
         .map(function(record) { return record.data; });
 
-      const contactMessagesFromSheet = cards
+      const contactMessagesFromSheet = contactRequests
         .filter(function(record) { return record && record.type === CONTACT_MESSAGES_SHEET_TYPE && record.data; })
         .map(function(record) { return record.data; });
 
@@ -6042,7 +6072,8 @@
         experiences: experiencesFromSheet.length,
         feedbacks: feedbacksFromSheet.length,
         assets: assetsFromSheet.length,
-        feedbackCodes: codesFromSheet.length
+        feedbackCodes: codesFromSheet.length,
+        contactRequests: contactMessagesFromSheet.length
       };
     };
 
