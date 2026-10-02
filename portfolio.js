@@ -55,9 +55,9 @@
       year: '2024 - 2025',
       role: 'Lead Game Designer & Programador Principal',
       featured: true,
-      coverImage: './assets/images/ely/overdrivers-teaser.jpg',
+      coverImage: './assets/images/ely/Proyectos/Overdrivers/od1.jpg',
       galleryImages: [
-        './assets/images/ely/overdrivers-teaser.jpg',
+        './assets/images/ely/Proyectos/Overdrivers/od1.jpg',
         './assets/images/ely/my-avatar.png'
       ],
       youtubeVideo: 'https://www.youtube.com/watch?v=PH6cK45nkto',
@@ -4481,7 +4481,7 @@
     const iconInp = document.getElementById('edit-proj-icon');
     if (iconInp) iconInp.value = savedIcon;
     const coverPrev = document.getElementById('edit-proj-cover-preview');
-    if (coverPrev) setMediaPreviewElement(coverPrev, project.coverImage || './assets/images/ely/overdrivers-teaser.jpg', project.title || 'Portada');
+    if (coverPrev) setMediaPreviewElement(coverPrev, project.coverImage || './assets/images/ely/Proyectos/Overdrivers/od1.jpg', project.title || 'Portada');
     renderGalleryThumbnails('edit-proj-gallery-thumbs', 'edit-proj-gallery');
 
     // Video de YouTube en grande
