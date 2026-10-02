@@ -3804,6 +3804,7 @@
   const CONTACT_MESSAGES_SHEET_TYPE = 'contact_message';
   const OWNER_EMAIL = 'eliezerterrero275@gmail.com';
   let activeMessageReplyId = null;
+  let activeMessagesFilter = 'unread';
 
   function openContactModal(initialSubject) {
     const modal = document.getElementById('contact-modal');
@@ -3876,16 +3877,36 @@
     const listEl = document.getElementById('messages-list');
     if (!listEl) return;
     const sorted = contactMessages.slice().sort(function(a, b) {
-      return (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0);
+      return (Number(b.createdAt) || Date.parse(b.createdAt) || 0) - (Number(a.createdAt) || Date.parse(a.createdAt) || 0);
     });
-
-    if (!sorted.length) {
-      listEl.innerHTML = '<div class="rounded-xl border border-dashed border-white/10 p-8 text-center text-xs text-slate-500">No hay mensajes todavía.</div>';
+    const unreadCount = contactMessages.filter(function(item) { return item && !item.read; }).length;
+    const readCount = contactMessages.filter(function(item) { return item && !!item.read; }).length;
+    const unreadTab = document.getElementById('messages-tab-unread');
+    const readTab = document.getElementById('messages-tab-read');
+    const unreadTabCount = document.getElementById('messages-unread-tab-count');
+    const readTabCount = document.getElementById('messages-read-tab-count');
+    if (unreadTabCount) unreadTabCount.textContent = String(unreadCount);
+    if (readTabCount) readTabCount.textContent = String(readCount);
+    if (unreadTab) {
+      unreadTab.setAttribute('aria-selected', String(activeMessagesFilter === 'unread'));
+      unreadTab.className = 'px-3 py-1.5 rounded-lg ' + (activeMessagesFilter === 'unread' ? 'bg-violet-400 text-black font-bold' : 'bg-white/5 border border-white/10 text-slate-300 font-semibold hover:bg-white/10') + ' text-[10px] transition-colors';
+    }
+    if (readTab) {
+      readTab.setAttribute('aria-selected', String(activeMessagesFilter === 'read'));
+      readTab.className = 'px-3 py-1.5 rounded-lg ' + (activeMessagesFilter === 'read' ? 'bg-violet-400 text-black font-bold' : 'bg-white/5 border border-white/10 text-slate-300 font-semibold hover:bg-white/10') + ' text-[10px] transition-colors';
+    }
+    const filtered = sorted.filter(function(item) {
+      return activeMessagesFilter === 'read' ? !!item.read : !item.read;
+    });
+    if (!sorted.length || !filtered.length) {
+      listEl.innerHTML = '<div class="rounded-xl border border-dashed border-white/10 p-6 text-center text-[10px] text-slate-500">' +
+        (!sorted.length ? 'No hay mensajes todavía.' : (activeMessagesFilter === 'read' ? 'No hay mensajes leídos.' : 'No hay mensajes sin leer.')) +
+        '</div>';
       updateMessagesButtonBadge();
       return;
     }
 
-    listEl.innerHTML = sorted.map(function(item) {
+    listEl.innerHTML = filtered.map(function(item) {
       const id = String(item.id || '');
       const safeId = escapeSocialAttr(id);
       const name = escapeSocialText(item.name || 'Sin nombre');
@@ -3923,6 +3944,13 @@
     }).join('');
 
     updateMessagesButtonBadge();
+  }
+
+  function setMessagesFilter(filter) {
+    if (!isModerator || visitorPreviewMode) return;
+    activeMessagesFilter = filter === 'read' ? 'read' : 'unread';
+    closeMessageReply();
+    renderMessagesModal();
   }
 
   function openMessagesModal() {
@@ -9011,6 +9039,7 @@ githubElyFolderPaths = Array.from(folderSet).sort(function(a,b) {
     openContactModal: openContactModal,
     closeContactModal: closeContactModal,
     openMessagesModal: openMessagesModal,
+    setMessagesFilter: setMessagesFilter,
     closeMessagesModal: closeMessagesModal,
     renderMessagesModal: renderMessagesModal,
     toggleMessageRead: toggleMessageRead,
