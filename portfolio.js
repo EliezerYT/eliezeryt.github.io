@@ -3868,9 +3868,7 @@
     } catch (err) {
       console.warn('Fallo envío AJAX, intentando vía mailto o contact.php...', err);
       // Fallback automático para que el mensaje NUNCA se pierda
-      const mailto = `mailto:eliezerterrero275@gmail.com?subject=${encodeURIComponent(subject || 'Consulta Portafolio ElyDev')}&body=${encodeURIComponent('De: ' + name + ' (' + email + ')
-
-' + message)}`;
+      const mailto = `mailto:eliezerterrero275@gmail.com?subject=${encodeURIComponent(subject || 'Consulta Portafolio ElyDev')}&body=${encodeURIComponent('De: ' + name + ' (' + email + ')\n\n' + message)}`;
       window.location.href = mailto;
 
       if (successMsg) {
