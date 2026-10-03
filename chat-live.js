@@ -29,8 +29,35 @@
     Object.keys(extra || {}).forEach(function (key) {
       if (extra[key] != null) params.set(key, extra[key]);
     });
-    return fetch(API + '?' + params.toString(), { cache: 'no-store' }).then(function (r) {
-      return r.json();
+    params.set('_', String(Date.now()));
+
+    const controller = new AbortController();
+    const timeout = setTimeout(function () {
+      controller.abort();
+    }, 10000);
+
+    return fetch(API + '?' + params.toString(), {
+      method: 'GET',
+      cache: 'no-store',
+      redirect: 'follow',
+      signal: controller.signal
+    }).then(function (response) {
+      return response.text().then(function (text) {
+        if (!response.ok) {
+          throw new Error('HTTP ' + response.status);
+        }
+
+        try {
+          return JSON.parse(text);
+        } catch (e) {
+          throw new Error(
+            'Respuesta inválida de Apps Script: ' +
+            text.slice(0, 180)
+          );
+        }
+      });
+    }).finally(function () {
+      clearTimeout(timeout);
     });
   }
 
@@ -383,6 +410,11 @@
   function refreshModeratorChats() {
     if (!isModerator()) return;
 
+    const list = document.getElementById('ely-mod-chat-list');
+    const count = document.getElementById('ely-mod-chat-count');
+
+    if (!list) return;
+
     jsonGet('getSupportChats').then(function(res) {
       if (!res || res.success !== true) {
         throw new Error(
@@ -395,27 +427,14 @@
       const incoming = Array.isArray(res.data) ? res.data : [];
 
       moderatorChats = incoming
-        .filter(function(chat) {
-          return String(chat.status || '').toLowerCase() !== 'closed';
+        .filter(function(item) {
+          return String(item.status || '').toLowerCase() !== 'closed';
         })
         .sort(function(a, b) {
-          return new Date(b.timestamp || 0) - new Date(a.timestamp || 0);
+          const ta = new Date(a.timestamp || 0).getTime() || 0;
+          const tb = new Date(b.timestamp || 0).getTime() || 0;
+          return tb - ta;
         });
-
-      const signature = moderatorChats.map(function(chat) {
-        return [
-          chat.chatID,
-          chat.status,
-          chat.timestamp,
-          chat.userName,
-          chat.userEmail
-        ].join(':');
-      }).join('|');
-
-      const list = document.getElementById('ely-mod-chat-list');
-      const count = document.getElementById('ely-mod-chat-count');
-
-      if (!list) return;
 
       if (count) {
         count.textContent =
@@ -424,6 +443,16 @@
             ? ' conversación'
             : ' conversaciones');
       }
+
+      const signature = moderatorChats.map(function(item) {
+        return [
+          item.chatID || '',
+          item.status || '',
+          item.timestamp || '',
+          item.userName || '',
+          item.userEmail || ''
+        ].join(':');
+      }).join('|');
 
       if (signature !== lastModeratorChatSignature) {
         lastModeratorChatSignature = signature;
@@ -434,25 +463,25 @@
             'No hay chats pendientes.' +
             '</div>';
         } else {
-          list.innerHTML = moderatorChats.map(function(chat) {
+          list.innerHTML = moderatorChats.map(function(item) {
             const active =
               selectedModeratorChat &&
-              selectedModeratorChat.chatID === chat.chatID;
+              selectedModeratorChat.chatID === item.chatID;
 
             return (
               '<div class="ely-mod-chat-item ' +
               (active ? 'active' : '') +
               '" data-chat-id="' +
-              esc(chat.chatID) +
+              esc(item.chatID || '') +
               '">' +
                 '<div>' +
                   '<b>' +
-                    esc(chat.userName || 'Usuario') +
+                    esc(item.userName || 'Usuario') +
                   '</b>' +
                   '<small>' +
-                    esc(chat.userEmail || '') +
+                    esc(item.userEmail || '') +
                     ' · ' +
-                    esc(chat.status || 'pending') +
+                    esc(item.status || 'pending') +
                   '</small>' +
                 '</div>' +
                 '<button type="button">Abrir</button>' +
@@ -460,20 +489,19 @@
             );
           }).join('');
 
-          list.querySelectorAll('.ely-mod-chat-item')
-            .forEach(function(el) {
-              el.onclick = function() {
-                selectModeratorChat(
-                  el.getAttribute('data-chat-id')
-                );
-              };
-            });
+          list.querySelectorAll('.ely-mod-chat-item').forEach(function(el) {
+            el.onclick = function() {
+              selectModeratorChat(
+                el.getAttribute('data-chat-id')
+              );
+            };
+          });
         }
       }
 
       if (selectedModeratorChat) {
-        const fresh = moderatorChats.find(function(chat) {
-          return chat.chatID === selectedModeratorChat.chatID;
+        const fresh = moderatorChats.find(function(item) {
+          return item.chatID === selectedModeratorChat.chatID;
         });
 
         if (fresh) {
@@ -491,23 +519,17 @@
         }
       }
     }).catch(function(error) {
-      console.error(
-        '[ElyLiveChat] Error cargando chats:',
-        error
-      );
+      console.error('[ElyLiveChat] Error cargando chats:', error);
 
-      const list =
-        document.getElementById('ely-mod-chat-list');
-
-      if (list) {
-        list.innerHTML =
-          '<div class="ely-live-empty" style="height:70px">' +
-          'Error cargando chats.<br>' +
-          '<small>' +
-          esc(error.message || 'Error desconocido') +
-          '</small>' +
-          '</div>';
-      }
+      list.innerHTML =
+        '<div class="ely-live-empty" style="height:70px">' +
+        'Error cargando chats.<br>' +
+        '<small>' +
+        esc(error && error.name === 'AbortError'
+          ? 'La conexión tardó demasiado.'
+          : (error && error.message) || 'Error desconocido') +
+        '</small>' +
+        '</div>';
     });
   }
 
