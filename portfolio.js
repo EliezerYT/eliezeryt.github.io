@@ -5445,7 +5445,6 @@
     let token = '';
     try { token = localStorage.getItem(GITHUB_TOKEN_STORAGE_KEY) || ''; } catch (e) {}
     if (!token && window.ELY_GITHUB_TOKEN) token = window.ELY_GITHUB_TOKEN;
-    if (!token) token = prompt('GitHub API Token:');
     if (token) {
       try { localStorage.setItem(GITHUB_TOKEN_STORAGE_KEY, token.trim()); } catch (e) {}
       return token.trim();
