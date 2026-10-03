@@ -383,31 +383,78 @@
   function refreshModeratorChats() {
     if (!isModerator()) return;
 
-    jsonGet('getSupportChats').then(function(res){
-      let incoming = res && Array.isArray(res.data) ? res.data : [];
+    jsonGet('getRealtimeSupportData').then(function(res){
+      const rows = res && Array.isArray(res.data) ? res.data : [];
+      const map = {};
 
-      if (!incoming.length) {
-        return jsonGet('getRealtimeSupportData').then(function(all){
-          const rows = all && Array.isArray(all.data) ? all.data : [];
-          const map = {};
-          rows.forEach(function(x){
-            if (String(x.Type || '') !== 'support_chat' || !x.ChatID) return;
-            map[x.ChatID] = {
-              chatID: x.ChatID,
-              userID: x.UserID || '',
-              userName: x.UserName || 'Usuario',
-              userEmail: x.UserEmail || '',
-              status: x.Status || 'pending',
-              timestamp: x.Timestamp || ''
-            };
-          });
-          return Object.keys(map).map(function(k){ return map[k]; });
-        });
+      function value(row, upper, lower) {
+        if (row && row[upper] != null) return row[upper];
+        if (row && row[lower] != null) return row[lower];
+        return '';
       }
 
-      return incoming;
+      function toTime(value) {
+        const time = value ? new Date(value).getTime() : 0;
+        return isNaN(time) ? 0 : time;
+      }
+
+      rows.forEach(function(row){
+        const type = String(value(row, 'Type', 'type') || '').trim();
+        const chatID = String(value(row, 'ChatID', 'chatID') || '').trim();
+        if (!chatID) return;
+        if (type !== 'support_chat' && type !== 'support_message') return;
+
+        const userID = String(value(row, 'UserID', 'userID') || '');
+        const userName = String(value(row, 'UserName', 'userName') || '');
+        const userEmail = String(value(row, 'UserEmail', 'userEmail') || '');
+        const status = String(value(row, 'Status', 'status') || 'pending');
+        const timestamp = value(row, 'Timestamp', 'timestamp') || '';
+
+        if (!map[chatID]) {
+          map[chatID] = {
+            chatID: chatID,
+            userID: userID,
+            userName: userName || 'Usuario',
+            userEmail: userEmail,
+            status: status || 'pending',
+            timestamp: timestamp
+          };
+          return;
+        }
+
+        const current = map[chatID];
+
+        if (type === 'support_chat') {
+          current.userID = userID || current.userID;
+          current.userName = userName || current.userName;
+          current.userEmail = userEmail || current.userEmail;
+          current.status = status || current.status;
+          if (toTime(timestamp) >= toTime(current.timestamp)) {
+            current.timestamp = timestamp || current.timestamp;
+          }
+          return;
+        }
+
+        if (!current.userID && userID) current.userID = userID;
+        if (userName) current.userName = userName;
+        if (userEmail) current.userEmail = userEmail;
+
+        if (toTime(timestamp) >= toTime(current.timestamp)) {
+          current.timestamp = timestamp || current.timestamp;
+        }
+
+        if (current.status === 'closed' && status !== 'closed') {
+          current.status = status;
+        }
+      });
+
+      return Object.keys(map).map(function(key){ return map[key]; });
     }).then(function(incoming){
-      moderatorChats = incoming.filter(function(x){return x.status !== 'closed';});
+      moderatorChats = incoming.filter(function(x){
+        return String(x.status || '').toLowerCase() !== 'closed';
+      }).sort(function(a,b){
+        return new Date(b.timestamp || 0) - new Date(a.timestamp || 0);
+      });
 
       const signature = moderatorChats.map(function(x){
         return [x.chatID,x.status,x.timestamp,x.userName,x.userEmail].join(':');
@@ -426,7 +473,9 @@
         lastModeratorChatSignature = signature;
         list.innerHTML = moderatorChats.length ? moderatorChats.map(function(c){
           const active = selectedModeratorChat && selectedModeratorChat.chatID === c.chatID;
-          return '<div class="ely-mod-chat-item ' + (active?'active':'') + '" data-chat-id="' + esc(c.chatID) + '">' +
+          return '<div class="ely-mod-chat-item ' +
+            (active?'active':'') + '" data-chat-id="' +
+            esc(c.chatID) + '">' +
             '<div><b>' + esc(c.userName || 'Usuario') + '</b><small>' +
             esc(c.userEmail || '') + ' · ' + esc(c.status || 'pending') +
             '</small></div><button type="button">Abrir</button></div>';
@@ -441,8 +490,15 @@
         const fresh = moderatorChats.find(function(x){
           return x.chatID === selectedModeratorChat.chatID;
         });
-        if (fresh) selectedModeratorChat = fresh;
-        refreshModeratorMessages();
+
+        if (fresh) {
+          selectedModeratorChat = fresh;
+          refreshModeratorMessages();
+        } else {
+          selectedModeratorChat = null;
+          const view = document.getElementById('ely-mod-chat-view');
+          if (view) view.classList.remove('open');
+        }
       }
     }).catch(function(){});
   }
