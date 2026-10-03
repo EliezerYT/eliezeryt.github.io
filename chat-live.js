@@ -383,94 +383,97 @@
   function refreshModeratorChats() {
     if (!isModerator()) return;
 
-    jsonGet('getRealtimeSupportData').then(function(res){
-      const rows = res && Array.isArray(res.data) ? res.data : [];
-      const map = {};
+    jsonGet('getSupportChats').then(function(res) {
+      if (!res || res.success !== true) {
+        throw new Error(
+          res && res.error
+            ? res.error
+            : 'No se pudieron cargar los chats.'
+        );
+      }
 
-      rows.forEach(function(row){
-        const type = String(row.Type != null ? row.Type : row.type || '').trim();
-        const chatID = String(row.ChatID != null ? row.ChatID : row.chatID || '').trim();
+      const incoming = Array.isArray(res.data) ? res.data : [];
 
-        if (!chatID || type !== 'support_message') return;
-
-        const timestamp = row.Timestamp != null ? row.Timestamp : row.timestamp || '';
-        const status = String(row.Status != null ? row.Status : row.status || 'pending').trim().toLowerCase();
-
-        if (!map[chatID]) {
-          map[chatID] = {
-            chatID: chatID,
-            userID: String(row.UserID != null ? row.UserID : row.userID || ''),
-            userName: String(row.UserName != null ? row.UserName : row.userName || 'Usuario'),
-            userEmail: String(row.UserEmail != null ? row.UserEmail : row.userEmail || ''),
-            status: status || 'pending',
-            timestamp: timestamp
-          };
-        } else {
-          const current = map[chatID];
-          const currentTime = new Date(current.timestamp || 0).getTime();
-          const rowTime = new Date(timestamp || 0).getTime();
-
-          if (!current.userID && row.UserID) current.userID = String(row.UserID);
-          if (!current.userEmail && row.UserEmail) current.userEmail = String(row.UserEmail);
-
-          if (rowTime >= currentTime) {
-            current.timestamp = timestamp || current.timestamp;
-            if (row.UserName) current.userName = String(row.UserName);
-            if (row.UserEmail) current.userEmail = String(row.UserEmail);
-            if (row.Status) current.status = status;
-          }
-        }
-      });
-
-      return Object.keys(map).map(function(key){ return map[key]; });
-    }).then(function(incoming){
       moderatorChats = incoming
-        .filter(function(x){ return String(x.status || '').toLowerCase() !== 'closed'; })
-        .sort(function(a,b){
+        .filter(function(chat) {
+          return String(chat.status || '').toLowerCase() !== 'closed';
+        })
+        .sort(function(a, b) {
           return new Date(b.timestamp || 0) - new Date(a.timestamp || 0);
         });
 
-      const signature = moderatorChats.map(function(x){
-        return [x.chatID,x.status,x.timestamp,x.userName,x.userEmail].join(':');
+      const signature = moderatorChats.map(function(chat) {
+        return [
+          chat.chatID,
+          chat.status,
+          chat.timestamp,
+          chat.userName,
+          chat.userEmail
+        ].join(':');
       }).join('|');
 
       const list = document.getElementById('ely-mod-chat-list');
       const count = document.getElementById('ely-mod-chat-count');
+
       if (!list) return;
 
       if (count) {
-        count.textContent = moderatorChats.length +
-          (moderatorChats.length === 1 ? ' conversación' : ' conversaciones');
+        count.textContent =
+          moderatorChats.length +
+          (moderatorChats.length === 1
+            ? ' conversación'
+            : ' conversaciones');
       }
 
       if (signature !== lastModeratorChatSignature) {
         lastModeratorChatSignature = signature;
 
-        list.innerHTML = moderatorChats.length
-          ? moderatorChats.map(function(c){
-              const active = selectedModeratorChat &&
-                selectedModeratorChat.chatID === c.chatID;
+        if (!moderatorChats.length) {
+          list.innerHTML =
+            '<div class="ely-live-empty" style="height:70px">' +
+            'No hay chats pendientes.' +
+            '</div>';
+        } else {
+          list.innerHTML = moderatorChats.map(function(chat) {
+            const active =
+              selectedModeratorChat &&
+              selectedModeratorChat.chatID === chat.chatID;
 
-              return '<div class="ely-mod-chat-item ' +
-                (active ? 'active' : '') +
-                '" data-chat-id="' + esc(c.chatID) + '">' +
-                '<div><b>' + esc(c.userName || 'Usuario') +
-                '</b><small>' + esc(c.userEmail || '') +
-                ' · ' + esc(c.status || 'pending') +
-                '</small></div><button type="button">Abrir</button></div>';
-            }).join('')
-          : '<div class="ely-live-empty" style="height:70px">No hay chats pendientes.</div>';
+            return (
+              '<div class="ely-mod-chat-item ' +
+              (active ? 'active' : '') +
+              '" data-chat-id="' +
+              esc(chat.chatID) +
+              '">' +
+                '<div>' +
+                  '<b>' +
+                    esc(chat.userName || 'Usuario') +
+                  '</b>' +
+                  '<small>' +
+                    esc(chat.userEmail || '') +
+                    ' · ' +
+                    esc(chat.status || 'pending') +
+                  '</small>' +
+                '</div>' +
+                '<button type="button">Abrir</button>' +
+              '</div>'
+            );
+          }).join('');
 
-        list.querySelectorAll('.ely-mod-chat-item').forEach(function(el){
-          el.onclick = function(){
-            selectModeratorChat(el.getAttribute('data-chat-id'));
-          };
-        });
+          list.querySelectorAll('.ely-mod-chat-item')
+            .forEach(function(el) {
+              el.onclick = function() {
+                selectModeratorChat(
+                  el.getAttribute('data-chat-id')
+                );
+              };
+            });
+        }
       }
 
       if (selectedModeratorChat) {
-        const fresh = moderatorChats.find(function(x){
-          return x.chatID === selectedModeratorChat.chatID;
+        const fresh = moderatorChats.find(function(chat) {
+          return chat.chatID === selectedModeratorChat.chatID;
         });
 
         if (fresh) {
@@ -478,11 +481,34 @@
           refreshModeratorMessages();
         } else {
           selectedModeratorChat = null;
-          const view = document.getElementById('ely-mod-chat-view');
-          if (view) view.classList.remove('open');
+
+          const view =
+            document.getElementById('ely-mod-chat-view');
+
+          if (view) {
+            view.classList.remove('open');
+          }
         }
       }
-    }).catch(function(){});
+    }).catch(function(error) {
+      console.error(
+        '[ElyLiveChat] Error cargando chats:',
+        error
+      );
+
+      const list =
+        document.getElementById('ely-mod-chat-list');
+
+      if (list) {
+        list.innerHTML =
+          '<div class="ely-live-empty" style="height:70px">' +
+          'Error cargando chats.<br>' +
+          '<small>' +
+          esc(error.message || 'Error desconocido') +
+          '</small>' +
+          '</div>';
+      }
+    });
   }
 
   function ensureModeratorPolling() {
