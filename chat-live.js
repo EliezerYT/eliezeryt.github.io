@@ -13,6 +13,7 @@
   let messages = [];
   let moderatorOnline = false;
   let moderatorChatEnabled = false;
+  let presenceInitialized = false;
   let pollTimer = null;
   let presenceTimer = null;
   let lastMessageSignature = '';
@@ -249,19 +250,31 @@
     return jsonGet('getModeratorPresence').then(function(res){
       const p = res && res.data ? res.data : {};
       const stamp = p.timestamp ? new Date(p.timestamp).getTime() : 0;
-      moderatorOnline = !!p.online && stamp > 0 && Date.now() - stamp < PRESENCE_TTL;
+      const serverOnline = !!p.online && stamp > 0 && Date.now() - stamp < PRESENCE_TTL;
       if (isModerator()) {
-        moderatorChatEnabled = moderatorOnline;
-        updatePresenceToggle();
+        if (!presenceInitialized) {
+          moderatorChatEnabled = serverOnline;
+          presenceInitialized = true;
+          updatePresenceToggle();
+          if (moderatorChatEnabled && !presenceTimer) presenceTimer = setInterval(sendPresence, PRESENCE_MS);
+        }
+        moderatorOnline = moderatorChatEnabled;
+        setFabVisible(true);
+      } else {
+        moderatorOnline = serverOnline;
+        setFabVisible(moderatorOnline);
       }
-      setFabVisible(isModerator() ? true : moderatorOnline);
       const win = document.getElementById('ely-live-chat-window');
       if (win && win.classList.contains('open')) renderChat();
+      hookContactModal();
       return moderatorOnline;
     }).catch(function(){
-      moderatorOnline = false;
-      setFabVisible(false);
-      return false;
+      if (!isModerator()) {
+        moderatorOnline = false;
+        setFabVisible(false);
+        hookContactModal();
+      }
+      return isModerator() ? moderatorChatEnabled : false;
     });
   }
 
@@ -301,13 +314,17 @@
     if (btn) btn.disabled = true;
     setPresenceState(next).then(function(){
       moderatorChatEnabled = next;
+      presenceInitialized = true;
       moderatorOnline = next;
       updatePresenceToggle();
       setFabVisible(true);
       const win = document.getElementById('ely-live-chat-window');
       if (win && win.classList.contains('open')) renderChat();
       hookContactModal();
-      if (next && !presenceTimer) presenceTimer = setInterval(sendPresence, PRESENCE_MS);
+      if (next) {
+        sendPresence();
+        if (!presenceTimer) presenceTimer = setInterval(sendPresence, PRESENCE_MS);
+      }
       if (!next && presenceTimer) { clearInterval(presenceTimer); presenceTimer = null; }
     }).catch(function(){
       if (btn) btn.textContent = 'Error al actualizar disponibilidad';
@@ -473,7 +490,6 @@
     checkPresence();
     setInterval(checkPresence, 15000);
     if (isModerator()) {
-      startModeratorPresence();
       ensureModeratorPanel();
       setInterval(refreshModeratorChats, 5000);
     }
