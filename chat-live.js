@@ -453,7 +453,7 @@
       refreshModeratorChats();
       if (selectedModeratorChat) refreshModeratorMessages();
     }, MODERATOR_POLL_MS);
-    ensureModeratorPolling();
+    refreshModeratorChats();
   }
 
   function selectModeratorChat(chatID) {
