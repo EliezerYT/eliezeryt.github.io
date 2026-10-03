@@ -387,74 +387,48 @@
       const rows = res && Array.isArray(res.data) ? res.data : [];
       const map = {};
 
-      function value(row, upper, lower) {
-        if (row && row[upper] != null) return row[upper];
-        if (row && row[lower] != null) return row[lower];
-        return '';
-      }
-
-      function toTime(value) {
-        const time = value ? new Date(value).getTime() : 0;
-        return isNaN(time) ? 0 : time;
-      }
-
       rows.forEach(function(row){
-        const type = String(value(row, 'Type', 'type') || '').trim();
-        const chatID = String(value(row, 'ChatID', 'chatID') || '').trim();
-        if (!chatID) return;
-        if (type !== 'support_chat' && type !== 'support_message') return;
+        const type = String(row.Type != null ? row.Type : row.type || '').trim();
+        const chatID = String(row.ChatID != null ? row.ChatID : row.chatID || '').trim();
 
-        const userID = String(value(row, 'UserID', 'userID') || '');
-        const userName = String(value(row, 'UserName', 'userName') || '');
-        const userEmail = String(value(row, 'UserEmail', 'userEmail') || '');
-        const status = String(value(row, 'Status', 'status') || 'pending');
-        const timestamp = value(row, 'Timestamp', 'timestamp') || '';
+        if (!chatID || type !== 'support_message') return;
+
+        const timestamp = row.Timestamp != null ? row.Timestamp : row.timestamp || '';
+        const status = String(row.Status != null ? row.Status : row.status || 'pending').trim().toLowerCase();
 
         if (!map[chatID]) {
           map[chatID] = {
             chatID: chatID,
-            userID: userID,
-            userName: userName || 'Usuario',
-            userEmail: userEmail,
+            userID: String(row.UserID != null ? row.UserID : row.userID || ''),
+            userName: String(row.UserName != null ? row.UserName : row.userName || 'Usuario'),
+            userEmail: String(row.UserEmail != null ? row.UserEmail : row.userEmail || ''),
             status: status || 'pending',
             timestamp: timestamp
           };
-          return;
-        }
+        } else {
+          const current = map[chatID];
+          const currentTime = new Date(current.timestamp || 0).getTime();
+          const rowTime = new Date(timestamp || 0).getTime();
 
-        const current = map[chatID];
+          if (!current.userID && row.UserID) current.userID = String(row.UserID);
+          if (!current.userEmail && row.UserEmail) current.userEmail = String(row.UserEmail);
 
-        if (type === 'support_chat') {
-          current.userID = userID || current.userID;
-          current.userName = userName || current.userName;
-          current.userEmail = userEmail || current.userEmail;
-          current.status = status || current.status;
-          if (toTime(timestamp) >= toTime(current.timestamp)) {
+          if (rowTime >= currentTime) {
             current.timestamp = timestamp || current.timestamp;
+            if (row.UserName) current.userName = String(row.UserName);
+            if (row.UserEmail) current.userEmail = String(row.UserEmail);
+            if (row.Status) current.status = status;
           }
-          return;
-        }
-
-        if (!current.userID && userID) current.userID = userID;
-        if (userName) current.userName = userName;
-        if (userEmail) current.userEmail = userEmail;
-
-        if (toTime(timestamp) >= toTime(current.timestamp)) {
-          current.timestamp = timestamp || current.timestamp;
-        }
-
-        if (current.status === 'closed' && status !== 'closed') {
-          current.status = status;
         }
       });
 
       return Object.keys(map).map(function(key){ return map[key]; });
     }).then(function(incoming){
-      moderatorChats = incoming.filter(function(x){
-        return String(x.status || '').toLowerCase() !== 'closed';
-      }).sort(function(a,b){
-        return new Date(b.timestamp || 0) - new Date(a.timestamp || 0);
-      });
+      moderatorChats = incoming
+        .filter(function(x){ return String(x.status || '').toLowerCase() !== 'closed'; })
+        .sort(function(a,b){
+          return new Date(b.timestamp || 0) - new Date(a.timestamp || 0);
+        });
 
       const signature = moderatorChats.map(function(x){
         return [x.chatID,x.status,x.timestamp,x.userName,x.userEmail].join(':');
@@ -471,18 +445,26 @@
 
       if (signature !== lastModeratorChatSignature) {
         lastModeratorChatSignature = signature;
-        list.innerHTML = moderatorChats.length ? moderatorChats.map(function(c){
-          const active = selectedModeratorChat && selectedModeratorChat.chatID === c.chatID;
-          return '<div class="ely-mod-chat-item ' +
-            (active?'active':'') + '" data-chat-id="' +
-            esc(c.chatID) + '">' +
-            '<div><b>' + esc(c.userName || 'Usuario') + '</b><small>' +
-            esc(c.userEmail || '') + ' · ' + esc(c.status || 'pending') +
-            '</small></div><button type="button">Abrir</button></div>';
-        }).join('') : '<div class="ely-live-empty" style="height:70px">No hay chats pendientes.</div>';
+
+        list.innerHTML = moderatorChats.length
+          ? moderatorChats.map(function(c){
+              const active = selectedModeratorChat &&
+                selectedModeratorChat.chatID === c.chatID;
+
+              return '<div class="ely-mod-chat-item ' +
+                (active ? 'active' : '') +
+                '" data-chat-id="' + esc(c.chatID) + '">' +
+                '<div><b>' + esc(c.userName || 'Usuario') +
+                '</b><small>' + esc(c.userEmail || '') +
+                ' · ' + esc(c.status || 'pending') +
+                '</small></div><button type="button">Abrir</button></div>';
+            }).join('')
+          : '<div class="ely-live-empty" style="height:70px">No hay chats pendientes.</div>';
 
         list.querySelectorAll('.ely-mod-chat-item').forEach(function(el){
-          el.onclick = function(){ selectModeratorChat(el.getAttribute('data-chat-id')); };
+          el.onclick = function(){
+            selectModeratorChat(el.getAttribute('data-chat-id'));
+          };
         });
       }
 
